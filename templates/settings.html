@@ -24,13 +24,13 @@
 
 <div id="app" class="container">
     <div v-if="state == 'loading'">
-        Загрузка...
+
     </div>
     <div v-if="state == 'dashboard'">
-        <h2>Пациент: [[ info.name ]]</h2>
+        <h2>Пациент: {{ info.name }}</h2>
         <strong>Опросники</strong>
         <ul>
-            <li v-for="form in patient.forms">[[ form.title ]]<br><small>[[ form.doctor_description ]]</small></li>
+            <li v-for="form in patient.forms">{{ form.title }}<br><small>{{ form.doctor_description }}</small></li>
         </ul>
 
         <button class="btn btn-primary btn-sm" @click="to_create_page()">Добавить</button>
@@ -39,7 +39,7 @@
     <div v-if="state == 'create_form'">
         <a class="btn btn-danger btn-sm" @click="back_from_create_page()">назад</a>
         <ul>
-            <li v-for="error in new_form.errors">[[ error ]]</li>
+            <li v-for="error in new_form.errors">{{ error }}</li>
         </ul>
         <div class="form">
             <div class="card">
@@ -119,7 +119,7 @@
                                     <small class="text-muted">День недели</small>
                                     <select class="form-control" v-model="timepoint.day">
                                         <option v-for="(day, i) in ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']"
-                                                v-bind:value="i">[[ day ]]
+                                                v-bind:value="i">{{ day }}
                                         </option>
                                     </select>
                                 </div>
@@ -397,7 +397,7 @@
         mounted: function () {
             this.load();
         },
-        delimiters: ['[[', ']]'],
+        delimiters: ['{{', '}}'],
     })
 
 

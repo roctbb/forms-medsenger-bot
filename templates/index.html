@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>monitoring-app</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+          integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+    <script>
+        window.AGENT_ID = '{{ agent_id }}';
+        window.CONTRACT_ID = '{{ contract_id }}';
+        window.API_HOST = '{{ api_host }}';
+        window.LOCAL_HOST = '{{ local_host }}';
+        window.AGENT_TOKEN = '{{ agent_token }}';
+    </script>
+</head>
+<body>
+<div class="container">
+    <div id="app"></div>
+</div>
+<script src="{{ local_host }}/static/build.js"></script>
+</body>
+</html>

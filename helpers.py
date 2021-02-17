@@ -18,6 +18,8 @@ def log(error, terminating=False):
 # decorators
 def verify_args(func):
     def wrapper(*args):
+        if not request.args.get('contract_id'):
+            abort(422)
         if request.args.get('api_key') != API_KEY:
             abort(401)
         try:
@@ -32,6 +34,8 @@ def verify_args(func):
 
 def only_doctor_args(func):
     def wrapper(*args):
+        if not request.args.get('contract_id'):
+            abort(422)
         if request.args.get('api_key') != API_KEY:
             abort(401)
         if request.args.get('source') == 'patient':
@@ -48,6 +52,8 @@ def only_doctor_args(func):
 
 def verify_json(func):
     def wrapper(*args):
+        if not request.args.get('contract_id'):
+            abort(422)
         if request.json.get('api_key') != API_KEY:
             abort(401)
         try:
