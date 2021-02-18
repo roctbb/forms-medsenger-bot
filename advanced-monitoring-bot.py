@@ -1,12 +1,14 @@
 from manage import *
 from managers.ContractsManager import ContractManager
 from managers.FormManager import FormManager
+from managers.MedicineManager import MedicineManager
 from medsenger_api import AgentApiClient
 from helpers import *
 
 medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG)
 contract_manager = ContractManager(medsenger_api, db)
 form_manager = FormManager(medsenger_api, db)
+medicine_manager = MedicineManager(medsenger_api, db)
 
 
 @app.route('/')
@@ -104,16 +106,56 @@ def get_data(args, form):
 
     return jsonify(patient)
 
-@app.route('/api/create_form', methods=['POST'])
+@app.route('/api/settings/form', methods=['POST'])
 @only_doctor_args
 def create_form(args, form):
     contract_id = args.get('contract_id')
-    contract = contract_manager.get_patient(contract_id)
-    form = form_manager.create_form(request.json, contract)
+    contract = contract_manager.get_contract(contract_id)
+    form = form_manager.create_or_edit(request.json, contract)
 
     if form:
         return jsonify(form.as_dict())
     else:
         abort(422)
+
+@app.route('/api/settings/delete_form', methods=['POST'])
+@only_doctor_args
+def delete_form(args, form):
+    contract_id = args.get('contract_id')
+    contract = contract_manager.get_contract(contract_id)
+    result = form_manager.delete(request.json.get('id'), contract)
+
+    if result:
+        return jsonify({
+            "deleted_id": result
+        })
+    else:
+        abort(404)
+
+@app.route('/api/settings/medicine', methods=['POST'])
+@only_doctor_args
+def create_medicine(args, form):
+    contract_id = args.get('contract_id')
+    contract = contract_manager.get_contract(contract_id)
+    form = medicine_manager.create_or_edit(request.json, contract)
+
+    if form:
+        return jsonify(form.as_dict())
+    else:
+        abort(422)
+
+@app.route('/api/settings/delete_medicine', methods=['POST'])
+@only_doctor_args
+def delete_medicine(args, form):
+    contract_id = args.get('contract_id')
+    contract = contract_manager.get_contract(contract_id)
+    result = medicine_manager.delete(request.json.get('id'), contract)
+
+    if result:
+        return jsonify({
+            "deleted_id": result
+        })
+    else:
+        abort(404)
 
 app.run(HOST, PORT, debug=API_DEBUG)

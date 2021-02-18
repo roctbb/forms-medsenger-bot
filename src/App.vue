@@ -1,8 +1,11 @@
 <template>
     <div>
-        <loading v-if="state == 'loading'" />
-        <dashboard :patient="patient" v-else-if="state == 'dashboard'" />
-        <form-editor v-else-if="state == 'create-form'" />
+        <loading v-if="state == 'loading'"/>
+        <div v-else>
+            <dashboard :patient="patient" v-show="state == 'dashboard'"/>
+            <form-editor v-show="state == 'form-manager'"/>
+            <medicine-editor v-show="state == 'medicine-manager'" />
+        </div>
     </div>
 </template>
 
@@ -10,13 +13,14 @@
 
 import Loading from "./components/Loading";
 import Dashboard from "./components/dashboard/Dashboard";
-import FormEditor from "./components/form-editor/FormEditor";
+import FormEditor from "./components/editors/FormEditor";
+import MedicineEditor from "./components/editors/MedicineEditor";
 
 const axios = require('axios');
 
 export default {
     name: 'app',
-    components: {FormEditor, Loading, Dashboard},
+    components: {FormEditor, Loading, Dashboard, MedicineEditor},
     data() {
         return {
             state: "loading",
@@ -25,11 +29,24 @@ export default {
     },
     created() {
         console.log("running created");
-        Event.listen('navigate-to-create-form-page', () => this.state = 'create-form');
+        Event.listen('navigate-to-create-form-page', () => this.state = 'form-manager');
+        Event.listen('navigate-to-create-medicine-page', () => this.state = 'medicine-manager');
         Event.listen('back-to-dashboard', () => this.state = 'dashboard');
         Event.listen('form-created', (form) => {
-            console.log(form);
+            this.state = 'dashboard'
             this.patient.forms.push(form)
+        });
+        Event.listen('medicine-created', (medicine) => {
+            this.state = 'dashboard'
+            this.patient.medicines.push(medicine)
+        });
+        Event.listen('edit-form', (form) => {
+            this.state = 'form-manager'
+            Event.fire('navigate-to-edit-form-page', form);
+        });
+        Event.listen('edit-medicine', (medicine) => {
+            this.state = 'medicine-manager'
+            Event.fire('navigate-to-edit-medicine-page', medicine);
         });
     },
     methods: {
@@ -59,16 +76,6 @@ export default {
 
 h1, h2 {
     font-weight: normal;
-}
-
-ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-li {
-    display: inline-block;
-    margin: 0 10px;
 }
 
 a {

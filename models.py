@@ -7,12 +7,14 @@ class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     contracts = db.relationship('Contract', backref='patient', lazy=True)
     forms = db.relationship('Form', backref='patient', lazy=True)
+    medicines = db.relationship('Medicine', backref='patient', lazy=True)
 
     def as_dict(self):
         return {
             "id": self.id,
             "contracts": [contract.as_dict() for contract in self.contracts],
-            "forms": [form.as_dict() for form in self.forms]
+            "forms": [form.as_dict() for form in self.forms],
+            "medicines": [medicine.as_dict() for medicine in self.medicines]
         }
 
 class Contract(db.Model):
@@ -31,6 +33,25 @@ class Contract(db.Model):
 
         return serialized
 
+class Medicine(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=True)
+    contract_id = db.Column(db.Integer, db.ForeignKey('contract.id', ondelete="CASCADE"), nullable=True)
+
+    title = db.Column(db.String(255), nullable=True)
+    rules = db.Column(db.Text, nullable=True)
+    timetable = db.Column(db.JSON, nullable=True)
+    is_template = db.Column(db.Boolean, default=False)
+
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "contract_id": self.contract_id,
+            "patient_id": self.patient_id,
+            "title": self.title,
+            "rules": self.rules,
+            "timetable": self.timetable,
+        }
 
 class Form(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -48,11 +69,13 @@ class Form(db.Model):
     timetable = db.Column(db.JSON, nullable=True)
 
     is_template = db.Column(db.Boolean, default=False)
+    categories = db.Column(db.String(512), nullable=True)
 
     def as_dict(self):
         return {
             "id": self.id,
             "contract_id": self.contract_id,
+            "patient_id": self.patient_id,
             "title": self.title,
             "doctor_description": self.doctor_description,
             "patient_description": self.patient_description,

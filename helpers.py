@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask import request, abort, jsonify, render_template
 from config import *
+import sys, os
 
 
 def gts():
@@ -9,10 +10,13 @@ def gts():
 
 
 def log(error, terminating=False):
+    exc_type, exc_obj, exc_tb = sys.exc_info()
+    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+
     if terminating:
-        print(gts(), error, "CRITICAL")
+        print(gts(), exc_type, fname, exc_tb.tb_lineno, error, "CRITICAL")
     else:
-        print(gts(), error)
+        print(gts(), exc_type, fname, exc_tb.tb_lineno, error)
 
 
 # decorators

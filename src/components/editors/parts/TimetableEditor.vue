@@ -1,0 +1,107 @@
+<template>
+    <card title="Расписание">
+                <form-group48 title="Режим">
+                    <select @change="clear_time_points()" class="form-control"
+                            v-model="timetable.mode">
+                        <option value="manual">Заполняется вручную</option>
+                        <option value="daily">Ежедневно</option>
+                        <option value="weekly">Еженедельно</option>
+                        <option value="monthly">Ежемесячно</option>
+                    </select>
+                </form-group48>
+
+
+                <div v-if="timetable.mode != 'manual'">
+                    <hr>
+
+                    <div class="form-group row" v-for="(timepoint, i) in timetable.points">
+                        <div class="col-md-3">
+                            <div v-if="timetable.mode == 'weekly'">
+                                <small class="text-muted">День недели</small>
+                                <select class="form-control" v-model="timepoint.day">
+                                    <option v-for="(day, i) in weekdays"
+                                            v-bind:value="i">{{ day }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div v-if="timetable.mode == 'monthly'">
+                                <small class="text-muted">День</small>
+                                <input type="number" min="1" max="31" class="form-control"
+                                       v-model="timepoint.day"/>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Часы</small>
+                            <input type="number" min="0" max="23" class="form-control"
+                                   v-model="timepoint.hour"/>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Минуты</small>
+                            <input type="number" min="0" max="59" class="form-control"
+                                   v-model="timepoint.minute"/>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="#" @click="remove_time_point(i)"
+                               v-if="timetable.points.length > 1">Удалить</a>
+                        </div>
+                    </div>
+
+                    <a href="#" class="btn btn-primary btn-sm" @click="add_time_point()">Добавить</a>
+
+                </div>
+            </card>
+</template>
+
+<script>
+import FormGroup48 from "../../common/FormGroup-4-8";
+import Card from "../../common/Card";
+
+export default {
+    name: "TimetableEditor",
+    components: {FormGroup48, Card},
+    props: {
+        data: {
+            required: true,
+        }
+    },
+    methods: {
+        clear_time_points: function () {
+            this.timetable.points = []
+            this.add_time_point();
+        },
+        add_time_point: function () {
+            if (this.timetable.mode == 'manual') {
+                return;
+            }
+            if (this.timetable.mode == 'daily') {
+                this.timetable.points.push({
+                    hour: '',
+                    minute: ''
+                })
+            } else {
+                this.timetable.points.push({
+                    day: '',
+                    hour: '',
+                    minute: ''
+                })
+            }
+        },
+        remove_time_point: function (index) {
+            this.timetable.points.splice(index, 1);
+        },
+    },
+    data() {
+        return {
+            timetable: {}
+        }
+    },
+    created() {
+        this.timetable = this.data
+        console.log("got timetable", this.timetable)
+    }
+}
+</script>
+
+<style scoped>
+
+</style>

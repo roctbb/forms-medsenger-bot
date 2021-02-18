@@ -7,9 +7,26 @@ class FormManager(Manager):
     def __init__(self, *args):
         super(FormManager, self).__init__(*args)
 
-    def create_form(self, data, contract=None):
+    def delete(self, id, contract):
+
+        form = Form.query.filter_by(id=id).first_or_404()
+
+        if form.contract_id != contract.id:
+            return None
+
+        Form.query.filter_by(id=id).delete()
+
+        self.__commit__()
+        return id
+
+
+    def create_or_edit(self, data, contract):
         try:
-            form = Form()
+            form_id = data.get('id')
+            if not form_id:
+                form = Form()
+            else:
+                form = Form.query.filter_by(id=form_id).first_or_404()
 
             form.title = data.get('title')
             form.doctor_description = data.get('doctor_description')
@@ -18,14 +35,16 @@ class FormManager(Manager):
             form.button_title = data.get('button_title')
             form.timetable = data.get('timetable')
             form.fields = data.get('fields')
+            form.categories = data.get('categories')
 
-            if not contract:
+            if data.get('is_template'):
                 form.is_template = True
             else:
                 form.patient_id = contract.patient_id
                 form.contract_id = contract.id
 
-            self.db.session.add(form)
+            if not form_id:
+                self.db.session.add(form)
             self.__commit__()
 
             return form
