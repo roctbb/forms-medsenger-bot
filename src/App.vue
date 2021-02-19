@@ -2,9 +2,14 @@
     <div>
         <loading v-if="state == 'loading'"/>
         <div v-else>
-            <dashboard :patient="patient" v-show="state == 'dashboard'"/>
-            <form-editor v-show="state == 'form-manager'"/>
-            <medicine-editor v-show="state == 'medicine-manager'" />
+            <div v-if="mode == 'settings'">
+                <dashboard :patient="patient" v-show="state == 'dashboard'"/>
+                <form-editor v-show="state == 'form-manager'"/>
+                <medicine-editor v-show="state == 'medicine-manager'"/>
+            </div>
+            <div v-if="mode == 'form'">
+                <form-presenter :data="form" v-if="state == 'form-presenter'" />
+            </div>
         </div>
     </div>
 </template>
@@ -15,16 +20,19 @@ import Loading from "./components/Loading";
 import Dashboard from "./components/dashboard/Dashboard";
 import FormEditor from "./components/editors/FormEditor";
 import MedicineEditor from "./components/editors/MedicineEditor";
+import FormPresenter from "./components/presenters/FormPresenter";
 
-const axios = require('axios');
 
 export default {
     name: 'app',
-    components: {FormEditor, Loading, Dashboard, MedicineEditor},
+    components: {FormPresenter, FormEditor, Loading, Dashboard, MedicineEditor},
     data() {
         return {
             state: "loading",
             patient: {},
+            form: {},
+            mode: "",
+            object_id: -1
         }
     },
     created() {
@@ -51,11 +59,29 @@ export default {
     },
     methods: {
         load: function () {
-            axios.get(this.url('/api/get_patient')).then(this.process_load_answer);
+            this.mode = window.PAGE
+            this.object_id = window.OBJECT_ID
+
+            if (this.mode == 'settings')
+            {
+                this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
+            }
+            if (this.mode == 'form')
+            {
+                this.axios.get(this.url('/api/form/' + this.object_id)).then(this.process_load_answer);
+            }
         },
         process_load_answer: function (response) {
-            this.patient = response.data;
-            this.state = 'dashboard'
+            if (this.mode == 'settings') {
+                this.patient = response.data;
+                this.state = 'dashboard'
+            }
+            if (this.mode == 'form')
+            {
+                this.form = response.data;
+                this.state = 'form-presenter'
+            }
+
         }
     },
     mounted: function () {
@@ -81,5 +107,6 @@ h1, h2 {
 a {
     color: #42b983;
 }
+
 </style>
 

@@ -46,7 +46,7 @@ def init(data):
     if not contract_id:
         abort(422)
 
-    contract_manager.add_contract(contract_id)
+    contract_manager.add(contract_id)
     return "ok"
 
 
@@ -57,7 +57,7 @@ def remove(data):
     if not contract_id:
         abort(422)
 
-    contract_manager.remove_contract(contract_id)
+    contract_manager.remove(contract_id)
     return "ok"
 
 
@@ -72,37 +72,24 @@ def actions(data):
 @app.route('/settings', methods=['GET'])
 @verify_args
 def get_settings(args, form):
-    contract = contract_manager.get_contract(args.get('contract_id'))
+    contract = contract_manager.get(args.get('contract_id'))
+    return get_ui('settings', contract)
 
-    return render_template('index.html', contract_id=contract.id, api_host=MAIN_HOST.replace('8001', '8000'), local_host=LOCALHOST, agent_token=contract.agent_token, agent_id=AGENT_ID)
-
-
-@app.route('/settings', methods=['POST'])
+@app.route('/form/<form_id>', methods=['GET'])
 @verify_args
-def post_settings(args, form):
-    pass
-
-
-@app.route('/form', methods=['GET'])
-@verify_args
-def get_form(args, form):
-    pass
-
-
-@app.route('/form', methods=['POST'])
-@verify_args
-def post_form(args, form):
-    pass
-
+def form_page(args, form, form_id):
+    contract = contract_manager.get(args.get('contract_id'))
+    return get_ui('form', contract, form_id)
 
 # settings api
-@app.route('/api/get_patient', methods=['GET'])
+@app.route('/api/settings/get_patient', methods=['GET'])
 @only_doctor_args
 def get_data(args, form):
     contract_id = args.get('contract_id')
-    patient = contract_manager.get_patient(contract_id).as_dict()
+    contract = contract_manager.get(contract_id)
+    patient = contract.patient.as_dict()
     patient["info"] = medsenger_api.get_patient_info(contract_id)
-    patient["current_contract"] = contract_manager.get_contract(contract_id).as_dict()
+    patient["current_contract"] = contract.as_dict()
 
     return jsonify(patient)
 
@@ -110,7 +97,7 @@ def get_data(args, form):
 @only_doctor_args
 def create_form(args, form):
     contract_id = args.get('contract_id')
-    contract = contract_manager.get_contract(contract_id)
+    contract = contract_manager.get(contract_id)
     form = form_manager.create_or_edit(request.json, contract)
 
     if form:
@@ -122,8 +109,8 @@ def create_form(args, form):
 @only_doctor_args
 def delete_form(args, form):
     contract_id = args.get('contract_id')
-    contract = contract_manager.get_contract(contract_id)
-    result = form_manager.delete(request.json.get('id'), contract)
+    contract = contract_manager.get(contract_id)
+    result = form_manager.remove(request.json.get('id'), contract)
 
     if result:
         return jsonify({
@@ -136,7 +123,7 @@ def delete_form(args, form):
 @only_doctor_args
 def create_medicine(args, form):
     contract_id = args.get('contract_id')
-    contract = contract_manager.get_contract(contract_id)
+    contract = contract_manager.get(contract_id)
     form = medicine_manager.create_or_edit(request.json, contract)
 
     if form:
@@ -148,12 +135,39 @@ def create_medicine(args, form):
 @only_doctor_args
 def delete_medicine(args, form):
     contract_id = args.get('contract_id')
-    contract = contract_manager.get_contract(contract_id)
-    result = medicine_manager.delete(request.json.get('id'), contract)
+    contract = contract_manager.get(contract_id)
+    result = medicine_manager.remove(request.json.get('id'), contract)
 
     if result:
         return jsonify({
+            "result": "ok",
             "deleted_id": result
+        })
+    else:
+        abort(404)
+
+@app.route('/api/form/<form_id>', methods=['GET'])
+@verify_args
+def get_form(args, form, form_id):
+    form = form_manager.get(form_id)
+
+    if form.contract_id != int(args.get('contract_id')):
+        abort(401)
+
+    return jsonify(form.as_dict())
+
+@app.route('/api/form/<form_id>', methods=['POST'])
+@verify_args
+def post_form(args, form, form_id):
+    form = form_manager.get(form_id)
+    data = request.json
+
+    if form.contract_id != int(args.get('contract_id')):
+        abort(401)
+
+    if form_manager.submit(data, form_id):
+        return jsonify({
+            "result": "ok",
         })
     else:
         abort(404)

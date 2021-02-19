@@ -7,10 +7,7 @@ class ContractManager(Manager):
     def __init__(self, *args):
         super(ContractManager, self).__init__(*args)
 
-    def __commit__(self):
-        self.db.session.commit()
-
-    def add_contract(self, contract_id):
+    def add(self, contract_id):
         contract = Contract.query.filter_by(id=contract_id).first()
 
         if not contract:
@@ -36,7 +33,7 @@ class ContractManager(Manager):
 
         return contract
 
-    def remove_contract(self, contract_id):
+    def remove(self, contract_id):
         try:
             contract = Contract.query.filter_by(id=contract_id).first()
 
@@ -49,6 +46,7 @@ class ContractManager(Manager):
             log(e)
 
     def get_patient(self, contract_id):
+        contract_id
         contract = Contract.query.filter_by(id=contract_id).first()
 
         if not contract:
@@ -56,7 +54,7 @@ class ContractManager(Manager):
 
         return contract.patient
 
-    def get_contract(self, contract_id):
+    def get(self, contract_id):
         contract = Contract.query.filter_by(id=contract_id).first()
 
         if not contract:

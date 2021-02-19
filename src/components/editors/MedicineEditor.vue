@@ -1,9 +1,7 @@
 <template>
     <div v-if="medicine">
         <a class="btn btn-danger btn-sm" @click="go_back()">назад</a>
-        <ul>
-            <li v-for="error in errors">{{ error }}</li>
-        </ul>
+        <error-block :errors="errors" />
         <div class="form">
             <card title="Описание лекарства">
                 <form-group48 title="Название">
@@ -27,12 +25,11 @@
 import Card from "../common/Card";
 import FormGroup48 from "../common/FormGroup-4-8";
 import TimetableEditor from "./parts/TimetableEditor";
-
-const axios = require('axios');
+import ErrorBlock from "../common/ErrorBlock";
 
 export default {
     name: "MedicineEditor",
-    components: {TimetableEditor, FormGroup48, Card},
+    components: {TimetableEditor, FormGroup48, Card, ErrorBlock},
     props: {
         data: {
             required: false,
@@ -72,7 +69,7 @@ export default {
         save: function () {
             if (this.check()) {
                 this.errors = []
-                axios.post(this.url('/api/settings/medicine'), this.medicine).then(this.process_save_answer).catch(this.process_save_error);
+                this.axios.post(this.url('/api/settings/medicine'), this.medicine).then(this.process_save_answer).catch(this.process_save_error);
             }
         },
         process_save_answer: function (response) {

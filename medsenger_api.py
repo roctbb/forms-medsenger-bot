@@ -21,6 +21,9 @@ class AgentApiClient:
 
             result = requests.post(target, json=json_params)
 
+            if result.status_code != 200:
+                raise Exception('status code - {}'.format(result.status_code))
+
             if self.debug:
                 print(self.__gts__(), "Result - {}".format(result.text))
 

@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import App from './App.vue'
+import axios from "axios";
 
 window.Event = new class {
     constructor() {
@@ -7,7 +8,14 @@ window.Event = new class {
     }
 
     fire(event, data = null) {
-        console.log('sending event', event);
+        if (!data && data !== 0)
+        {
+            console.log('sending event', event);
+        }
+        else {
+            console.log('sending event', event, 'with data', data);
+        }
+
         this.vue.$emit(event, data);
     }
 
@@ -73,6 +81,11 @@ Vue.mixin({
                     minute: ''
                 }]
             }
+        },
+        uuidv4: () => {
+          return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+          );
         }
     },
     data() {
@@ -86,7 +99,8 @@ Vue.mixin({
                 radio: "Выбор варианта",
                 scale: "Шкала",
             },
-            weekdays: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
+            weekdays: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
+            axios: require('axios')
         }
     }
 })

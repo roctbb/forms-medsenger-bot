@@ -5,6 +5,7 @@
         </div>
         <div class="col-md-8">
             <slot></slot>
+            <span class="text-muted" v-if="description">{{ description }}</span>
         </div>
     </div>
 </template>
@@ -12,7 +13,7 @@
 <script>
 export default {
     name: "FormGroup-4-8",
-    props: ['title']
+    props: ['title', 'description']
 }
 </script>
 

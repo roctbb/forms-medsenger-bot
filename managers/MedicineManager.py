@@ -7,7 +7,7 @@ class MedicineManager(Manager):
     def __init__(self, *args):
         super(MedicineManager, self).__init__(*args)
 
-    def delete(self, id, contract):
+    def remove(self, id, contract):
 
         medicine = Medicine.query.filter_by(id=id).first_or_404()
 

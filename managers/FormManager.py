@@ -7,7 +7,10 @@ class FormManager(Manager):
     def __init__(self, *args):
         super(FormManager, self).__init__(*args)
 
-    def delete(self, id, contract):
+    def get(self, form_id):
+        return Form.query.filter_by(id=form_id).first_or_404()
+
+    def remove(self, id, contract):
 
         form = Form.query.filter_by(id=id).first_or_404()
 
@@ -19,6 +22,25 @@ class FormManager(Manager):
         self.__commit__()
         return id
 
+    def submit(self, answers, form_id):
+        form = Form.query.filter_by(id=form_id).first_or_404()
+
+        packet = []
+
+        for field in form.fields:
+            if field['uid'] in answers:
+                if field['type'] == 'radio':
+                    category = field['params']['variants'][answers[field['uid']]]['category']
+                    value = field['params']['variants'][answers[field['uid']]]['category_value']
+                    packet.append((category, value))
+                elif field['type'] == 'checkbox':
+                    packet.append((field['category'], 1))
+                else:
+                    packet.append((field['category'], answers[field['uid']]))
+
+        packet.append( ('action', 'Заполнение анкеты ID {}'.format(form_id)) )
+
+        return bool(self.medsenger_api.add_records(form.contract_id, packet))
 
     def create_or_edit(self, data, contract):
         try:
@@ -51,4 +73,3 @@ class FormManager(Manager):
         except Exception as e:
             log(e)
             return None
-
