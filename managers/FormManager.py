@@ -1,3 +1,5 @@
+from copy import copy
+from datetime import datetime
 from helpers import log
 from managers.Manager import Manager
 from models import Patient, Contract, Form
@@ -22,6 +24,22 @@ class FormManager(Manager):
         self.__commit__()
         return id
 
+    def run(self, form, commit=True):
+        text = 'Пожалуйста, заполните анкету "{}".'.format(form.title)
+        action = 'form/{}'.format(form.id)
+        action_name = 'Заполнить анкету'
+        deadline = self.calculate_deadline(form.timetable)
+
+        result = self.medsenger_api.send_message(form.contract_id, text, action, action_name, True, False, True, deadline)
+
+        if result:
+            form.last_sent = datetime.now()
+
+            if commit:
+                self.__commit__()
+
+        return result
+
     def submit(self, answers, form_id):
         form = Form.query.filter_by(id=form_id).first_or_404()
 
@@ -38,7 +56,7 @@ class FormManager(Manager):
                 else:
                     packet.append((field['category'], answers[field['uid']]))
 
-        packet.append( ('action', 'Заполнение анкеты ID {}'.format(form_id)) )
+        packet.append(('action', 'Заполнение анкеты ID {}'.format(form_id)))
 
         return bool(self.medsenger_api.add_records(form.contract_id, packet))
 

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from helpers import log
 from managers.Manager import Manager
 from models import Patient, Contract, Medicine
@@ -18,6 +20,22 @@ class MedicineManager(Manager):
 
         self.__commit__()
         return id
+
+    def run(self, medicine, commit=True):
+        text = 'Пожалуйста, не забудьте принять лекарство "{}" ({}).'.format(medicine.title, medicine.rules)
+        action = 'medicine/{}'.format(medicine.id)
+        action_name = 'Подтвердить прием'
+        deadline = self.calculate_deadline(medicine.timetable)
+
+        result = self.medsenger_api.send_message(medicine.contract_id, text, action, action_name, True, False, True, deadline)
+
+        if result:
+            medicine.last_sent = datetime.now()
+
+            if commit:
+                self.__commit__()
+
+        return result
 
 
     def create_or_edit(self, data, contract):

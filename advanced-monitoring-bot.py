@@ -2,14 +2,16 @@ from manage import *
 from managers.ContractsManager import ContractManager
 from managers.FormManager import FormManager
 from managers.MedicineManager import MedicineManager
+from managers.TimetableManager import TimetableManager
 from medsenger_api import AgentApiClient
 from helpers import *
+from models import Form
 
 medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG)
 contract_manager = ContractManager(medsenger_api, db)
 form_manager = FormManager(medsenger_api, db)
 medicine_manager = MedicineManager(medsenger_api, db)
-
+timetable_manager = TimetableManager(medicine_manager, form_manager,medsenger_api, db)
 
 @app.route('/')
 @verify_args
@@ -78,6 +80,7 @@ def get_settings(args, form):
 @app.route('/form/<form_id>', methods=['GET'])
 @verify_args
 def form_page(args, form, form_id):
+    form_manager.calculate_deadline(form_manager.get(form_id))
     contract = contract_manager.get(args.get('contract_id'))
     return get_ui('form', contract, form_id)
 
@@ -171,5 +174,10 @@ def post_form(args, form, form_id):
         })
     else:
         abort(404)
+
+with app.app_context():
+    db.create_all()
+
+timetable_manager.run(app)
 
 app.run(HOST, PORT, debug=API_DEBUG)

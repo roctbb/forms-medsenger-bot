@@ -22,7 +22,6 @@ class Contract(db.Model):
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=False)
     is_active = db.Column(db.Boolean, default=True)
     agent_token = db.Column(db.String(255), nullable=True)
-
     def as_dict(self, native=False):
         serialized = {
             "id": self.id,
@@ -42,6 +41,8 @@ class Medicine(db.Model):
     rules = db.Column(db.Text, nullable=True)
     timetable = db.Column(db.JSON, nullable=True)
     is_template = db.Column(db.Boolean, default=False)
+
+    last_sent = db.Column(db.DateTime(), nullable=True)
 
     def as_dict(self):
         return {
@@ -70,6 +71,8 @@ class Form(db.Model):
 
     is_template = db.Column(db.Boolean, default=False)
     categories = db.Column(db.String(512), nullable=True)
+
+    last_sent = db.Column(db.DateTime(), nullable=True)
 
     def as_dict(self):
         return {
