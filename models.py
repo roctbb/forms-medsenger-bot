@@ -1,13 +1,14 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import backref
 
 db = SQLAlchemy()
 
 # models
 class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    contracts = db.relationship('Contract', backref='patient', lazy=True)
-    forms = db.relationship('Form', backref='patient', lazy=True)
-    medicines = db.relationship('Medicine', backref='patient', lazy=True)
+    contracts = db.relationship('Contract', backref=backref('patient', uselist=False), lazy=True)
+    forms = db.relationship('Form', backref=backref('patient', uselist=False), lazy=True)
+    medicines = db.relationship('Medicine', backref=backref('patient', uselist=False), lazy=True)
 
     def as_dict(self):
         return {
@@ -22,6 +23,10 @@ class Contract(db.Model):
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=False)
     is_active = db.Column(db.Boolean, default=True)
     agent_token = db.Column(db.String(255), nullable=True)
+
+    forms = db.relationship('Form', backref=backref('contract', uselist=False), lazy=True)
+    medicines = db.relationship('Medicine', backref=backref('contract', uselist=False), lazy=True)
+
     def as_dict(self, native=False):
         serialized = {
             "id": self.id,

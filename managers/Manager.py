@@ -13,7 +13,7 @@ class Manager:
 
     def get_timepoints(self, timetable):
         now = datetime.now()
-        points = []
+        points = timetable['points']
 
         if timetable['mode'] == 'daily':
             points = list(map(lambda p: datetime(minute=p['minute'], hour=p['hour'], day=now.day, month=now.month, year=now.year), points))
@@ -44,7 +44,7 @@ class Manager:
     def calculate_deadline(self, timetable):
         now = datetime.now()
 
-        points = self.get_timepoints(timetable['points'])
+        points = self.get_timepoints(timetable)
         greater = list(filter(lambda x: x > now, points))[0]
 
         return int(greater.timestamp() - 1)

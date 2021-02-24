@@ -178,6 +178,6 @@ def post_form(args, form, form_id):
 with app.app_context():
     db.create_all()
 
-timetable_manager.run(app)
-
-app.run(HOST, PORT, debug=API_DEBUG)
+if __name__ == "__main__":
+    timetable_manager.run(app)
+    app.run(HOST, PORT, debug=API_DEBUG)
