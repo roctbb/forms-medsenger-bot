@@ -21,6 +21,17 @@
         </ul>
 
         <button class="btn btn-primary btn-sm" @click="create_medicine()">Добавить</button>
+
+        <hr>
+
+        <strong>Алгоритмы</strong>
+        <ul>
+            <li v-for="(algorithm, i) in patient.algorithms">{{ algorithm.title }}<br>
+            <a href="#" @click="edit_algorithm(algorithm)">Редактировать</a>
+            <a href="#" @click="delete_algorithm(algorithm)">Удалить</a></li>
+        </ul>
+
+        <button class="btn btn-primary btn-sm" @click="create_algorithm()">Добавить</button>
     </div>
 </template>
 
@@ -62,10 +73,25 @@ export default {
         delete_medicine: function (medicine) {
             this.axios.post(this.url('/api/settings/delete_medicine'), medicine).then(this.process_delete_medicine_answer);
         },
+        create_algorithm: function () {
+            Event.fire('navigate-to-create-algorithm-page')
+        },
+        edit_algorithm: function (algorithm) {
+            Event.fire('edit-algorithm', algorithm)
+        },
+        delete_algorithm: function (algorithm) {
+            this.axios.post(this.url('/api/settings/delete_algorithm'), algorithm).then(this.process_delete_algorithm_answer);
+        },
         process_delete_medicine_answer: function (response) {
             if (response.data.deleted_id)
             {
                 this.patient.medicines = this.patient.medicines.filter(m => m.id != response.data.deleted_id)
+            }
+        },
+        process_delete_algorithm_answer: function (response) {
+            if (response.data.deleted_id)
+            {
+                this.patient.algorithms = this.patient.algorithms.filter(m => m.id != response.data.deleted_id)
             }
         },
     },

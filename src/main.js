@@ -86,6 +86,9 @@ Vue.mixin({
           return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
             (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
           );
+        },
+        get_category: function (category_name) {
+            return this.category_list.find(x => x.name == category_name)
         }
     },
     data() {
@@ -100,7 +103,15 @@ Vue.mixin({
                 scale: "Шкала",
             },
             weekdays: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
-            axios: require('axios')
+            axios: require('axios'),
+            category_list: window.CATEGORY_LIST,
+            native_types: {
+                integer: 'integer',
+                float: 'float',
+                string: 'string',
+                text: 'string',
+                checkbox: 'integer'
+            }
         }
     }
 })

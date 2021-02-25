@@ -24,7 +24,7 @@ class Manager:
             current_weekday_points = list(map(lambda p: datetime(minute=p['minute'], hour=p['hour'], day=now.day, month=now.month, year=now.year), current_weekday_points))
 
             next_points = []
-            for i in range(1, 0):
+            for i in range(1, 8):
                 next_points = list(filter(lambda x: x['day'] == (now.weekday() + i) % 7, points))
 
                 if next_points:

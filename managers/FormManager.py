@@ -40,7 +40,7 @@ class FormManager(Manager):
 
         return result
 
-    def submit(self, answers, form_id):
+    def submit(self, answers, form_id, contract_id):
         form = Form.query.filter_by(id=form_id).first_or_404()
 
         packet = []
@@ -52,13 +52,15 @@ class FormManager(Manager):
                     value = field['params']['variants'][answers[field['uid']]]['category_value']
                     packet.append((category, value))
                 elif field['type'] == 'checkbox':
-                    packet.append((field['category'], 1))
+                    category = field['category']
+                    packet.append((category, 1))
                 else:
-                    packet.append((field['category'], answers[field['uid']]))
+                    category = field['category']
+                    packet.append((category, answers[field['uid']]))
 
         packet.append(('action', 'Заполнение анкеты ID {}'.format(form_id)))
 
-        return bool(self.medsenger_api.add_records(form.contract_id, packet))
+        return bool(self.medsenger_api.add_records(contract_id, packet))
 
     def create_or_edit(self, data, contract):
         try:

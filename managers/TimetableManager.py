@@ -51,8 +51,8 @@ class TimetableManager(Manager):
         while True:
             with app.app_context():
                 self.iterate()
-                time.sleep(60)
+            time.sleep(60)
 
     def run(self, app):
         thread = Thread(target=self.worker, args=[app, ])
-        thread.run()
+        thread.start()

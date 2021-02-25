@@ -1,4 +1,5 @@
 from manage import *
+from managers.AlgorithmsManager import AlgorithmsManager
 from managers.ContractsManager import ContractManager
 from managers.FormManager import FormManager
 from managers.MedicineManager import MedicineManager
@@ -12,6 +13,7 @@ contract_manager = ContractManager(medsenger_api, db)
 form_manager = FormManager(medsenger_api, db)
 medicine_manager = MedicineManager(medsenger_api, db)
 timetable_manager = TimetableManager(medicine_manager, form_manager,medsenger_api, db)
+algorithm_manager = AlgorithmsManager(medsenger_api, db)
 
 @app.route('/')
 @verify_args
@@ -75,14 +77,14 @@ def actions(data):
 @verify_args
 def get_settings(args, form):
     contract = contract_manager.get(args.get('contract_id'))
-    return get_ui('settings', contract)
+    return get_ui('settings', contract, medsenger_api.get_categories())
 
 @app.route('/form/<form_id>', methods=['GET'])
 @verify_args
 def form_page(args, form, form_id):
-    form_manager.calculate_deadline(form_manager.get(form_id))
+    form_manager.calculate_deadline(form_manager.get(form_id).timetable)
     contract = contract_manager.get(args.get('contract_id'))
-    return get_ui('form', contract, form_id)
+    return get_ui('form', contract, medsenger_api.get_categories(), form_id)
 
 # settings api
 @app.route('/api/settings/get_patient', methods=['GET'])
@@ -149,12 +151,39 @@ def delete_medicine(args, form):
     else:
         abort(404)
 
+@app.route('/api/settings/algorithm', methods=['POST'])
+@only_doctor_args
+def create_algorithm(args, form):
+    contract_id = args.get('contract_id')
+    contract = contract_manager.get(contract_id)
+    form = algorithm_manager.create_or_edit(request.json, contract)
+
+    if form:
+        return jsonify(form.as_dict())
+    else:
+        abort(422)
+
+@app.route('/api/settings/delete_algorithm', methods=['POST'])
+@only_doctor_args
+def delete_algorithm(args, form):
+    contract_id = args.get('contract_id')
+    contract = contract_manager.get(contract_id)
+    result = algorithm_manager.remove(request.json.get('id'), contract)
+
+    if result:
+        return jsonify({
+            "result": "ok",
+            "deleted_id": result
+        })
+    else:
+        abort(404)
+
 @app.route('/api/form/<form_id>', methods=['GET'])
 @verify_args
 def get_form(args, form, form_id):
     form = form_manager.get(form_id)
 
-    if form.contract_id != int(args.get('contract_id')):
+    if form.contract_id != int(args.get('contract_id')) and not form.is_template:
         abort(401)
 
     return jsonify(form.as_dict())
@@ -164,11 +193,15 @@ def get_form(args, form, form_id):
 def post_form(args, form, form_id):
     form = form_manager.get(form_id)
     data = request.json
+    contract_id = int(args.get('contract_id'))
 
-    if form.contract_id != int(args.get('contract_id')):
+    if form.contract_id != contract_id and not form.is_template:
         abort(401)
 
-    if form_manager.submit(data, form_id):
+    if form_manager.submit(data, form_id, contract_id):
+        contract = contract_manager.get(contract_id)
+        algorithm_manager.examine(contract, form)
+
         return jsonify({
             "result": "ok",
         })

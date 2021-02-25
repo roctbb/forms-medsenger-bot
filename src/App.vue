@@ -6,6 +6,7 @@
                 <dashboard :patient="patient" v-show="state == 'dashboard'"/>
                 <form-editor v-show="state == 'form-manager'"/>
                 <medicine-editor v-show="state == 'medicine-manager'"/>
+                <algorithm-editor v-show="state == 'algorithm-manager'"/>
             </div>
             <div v-if="mode == 'form'">
                 <form-presenter :data="form" v-if="state == 'form-presenter'" />
@@ -21,11 +22,12 @@ import Dashboard from "./components/dashboard/Dashboard";
 import FormEditor from "./components/editors/FormEditor";
 import MedicineEditor from "./components/editors/MedicineEditor";
 import FormPresenter from "./components/presenters/FormPresenter";
+import AlgorithmEditor from "./components/editors/AlgorithmEditor";
 
 
 export default {
     name: 'app',
-    components: {FormPresenter, FormEditor, Loading, Dashboard, MedicineEditor},
+    components: {AlgorithmEditor, FormPresenter, FormEditor, Loading, Dashboard, MedicineEditor},
     data() {
         return {
             state: "loading",
@@ -39,6 +41,7 @@ export default {
         console.log("running created");
         Event.listen('navigate-to-create-form-page', () => this.state = 'form-manager');
         Event.listen('navigate-to-create-medicine-page', () => this.state = 'medicine-manager');
+        Event.listen('navigate-to-create-algorithm-page', () => this.state = 'algorithm-manager');
         Event.listen('back-to-dashboard', () => this.state = 'dashboard');
         Event.listen('form-created', (form) => {
             this.state = 'dashboard'
@@ -48,6 +51,10 @@ export default {
             this.state = 'dashboard'
             this.patient.medicines.push(medicine)
         });
+        Event.listen('algorithm-created', (algorithm) => {
+            this.state = 'dashboard'
+            this.patient.algorithms.push(algorithm)
+        });
         Event.listen('edit-form', (form) => {
             this.state = 'form-manager'
             Event.fire('navigate-to-edit-form-page', form);
@@ -55,6 +62,10 @@ export default {
         Event.listen('edit-medicine', (medicine) => {
             this.state = 'medicine-manager'
             Event.fire('navigate-to-edit-medicine-page', medicine);
+        });
+        Event.listen('edit-algorithm', (algorithm) => {
+            this.state = 'algorithm-manager'
+            Event.fire('navigate-to-edit-algorithm-page', algorithm);
         });
     },
     methods: {
@@ -74,7 +85,7 @@ export default {
         process_load_answer: function (response) {
             if (this.mode == 'settings') {
                 this.patient = response.data;
-                this.state = 'dashboard'
+                this.state = 'dashboard';
             }
             if (this.mode == 'form')
             {

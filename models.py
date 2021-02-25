@@ -9,13 +9,15 @@ class Patient(db.Model):
     contracts = db.relationship('Contract', backref=backref('patient', uselist=False), lazy=True)
     forms = db.relationship('Form', backref=backref('patient', uselist=False), lazy=True)
     medicines = db.relationship('Medicine', backref=backref('patient', uselist=False), lazy=True)
+    algorithms = db.relationship('Algorithm', backref=backref('patient', uselist=False), lazy=True)
 
     def as_dict(self):
         return {
             "id": self.id,
             "contracts": [contract.as_dict() for contract in self.contracts],
             "forms": [form.as_dict() for form in self.forms],
-            "medicines": [medicine.as_dict() for medicine in self.medicines]
+            "medicines": [medicine.as_dict() for medicine in self.medicines],
+            "algorithms": [algorithm.as_dict() for algorithm in self.algorithms]
         }
 
 class Contract(db.Model):
@@ -26,6 +28,7 @@ class Contract(db.Model):
 
     forms = db.relationship('Form', backref=backref('contract', uselist=False), lazy=True)
     medicines = db.relationship('Medicine', backref=backref('contract', uselist=False), lazy=True)
+    algorithms = db.relationship('Algorithm', backref=backref('contract', uselist=False), lazy=True)
 
     def as_dict(self, native=False):
         serialized = {
@@ -89,4 +92,28 @@ class Form(db.Model):
             "patient_description": self.patient_description,
             "fields": self.fields,
             "timetable": self.timetable,
+        }
+
+class Algorithm(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=True)
+    contract_id = db.Column(db.Integer, db.ForeignKey('contract.id', ondelete="CASCADE"), nullable=True)
+
+    title = db.Column(db.String(255), nullable=True)
+    description = db.Column(db.Text, nullable=True)
+
+    criteria = db.Column(db.JSON, nullable=True)
+    actions = db.Column(db.JSON, nullable=True)
+
+    categories = db.Column(db.String(512), nullable=True)
+    is_template = db.Column(db.Boolean, default=False)
+
+    def as_dict(self, native=False):
+        return {
+            "id": self.id,
+            "contract_id": self.contract_id,
+            "patient_id": self.patient_id,
+            "title": self.title,
+            "criteria": self.criteria,
+            "actions": self.actions,
         }

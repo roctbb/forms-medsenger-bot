@@ -1,3 +1,4 @@
+import json
 import threading
 from datetime import datetime
 from flask import request, abort, jsonify, render_template
@@ -70,8 +71,8 @@ def verify_json(func):
     wrapper.__name__ = func.__name__
     return wrapper
 
-def get_ui(page, contract, object_id = None):
-    return render_template('index.html', page=page, object_id=object_id, contract_id=contract.id, api_host=MAIN_HOST.replace('8001', '8000'), local_host=LOCALHOST, agent_token=contract.agent_token, agent_id=AGENT_ID)
+def get_ui(page, contract, categories, object_id = None):
+    return render_template('index.html', page=page, object_id=object_id, contract_id=contract.id, api_host=MAIN_HOST.replace('8001', '8000'), local_host=LOCALHOST, agent_token=contract.agent_token, agent_id=AGENT_ID, categories=json.dumps(categories))
 
 def delayed(delay, f, args):
     timer = threading.Timer(delay, f, args=args)
