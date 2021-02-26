@@ -31,7 +31,8 @@
 
         </div>
 
-        <button class="btn btn-success btn-lg" @click="save()">Сохранить</button>
+        <button class="btn btn-success btn-lg" @click="save()">Сохранить <span v-if="algorithm.is_template"> шаблон</span></button>
+        <button class="btn btn-primary btn-lg" v-if="!algorithm.id" @click="save(true)">Сохранить как шаблон</button>
     </div>
 </template>
 
@@ -54,9 +55,7 @@ export default {
     methods: {
         go_back: function () {
             let old = JSON.parse(this.backup)
-            Object.keys(old).forEach(k => {
-                this.algorithm[k] = old[k]
-            })
+            this.copy(this.algorithm, old)
             Event.fire('back-to-dashboard');
             this.algorithm = undefined
         },
@@ -169,19 +168,29 @@ export default {
                 return true;
             }
         },
-        save: function () {
+        save: function (is_template) {
             if (this.check()) {
                 this.algorithm.categories = this.algorithm.criteria.map(block => block.map(c => c.category).join('|')).join('|')
                 this.errors = []
+
+                if (is_template || this.algorithm.is_template)
+                {
+                    this.algorithm.contract_id = undefined
+                    this.algorithm.is_template = true;
+                }
+
                 this.axios.post(this.url('/api/settings/algorithm'), this.algorithm).then(this.process_save_answer).catch(this.process_save_error);
             }
         },
         process_save_answer: function (response) {
             let is_new = this.ne(this.algorithm.id)
 
-            this.algorithm.patient_id = response.data.patient_id
             this.algorithm.id = response.data.id
-            this.algorithm.contract_id = response.data.contract_id
+            if (!this.algorithm.is_template)
+            {
+                this.algorithm.patient_id = response.data.patient_id
+                this.algorithm.contract_id = response.data.contract_id
+            }
 
             if (is_new) Event.fire('algorithm-created', this.algorithm)
             else Event.fire('back-to-dashboard', this.algorithm)
@@ -210,6 +219,14 @@ export default {
         }
     },
     mounted() {
+        Event.listen('attach-algorithm', (algorithm) => {
+            this.algorithm = {}
+            this.copy(this.algorithm, algorithm)
+            this.algorithm.id = undefined
+            this.algorithm.is_template = false;
+            this.save()
+        });
+
         Event.listen('navigate-to-create-algorithm-page', () => {
             this.algorithm = this.create_empty_algorithm()
             this.backup = JSON.stringify(this.algorithm)

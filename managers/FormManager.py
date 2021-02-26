@@ -12,6 +12,9 @@ class FormManager(Manager):
     def get(self, form_id):
         return Form.query.filter_by(id=form_id).first_or_404()
 
+    def get_templates(self):
+        return Form.query.filter_by(is_template=True).all()
+
     def remove(self, id, contract):
 
         form = Form.query.filter_by(id=id).first_or_404()

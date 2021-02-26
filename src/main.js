@@ -89,6 +89,11 @@ Vue.mixin({
         },
         get_category: function (category_name) {
             return this.category_list.find(x => x.name == category_name)
+        },
+        copy: function (to, from) {
+            Object.keys(from).forEach(k => {
+                to[k] = from[k]
+            })
         }
     },
     data() {

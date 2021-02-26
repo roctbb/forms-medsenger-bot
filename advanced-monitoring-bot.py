@@ -12,8 +12,9 @@ medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG)
 contract_manager = ContractManager(medsenger_api, db)
 form_manager = FormManager(medsenger_api, db)
 medicine_manager = MedicineManager(medsenger_api, db)
-timetable_manager = TimetableManager(medicine_manager, form_manager,medsenger_api, db)
+timetable_manager = TimetableManager(medicine_manager, form_manager, medsenger_api, db)
 algorithm_manager = AlgorithmsManager(medsenger_api, db)
+
 
 @app.route('/')
 @verify_args
@@ -79,12 +80,14 @@ def get_settings(args, form):
     contract = contract_manager.get(args.get('contract_id'))
     return get_ui('settings', contract, medsenger_api.get_categories())
 
+
 @app.route('/form/<form_id>', methods=['GET'])
 @verify_args
 def form_page(args, form, form_id):
     form_manager.calculate_deadline(form_manager.get(form_id).timetable)
     contract = contract_manager.get(args.get('contract_id'))
     return get_ui('form', contract, medsenger_api.get_categories(), form_id)
+
 
 # settings api
 @app.route('/api/settings/get_patient', methods=['GET'])
@@ -98,6 +101,19 @@ def get_data(args, form):
 
     return jsonify(patient)
 
+
+@app.route('/api/settings/get_templates', methods=['GET'])
+@only_doctor_args
+def get_templates(args, form):
+    templates = {
+        "forms": form_manager.get_templates_as_dicts(),
+        "medicines": medicine_manager.get_templates_as_dicts(),
+        "algorithms": algorithm_manager.get_templates_as_dicts()
+    }
+
+    return jsonify(templates)
+
+
 @app.route('/api/settings/form', methods=['POST'])
 @only_doctor_args
 def create_form(args, form):
@@ -109,6 +125,7 @@ def create_form(args, form):
         return jsonify(form.as_dict())
     else:
         abort(422)
+
 
 @app.route('/api/settings/delete_form', methods=['POST'])
 @only_doctor_args
@@ -124,6 +141,7 @@ def delete_form(args, form):
     else:
         abort(404)
 
+
 @app.route('/api/settings/medicine', methods=['POST'])
 @only_doctor_args
 def create_medicine(args, form):
@@ -135,6 +153,7 @@ def create_medicine(args, form):
         return jsonify(form.as_dict())
     else:
         abort(422)
+
 
 @app.route('/api/settings/delete_medicine', methods=['POST'])
 @only_doctor_args
@@ -151,6 +170,7 @@ def delete_medicine(args, form):
     else:
         abort(404)
 
+
 @app.route('/api/settings/algorithm', methods=['POST'])
 @only_doctor_args
 def create_algorithm(args, form):
@@ -162,6 +182,7 @@ def create_algorithm(args, form):
         return jsonify(form.as_dict())
     else:
         abort(422)
+
 
 @app.route('/api/settings/delete_algorithm', methods=['POST'])
 @only_doctor_args
@@ -178,6 +199,7 @@ def delete_algorithm(args, form):
     else:
         abort(404)
 
+
 @app.route('/api/form/<form_id>', methods=['GET'])
 @verify_args
 def get_form(args, form, form_id):
@@ -187,6 +209,7 @@ def get_form(args, form, form_id):
         abort(401)
 
     return jsonify(form.as_dict())
+
 
 @app.route('/api/form/<form_id>', methods=['POST'])
 @verify_args
@@ -207,6 +230,7 @@ def post_form(args, form, form_id):
         })
     else:
         abort(404)
+
 
 with app.app_context():
     db.create_all()

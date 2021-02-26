@@ -3,7 +3,7 @@
         <loading v-if="state == 'loading'"/>
         <div v-else>
             <div v-if="mode == 'settings'">
-                <dashboard :patient="patient" v-show="state == 'dashboard'"/>
+                <dashboard :patient="patient" :templates="templates" v-show="state == 'dashboard'"/>
                 <form-editor v-show="state == 'form-manager'"/>
                 <medicine-editor v-show="state == 'medicine-manager'"/>
                 <algorithm-editor v-show="state == 'algorithm-manager'"/>
@@ -34,7 +34,12 @@ export default {
             patient: {},
             form: {},
             mode: "",
-            object_id: -1
+            object_id: -1,
+            templates: {
+                forms: [],
+                algorithms: [],
+                medicines: []
+            }
         }
     },
     created() {
@@ -45,15 +50,37 @@ export default {
         Event.listen('back-to-dashboard', () => this.state = 'dashboard');
         Event.listen('form-created', (form) => {
             this.state = 'dashboard'
-            this.patient.forms.push(form)
+            if (!form.is_template)
+            {
+                Event.fire('dashboard-to-main');
+                this.patient.forms.push(form)
+            }
+            else {
+                this.templates.forms.push(form)
+            }
+
         });
         Event.listen('medicine-created', (medicine) => {
             this.state = 'dashboard'
-            this.patient.medicines.push(medicine)
+            if (!medicine.is_template)
+            {
+                Event.fire('dashboard-to-main');
+                this.patient.medicines.push(medicine)
+            }
+            else {
+                this.templates.medicines.push(medicine)
+            }
         });
         Event.listen('algorithm-created', (algorithm) => {
             this.state = 'dashboard'
-            this.patient.algorithms.push(algorithm)
+            if (!algorithm.is_template)
+            {
+                Event.fire('dashboard-to-main');
+                this.patient.algorithms.push(algorithm)
+            }
+            else {
+                this.templates.algorithms.push(algorithm)
+            }
         });
         Event.listen('edit-form', (form) => {
             this.state = 'form-manager'
@@ -76,6 +103,7 @@ export default {
             if (this.mode == 'settings')
             {
                 this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
+                this.axios.get(this.url('/api/settings/get_templates')).then(response => this.templates = response.data);
             }
             if (this.mode == 'form')
             {
@@ -117,6 +145,10 @@ h1, h2 {
 
 a {
     color: #42b983;
+}
+
+body {
+    background-color: #f8f8fb;
 }
 
 </style>

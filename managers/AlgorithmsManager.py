@@ -21,6 +21,9 @@ class AlgorithmsManager(Manager):
         self.__commit__()
         return id
 
+    def get_templates(self):
+        return Algorithm.query.filter_by(is_template=True).all()
+
     def get_value(self, category_name, mode, contract_id, days=1):
         if mode == 'value':
             answer = self.medsenger_api.get_records(contract_id, category_name, limit=1)

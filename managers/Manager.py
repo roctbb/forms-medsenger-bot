@@ -48,3 +48,9 @@ class Manager:
         greater = list(filter(lambda x: x > now, points))[0]
 
         return int(greater.timestamp() - 1)
+
+    def get_templates(self):
+        return []
+
+    def get_templates_as_dicts(self):
+        return [template.as_dict() for template in self.get_templates()]

@@ -31,7 +31,8 @@
             <fields-editor v-bind:data="form.fields"/>
         </div>
 
-        <button class="btn btn-success btn-lg" @click="save()">Сохранить</button>
+        <button class="btn btn-success btn-lg" @click="save()">Сохранить <span v-if="form.is_template"> шаблон</span></button>
+        <button v-if="!form.id" class="btn btn-primary btn-lg" @click="save(true)">Сохранить как шаблон</button>
     </div>
 </template>
 
@@ -54,9 +55,7 @@ export default {
     methods: {
         go_back: function () {
             let old = JSON.parse(this.backup)
-            Object.keys(old).forEach(k => {
-                this.form[k] = old[k]
-            })
+            this.copy(this.form, old)
             Event.fire('back-to-dashboard');
             this.form = undefined
         },
@@ -125,9 +124,16 @@ export default {
             }
 
         },
-        save: function () {
+        save: function (is_template) {
             if (this.check()) {
                 this.errors = []
+
+                if (is_template || this.form.is_template)
+                {
+                    this.form.contract_id = undefined
+                    this.form.is_template = true;
+                }
+
                 this.form.categories = this.form.fields.map(f => f.category).join('|')
                 this.axios.post(this.url('/api/settings/form'), this.form).then(this.process_save_answer).catch(this.process_save_error);
             }
@@ -135,12 +141,20 @@ export default {
         process_save_answer: function (response) {
             let is_new = this.ne(this.form.id)
             console.log(response)
-            this.form.patient_id = response.data.patient_id
-            this.form.id = response.data.id
-            this.form.contract_id = response.data.contract_id
 
-            if (is_new) Event.fire('form-created', this.form)
-            else Event.fire('back-to-dashboard', this.form)
+            this.form.id = response.data.id
+            if (is_new)
+            {
+                if (!this.form.is_template)
+                {
+                    this.form.patient_id = response.data.patient_id
+                    this.form.contract_id = response.data.contract_id
+                }
+                Event.fire('form-created', this.form)
+            }
+            else {
+                Event.fire('back-to-dashboard', this.form)
+            }
 
             this.form = undefined
         },
@@ -156,6 +170,15 @@ export default {
         }
     },
     mounted() {
+        Event.listen('attach-form', (form) => {
+            this.form = {}
+            this.copy(this.form, form)
+            this.form.id = undefined
+            this.form.is_template = false;
+            this.form.contract_id = undefined;
+            this.save()
+        });
+
         Event.listen('navigate-to-create-form-page', () => {
             this.form = this.create_empty_form()
             console.log("create", this.form)

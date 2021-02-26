@@ -60,6 +60,7 @@ class Medicine(db.Model):
             "title": self.title,
             "rules": self.rules,
             "timetable": self.timetable,
+            "is_template": self.is_template
         }
 
 class Form(db.Model):
@@ -92,6 +93,7 @@ class Form(db.Model):
             "patient_description": self.patient_description,
             "fields": self.fields,
             "timetable": self.timetable,
+            "is_template": self.is_template
         }
 
 class Algorithm(db.Model):
@@ -116,4 +118,5 @@ class Algorithm(db.Model):
             "title": self.title,
             "criteria": self.criteria,
             "actions": self.actions,
+            "is_template": self.is_template
         }
