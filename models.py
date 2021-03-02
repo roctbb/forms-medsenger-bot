@@ -162,6 +162,7 @@ class Algorithm(db.Model):
             "contract_id": self.contract_id,
             "patient_id": self.patient_id,
             "title": self.title,
+            "description": self.description,
             "criteria": self.criteria,
             "actions": self.actions,
             "categories": self.categories,

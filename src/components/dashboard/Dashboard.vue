@@ -64,6 +64,7 @@
                 <card v-for="(algorithm, i) in patient.algorithms" :key="algorithm.id" :image="images.algorithm"
                       class="col-lg-3 col-md-4">
                     <h6>{{ algorithm.title }}</h6>
+                    <small>{{ algorithm.description }}</small><br>
                     <small v-html="alg_description(algorithm)"></small>
                     <div v-if="algorithm.contract_id == current_contract_id">
                         <a href="#" @click="edit_algorithm(algorithm)">Редактировать</a>
@@ -147,13 +148,17 @@
 
         </div>
         <div v-if="state == 'algorithm_templates'">
-            <h3>Шаблоны алгоритмов</h3>
+            <div class="alert alert-info" role="alert">
+                <h4 class="alert-heading">Выбор алгоритма</h4>
+                <p>Выберите алгоритм из списка ниже. В дальнейшем вы сможете посмотреть подробную схему его работы, но изменять ее без опыта не рекомендуется.</p>
+            </div>
 
 
             <div class="row">
                 <card v-for="(algorithm, i) in templates.algorithms" :key="algorithm.id" :image="images.algorithm"
                       class="col-lg-3 col-md-4">
                     <h6>{{ algorithm.title }}</h6>
+                    <small>{{ algorithm.description }}</small><br>
                     <small v-html="alg_description(algorithm)"></small>
                     <a href="#" @click="attach_algorithm(algorithm)">Подключить</a>
                     <a href="#" v-if="is_admin" @click="edit_algorithm(algorithm)">Редактировать</a>

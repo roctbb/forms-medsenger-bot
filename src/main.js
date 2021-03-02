@@ -115,17 +115,50 @@ Vue.mixin({
             algorithm.actions.forEach((a) => {
                 if (a.type == 'patient_message')
                 {
-                    actions.add('сообщения пациенту');
+                    actions.add('сообщение пациенту');
                 }
                 if (a.type == 'doctor_message')
                 {
-                    actions.add('сообщения врачу');
+                    actions.add('сообщение врачу');
                 }
                 if (a.type == 'record')
                 {
-                    actions.add('записи в карту');
+                    actions.add('запись в карту');
+                }
+                if (a.type == 'medicine')
+                {
+                    actions.add('прием препарата' + a.params.medicine_name);
+                }
+                if (a.type == 'form')
+                {
+                    actions.add('отправка дополнительного опросника');
+                }
+                if (a.type == 'attach_medicine')
+                {
+                    actions.add('назначение лекарства');
+                }
+                if (a.type == 'detach_medicine')
+                {
+                    actions.add('отмена лекарства');
+                }
+                if (a.type == 'attach_form')
+                {
+                    actions.add('подключение опросника');
+                }
+                if (a.type == 'detach_form')
+                {
+                    actions.add('отключение опросника');
+                }
+                if (a.type == 'attach_algorithm')
+                {
+                    actions.add('подключение алгоритма');
+                }
+                if (a.type == 'detach_algorithm')
+                {
+                    actions.add('отключение алгоритма');
                 }
             })
+
 
             actions = `<b>Действия:</b> ` + Array.from(actions).join(', ')
 
