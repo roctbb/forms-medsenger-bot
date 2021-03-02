@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
-    "vue": "^2.5.11"
+    "vue": "^2.5.11",
+    "vue-confirm-dialog": "^1.0.2"
   },
   "browserslist": [
     "> 1%",

@@ -1,7 +1,7 @@
 <template>
     <card title="Расписание">
         <form-group48 title="Режим">
-            <select @change="clear_time_points()" class="form-control"
+            <select @change="clear_time_points()" class="form-control form-control-sm"
                     v-model="mode">
                 <option value="manual">Заполняется вручную</option>
                 <option value="daily">Ежедневно</option>
@@ -18,7 +18,7 @@
                 <div class="col-md-3">
                     <div v-if="timetable.mode == 'weekly'">
                         <small class="text-muted">День недели</small>
-                        <select class="form-control" v-model="timepoint.day">
+                        <select class="form-control form-control-sm" v-model="timepoint.day">
                             <option v-for="(day, i) in weekdays"
                                     v-bind:value="i">{{ day }}
                             </option>
@@ -26,27 +26,27 @@
                     </div>
                     <div v-if="timetable.mode == 'monthly'">
                         <small class="text-muted">День</small>
-                        <input type="number" min="1" max="31" class="form-control"
+                        <input type="number" min="1" max="31" class="form-control form-control-sm"
                                v-model="timepoint.day"/>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <small class="text-muted">Часы</small>
-                    <input type="number" min="0" max="23" class="form-control"
+                    <input type="number" min="0" max="23" class="form-control form-control-sm"
                            v-model="timepoint.hour"/>
                 </div>
                 <div class="col-md-3">
                     <small class="text-muted">Минуты</small>
-                    <input type="number" min="0" max="59" class="form-control"
+                    <input type="number" min="0" max="59" class="form-control form-control-sm"
                            v-model="timepoint.minute"/>
                 </div>
-                <div class="col-md-3">
-                    <a @click="remove_time_point(i)"
+                <div class="col-md-3"><br>
+                    <a class="btn btn-sm btn-default" @click="remove_time_point(i)"
                        v-if="timetable.points.length > 1">Удалить</a>
                 </div>
             </div>
 
-            <a class="btn btn-primary btn-sm" @click="add_time_point()">Добавить</a>
+            <a class="btn btn-primary btn-sm" @click="add_time_point()">Добавить время</a>
 
         </div>
     </card>

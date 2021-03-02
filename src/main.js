@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import App from './App.vue'
 import axios from "axios";
+import VueConfirmDialog from 'vue-confirm-dialog'
 
 window.Event = new class {
     constructor() {
@@ -94,6 +95,41 @@ Vue.mixin({
             Object.keys(from).forEach(k => {
                 to[k] = from[k]
             })
+        },
+        tt_description: function (timetable) {
+            if (timetable.mode == 'daily') {
+                return timetable.points.length + ' раз(а) в день.'
+            }
+            else if (timetable.mode == 'weekly') {
+                return timetable.points.length + ' раз(а) в неделю.'
+            }
+            else {
+                return timetable.points.length + ' раз(а) в месяц.'
+            }
+        },
+        alg_description: function (algorithm) {
+            console.log(algorithm)
+            let criteria = `<b>Анализирует:</b> ` + algorithm.categories.split('|').map((c) => this.get_category(c).description.toLowerCase()).join(', ') + `<br>`;
+            let actions = new Set();
+
+            algorithm.actions.forEach((a) => {
+                if (a.type == 'patient_message')
+                {
+                    actions.add('сообщения пациенту');
+                }
+                if (a.type == 'doctor_message')
+                {
+                    actions.add('сообщения врачу');
+                }
+                if (a.type == 'record')
+                {
+                    actions.add('записи в карту');
+                }
+            })
+
+            actions = `<b>Действия:</b> ` + Array.from(actions).join(', ')
+
+            return criteria + actions
         }
     },
     data() {
@@ -107,6 +143,7 @@ Vue.mixin({
                 radio: "Выбор варианта",
                 scale: "Шкала",
             },
+            current_contract_id: window.CONTRACT_ID,
             weekdays: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
             axios: require('axios'),
             category_list: window.CATEGORY_LIST,
@@ -116,10 +153,21 @@ Vue.mixin({
                 string: 'string',
                 text: 'string',
                 checkbox: 'integer'
-            }
+            },
+            images: {
+                form: window.LOCAL_HOST + '/static/images/icons8-fill-in-form-48.png',
+                medicine: window.LOCAL_HOST + '/static/images/icons8-pill-96.png',
+                algorithm: window.LOCAL_HOST + '/static/images/icons8-artificial-intelligence-96.png',
+                ok: window.LOCAL_HOST + '/static/images/icons8-ok-128.png',
+            },
+            is_admin: window.IS_ADMIN
         }
     }
 })
+
+
+Vue.use(VueConfirmDialog)
+Vue.component('vue-confirm-dialog', VueConfirmDialog.default)
 
 new Vue({
     el: '#app',

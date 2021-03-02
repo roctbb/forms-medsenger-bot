@@ -1,6 +1,5 @@
 <template>
     <div v-if="algorithm">
-        <a class="btn btn-danger btn-sm" @click="go_back()">назад</a>
         <error-block :errors="errors"/>
         <div class="form">
             <card title="Описание алгоритма">
@@ -30,9 +29,9 @@
             </card>
 
         </div>
-
-        <button class="btn btn-success btn-lg" @click="save()">Сохранить <span v-if="algorithm.is_template"> шаблон</span></button>
-        <button class="btn btn-primary btn-lg" v-if="!algorithm.id" @click="save(true)">Сохранить как шаблон</button>
+        <button class="btn btn-danger" @click="go_back()">назад</button>
+        <button class="btn btn-success" @click="save()">Сохранить <span v-if="algorithm.is_template"> шаблон</span></button>
+        <button class="btn btn-primary" v-if="!algorithm.id && is_admin" @click="save(true)">Сохранить как шаблон</button>
     </div>
 </template>
 
@@ -58,6 +57,7 @@ export default {
             this.copy(this.algorithm, old)
             Event.fire('back-to-dashboard');
             this.algorithm = undefined
+            this.errors = []
         },
         create_empty_algorithm: function () {
             return {
@@ -224,7 +224,14 @@ export default {
             this.copy(this.algorithm, algorithm)
             this.algorithm.id = undefined
             this.algorithm.is_template = false;
+            this.algorithm.template_id = algorithm.id;
             this.save()
+        });
+
+        Event.listen('home', (form) => {
+            this.errors = []
+            this.algorithm = undefined
+            this.$forceUpdate()
         });
 
         Event.listen('navigate-to-create-algorithm-page', () => {

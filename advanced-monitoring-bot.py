@@ -84,9 +84,15 @@ def get_settings(args, form):
 @app.route('/form/<form_id>', methods=['GET'])
 @verify_args
 def form_page(args, form, form_id):
-    form_manager.calculate_deadline(form_manager.get(form_id).timetable)
     contract = contract_manager.get(args.get('contract_id'))
     return get_ui('form', contract, medsenger_api.get_categories(), form_id)
+
+@app.route('/medicine/<medicine_id>', methods=['GET'])
+@verify_args
+def medicine_page(args, form, medicine_id):
+    contract = contract_manager.get(args.get('contract_id'))
+    medicine_manager.submit(medicine_id, contract.id)
+    return get_ui('done', contract, [])
 
 
 # settings api
@@ -207,8 +213,13 @@ def get_form(args, form, form_id):
 
     if form.contract_id != int(args.get('contract_id')) and not form.is_template:
         abort(401)
+    answer = form.as_dict()
+    if args.get('source') == 'patient':
+        answer['preview'] = False
+    else:
+        answer['preview'] = True
 
-    return jsonify(form.as_dict())
+    return jsonify(answer)
 
 
 @app.route('/api/form/<form_id>', methods=['POST'])

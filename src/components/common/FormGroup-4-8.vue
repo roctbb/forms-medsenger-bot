@@ -1,5 +1,5 @@
 <template>
-    <div class="form-group row">
+    <div class="form-group form-group-sm row" :class="{'required': required}">
         <div class="col-md-4">
             <strong>{{ title }}</strong>
         </div>
@@ -13,10 +13,18 @@
 <script>
 export default {
     name: "FormGroup-4-8",
-    props: ['title', 'description']
+    props: ['title', 'description', 'required']
 }
 </script>
 
 <style scoped>
+strong {
+    font-size: 0.9rem;
+}
 
+.form-group.required strong:after {
+    color: red;
+    content: ' *';
+    font-size: 18px;
+}
 </style>

@@ -2,7 +2,7 @@
     <div>
         <field v-for="(field, i) in fields" :data="field" :pkey="i" :key="field.uid"></field>
 
-        <p class="text-center"><a class="btn btn-primary btn-sm" @click="add_field()">Добавить поле</a></p>
+        <p class="text-center"><a class="btn btn-primary btn-sm" @click="add_field()">Добавить вопрос</a></p>
     </div>
 </template>
 
@@ -37,8 +37,19 @@ export default {
             });
         },
         remove_field: function (index) {
-            console.log("remove field", index)
-            this.fields.splice(index, 1);
+            this.$confirm({
+                message: `Вы уверены?`,
+                button: {
+                    no: 'Нет',
+                    yes: 'Удалить вопрос'
+                },
+                callback: confirm => {
+                    if (confirm) {
+                        this.fields.splice(index, 1);
+                    }
+                }
+            })
+
         },
     }
 }

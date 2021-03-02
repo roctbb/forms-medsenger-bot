@@ -1,23 +1,27 @@
 <template>
     <div v-if="medicine">
-        <a class="btn btn-danger btn-sm" @click="go_back()">назад</a>
+
         <error-block :errors="errors"/>
         <div class="form">
             <card title="Описание лекарства">
                 <form-group48 title="Название">
-                    <input class="form-control" v-model="medicine.title"/>
+                    <input class="form-control form-control-sm" v-model="medicine.title"/>
                 </form-group48>
 
                 <form-group48 title="Доза и правила приема">
-                    <textarea class="form-control" v-model="medicine.rules"></textarea>
+                    <textarea class="form-control form-control-sm" v-model="medicine.rules"></textarea>
                 </form-group48>
             </card>
 
             <timetable-editor v-bind:data="medicine.timetable"/>
         </div>
 
-        <button class="btn btn-success btn-lg" @click="save()">Сохранить <span v-if="medicine.is_template"> шаблон</span></button>
-        <button v-if="!medicine.id" class="btn btn-primary btn-lg" @click="save(true)">Сохранить как шаблон</button>
+        <button class="btn btn-danger" @click="go_back()">Назад</button>
+        <button class="btn btn-success" @click="save()">Сохранить <span
+            v-if="medicine.is_template"> шаблон</span></button>
+        <button v-if="!medicine.id && is_admin" class="btn btn-primary" @click="save(true)">Сохранить как
+            шаблон
+        </button>
 
     </div>
 </template>
@@ -39,10 +43,24 @@ export default {
     },
     methods: {
         go_back: function () {
-            let old = JSON.parse(this.backup)
-            this.copy(this.medicine, old)
-            Event.fire('back-to-dashboard');
-            this.medicine = undefined
+
+            this.$confirm({
+                message: `Вы уверены? Внесенные изменения будут утеряны!`,
+                button: {
+                    no: 'Нет',
+                    yes: 'Да'
+                },
+                callback: confirm => {
+                    if (confirm) {
+                        let old = JSON.parse(this.backup)
+                        this.copy(this.medicine, old)
+                        Event.fire('back-to-dashboard');
+
+                        this.medicine = undefined
+                        this.errors = []
+                    }
+                }
+            })
         },
         create_empty_medicine: function () {
             return {
@@ -70,8 +88,7 @@ export default {
             if (this.check()) {
                 this.errors = []
 
-                if (is_template || this.medicine.is_template)
-                {
+                if (is_template || this.medicine.is_template) {
                     this.medicine.contract_id = undefined
                     this.medicine.is_template = true;
                 }
@@ -83,7 +100,7 @@ export default {
             let is_new = this.ne(this.medicine.id)
             this.medicine.id = response.data.id
 
-            if (!this.algorithm.is_template) {
+            if (!this.medicine.is_template) {
                 this.medicine.patient_id = response.data.patient_id
                 this.medicine.contract_id = response.data.contract_id
             }
@@ -94,6 +111,7 @@ export default {
             this.medicine = undefined
         },
         process_save_error: function (response) {
+            console.log(response)
             this.errors.push('Ошибка сохранения');
         }
     },
@@ -110,7 +128,14 @@ export default {
             this.copy(this.medicine, medicine)
             this.medicine.id = undefined
             this.medicine.is_template = false;
+            this.medicine.template_id = medicine.id;
             this.save()
+        });
+
+        Event.listen('home', (form) => {
+            this.errors = []
+            this.medicine = undefined
+            this.$forceUpdate()
         });
 
         Event.listen('navigate-to-create-medicine-page', () => {

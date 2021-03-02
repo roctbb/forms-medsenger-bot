@@ -13,7 +13,7 @@ class AlgorithmsManager(Manager):
 
         algorithm = Algorithm.query.filter_by(id=id).first_or_404()
 
-        if algorithm.contract_id != contract.id:
+        if algorithm.contract_id != contract.id and not contract.is_admin:
             return None
 
         Algorithm.query.filter_by(id=id).delete()
@@ -129,11 +129,15 @@ class AlgorithmsManager(Manager):
             else:
                 algorithm = Algorithm.query.filter_by(id=algorithm_id).first_or_404()
 
+                if algorithm.contract_id != contract.id and not contract.is_admin:
+                    return None
+
             algorithm.title = data.get('title')
             algorithm.criteria = data.get('criteria')
             algorithm.actions = data.get('actions')
             algorithm.description = data.get('description')
             algorithm.categories = data.get('categories')
+            algorithm.template_id = data.get('template_id')
 
             if data.get('is_template'):
                 algorithm.is_template = True

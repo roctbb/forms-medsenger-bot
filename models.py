@@ -30,6 +30,8 @@ class Contract(db.Model):
     medicines = db.relationship('Medicine', backref=backref('contract', uselist=False), lazy=True)
     algorithms = db.relationship('Algorithm', backref=backref('contract', uselist=False), lazy=True)
 
+    is_admin = db.Column(db.Boolean, default=False)
+
     def as_dict(self, native=False):
         serialized = {
             "id": self.id,
@@ -49,6 +51,7 @@ class Medicine(db.Model):
     rules = db.Column(db.Text, nullable=True)
     timetable = db.Column(db.JSON, nullable=True)
     is_template = db.Column(db.Boolean, default=False)
+    template_id = db.Column(db.Integer, db.ForeignKey('medicine.id', ondelete="set null"), nullable=True)
 
     last_sent = db.Column(db.DateTime(), nullable=True)
 
@@ -60,8 +63,17 @@ class Medicine(db.Model):
             "title": self.title,
             "rules": self.rules,
             "timetable": self.timetable,
-            "is_template": self.is_template
+            "is_template": self.is_template,
+            "template_id": self.template_id
         }
+
+    def timetable_description(self):
+        if self.timetable['mode'] == 'daily':
+            return '{} раз(а) в день'.format(len(self.timetable['points']))
+        elif self.timetable['mode'] == 'weekly':
+            return '{} раз(а) в неделю'.format(len(self.timetable['points']))
+        else:
+            return '{} раз(а) в месяц'.format(len(self.timetable['points']))
 
 class Form(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -79,6 +91,7 @@ class Form(db.Model):
     timetable = db.Column(db.JSON, nullable=True)
 
     is_template = db.Column(db.Boolean, default=False)
+    template_id = db.Column(db.Integer, db.ForeignKey('form.id', ondelete="set null"), nullable=True)
     categories = db.Column(db.String(512), nullable=True)
 
     last_sent = db.Column(db.DateTime(), nullable=True)
@@ -93,7 +106,8 @@ class Form(db.Model):
             "patient_description": self.patient_description,
             "fields": self.fields,
             "timetable": self.timetable,
-            "is_template": self.is_template
+            "is_template": self.is_template,
+            "template_id": self.template_id
         }
 
 class Algorithm(db.Model):
@@ -109,6 +123,7 @@ class Algorithm(db.Model):
 
     categories = db.Column(db.String(512), nullable=True)
     is_template = db.Column(db.Boolean, default=False)
+    template_id = db.Column(db.Integer, db.ForeignKey('algorithm.id', ondelete="set null"), nullable=True)
 
     def as_dict(self, native=False):
         return {
@@ -118,5 +133,7 @@ class Algorithm(db.Model):
             "title": self.title,
             "criteria": self.criteria,
             "actions": self.actions,
-            "is_template": self.is_template
+            "categories": self.categories,
+            "is_template": self.is_template,
+            "template_id": self.template_id
         }

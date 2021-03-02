@@ -19,7 +19,7 @@ class FormManager(Manager):
 
         form = Form.query.filter_by(id=id).first_or_404()
 
-        if form.contract_id != contract.id:
+        if form.contract_id != contract.id and not contract.is_admin:
             return None
 
         Form.query.filter_by(id=id).delete()
@@ -73,6 +73,9 @@ class FormManager(Manager):
             else:
                 form = Form.query.filter_by(id=form_id).first_or_404()
 
+                if form.contract_id != contract.id and not contract.is_admin:
+                    return None
+
             form.title = data.get('title')
             form.doctor_description = data.get('doctor_description')
             form.patient_description = data.get('patient_description')
@@ -81,6 +84,7 @@ class FormManager(Manager):
             form.timetable = data.get('timetable')
             form.fields = data.get('fields')
             form.categories = data.get('categories')
+            form.template_id = data.get('template_id')
 
             if data.get('is_template'):
                 form.is_template = True

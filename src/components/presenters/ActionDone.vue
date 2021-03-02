@@ -1,8 +1,16 @@
 <template>
     <div>
-        <h3>Действие подтверждено!</h3>
+        <h3 style="text-align: center; margin-bottom: 15px;">Действие подтверждено</h3>
 
-        <button class="btn btn-success">Закрыть окно</button>
+        <p style="text-align: center"><img :src="images.ok" /></p>
+
+        <p style="text-align: center">
+            <small>Окно закроется автоматически через секунду. Если не закрылось - нажмите кнопку.</small>
+        </p>
+
+        <p style="text-align: center">
+            <button class="btn btn-success">Закрыть окно</button>
+        </p>
     </div>
 </template>
 
@@ -13,6 +21,9 @@ export default {
         close: function () {
             window.parent.postMessage('close-modal-success', '*');
         }
+    },
+    mounted() {
+        setTimeout(this.close, 1000);
     }
 }
 </script>

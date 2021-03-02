@@ -1,15 +1,23 @@
 <template>
     <div>
+        <vue-confirm-dialog></vue-confirm-dialog>
         <loading v-if="state == 'loading'"/>
         <div v-else>
             <div v-if="mode == 'settings'">
-                <dashboard :patient="patient" :templates="templates" v-show="state == 'dashboard'"/>
-                <form-editor v-show="state == 'form-manager'"/>
-                <medicine-editor v-show="state == 'medicine-manager'"/>
-                <algorithm-editor v-show="state == 'algorithm-manager'"/>
+                <dashboard-header :patient="patient"/>
+
+                <div class="container" style="margin-top: 15px;">
+                    <dashboard :patient="patient" :templates="templates" v-show="state == 'dashboard'"/>
+                    <form-editor v-show="state == 'form-manager'"/>
+                    <medicine-editor v-show="state == 'medicine-manager'"/>
+                    <algorithm-editor v-show="state == 'algorithm-manager'"/>
+                </div>
             </div>
-            <div v-if="mode == 'form'">
-                <form-presenter :data="form" v-if="state == 'form-presenter'" />
+            <div v-if="mode == 'form' || mode == 'done'">
+                <div class="container" style="margin-top: 15px;">
+                    <form-presenter :data="form" v-if="state == 'form-presenter'"/>
+                    <action-done v-if="state == 'done'"></action-done>
+                </div>
             </div>
         </div>
     </div>
@@ -23,11 +31,15 @@ import FormEditor from "./components/editors/FormEditor";
 import MedicineEditor from "./components/editors/MedicineEditor";
 import FormPresenter from "./components/presenters/FormPresenter";
 import AlgorithmEditor from "./components/editors/AlgorithmEditor";
+import DashboardHeader from "./components/dashboard/DashboardHeader";
+import ActionDone from "./components/presenters/ActionDone";
 
 
 export default {
     name: 'app',
-    components: {AlgorithmEditor, FormPresenter, FormEditor, Loading, Dashboard, MedicineEditor},
+    components: {
+        ActionDone,
+        DashboardHeader, AlgorithmEditor, FormPresenter, FormEditor, Loading, Dashboard, MedicineEditor},
     data() {
         return {
             state: "loading",
@@ -48,37 +60,33 @@ export default {
         Event.listen('navigate-to-create-medicine-page', () => this.state = 'medicine-manager');
         Event.listen('navigate-to-create-algorithm-page', () => this.state = 'algorithm-manager');
         Event.listen('back-to-dashboard', () => this.state = 'dashboard');
+        Event.listen('home', () => this.state = 'dashboard');
+        Event.listen('form-done', () => this.state = 'done');
         Event.listen('form-created', (form) => {
             this.state = 'dashboard'
-            if (!form.is_template)
-            {
+            if (!form.is_template) {
                 Event.fire('dashboard-to-main');
                 this.patient.forms.push(form)
-            }
-            else {
+            } else {
                 this.templates.forms.push(form)
             }
 
         });
         Event.listen('medicine-created', (medicine) => {
             this.state = 'dashboard'
-            if (!medicine.is_template)
-            {
+            if (!medicine.is_template) {
                 Event.fire('dashboard-to-main');
                 this.patient.medicines.push(medicine)
-            }
-            else {
+            } else {
                 this.templates.medicines.push(medicine)
             }
         });
         Event.listen('algorithm-created', (algorithm) => {
             this.state = 'dashboard'
-            if (!algorithm.is_template)
-            {
+            if (!algorithm.is_template) {
                 Event.fire('dashboard-to-main');
                 this.patient.algorithms.push(algorithm)
-            }
-            else {
+            } else {
                 this.templates.algorithms.push(algorithm)
             }
         });
@@ -100,13 +108,15 @@ export default {
             this.mode = window.PAGE
             this.object_id = window.OBJECT_ID
 
-            if (this.mode == 'settings')
-            {
+            if (this.mode == 'done') {
+                this.state = 'done'
+            }
+
+            if (this.mode == 'settings') {
                 this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
                 this.axios.get(this.url('/api/settings/get_templates')).then(response => this.templates = response.data);
             }
-            if (this.mode == 'form')
-            {
+            if (this.mode == 'form') {
                 this.axios.get(this.url('/api/form/' + this.object_id)).then(this.process_load_answer);
             }
         },
@@ -115,8 +125,7 @@ export default {
                 this.patient = response.data;
                 this.state = 'dashboard';
             }
-            if (this.mode == 'form')
-            {
+            if (this.mode == 'form') {
                 this.form = response.data;
                 this.state = 'form-presenter'
             }

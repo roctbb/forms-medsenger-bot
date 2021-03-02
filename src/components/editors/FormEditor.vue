@@ -1,19 +1,18 @@
 <template>
     <div v-if="form">
-        <a class="btn btn-danger btn-sm" @click="go_back()">назад</a>
-        <error-block :errors="errors" />
+        <error-block :errors="errors"/>
         <div class="form">
             <card title="Параметры анкеты">
                 <form-group48 title="Название анкеты">
-                    <input class="form-control" v-model="form.title"/>
+                    <input class="form-control form-control-sm" v-model="form.title"/>
                 </form-group48>
 
                 <form-group48 title="Краткое описание для врача">
-                    <textarea class="form-control" v-model="form.doctor_description"></textarea>
+                    <textarea class="form-control form-control-sm" v-model="form.doctor_description"></textarea>
                 </form-group48>
 
                 <form-group48 title="Описание для пациента">
-                    <textarea class="form-control" v-model="form.patient_description"></textarea>
+                    <textarea class="form-control form-control-sm" v-model="form.patient_description"></textarea>
                 </form-group48>
 
                 <form-group48 title="Пациент может заполнить анкету в произвольное время">
@@ -21,7 +20,7 @@
                 </form-group48>
 
                 <form-group48 v-if="form.show_button" title="Название анкеты для кнопки">
-                    <input class="form-control" v-model="form.button_title"/>
+                    <input class="form-control form-control-sm" v-model="form.button_title"/>
                 </form-group48>
             </card>
 
@@ -31,8 +30,9 @@
             <fields-editor v-bind:data="form.fields"/>
         </div>
 
-        <button class="btn btn-success btn-lg" @click="save()">Сохранить <span v-if="form.is_template"> шаблон</span></button>
-        <button v-if="!form.id" class="btn btn-primary btn-lg" @click="save(true)">Сохранить как шаблон</button>
+        <button class="btn btn-danger" @click="go_back()">Вернуться назад</button>
+        <button class="btn btn-success" @click="save()">Сохранить <span v-if="form.is_template"> шаблон</span></button>
+        <button v-if="!form.id && is_admin" class="btn btn-primary" @click="save(true)">Сохранить как шаблон</button>
     </div>
 </template>
 
@@ -54,10 +54,23 @@ export default {
     },
     methods: {
         go_back: function () {
-            let old = JSON.parse(this.backup)
-            this.copy(this.form, old)
-            Event.fire('back-to-dashboard');
-            this.form = undefined
+            this.$confirm({
+                message: `Вы уверены? Внесенные изменения будут утеряны!`,
+                button: {
+                    no: 'Нет',
+                    yes: 'Да'
+                },
+                callback: confirm => {
+                    if (confirm) {
+                        let old = JSON.parse(this.backup)
+                        this.copy(this.form, old)
+                        Event.fire('back-to-dashboard');
+                        this.form = undefined
+                        this.errors = []
+                    }
+                }
+            })
+
         },
         create_empty_form: function () {
             return {
@@ -128,8 +141,7 @@ export default {
             if (this.check()) {
                 this.errors = []
 
-                if (is_template || this.form.is_template)
-                {
+                if (is_template || this.form.is_template) {
                     this.form.contract_id = undefined
                     this.form.is_template = true;
                 }
@@ -143,16 +155,13 @@ export default {
             console.log(response)
 
             this.form.id = response.data.id
-            if (is_new)
-            {
-                if (!this.form.is_template)
-                {
+            if (is_new) {
+                if (!this.form.is_template) {
                     this.form.patient_id = response.data.patient_id
                     this.form.contract_id = response.data.contract_id
                 }
                 Event.fire('form-created', this.form)
-            }
-            else {
+            } else {
                 Event.fire('back-to-dashboard', this.form)
             }
 
@@ -176,7 +185,14 @@ export default {
             this.form.id = undefined
             this.form.is_template = false;
             this.form.contract_id = undefined;
+            this.form.template_id = form.id;
             this.save()
+        });
+
+        Event.listen('home', (form) => {
+            this.form = undefined
+            this.errors = []
+            this.$forceUpdate()
         });
 
         Event.listen('navigate-to-create-form-page', () => {
