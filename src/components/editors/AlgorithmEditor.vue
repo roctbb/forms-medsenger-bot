@@ -4,11 +4,11 @@
         <div class="form">
             <card title="Описание алгоритма">
                 <form-group48 title="Название">
-                    <input class="form-control" v-model="algorithm.title"/>
+                    <input class="form-control form-control-sm" v-model="algorithm.title"/>
                 </form-group48>
 
                 <form-group48 title="Описание">
-                    <textarea class="form-control" v-model="algorithm.description"></textarea>
+                    <textarea class="form-control form-control-sm" v-model="algorithm.description"></textarea>
                 </form-group48>
             </card>
 
@@ -30,8 +30,10 @@
 
         </div>
         <button class="btn btn-danger" @click="go_back()">назад</button>
-        <button class="btn btn-success" @click="save()">Сохранить <span v-if="algorithm.is_template"> шаблон</span></button>
-        <button class="btn btn-primary" v-if="!algorithm.id && is_admin" @click="save(true)">Сохранить как шаблон</button>
+        <button class="btn btn-success" @click="save()">Сохранить <span v-if="algorithm.is_template"> шаблон</span>
+        </button>
+        <button class="btn btn-primary" v-if="!algorithm.id && is_admin" @click="save(true)">Сохранить как шаблон
+        </button>
     </div>
 </template>
 
@@ -53,11 +55,23 @@ export default {
     },
     methods: {
         go_back: function () {
-            let old = JSON.parse(this.backup)
-            this.copy(this.algorithm, old)
-            Event.fire('back-to-dashboard');
-            this.algorithm = undefined
-            this.errors = []
+            this.$confirm({
+                message: `Вы уверены? Внесенные изменения будут утеряны!`,
+                button: {
+                    no: 'Нет',
+                    yes: 'Да'
+                },
+                callback: confirm => {
+                    if (confirm) {
+                        let old = JSON.parse(this.backup)
+                        this.copy(this.algorithm, old)
+                        Event.fire('back-to-dashboard');
+                        this.algorithm = undefined
+                        this.errors = []
+                    }
+                }
+            })
+
         },
         create_empty_algorithm: function () {
             return {
@@ -122,21 +136,17 @@ export default {
 
             this.algorithm.criteria = this.algorithm.criteria.map((L) => L.map(prepare_criteria))
 
-            if (!this.algorithm.criteria.length)
-            {
+            if (!this.algorithm.criteria.length) {
                 this.errors.push('Добавьте хотя бы одно условие.')
             }
 
             console.log(this.algorithm.criteria.filter((L) => L.filter(criteria_validator)))
-            if (this.algorithm.criteria.filter((L) => L.filter(criteria_validator).length > 0).length)
-            {
+            if (this.algorithm.criteria.filter((L) => L.filter(criteria_validator).length > 0).length) {
                 this.errors.push('Проверьте правильность условий.')
             }
 
-            let prepare_action = (action) =>
-            {
-                if (action.type == 'record')
-                {
+            let prepare_action = (action) => {
+                if (action.type == 'record') {
                     let category = this.get_category(action.params.category)
 
                     if (category.type == 'integer') action.params.value = parseInt(action.params.value)
@@ -153,8 +163,7 @@ export default {
 
             this.algorithm.actions = this.algorithm.actions.map(prepare_action)
 
-            if (!this.algorithm.actions.length)
-            {
+            if (!this.algorithm.actions.length) {
                 this.errors.push('Добавьте хотя бы одно действие.')
             }
 
@@ -173,8 +182,7 @@ export default {
                 this.algorithm.categories = this.algorithm.criteria.map(block => block.map(c => c.category).join('|')).join('|')
                 this.errors = []
 
-                if (is_template || this.algorithm.is_template)
-                {
+                if (is_template || this.algorithm.is_template) {
                     this.algorithm.contract_id = undefined
                     this.algorithm.is_template = true;
                 }
@@ -186,8 +194,7 @@ export default {
             let is_new = this.ne(this.algorithm.id)
 
             this.algorithm.id = response.data.id
-            if (!this.algorithm.is_template)
-            {
+            if (!this.algorithm.is_template) {
                 this.algorithm.patient_id = response.data.patient_id
                 this.algorithm.contract_id = response.data.contract_id
             }

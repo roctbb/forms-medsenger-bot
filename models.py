@@ -75,6 +75,21 @@ class Medicine(db.Model):
         else:
             return '{} раз(а) в месяц'.format(len(self.timetable['points']))
 
+    def clone(self):
+        new_medicine = Medicine()
+        new_medicine.title = self.title
+        new_medicine.rules = self.drules
+
+        new_medicine.timetable = self.timetable
+        new_medicine.actions = self.actions
+
+        if self.is_template:
+            new_medicine.template_id = self.id
+        else:
+            new_medicine.template_id = self.template_id
+
+        return new_medicine
+
 class Form(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=True)
@@ -110,6 +125,22 @@ class Form(db.Model):
             "template_id": self.template_id
         }
 
+    def clone(self):
+        new_form = Form()
+        new_form.title = self.title
+        new_form.doctor_description = self.doctor_description
+        new_form.patient_description = self.patient_description
+        new_form.show_button = self.show_button
+        new_form.button_title = self.button_title
+        new_form.fields = self.fields
+        new_form.timetable = self.timetable
+        if self.is_template:
+            new_form.template_id = self.id
+        else:
+            new_form.template_id = self.template_id
+
+        return new_form
+
 class Algorithm(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=True)
@@ -137,3 +168,19 @@ class Algorithm(db.Model):
             "is_template": self.is_template,
             "template_id": self.template_id
         }
+
+    def clone(self):
+        new_algorithm = Algorithm()
+        new_algorithm.title = self.title
+        new_algorithm.description = self.description
+
+        new_algorithm.criteria = self.criteria
+        new_algorithm.actions = self.actions
+        new_algorithm.categories = self.categories
+
+        if self.is_template:
+            new_algorithm.template_id = self.id
+        else:
+            new_algorithm.template_id = self.template_id
+
+        return new_algorithm

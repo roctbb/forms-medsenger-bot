@@ -1,13 +1,42 @@
 from datetime import datetime, timedelta
 
 from helpers import log
+from managers.ContractsManager import ContractManager
+from managers.FormManager import FormManager
 from managers.Manager import Manager
+from managers.MedicineManager import MedicineManager
 from models import Patient, Contract, Algorithm
 
 
 class AlgorithmsManager(Manager):
     def __init__(self, *args):
         super(AlgorithmsManager, self).__init__(*args)
+
+    def get(self, algorithm_id):
+        return Algorithm.query.filter_by(id=algorithm_id).first_or_404()
+
+    def detach(self, template_id, contract):
+        algorithms = list(filter(lambda x: x.template_id == template_id, contract.patient.algorithms))
+
+        for algorithm in algorithms:
+            algorithm.delete()
+
+        self.__commit__()
+
+    def attach(self, template_id, contract):
+        algorithm = self.get(template_id)
+
+        if algorithm:
+            new_algorithm = algorithm.clone()
+            new_algorithm.contract_id = contract.id
+            new_algorithm.patient_id = contract.patient.id
+
+            self.db.session.add(new_algorithm)
+            self.__commit__()
+
+            return True
+        else:
+            return False
 
     def remove(self, id, contract):
 
@@ -100,6 +129,91 @@ class AlgorithmsManager(Manager):
 
             self.medsenger_api.add_record(contract_id, category_name, value)
 
+        if action['type'] == 'medicine':
+            name = action['params'].get('medicine_name')
+            rules = action['params'].get('medicine_rules')
+
+            self.medsenger_api.send_message(contract_id,
+                                            'Внимание! В соответствие с алгоритмом, Вам требуется дополнительное принять препарат {}.<br>Комментарий: {}.'.format(
+                                                name, rules), only_patient=True,
+                                            is_urgent=True)
+            self.medsenger_api.send_message(contract_id,
+                                            'Внимание! В соответствие с алгоритмом, пациенту отправлена просьба принять препарат {}.<br>Комментарий: {}.'.format(
+                                                name, rules), only_doctor=True,
+                                            is_urgent=True)
+        if action['type'] in ['form', 'attach_form', 'detach_form', 'attach_algorithm', 'detach_algorithm',
+                              'attach_medicine', 'detach_medicine']:
+            form_manager = FormManager(self.medsenger_api, self.db)
+            contract_manager = ContractManager(self.medsenger_api, self.db)
+            medicine_manager = MedicineManager(self.medsenger_api, self.db)
+
+            contract = contract_manager.get(contract_id)
+            template_id = action['params'].get('template_id')
+
+            if action['type'] == 'form':
+                form = form_manager.get(template_id)
+
+                if form:
+                    form_manager.run(form, False, contract_id)
+                    self.medsenger_api.send_message(contract_id,
+                                                    'Опросник {} автоматически подключен.'.format(form.title),
+                                                    only_doctor=True)
+
+            if action['type'] == 'attach_form':
+                form = form_manager.get(template_id)
+
+                if form:
+                    form_manager.attach(template_id, contract)
+                    self.medsenger_api.send_message(contract_id, 'Опросник {} автоматически подключен.'.format(form.title),
+                                                    only_doctor=True)
+
+            if action['type'] == 'detach_form':
+                form = form_manager.get(template_id)
+
+                if form:
+                    form_manager.detach(template_id, contract)
+                    self.medsenger_api.send_message(contract_id, 'Опросник {} автоматически отключен.'.format(form.title),
+                                                    only_doctor=True)
+
+            if action['type'] == 'attach_algorithm':
+                algorithm = self.get(template_id)
+
+                if algorithm:
+                    self.attach(template_id, contract)
+                    self.medsenger_api.send_message(contract_id, 'Алгоритм {} автоматически подключен.'.format(algorithm.title),
+                                                    only_doctor=True)
+
+            if action['type'] == 'detach_algorithm':
+                algorithm = self.get(template_id)
+
+                if algorithm:
+                    self.detach(template_id, contract)
+                    self.medsenger_api.send_message(contract_id, 'Алгоритм {} автоматически отключен.'.format(algorithm.title),
+                                                    only_doctor=True)
+
+            if action['type'] == 'attach_medicine':
+                medicine = self.get(template_id)
+
+                if medicine:
+                    medicine_manager.attach(template_id, contract)
+                    self.medsenger_api.send_message(contract_id, 'Вам назначен препарат {} ({} / {}).'.format(
+                        medicine.title, medicine.rules, medicine.timetable_description()),
+                                                    only_patient=True)
+                    self.medsenger_api.send_message(contract_id, 'Внимание! Препарат {} ({} / {}) назначен автоматически.'.format(medicine.title, medicine.rules, medicine.timetable_description()),
+                                                    only_doctor=True)
+
+            if action['type'] == 'detach_medicine':
+                medicine = self.get(template_id)
+
+                if medicine:
+                    medicine_manager.detach(template_id, contract)
+
+                    self.medsenger_api.send_message(contract_id, 'Препарат {} ({} / {}) отменен.'.format(
+                        medicine.title, medicine.rules, medicine.timetable_description()),
+                                                    only_patient=True)
+                    self.medsenger_api.send_message(contract_id, 'Внимание! Препарат {} ({} / {}) отменен автоматически.'.format(medicine.title, medicine.rules, medicine.timetable_description()),
+                                                    only_doctor=True)
+
     def run(self, algorithm):
         criteria = algorithm.criteria
         actions = algorithm.actions
@@ -116,7 +230,7 @@ class AlgorithmsManager(Manager):
         patient = contract.patient
 
         algorithms = list(filter(lambda algorithm: any([cat in algorithm.categories for cat in categories]),
-                            patient.algorithms))
+                                 patient.algorithms))
 
         for algorithm in algorithms:
             self.run(algorithm)

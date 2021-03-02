@@ -9,6 +9,29 @@ class MedicineManager(Manager):
     def __init__(self, *args):
         super(MedicineManager, self).__init__(*args)
 
+    def detach(self, template_id, contract):
+        medicines = list(filter(lambda x: x.template_id == template_id, contract.patient.medicines))
+
+        for medicine in medicines:
+            medicine.delete()
+
+        self.__commit__()
+
+    def attach(self, template_id, contract):
+        medicine = self.get(template_id)
+
+        if medicine:
+            new_medicine = medicine.clone()
+            new_medicine.contract_id = contract.id
+            new_medicine.patient_id = contract.patient.id
+
+            self.db.session.add(new_medicine)
+            self.__commit__()
+
+            return True
+        else:
+            return False
+
     def get_templates(self):
         return Medicine.query.filter_by(is_template=True).all()
 

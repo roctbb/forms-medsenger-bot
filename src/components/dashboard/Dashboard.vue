@@ -201,10 +201,46 @@ export default {
     },
     methods: {
         attach_form: function (form) {
-            Event.fire('attach-form', form)
+            if (this.patient.forms.filter(f => f.template_id == form.id).length != 0)
+            {
+                this.$confirm({
+                    message: `Пациенту уже подключен опросник на основе шаблона ` + form.title + `. Подключить еще один?`,
+                    button: {
+                        no: 'Нет',
+                        yes: 'Да'
+                    },
+                    callback: confirm => {
+                        if (confirm) {
+                            Event.fire('attach-form', form)
+                        }
+                    }
+                })
+            }
+            else {
+                Event.fire('attach-form', form)
+            }
+
         },
         attach_algorithm: function (algorithm) {
-            Event.fire('attach-algorithm', algorithm)
+            if (this.patient.algorithms.filter(f => f.template_id == algorithm.id).length != 0)
+            {
+                this.$confirm({
+                    message: `Пациенту уже подключен алгоритм на основе шаблона ` + algorithm.title + `. Подключить еще один?`,
+                    button: {
+                        no: 'Нет',
+                        yes: 'Да'
+                    },
+                    callback: confirm => {
+                        if (confirm) {
+                            Event.fire('attach-algorithm', algorithm)
+                        }
+                    }
+                })
+            }
+            else {
+                Event.fire('attach-algorithm', algorithm)
+            }
+
         },
         attach_medicine: function (medicine) {
             Event.fire('attach-medicine', medicine)

@@ -27,13 +27,42 @@ class FormManager(Manager):
         self.__commit__()
         return id
 
-    def run(self, form, commit=True):
+    def detach(self, template_id, contract):
+        forms = list(filter(lambda x: x.template_id == template_id, contract.patient.forms))
+
+        for form in forms:
+            form.delete()
+
+        self.__commit__()
+
+    def attach(self, template_id, contract):
+        form = self.get(template_id)
+
+        if form:
+            new_form = form.clone()
+            new_form.contract_id = contract.id
+            new_form.patient_id = contract.patient.id
+
+            self.db.session.add(new_form)
+            self.__commit__()
+
+            return True
+        else:
+            return False
+
+    def run(self, form, commit=True, contract_id=None):
+
         text = 'Пожалуйста, заполните анкету "{}".'.format(form.title)
         action = 'form/{}'.format(form.id)
         action_name = 'Заполнить анкету'
-        deadline = self.calculate_deadline(form.timetable)
 
-        result = self.medsenger_api.send_message(form.contract_id, text, action, action_name, True, False, True, deadline)
+        if not contract_id:
+            deadline = self.calculate_deadline(form.timetable)
+            contract_id = form.contract_id
+        else:
+            deadline = None
+
+        result = self.medsenger_api.send_message(contract_id, text, action, action_name, True, False, True, deadline)
 
         if result:
             form.last_sent = datetime.now()

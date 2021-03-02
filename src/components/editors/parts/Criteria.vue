@@ -1,7 +1,7 @@
 <template>
     <div class="form-group row" v-if="criteria">
         <div class="col-md-2">
-            <select class="form-control" v-model="criteria.left_mode">
+            <select class="form-control form-control-sm" v-model="criteria.left_mode">
                 <option value="value">значение</option>
                 <option value="average" v-if="is_int()">среднее за</option>
                 <option value="sum" v-if="is_int()">сумма за</option>
@@ -10,20 +10,20 @@
             <span class="text-muted"><button class="btn btn-sm btn-default" @click="remove()">Удалить</button></span>
         </div>
         <div class="col-md-1" v-if="criteria.left_mode != 'value'">
-            <input class="form-control" v-model="criteria.left_days">
-            <span class="text-muted">дней</span>
+            <input class="form-control form-control-sm" v-model="criteria.left_days">
+            <small class="text-muted">дней</small>
         </div>
         <div class="col-md-4">
-            <select @change="category_changed()" class="form-control" v-model="criteria.category">
+            <select @change="category_changed()" class="form-control form-control-sm" v-model="criteria.category">
                 <option
                     v-for="category in category_list"
                     :value="category.name">{{ category.description }}
                 </option>
             </select>
-            <span class="text-muted">Код категории</span>
+            <small class="text-muted">Код категории</small>
         </div>
         <div class="col-md-1">
-            <select class="form-control" v-model="criteria.sign">
+            <select class="form-control form-control-sm" v-model="criteria.sign">
                 <option value="equal">=</option>
                 <option value="contains" v-if="!is_int()">содержит</option>
                 <option value="greater" v-if="is_int()">&gt;</option>
@@ -35,7 +35,7 @@
         </div>
 
         <div class="col-md-2">
-            <select class="form-control" v-model="criteria.right_mode">
+            <select class="form-control form-control-sm" v-model="criteria.right_mode">
                 <option value="value">значение</option>
                 <option value="average" v-if="is_int()">среднее за</option>
                 <option value="sum" v-if="is_int()">сумма за</option>
@@ -43,11 +43,11 @@
             </select>
         </div>
         <div class="col-md-1" v-if="criteria.right_mode != 'value'">
-            <input class="form-control" v-model="criteria.right_days">
+            <input class="form-control form-control-sm" v-model="criteria.right_days">
             <span class="text-muted">дней</span>
         </div>
         <div class="col-md-2" v-if="criteria.right_mode == 'value'">
-            <input class="form-control" v-model="criteria.value">
+            <input class="form-control form-control-sm" v-model="criteria.value">
         </div>
     </div>
 </template>

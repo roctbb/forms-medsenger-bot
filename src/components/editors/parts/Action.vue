@@ -1,43 +1,65 @@
 <template>
     <div class="form-group row" v-if="action">
         <div class="col-md-3">
-            <select class="form-control" @change="clear_params()" v-model="mode">
+            <select class="form-control form-control-sm" @change="clear_params()" v-model="mode">
                 <option value="doctor_message">сообщение врачу</option>
                 <option value="patient_message">сообщение пациенту</option>
                 <option value="record">запись в карту</option>
+                <option value="medicine">прием лекарства</option>
+                <option value="form">отправка опросника</option>
+                <option value="attach_form">подключение опросника</option>
+                <option value="detach_form">отключение опросника</option>
+                <option value="attach_algorithm">подключение алгоритма</option>
+                <option value="detach_algorithm">отключение алгоритма</option>
+                <option value="attach_medicine">назначение лекарства</option>
+                <option value="detach_medicine">отмена лекарства</option>
                 <!-- назначение/отключения мониторинга/лекарства/алгоритма / order -->
             </select>
-            <span class="text-muted"><button class="btn btn-sm btn-default" @click="remove()">Удалить</button></span>
+            <small class="text-muted"><button class="btn btn-sm btn-default" @click="remove()">Удалить</button></small>
         </div>
 
         <div class="col-md-2" v-if="['doctor_message', 'patient_message'].includes(action.type)">
             <input type="checkbox" v-model="action.params.is_urgent">
-            <span class="text-muted">Срочное?</span>
+            <small class="text-muted">Срочное?</small>
         </div>
 
         <div class="col-md-2" v-if="action.type == 'doctor_message'">
             <input type="checkbox" v-model="action.params.need_answer">
-            <span class="text-muted">Нужен ответ?</span>
+            <small class="text-muted">Нужен ответ?</small>
         </div>
 
         <div class="col-md-5" v-if="['doctor_message', 'patient_message'].includes(action.type)">
-            <textarea class="form-control" v-model="action.params.text"></textarea>
-            <span class="text-muted">Текст сообщения</span>
+            <textarea class="form-control form-control-sm" v-model="action.params.text"></textarea>
+            <small class="text-muted">Текст сообщения</small>
         </div>
 
         <div class="col-md-4" v-if="action.type == 'record'">
-            <select class="form-control" v-model="action.params.category">
+            <select class="form-control form-control-sm" v-model="action.params.category">
                 <option
                     v-for="category in category_list"
                     :value="category.name">{{ category.description }}
                 </option>
             </select>
-            <span class="text-muted">Код категории</span>
+            <small class="text-muted">Код категории</small>
         </div>
 
         <div class="col-md-3" v-if="action.type == 'record'">
-            <input type="text" class="form-control" v-model="action.params.value">
-            <span class="text-muted">Значение</span>
+            <input type="text" class="form-control form-control-sm" v-model="action.params.value">
+            <small class="text-muted">Значение</small>
+        </div>
+        <div class="col-md-4" v-if="action.type == 'medicine'">
+            <textarea class="form-control form-control-sm" v-model="action.params.medicine_rules"></textarea>
+            <small class="text-muted">Комментарий, доза, количество</small>
+        </div>
+
+        <div class="col-md-3" v-if="action.type == 'medicine'">
+            <input type="text" class="form-control form-control-sm" v-model="action.params.medicine_name">
+            <small class="text-muted">Название препарата</small>
+        </div>
+
+        <div class="col-md-3" v-if="['form', 'attach_form', 'detach_form', 'attach_algorithm', 'detach_algorithm', 'attach_medicine', 'detach_medicine'].includes(action.type)">
+            <input type="text" class="form-control form-control-sm" v-model="action.params.template_id">
+            <small class="text-muted">ID шаблона</small>
         </div>
 
     </div>
