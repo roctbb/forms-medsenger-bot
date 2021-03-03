@@ -115,11 +115,14 @@ class FormManager(Manager):
             form.categories = data.get('categories')
             form.template_id = data.get('template_id')
 
-            if data.get('is_template'):
+            if data.get('is_template') and contract.is_admin:
                 form.is_template = True
             else:
                 form.patient_id = contract.patient_id
                 form.contract_id = contract.id
+
+            if data.get('algorithm_id') and contract.is_admin:
+                form.algorithm_id = data.get('algorithm_id')
 
             if not form_id:
                 self.db.session.add(form)

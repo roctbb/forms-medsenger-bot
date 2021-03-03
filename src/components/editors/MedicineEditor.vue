@@ -97,7 +97,7 @@ export default {
             }
         },
         process_save_answer: function (response) {
-            let is_new = this.ne(this.medicine.id)
+            let is_new = this.empty(this.medicine.id)
             this.medicine.id = response.data.id
 
             if (!this.medicine.is_template) {

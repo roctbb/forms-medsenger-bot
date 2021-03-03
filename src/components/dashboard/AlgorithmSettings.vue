@@ -1,0 +1,85 @@
+<template>
+    <modal height="auto" name="algorithm-settings" @before-open="beforeOpen">
+        <div class="container">
+            <h5>Настройка параметров алгоритма {{ algorithm.title }}</h5>
+            <error-block :errors="errors"></error-block>
+            <form-group48 v-for="field in fillable_fields" :key="field.uid" :title="field.value_name">
+                <input type="form-control form-control-sm" v-model="algorithm.setup[field.uid]"/>
+            </form-group48>
+
+            <button class="btn btn-danger btn-sm" @click="close()">Не подключать алгоритм</button>
+            <button class="btn btn-success btn-sm" @click="attach()">Подключить</button>
+        </div>
+
+    </modal>
+</template>
+
+<script>
+
+import FormGroup48 from "../common/FormGroup-4-8";
+import ErrorBlock from "../common/ErrorBlock";
+
+export default {
+    name: "AlgorithmSettings",
+    components: {ErrorBlock, FormGroup48},
+    data() {
+        return {
+            algorithm: {},
+            errors: []
+        }
+    },
+    computed: {
+        fillable_fields: function () {
+            if (!this.algorithm || !this.algorithm.criteria) {
+                return []
+            }
+            console.log('alg is ', this.algorithm)
+            return [].concat.apply([], this.algorithm.criteria.map(b => b.filter(c => c.ask_value == true)));
+        }
+    },
+    methods: {
+        close: function () {
+            this.$modal.hide('algorithm-settings')
+        },
+        attach: function () {
+            if (this.check())
+            {
+                Event.fire('attach-algorithm', this.algorithm)
+                this.close()
+            }
+        },
+        check: function () {
+            let prepare_field = (field) => {
+                let category = this.get_category(field.category)
+                if (category.type == 'integer') this.algorithm.setup[field.uid] = parseInt(this.algorithm.setup[field.uid])
+                if (category.type == 'float') this.algorithm.setup[field.uid] = parseFloat(this.algorithm.setup[field.uid])
+            }
+
+            this.fillable_fields.map(prepare_field)
+
+            if (this.fillable_fields.filter(f => this.empty(this.algorithm.setup[f.uid])).length > 0)
+            {
+                this.errors.push('Заполните все поля!')
+                return false
+            }
+            return true
+        },
+        beforeOpen(event) {
+            this.algorithm = event.params.algorithm;
+            this.algorithm.setup = {}
+            this.fillable_fields.forEach(f => {
+                this.algorithm.setup[f.uid] = f.value
+            })
+            this.errors = []
+        }
+    }
+}
+</script>
+
+<style scoped>
+ .container {
+     padding-top: 15px;
+     padding-bottom: 15px;
+ }
+
+</style>

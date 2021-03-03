@@ -72,7 +72,7 @@ def verify_json(func):
     return wrapper
 
 def get_ui(page, contract, categories, object_id = None):
-    return render_template('index.html', page=page, object_id=object_id, contract_id=contract.id, api_host=MAIN_HOST.replace('8001', '8000'), local_host=LOCALHOST, agent_token=contract.agent_token, agent_id=AGENT_ID, categories=json.dumps(categories), is_admin=str(contract.is_admin).lower())
+    return render_template('index.html', page=page, object_id=object_id, contract_id=contract.id, api_host=MAIN_HOST.replace('8001', '8000'), local_host=LOCALHOST, agent_token=contract.agent_token, agent_id=AGENT_ID, categories=json.dumps(categories), is_admin=str(bool(contract.is_admin)).lower())
 
 def delayed(delay, f, args):
     timer = threading.Timer(delay, f, args=args)

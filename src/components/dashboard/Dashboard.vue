@@ -1,5 +1,6 @@
 <template>
     <div>
+        <algorithm-settings/>
         <div v-if="state == 'main'">
 
             <h5>Опросники</h5>
@@ -19,7 +20,7 @@
                         <small>Добавлен в другом контракте.</small>
                     </div>
 
-                    <small v-if="!ne(form.template_id)" class="text-muted">ID шаблона: {{ form.template_id }}</small>
+                    <small v-if="!empty(form.template_id)" class="text-muted">ID шаблона: {{ form.template_id }}</small>
                 </card>
             </div>
 
@@ -44,7 +45,7 @@
                         <small>Добавлен в другом контракте.</small>
                     </div>
 
-                    <small v-if="!ne(medicine.template_id)" class="text-muted">ID шаблона: {{ medicine.template_id }}</small>
+                    <small v-if="!empty(medicine.template_id)" class="text-muted">ID шаблона: {{ medicine.template_id }}</small>
 
                 </card>
             </div>
@@ -74,7 +75,7 @@
                         <small>Добавлен в другом контракте.</small>
                     </div>
 
-                    <small v-if="!ne(algorithm.template_id)" class="text-muted">ID шаблона: {{ algorithm.template_id }}</small>
+                    <small v-if="!empty(algorithm.template_id)" class="text-muted">ID шаблона: {{ algorithm.template_id }}</small>
 
                 </card>
             </div>
@@ -101,6 +102,8 @@
                     <a href="#" v-if="is_admin" @click="edit_form(form)">Редактировать</a>
                     <a href="#" v-if="is_admin" @click="delete_form(form)">Удалить</a>
                     <a target="_blank" :href="preview_form_url(form)">Просмотр</a>
+
+                    <small v-if="form.algorithm_id"><br><b>Связанный алгоритм:</b> {{ find_algorithm(form.algorithm_id).title }}</small>
 
                     <br>
 
@@ -148,6 +151,7 @@
 
         </div>
         <div v-if="state == 'algorithm_templates'">
+
             <div class="alert alert-info" role="alert">
                 <h4 class="alert-heading">Выбор алгоритма</h4>
                 <p>Выберите алгоритм из списка ниже. В дальнейшем вы сможете посмотреть подробную схему его работы, но изменять ее без опыта не рекомендуется.</p>
@@ -160,12 +164,13 @@
                     <h6>{{ algorithm.title }}</h6>
                     <small>{{ algorithm.description }}</small><br>
                     <small v-html="alg_description(algorithm)"></small>
-                    <a href="#" @click="attach_algorithm(algorithm)">Подключить</a>
+                    <a href="#" v-if="need_filling(algorithm)" @click="setup_algorithm(algorithm)">Настроить и подключить</a>
+                    <a href="#" v-else @click="attach_algorithm(algorithm)">Подключить</a>
                     <a href="#" v-if="is_admin" @click="edit_algorithm(algorithm)">Редактировать</a>
                     <a href="#" v-if="is_admin" @click="delete_algorithm(algorithm)">Удалить</a>
 
                     <br>
-                    <small class="text-muted">ID: {{  algorithm.id }}</small>
+                    <small class="text-muted">ID: {{ algorithm.id }}</small>
 
                 </card>
 
@@ -187,10 +192,11 @@
 <script>
 
 import Card from "../common/Card";
+import AlgorithmSettings from "./AlgorithmSettings";
 
 export default {
     name: "Dashboard",
-    components: {Card},
+    components: {AlgorithmSettings, Card},
     props: {
         patient: {
             required: true
@@ -205,9 +211,22 @@ export default {
         }
     },
     methods: {
+        find_algorithm: function (id) {
+            return this.templates.algorithms.filter(t => t.id == id)[0]
+        },
         attach_form: function (form) {
-            if (this.patient.forms.filter(f => f.template_id == form.id).length != 0)
-            {
+            let attach = () => {
+                Event.fire('attach-form', form)
+
+                if (!this.empty(form.algorithm_id)) {
+                    let algorithm = this.find_algorithm(form.algorithm_id);
+
+                    if (this.need_filling(algorithm)) this.setup_algorithm(algorithm)
+                    else this.attach_algorithm(algorithm)
+                }
+            }
+
+            if (this.patient.forms.filter(f => f.template_id == form.id).length != 0) {
                 this.$confirm({
                     message: `Пациенту уже подключен опросник на основе шаблона ` + form.title + `. Подключить еще один?`,
                     button: {
@@ -216,36 +235,42 @@ export default {
                     },
                     callback: confirm => {
                         if (confirm) {
-                            Event.fire('attach-form', form)
+                            attach()
                         }
                     }
                 })
-            }
-            else {
-                Event.fire('attach-form', form)
+            } else {
+                attach()
             }
 
         },
-        attach_algorithm: function (algorithm) {
-            if (this.patient.algorithms.filter(f => f.template_id == algorithm.id).length != 0)
-            {
-                this.$confirm({
-                    message: `Пациенту уже подключен алгоритм на основе шаблона ` + algorithm.title + `. Подключить еще один?`,
-                    button: {
-                        no: 'Нет',
-                        yes: 'Да'
-                    },
-                    callback: confirm => {
-                        if (confirm) {
-                            Event.fire('attach-algorithm', algorithm)
-                        }
+        ask_for_alg_doubling: function (title, F) {
+            this.$confirm({
+                message: `Пациенту уже подключен алгоритм на основе шаблона ` + title + `. Подключить еще один?`,
+                button: {
+                    no: 'Нет',
+                    yes: 'Да'
+                },
+                callback: confirm => {
+                    if (confirm) {
+                        F()
                     }
-                })
+                }
+            })
+        },
+        setup_algorithm: function (algorithm) {
+            let setup = () => {
+                this.$modal.show('algorithm-settings', {algorithm: algorithm})
             }
-            else {
+            if (this.patient.algorithms.filter(f => f.template_id == algorithm.id).length != 0) this.ask_for_alg_doubling(algorithm.title, setup)
+            else setup()
+        },
+        attach_algorithm: function (algorithm) {
+            let attach = () => {
                 Event.fire('attach-algorithm', algorithm)
             }
-
+            if (this.patient.algorithms.filter(f => f.template_id == algorithm.id).length != 0) this.ask_for_alg_doubling(algorithm.title, attach)
+            else attach()
         },
         attach_medicine: function (medicine) {
             Event.fire('attach-medicine', medicine)
@@ -324,7 +349,7 @@ export default {
                     }
                 }
             )
-                  },
+        },
         process_delete_medicine_answer: function (response) {
             if (response.data.deleted_id) {
                 this.patient.medicines = this.patient.medicines.filter(m => m.id != response.data.deleted_id)

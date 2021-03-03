@@ -22,6 +22,10 @@
                 <form-group48 v-if="form.show_button" title="Название анкеты для кнопки">
                     <input class="form-control form-control-sm" v-model="form.button_title"/>
                 </form-group48>
+
+                <form-group48 v-if="is_admin && (empty(form.id) || form.is_template)" title="ID связанного алгоритма">
+                    <input class="form-control form-control-sm" v-model="form.algorithm_id"/>
+                </form-group48>
             </card>
 
             <timetable-editor v-bind:data="form.timetable"/>
@@ -114,7 +118,7 @@ export default {
                 if (!field.text) return true;
                 if (!Object.keys(this.field_types).includes(field.type)) return true;
                 if (['integer', 'float'].includes(field.type)) {
-                    if (this.ne(field.params.max) || this.ne(field.params.min)) return true;
+                    if (this.empty(field.params.max) || this.empty(field.params.min)) return true;
                 }
                 if (field.type == 'radio') {
                     let variant_validator = (variant) => !variant.text || !variant.category
@@ -151,7 +155,7 @@ export default {
             }
         },
         process_save_answer: function (response) {
-            let is_new = this.ne(this.form.id)
+            let is_new = this.empty(this.form.id)
             console.log(response)
 
             this.form.id = response.data.id

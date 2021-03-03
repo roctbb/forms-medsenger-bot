@@ -72,7 +72,7 @@ export default {
             this.form.fields.map(prepare_field)
 
             let validate_field = (field, i) => {
-                if (field.required && this.ne(this.answers[field.uid])) return true;
+                if (field.required && this.empty(this.answers[field.uid])) return true;
                 if (field.type == 'integer' || field.type == 'integer') {
                     if (this.answers[field.uid] < field.params.min || this.answers[field.uid] > field.params.max) return true
                 }

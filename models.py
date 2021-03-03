@@ -109,6 +109,8 @@ class Form(db.Model):
     template_id = db.Column(db.Integer, db.ForeignKey('form.id', ondelete="set null"), nullable=True)
     categories = db.Column(db.String(512), nullable=True)
 
+    algorithm_id = db.Column(db.Integer, db.ForeignKey('algorithm.id', ondelete="set null"), nullable=True)
+
     last_sent = db.Column(db.DateTime(), nullable=True)
 
     def as_dict(self):
@@ -122,7 +124,8 @@ class Form(db.Model):
             "fields": self.fields,
             "timetable": self.timetable,
             "is_template": self.is_template,
-            "template_id": self.template_id
+            "template_id": self.template_id,
+            "algorithm_id": self.algorithm_id
         }
 
     def clone(self):

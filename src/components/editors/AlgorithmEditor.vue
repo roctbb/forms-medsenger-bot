@@ -18,7 +18,7 @@
                         <criteria :data="criteria" :rkey="i" :pkey="j" :key="criteria.uid"/>
                     </div>
                     <button class="btn btn-sm btn-primary" @click="add_criteria(or_block)">и</button>
-                    <hr>
+                    <div class="separator">или</div>
                 </div>
                 <button class="btn btn-sm btn-primary" @click="add_or_block()">или</button>
             </card>
@@ -29,7 +29,7 @@
             </card>
 
         </div>
-        <button class="btn btn-danger" @click="go_back()">назад</button>
+        <button class="btn btn-danger" @click="go_back()">Назад</button>
         <button class="btn btn-success" @click="save()">Сохранить <span v-if="algorithm.is_template"> шаблон</span>
         </button>
         <button class="btn btn-primary" v-if="!algorithm.id && is_admin" @click="save(true)">Сохранить как шаблон
@@ -111,12 +111,12 @@ export default {
             }
 
             let prepare_criteria = (criteria) => {
-                if (!this.ne(criteria.left_days)) criteria.left_days = parseInt(criteria.left_days)
+                if (!this.empty(criteria.left_days)) criteria.left_days = parseInt(criteria.left_days)
 
-                if (!this.ne(criteria.right_days)) criteria.right_days = parseInt(criteria.right_days)
+                if (!this.empty(criteria.right_days)) criteria.right_days = parseInt(criteria.right_days)
 
 
-                if (!this.ne(criteria.value)) {
+                if (!this.empty(criteria.value)) {
                     let category = this.get_category(criteria.category)
                     if (category.type == 'integer') criteria.value = parseInt(criteria.value)
                     if (category.type == 'float') criteria.value = parseFloat(criteria.value)
@@ -127,10 +127,10 @@ export default {
 
             let criteria_validator = (criteria) => {
                 let category = this.get_category(criteria.category)
-                if (criteria.left_mode != 'value' && this.ne(criteria.left_days)) return true;
-                if (criteria.right_mode != 'value' && this.ne(criteria.right_days)) return true;
+                if (criteria.left_mode != 'value' && this.empty(criteria.left_days)) return true;
+                if (criteria.right_mode != 'value' && this.empty(criteria.right_days)) return true;
 
-                if (criteria.right_mode == 'value' && this.ne(criteria.value)) return true;
+                if (criteria.right_mode == 'value' && this.empty(criteria.value)) return true;
                 return false;
             }
 
@@ -156,8 +156,8 @@ export default {
             }
 
             let action_validator = (action) => {
-                if (action.type == 'record' && this.ne(action.params.value)) return true;
-                if ((action.type == 'patient_message' || action.type == 'doctor_message') && this.ne(action.params.text)) return true;
+                if (action.type == 'record' && this.empty(action.params.value)) return true;
+                if ((action.type == 'patient_message' || action.type == 'doctor_message') && this.empty(action.params.text)) return true;
                 return false;
             }
 
@@ -191,7 +191,7 @@ export default {
             }
         },
         process_save_answer: function (response) {
-            let is_new = this.ne(this.algorithm.id)
+            let is_new = this.empty(this.algorithm.id)
 
             this.algorithm.id = response.data.id
             if (!this.algorithm.is_template) {
@@ -232,6 +232,21 @@ export default {
             this.algorithm.id = undefined
             this.algorithm.is_template = false;
             this.algorithm.template_id = algorithm.id;
+
+            if (!this.empty(this.algorithm.setup))
+            {
+                this.algorithm.criteria.forEach((block) => {
+                    block.forEach(c => {
+                        if (c.ask_value == true)
+                        {
+                            c.value = algorithm.setup[c.uid]
+                        }
+                    })
+                })
+
+                this.algorithm.setup = undefined
+            }
+
             this.save()
         });
 
@@ -259,5 +274,26 @@ export default {
 </script>
 
 <style scoped>
+ .separator {
+     margin-top: 10px;
+     margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
 
+.separator::before,
+.separator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px dotted #aaa;
+}
+
+.separator:not(:empty)::before {
+  margin-right: .25em;
+}
+
+.separator:not(:empty)::after {
+  margin-left: .25em;
+}
 </style>

@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import axios from "axios";
 import VueConfirmDialog from 'vue-confirm-dialog'
+import vmodal from 'vue-js-modal'
 
 window.Event = new class {
     constructor() {
@@ -35,7 +36,7 @@ Vue.mixin({
 
             return api_host + '/api/client/agents/' + agent_id + '/?action=' + action + '&contract_id=' + contract_id + '&agent_token=' + agent_token
         },
-        ne: function (e) {
+        empty: function (e) {
             return !e && e !== 0
         },
         verify_timetable: function (timetable) {
@@ -49,7 +50,7 @@ Vue.mixin({
             timetable.points = timetable.points.map(prepare_point);
 
             let general_validate = (point) => {
-                if (this.ne(point.hour) || this.ne(point.minute)) return true;
+                if (this.empty(point.hour) || this.empty(point.minute)) return true;
                 if (point.hour < 0 || point.hour > 23) return true;
                 if (point.minute < 0 || point.minute > 59) return true;
                 return false;
@@ -59,14 +60,14 @@ Vue.mixin({
             if (timetable.mode == 'weekly') {
                 validate_point = (point) => {
                     if (general_validate(point)) return true;
-                    if (this.ne(point.day) || point.day < 0 || point.day > 6) return true;
+                    if (this.empty(point.day) || point.day < 0 || point.day > 6) return true;
                     return false;
                 }
             }
             if (timetable.mode == 'monthly') {
                 validate_point = (point) => {
                     if (general_validate(point)) return true;
-                    if (this.ne(point.day) || point.day < 1 || point.day > 31) return true;
+                    if (this.empty(point.day) || point.day < 1 || point.day > 31) return true;
                     return false;
                 }
             }
@@ -108,8 +109,7 @@ Vue.mixin({
             }
         },
         alg_description: function (algorithm) {
-            console.log(algorithm)
-            let criteria = `<b>Анализирует:</b> ` + algorithm.categories.split('|').map((c) => this.get_category(c).description.toLowerCase()).join(', ') + `<br>`;
+            let criteria = `<b>Анализирует:</b> ` + algorithm.categories.split('|').map((c) => this.get_category(c).description.toLowerCase()).filter((v, i, a) => a.indexOf(v) === i).join(', ') + `<br>`;
             let actions = new Set();
 
             algorithm.actions.forEach((a) => {
@@ -163,7 +163,10 @@ Vue.mixin({
             actions = `<b>Действия:</b> ` + Array.from(actions).join(', ')
 
             return criteria + actions
-        }
+        },
+        need_filling: function (algorithm) {
+            return algorithm.criteria.some(c => c.some(b => b.ask_value == true))
+        },
     },
     data() {
         return {
@@ -199,6 +202,7 @@ Vue.mixin({
 })
 
 
+Vue.use(vmodal,{ componentName: 'Modal' })
 Vue.use(VueConfirmDialog)
 Vue.component('vue-confirm-dialog', VueConfirmDialog.default)
 
