@@ -58,7 +58,7 @@ def only_doctor_args(func):
 
 def verify_json(func):
     def wrapper(*args, **kargs):
-        if not request.args.get('contract_id'):
+        if not request.json.get('contract_id'):
             abort(422)
         if request.json.get('api_key') != API_KEY:
             abort(401)

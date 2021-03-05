@@ -69,7 +69,12 @@ def remove(data):
 @app.route('/actions', methods=['POST'])
 @verify_json
 def actions(data):
-    return []
+    contract = contract_manager.get(data.get('contract_id'))
+    forms = filter(lambda f: f.show_button, contract.forms)
+
+    actions = [{'link': 'form/{}'.format(form.id), 'type': 'patient', 'name': form.button_title} for form in forms]
+
+    return jsonify(actions)
 
 
 # settings and views
