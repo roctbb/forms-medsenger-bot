@@ -56,9 +56,13 @@
                 <input type="checkbox" v-model="criteria.ask_value">
                 <small class="text-muted">Запросить при подключении шаблона?</small>
             </div>
-            <div class="col-md-6" v-if="criteria.ask_value">
+            <div class="col-md-5" v-if="criteria.ask_value">
                 <input class="form-control form-control-sm" v-model="criteria.value_name">
                 <small class="text-muted">Имя поля</small>
+            </div>
+            <div class="col-md-3" v-if="criteria.ask_value">
+                <input class="form-control form-control-sm" v-model="criteria.value_code">
+                <small class="text-muted">Код (для сценариев)</small>
             </div>
         </div>
     </div>

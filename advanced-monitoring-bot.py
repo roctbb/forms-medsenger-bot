@@ -51,7 +51,25 @@ def init(data):
     if not contract_id:
         abort(422)
 
-    contract_manager.add(contract_id)
+    contract = contract_manager.add(contract_id)
+
+    params = data.get('params')
+    print(params)
+    if params:
+        forms = params.get('forms')
+        if forms:
+            for template_id in forms.split(','):
+                form = form_manager.attach(template_id, contract)
+
+                if form.algorithm_id:
+                    algorithm_manager.attach(form.algorithm_id, contract, params)
+
+        algorithms = params.get('algorithms')
+
+        if algorithms:
+            for template_id in algorithms.split(','):
+                algorithm_manager.attach(template_id, contract, params)
+
     return "ok"
 
 @app.route('/hook', methods=['POST'])

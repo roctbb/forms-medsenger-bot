@@ -46,10 +46,13 @@ class FormManager(Manager):
             new_form.contract_id = contract.id
             new_form.patient_id = contract.patient.id
 
+            if new_form.categories:
+                self.medsenger_api.add_hooks(contract.id, new_form.categories.split('|'))
+
             self.db.session.add(new_form)
             self.__commit__()
 
-            return True
+            return new_form
         else:
             return False
 

@@ -23,13 +23,19 @@ class AlgorithmsManager(Manager):
 
         self.__commit__()
 
-    def attach(self, template_id, contract):
+    def attach(self, template_id, contract, setup=None):
         algorithm = self.get(template_id)
 
         if algorithm:
             new_algorithm = algorithm.clone()
             new_algorithm.contract_id = contract.id
             new_algorithm.patient_id = contract.patient.id
+
+            if setup:
+                for block in algorithm.criteria:
+                    for criteria in block:
+                        if criteria['ask_value'] and setup.get(criteria['value_code']):
+                            criteria['value'] = setup.get(criteria['value_code'])
 
             self.db.session.add(new_algorithm)
             self.__commit__()

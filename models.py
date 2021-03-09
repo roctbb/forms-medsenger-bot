@@ -137,6 +137,9 @@ class Form(db.Model):
         new_form.button_title = self.button_title
         new_form.fields = self.fields
         new_form.timetable = self.timetable
+        new_form.algorithm_id = self.algorithm_id
+        new_form.categories = self.categories
+
         if self.is_template:
             new_form.template_id = self.id
         else:
