@@ -229,11 +229,21 @@ class AlgorithmsManager(Manager):
         categories = form.categories.split('|')
         patient = contract.patient
 
-        algorithms = list(filter(lambda algorithm: any([cat in algorithm.categories for cat in categories]),
+        algorithms = list(filter(lambda algorithm: any([cat in algorithm.categories.split('|') for cat in categories]),
                                  patient.algorithms))
 
         for algorithm in algorithms:
             self.run(algorithm)
+
+    def hook(self, contract, category_name):
+        patient = contract.patient
+
+        algorithms = list(filter(lambda algorithm: category_name in algorithm.categories.split('|'), patient.algorithms))
+
+        for algorithm in algorithms:
+            self.run(algorithm)
+
+        return True
 
     def create_or_edit(self, data, contract):
         try:

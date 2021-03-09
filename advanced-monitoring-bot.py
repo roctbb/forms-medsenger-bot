@@ -54,6 +54,20 @@ def init(data):
     contract_manager.add(contract_id)
     return "ok"
 
+@app.route('/hook', methods=['POST'])
+@verify_json
+def hook(data):
+    contract_id = int(data.get('contract_id'))
+    contract = contract_manager.get(contract_id)
+    category_name = data.get('category_name')
+
+    if algorithm_manager.hook(contract, category_name):
+        return jsonify({
+            "result": "ok",
+        })
+    else:
+        abort(500)
+
 
 @app.route('/remove', methods=['POST'])
 @verify_json

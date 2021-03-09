@@ -88,6 +88,24 @@ class AgentApiClient:
 
         return self.__send_request__(url, data) or []
 
+    def add_hooks(self, contract_id, names):
+        data = {
+            "contract_id": contract_id,
+            "api_key": self.api_key,
+            "categories": names
+        }
+
+        return self.__send_request__("/api/agents/hooks/add", data)
+
+    def remove_hooks(self, contract_id, names):
+        data = {
+            "contract_id": contract_id,
+            "api_key": self.api_key,
+            "categories": names
+        }
+
+        return self.__send_request__("/api/agents/hooks/remove", data)
+
     def add_record(self, contract_id, category_name, value, record_time=None):
         data = {
             "contract_id": contract_id,

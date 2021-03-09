@@ -22,6 +22,9 @@ class FormManager(Manager):
         if form.contract_id != contract.id and not contract.is_admin:
             return None
 
+        if form.contract_id:
+            self.medsenger_api.remove_hooks(contract.id, form.categories.split('|'))
+
         Form.query.filter_by(id=id).delete()
 
         self.__commit__()
@@ -96,6 +99,7 @@ class FormManager(Manager):
 
     def create_or_edit(self, data, contract):
         try:
+            old_names = []
             form_id = data.get('id')
             if not form_id:
                 form = Form()
@@ -104,6 +108,8 @@ class FormManager(Manager):
 
                 if form.contract_id != contract.id and not contract.is_admin:
                     return None
+
+                old_names = form.categories.split('|')
 
             form.title = data.get('title')
             form.doctor_description = data.get('doctor_description')
@@ -120,6 +126,17 @@ class FormManager(Manager):
             else:
                 form.patient_id = contract.patient_id
                 form.contract_id = contract.id
+
+                names = form.categories.split('|')
+
+                to_remove = list(filter(lambda c: c not in names, old_names))
+                if to_remove:
+                    self.medsenger_api.remove_hooks(contract.id, to_remove)
+
+                to_add = list(filter(lambda c: c not in old_names, names))
+                if to_add:
+                    self.medsenger_api.add_hooks(contract.id, to_add)
+
 
             if data.get('algorithm_id') and contract.is_admin:
                 form.algorithm_id = data.get('algorithm_id')
