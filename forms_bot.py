@@ -17,7 +17,6 @@ algorithm_manager = AlgorithmsManager(medsenger_api, db)
 
 
 @app.route('/')
-@verify_args
 def index():
     return "Waiting for the thunder"
 
