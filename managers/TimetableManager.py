@@ -35,23 +35,24 @@ class TimetableManager(Manager):
             if object and self.should_run(object):
                 manager.run(object)
 
-    def iterate(self):
-        contracts = list(Contract.query.filter_by(is_active=True).all())
+    def iterate(self, app):
+        with app.app_context():
+            contracts = list(Contract.query.filter_by(is_active=True).all())
 
-        medicines_groups = list(map(lambda x: x.medicines, contracts))
-        forms_groups = list(map(lambda x: x.forms, contracts))
+            medicines_groups = list(map(lambda x: x.medicines, contracts))
+            forms_groups = list(map(lambda x: x.forms, contracts))
 
-        for medicines in medicines_groups:
-            self.run_if_should(medicines, self.medicine_manager)
+            for medicines in medicines_groups:
+                self.run_if_should(medicines, self.medicine_manager)
 
-        for forms in forms_groups:
-            self.run_if_should(forms, self.form_manager)
+            for forms in forms_groups:
+                self.run_if_should(forms, self.form_manager)
 
     def worker(self, app):
         while True:
-            with app.app_context():
-                self.iterate()
+            self.iterate()
             time.sleep(60)
+
 
     def run(self, app):
         thread = Thread(target=self.worker, args=[app, ])

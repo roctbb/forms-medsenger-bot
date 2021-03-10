@@ -280,9 +280,13 @@ def post_form(args, form, form_id):
         abort(404)
 
 
+
 with app.app_context():
     db.create_all()
 
-if __name__ == "__main__":
+def tasks():
     timetable_manager.run(app)
+
+if __name__ == "__main__":
+
     app.run(HOST, PORT, debug=API_DEBUG)
