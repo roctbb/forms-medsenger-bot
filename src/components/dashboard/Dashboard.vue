@@ -21,6 +21,7 @@
                     </div>
 
                     <small v-if="!empty(form.template_id)" class="text-muted">ID шаблона: {{ form.template_id }}</small>
+                    <small v-else class="text-muted">ID опросника: {{ form.id }}</small>
                 </card>
             </div>
 

@@ -161,9 +161,6 @@ class AlgorithmsManager(Manager):
 
                 if form:
                     form_manager.run(form, False, contract_id)
-                    self.medsenger_api.send_message(contract_id,
-                                                    'Опросник {} автоматически подключен.'.format(form.title),
-                                                    only_doctor=True)
 
             if action['type'] == 'attach_form':
                 form = form_manager.get(template_id)
