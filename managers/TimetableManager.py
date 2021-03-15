@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta
 import time
 from helpers import log
+from managers.FormManager import FormManager
 from managers.Manager import Manager
+from managers.MedicineManager import MedicineManager
 from models import Contract, Patient
 from threading import Thread
 
@@ -48,9 +50,27 @@ class TimetableManager(Manager):
             for forms in forms_groups:
                 self.run_if_should(forms, self.form_manager)
 
+    def check_forgotten(self, app):
+        with app.app_context():
+            contracts = list(Contract.query.filter_by(is_active=True).all())
+            medicine_manager = MedicineManager(self.medsenger_api, self.db)
+            form_manager = FormManager(self.medsenger_api, self.db)
+
+            medicines_groups = list(map(lambda x: x.medicines, contracts))
+            forms_groups = list(map(lambda x: x.forms, contracts))
+
+            for medicines in medicines_groups:
+                for medicine in medicines:
+                    medicine_manager.check_warning(medicine)
+
+            for forms in forms_groups:
+                for form in forms:
+                    form_manager.check_warning(form)
+
     def worker(self, app):
         while True:
-            self.iterate()
+            self.iterate(app)
+            self.check_forgotten(app)
             time.sleep(60)
 
 

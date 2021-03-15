@@ -56,7 +56,7 @@ export default {
             if (this.check()) {
                 this.axios.post(this.url('/api/form/' + this.form.id), this.answers).then(r => Event.fire('form-done')).catch(r => this.errors.push('Ошибка сохранения'));
             } else {
-                this.errors.push('Проверьте правильность заполнения анкеты')
+                this.errors.push('Проверьте правильность заполнения опросника')
             }
         },
         check: function () {

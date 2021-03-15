@@ -10,11 +10,9 @@ window.Event = new class {
     }
 
     fire(event, data = null) {
-        if (!data && data !== 0)
-        {
+        if (!data && data !== 0) {
             console.log('sending event', event);
-        }
-        else {
+        } else {
             console.log('sending event', event, 'with data', data);
         }
 
@@ -85,9 +83,9 @@ Vue.mixin({
             }
         },
         uuidv4: () => {
-          return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-          );
+            return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+                (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+            );
         },
         get_category: function (category_name) {
             return this.category_list.find(x => x.name == category_name)
@@ -100,11 +98,9 @@ Vue.mixin({
         tt_description: function (timetable) {
             if (timetable.mode == 'daily') {
                 return timetable.points.length + ' раз(а) в день.'
-            }
-            else if (timetable.mode == 'weekly') {
+            } else if (timetable.mode == 'weekly') {
                 return timetable.points.length + ' раз(а) в неделю.'
-            }
-            else {
+            } else {
                 return timetable.points.length + ' раз(а) в месяц.'
             }
         },
@@ -113,48 +109,37 @@ Vue.mixin({
             let actions = new Set();
 
             algorithm.actions.forEach((a) => {
-                if (a.type == 'patient_message')
-                {
+                if (a.type == 'patient_message') {
                     actions.add('сообщение пациенту');
                 }
-                if (a.type == 'doctor_message')
-                {
+                if (a.type == 'doctor_message') {
                     actions.add('сообщение врачу');
                 }
-                if (a.type == 'record')
-                {
+                if (a.type == 'record') {
                     actions.add('запись в карту');
                 }
-                if (a.type == 'medicine')
-                {
+                if (a.type == 'medicine') {
                     actions.add('прием препарата' + a.params.medicine_name);
                 }
-                if (a.type == 'form')
-                {
+                if (a.type == 'form') {
                     actions.add('отправка дополнительного опросника');
                 }
-                if (a.type == 'attach_medicine')
-                {
+                if (a.type == 'attach_medicine') {
                     actions.add('назначение лекарства');
                 }
-                if (a.type == 'detach_medicine')
-                {
+                if (a.type == 'detach_medicine') {
                     actions.add('отмена лекарства');
                 }
-                if (a.type == 'attach_form')
-                {
+                if (a.type == 'attach_form') {
                     actions.add('подключение опросника');
                 }
-                if (a.type == 'detach_form')
-                {
+                if (a.type == 'detach_form') {
                     actions.add('отключение опросника');
                 }
-                if (a.type == 'attach_algorithm')
-                {
+                if (a.type == 'attach_algorithm') {
                     actions.add('подключение алгоритма');
                 }
-                if (a.type == 'detach_algorithm')
-                {
+                if (a.type == 'detach_algorithm') {
                     actions.add('отключение алгоритма');
                 }
             })
@@ -167,6 +152,14 @@ Vue.mixin({
         need_filling: function (algorithm) {
             return algorithm.criteria.some(c => c.some(b => b.ask_value == true))
         },
+        group_categories: function (categories) {
+            return categories.reduce((groups, item) => {
+                const group = (groups[item.subcategory] || []);
+                group.push(item);
+                groups[item.subcategory] = group;
+                return groups;
+            }, {});
+        }
     },
     data() {
         return {
@@ -202,7 +195,7 @@ Vue.mixin({
 })
 
 
-Vue.use(vmodal,{ componentName: 'Modal' })
+Vue.use(vmodal, {componentName: 'Modal'})
 Vue.use(VueConfirmDialog)
 Vue.component('vue-confirm-dialog', VueConfirmDialog.default)
 

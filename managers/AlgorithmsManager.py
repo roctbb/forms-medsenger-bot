@@ -114,7 +114,12 @@ class AlgorithmsManager(Manager):
         if criteria['right_mode'] == 'value':
             right_value = criteria['value']
         else:
-            right_value = self.get_value(category_name, criteria['right_mode'], contract_id, criteria.get('right_days'))
+            right_category = criteria.get('right_category')
+            if right_category:
+                right_value = self.get_value(right_category, criteria['right_mode'], contract_id, criteria.get('right_days'))
+            else:
+                right_value = self.get_value(category_name, criteria['right_mode'], contract_id,
+                                             criteria.get('right_days'))
 
         if not right_value or not left_value:
             return False

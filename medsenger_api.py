@@ -106,13 +106,17 @@ class AgentApiClient:
 
         return self.__send_request__("/api/agents/hooks/remove", data)
 
-    def add_record(self, contract_id, category_name, value, record_time=None):
+    def add_record(self, contract_id, category_name, value, record_time=None, params=None):
         data = {
             "contract_id": contract_id,
             "api_key": self.api_key,
             "category_name": category_name,
             "value": value,
         }
+
+        if params:
+            data['params'] = params
+
 
         if record_time:
             data['time'] = record_time

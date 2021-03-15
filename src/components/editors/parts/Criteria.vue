@@ -8,18 +8,21 @@
                     <option value="sum" v-if="is_int()">сумма за</option>
                     <option value="difference" v-if="is_int()">разброс за</option>
                 </select>
-                <span class="text-muted"><button class="btn btn-sm btn-default" @click="remove()">Удалить</button></span>
+                <span class="text-muted"><button class="btn btn-sm btn-default"
+                                                 @click="remove()">Удалить</button></span>
             </div>
             <div class="col-md-1" v-if="criteria.left_mode != 'value'">
                 <input class="form-control form-control-sm" v-model="criteria.left_days">
                 <small class="text-muted">дней</small>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <select @change="category_changed()" class="form-control form-control-sm" v-model="criteria.category">
-                    <option
-                        v-for="category in category_list"
-                        :value="category.name">{{ category.description }}
-                    </option>
+                    <optgroup
+                        v-for="(group, name) in group_categories(category_list)"
+                        v-bind:label="name">
+                        <option v-for="category in group" :value="category.name">{{ category.description }}
+                        </option>
+                    </optgroup>
                 </select>
                 <small class="text-muted">Код категории</small>
             </div>
@@ -37,21 +40,38 @@
 
             <div class="col-md-2">
                 <select class="form-control form-control-sm" v-model="criteria.right_mode">
-                    <option value="value">значение</option>
+                    <option value="value">фиксированное значение</option>
+                    <option value="category_value">значение</option>
                     <option value="average" v-if="is_int()">среднее за</option>
                     <option value="sum" v-if="is_int()">сумма за</option>
                     <option value="difference" v-if="is_int()">разброс за</option>
                 </select>
             </div>
-            <div class="col-md-1" v-if="criteria.right_mode != 'value'">
-                <input class="form-control form-control-sm" v-model="criteria.right_days">
-                <span class="text-muted">дней</span>
+
+            <div class="col-md-3" v-if="criteria.right_mode != 'value'">
+                <select class="form-control form-control-sm"
+                        v-model="criteria.right_category">
+                    <optgroup
+                        v-for="(group, name) in group_categories(category_list)"
+                        v-bind:label="name">
+                        <option v-for="category in group" :value="category.name">{{ category.description }}
+                        </option>
+                    </optgroup>
+                </select>
+
+
+                <small class="text-muted">Код категории для сравнения</small>
             </div>
-            <div class="col-md-2" v-if="criteria.right_mode == 'value'">
+
+            <div class="col-md-1" v-if="!['value', 'category_value'].includes(criteria.right_mode)">
+                <input class="form-control form-control-sm" v-model="criteria.right_days">
+                <small class="text-muted">дней</small>
+            </div>
+            <div class="col-md-1" v-if="['value', 'category_value'].includes(criteria.right_mode)">
                 <input class="form-control form-control-sm" v-model="criteria.value">
             </div>
         </div>
-        <div v-if="is_admin && criteria.right_mode == 'value'" class="row">
+        <div v-if="is_admin && ['value', 'category_value'].includes(criteria.right_mode)" class="row">
             <div class="col-md-4">
                 <input type="checkbox" v-model="criteria.ask_value">
                 <small class="text-muted">Запросить при подключении шаблона?</small>

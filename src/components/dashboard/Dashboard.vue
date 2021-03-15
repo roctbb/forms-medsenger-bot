@@ -285,7 +285,7 @@ export default {
         delete_form: function (form) {
             this.$confirm(
                 {
-                    message: `Вы уверены, что хотите удалить анкету ` + form.title + `?`,
+                    message: `Вы уверены, что хотите удалить опросник ` + form.title + `?`,
                     button: {
                         no: 'Нет',
                         yes: 'Да, удалить'

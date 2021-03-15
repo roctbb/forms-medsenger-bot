@@ -15,10 +15,16 @@
         </form-group48>
 
         <form-group48 title="Код категории" v-if="field.type != 'radio'">
+
             <select class="form-control form-control-sm" v-model="field.category">
-                <option v-for="category in category_list.filter(c => c.type == native_types[field.type])"
-                        :value="category.name">{{ category.description }}
-                </option>
+                <option value="none">Не сохранять ответ</option>
+
+                <optgroup
+                    v-for="(group, name) in group_categories(category_list.filter(c => c.type == native_types[field.type]))"
+                    v-bind:label="name">
+                    <option v-for="category in group" :value="category.name">{{ category.description }}
+                    </option>
+                </optgroup>
             </select>
         </form-group48>
 
@@ -34,11 +40,11 @@
                 </div>
                 <div class="col-md-3">
                     <small>от </small><input type="number" pattern="\d*" class="form-control form-control-sm"
-                              v-model="field.params.min"/>
+                                             v-model="field.params.min"/>
                 </div>
                 <div class="col-md-3">
                     <small>до </small><input type="number" pattern="\d*" class="form-control form-control-sm"
-                              v-model="field.params.max"/>
+                                             v-model="field.params.max"/>
                 </div>
             </div>
         </div>
@@ -50,11 +56,11 @@
                 </div>
                 <div class="col-md-3">
                     <small>от </small><input type="number" step="0.01" class="form-control form-control-sm"
-                              v-model="field.params.min"/>
+                                             v-model="field.params.min"/>
                 </div>
                 <div class="col-md-3">
                     <small>до </small><input type="number" step="0.01" class="form-control form-control-sm"
-                              v-model="field.params.max"/>
+                                             v-model="field.params.max"/>
                 </div>
             </div>
         </div>
@@ -67,13 +73,15 @@
                     <small class="text-mutted">Код категории</small><br>
 
                     <select class="form-control form-control-sm" v-model="variant.category">
-                        <option v-for="category in category_list" :value="category.name">{{
-                                category.description
-                            }}
-                        </option>
+                        <option value="none">Не сохранять ответ</option>
+
+                        <optgroup v-for="(group, name) in group_categories(category_list)" v-bind:label="name">
+                            <option v-for="category in group" :value="category.name">{{ category.description }}
+                            </option>
+                        </optgroup>
                     </select>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-2" v-if="variant.category != 'none'">
                     <small class="text-mutted">Значение</small><br>
                     <input type="text" class="form-control form-control-sm" v-model="variant.category_value"/>
                 </div>
@@ -82,7 +90,8 @@
                     <input type="text" class="form-control form-control-sm" v-model="variant.text"/>
                 </div>
                 <div class="col-md-2"><br>
-                    <a class="btn btn-default btn-sm" v-if="field.params.variants.length > 2" @click="remove_variant(j)">Удалить
+                    <a class="btn btn-default btn-sm" v-if="field.params.variants.length > 2"
+                       @click="remove_variant(j)">Удалить
                         вариант</a>
                 </div>
             </div>

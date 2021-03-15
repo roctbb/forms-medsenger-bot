@@ -2,8 +2,8 @@
     <div v-if="form">
         <error-block :errors="errors"/>
         <div class="form">
-            <card title="Параметры анкеты">
-                <form-group48 title="Название анкеты">
+            <card title="Параметры опросника">
+                <form-group48 title="Название опросника">
                     <input class="form-control form-control-sm" v-model="form.title"/>
                 </form-group48>
 
@@ -15,16 +15,25 @@
                     <textarea class="form-control form-control-sm" v-model="form.patient_description"></textarea>
                 </form-group48>
 
-                <form-group48 title="Пациент может заполнить анкету в произвольное время">
+                <form-group48 title="Пациент может заполнить опросник в произвольное время">
                     <input class="form-check" type="checkbox" v-model="form.show_button"/>
                 </form-group48>
 
-                <form-group48 v-if="form.show_button" title="Название анкеты для кнопки">
+                <form-group48 v-if="form.show_button" title="Название опросника для кнопки">
                     <input class="form-control form-control-sm" v-model="form.button_title"/>
                 </form-group48>
 
                 <form-group48 v-if="is_admin && (empty(form.id) || form.is_template)" title="ID связанного алгоритма">
                     <input class="form-control form-control-sm" v-model="form.algorithm_id"/>
+                </form-group48>
+
+                <form-group48 title="Уведомить, если пациент не заполнят опросник">
+                    <input class="form-check" type="checkbox" @change="warning_change()" v-model="form.warning_enabled"/>
+                </form-group48>
+
+                <form-group48 v-if="form.warning_enabled" title="Прислать уведомление о пропусках через">
+                    <input class="form-control form-control-sm" type="number" min="1" max="200" step="1" v-model="form.warning_days"/>
+                    <small class="text-muted">дней</small>
                 </form-group48>
             </card>
 
@@ -79,14 +88,15 @@ export default {
         create_empty_form: function () {
             return {
                 fields: [],
-                timetable: this.empty_timetable()
+                timetable: this.empty_timetable(),
+                warning_days: 0
             };
         },
 
         check: function () {
             this.errors = [];
             if (!this.form.title) {
-                this.errors.push('Укажите название анкеты')
+                this.errors.push('Укажите название опросника')
             }
             if (this.form.show_button && !this.form.button_title) {
                 this.errors.push('Укажите название для кнопки')
@@ -173,6 +183,16 @@ export default {
         },
         process_save_error: function (response) {
             this.errors.push('Ошибка сохранения');
+        },
+        warning_change: function ()
+        {
+            if (this.form.warning_enabled)
+            {
+                this.form.warning_days = 7
+            }
+            else {
+                this.form.warning_days = 0
+            }
         }
     },
     data() {

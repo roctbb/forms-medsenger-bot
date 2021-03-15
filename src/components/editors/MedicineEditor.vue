@@ -71,7 +71,7 @@ export default {
         check: function () {
             this.errors = [];
             if (!this.medicine.title) {
-                this.errors.push('Укажите название анкеты')
+                this.errors.push('Укажите название опросника')
             }
 
             if (!this.verify_timetable(this.medicine.timetable)) {

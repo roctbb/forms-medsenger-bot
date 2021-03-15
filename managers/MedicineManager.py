@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 
 from helpers import log
@@ -43,13 +44,24 @@ class MedicineManager(Manager):
 
         return medicine
 
+    def check_warning(self, medicine):
+        if medicine.warning_days > 0 and medicine.warning_timestamp == 0:
+            if time.time() - medicine.filled_timestamp > 24 * 60 * 60 * medicine.warning_days:
+                medicine.warning_timestamp = int(time.time())
+
+                self.medsenger_api.send_message(medicine.contract_id, "Пациент не сообщал о приеме лекарства {} уже {} дней.".format(medicine.title, medicine.warning_days))
+                self.__commit__()
+
     def submit(self, medicine_id, contract_id):
         medicine = self.get(medicine_id)
+        medicine.warning_timestamp = 0
+        medicine.filled_timestamp = int(time.time())
 
-        self.medsenger_api.add_record(contract_id, 'medicine', medicine.title)
+        self.medsenger_api.add_record(contract_id, 'medicine', medicine.title, params={
+            "forms_medicine_id": medicine_id
+        })
 
         return True
-
 
     def remove(self, id, contract):
 
@@ -101,6 +113,7 @@ class MedicineManager(Manager):
             medicine.rules = data.get('rules')
             medicine.timetable = data.get('timetable')
             medicine.template_id = data.get('template_id')
+            medicine.warning_days = data.get('warning_days')
 
             if data.get('is_template'):
                 medicine.is_template = True
@@ -109,7 +122,10 @@ class MedicineManager(Manager):
                 medicine.contract_id = contract.id
 
                 if is_new:
-                    self.medsenger_api.send_message(contract.id, "Врач назначил препарат «{}» ({} / {}). Мы будем автоматически присылать напоминания об этом.".format(medicine.title, medicine.rules, medicine.timetable_description()))
+                    self.medsenger_api.send_message(contract.id,
+                                                    "Врач назначил препарат «{}» ({} / {}). Мы будем автоматически присылать напоминания об этом.".format(
+                                                        medicine.title, medicine.rules,
+                                                        medicine.timetable_description()))
                 else:
                     self.medsenger_api.send_message(contract.id,
                                                     "Врач изменил параметры приема препарата «{}» ({} / {}). Мы будем автоматически присылать напоминания об этом.".format(

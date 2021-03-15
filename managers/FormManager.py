@@ -1,3 +1,4 @@
+import time
 from copy import copy
 from datetime import datetime
 from helpers import log
@@ -58,9 +59,9 @@ class FormManager(Manager):
 
     def run(self, form, commit=True, contract_id=None):
 
-        text = 'Пожалуйста, заполните анкету "{}".'.format(form.title)
+        text = 'Пожалуйста, заполните опросник "{}".'.format(form.title)
         action = 'form/{}'.format(form.id)
-        action_name = 'Заполнить анкету'
+        action_name = 'Заполнить опросник'
 
         if not contract_id:
             deadline = self.calculate_deadline(form.timetable)
@@ -78,8 +79,18 @@ class FormManager(Manager):
 
         return result
 
+    def check_warning(self, form):
+        if form.warning_days > 0 and form.warning_timestamp == 0:
+            if time.time() - form.filled_timestamp > 24 * 60 * 60 * form.warning_days:
+                form.warning_timestamp = int(time.time())
+
+                self.medsenger_api.send_message(form.contract_id, "Пациент не заполнял опросник {} уже {} дней.".format(form.title, form.warning_days))
+                self.__commit__()
+
     def submit(self, answers, form_id, contract_id):
         form = Form.query.filter_by(id=form_id).first_or_404()
+        form.warning_timestamp = 0
+        form.filled_timestamp = int(time.time())
 
         packet = []
 
@@ -87,6 +98,10 @@ class FormManager(Manager):
             if field['uid'] in answers:
                 if field['type'] == 'radio':
                     category = field['params']['variants'][answers[field['uid']]]['category']
+
+                    if category == 'none':
+                        continue
+
                     value = field['params']['variants'][answers[field['uid']]]['category_value']
                     packet.append((category, value))
                 elif field['type'] == 'checkbox':
@@ -96,7 +111,7 @@ class FormManager(Manager):
                     category = field['category']
                     packet.append((category, answers[field['uid']]))
 
-        packet.append(('action', 'Заполнение анкеты ID {}'.format(form_id)))
+        packet.append(('action', 'Заполнение опросника ID {}'.format(form_id)))
 
         return bool(self.medsenger_api.add_records(contract_id, packet))
 
@@ -123,6 +138,7 @@ class FormManager(Manager):
             form.fields = data.get('fields')
             form.categories = data.get('categories')
             form.template_id = data.get('template_id')
+            form.warning_days = data.get('warning_days')
 
             if data.get('is_template') and contract.is_admin:
                 form.is_template = True

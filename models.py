@@ -55,6 +55,10 @@ class Medicine(db.Model):
 
     last_sent = db.Column(db.DateTime(), nullable=True)
 
+    warning_days = db.Column(db.Integer, default=0)
+    warning_timestamp = db.Column(db.Integer, default=0)
+    filled_timestamp = db.Column(db.Integer, default=0)
+
     def as_dict(self):
         return {
             "id": self.id,
@@ -64,7 +68,8 @@ class Medicine(db.Model):
             "rules": self.rules,
             "timetable": self.timetable,
             "is_template": self.is_template,
-            "template_id": self.template_id
+            "template_id": self.template_id,
+            "warning_days": self.warning_days
         }
 
     def timetable_description(self):
@@ -82,6 +87,7 @@ class Medicine(db.Model):
 
         new_medicine.timetable = self.timetable
         new_medicine.actions = self.actions
+        new_medicine.warning_days = self.warning_days
 
         if self.is_template:
             new_medicine.template_id = self.id
@@ -113,6 +119,10 @@ class Form(db.Model):
 
     last_sent = db.Column(db.DateTime(), nullable=True)
 
+    warning_days = db.Column(db.Integer, default=0)
+    warning_timestamp = db.Column(db.Integer, default=0)
+    filled_timestamp = db.Column(db.Integer, default=0)
+
     def as_dict(self):
         return {
             "id": self.id,
@@ -125,7 +135,8 @@ class Form(db.Model):
             "timetable": self.timetable,
             "is_template": self.is_template,
             "template_id": self.template_id,
-            "algorithm_id": self.algorithm_id
+            "algorithm_id": self.algorithm_id,
+            "warning_days": self.warning_days
         }
 
     def clone(self):
@@ -139,6 +150,7 @@ class Form(db.Model):
         new_form.timetable = self.timetable
         new_form.algorithm_id = self.algorithm_id
         new_form.categories = self.categories
+        new_form.warning_days = self.warning_days
 
         if self.is_template:
             new_form.template_id = self.id
