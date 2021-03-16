@@ -25,7 +25,7 @@ def index():
 
 @app.route('/status', methods=['POST'])
 @verify_json
-def status():
+def status(data):
     answer = {
         "is_tracking_data": True,
         "supported_scenarios": [],
@@ -37,7 +37,7 @@ def status():
 
 @app.route('/order', methods=['POST'])
 @verify_json
-def order():
+def order(data):
     pass
 
 
