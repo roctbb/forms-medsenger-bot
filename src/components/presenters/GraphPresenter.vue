@@ -40,7 +40,6 @@ export default {
                 chart: {
                     type: 'line',
                     zoomType: 'x',
-                    height:  '70%'
                 },
                 title: {
                     text: this.group.title
