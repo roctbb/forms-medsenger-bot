@@ -11,6 +11,15 @@
                 <form-group48 title="Доза и правила приема">
                     <textarea class="form-control form-control-sm" v-model="medicine.rules"></textarea>
                 </form-group48>
+
+                <form-group48 title="Уведомить, если пациент не заполнят опросник">
+                    <input class="form-check" type="checkbox" @change="warning_change()" v-model="medicine.warning_enabled"/>
+                </form-group48>
+
+                <form-group48 v-if="medicine.warning_enabled" title="Прислать уведомление о пропусках через">
+                    <input class="form-control form-control-sm" type="number" min="1" max="200" step="1" v-model="medicine.warning_days"/>
+                    <small class="text-muted">дней</small>
+                </form-group48>
             </card>
 
             <timetable-editor v-bind:data="medicine.timetable"/>
@@ -74,6 +83,12 @@ export default {
                 this.errors.push('Укажите название опросника')
             }
 
+            this.medicine.warning_days = parseInt(this.medicine.warning_days)
+            if (this.medicine.warning_days < 0)
+            {
+                this.medicine.warning_days = 0
+            }
+
             if (!this.verify_timetable(this.medicine.timetable)) {
                 this.errors.push('Проверьте корректность расписания')
             }
@@ -113,6 +128,16 @@ export default {
         process_save_error: function (response) {
             console.log(response)
             this.errors.push('Ошибка сохранения');
+        },
+        warning_change: function ()
+        {
+            if (this.medicine.warning_enabled)
+            {
+                this.medicine.warning_days = 7
+            }
+            else {
+                this.medicine.warning_days = 0
+            }
         }
     },
     data() {
@@ -145,6 +170,12 @@ export default {
 
         Event.listen('navigate-to-edit-medicine-page', medicine => {
             this.medicine = medicine
+
+            if (this.medicine.warning_days > 0)
+            {
+                this.medicine.warning_enabled = true;
+            }
+
             this.backup = JSON.stringify(medicine)
             this.$forceUpdate()
         });

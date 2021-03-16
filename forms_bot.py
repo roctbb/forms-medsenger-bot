@@ -123,6 +123,13 @@ def form_page(args, form, form_id):
     contract = contract_manager.get(args.get('contract_id'))
     return get_ui('form', contract, medsenger_api.get_categories(), form_id)
 
+@app.route('/graph', methods=['GET'])
+@verify_args
+def graph_page(args, form):
+    contract = contract_manager.get(args.get('contract_id'))
+    return get_ui('graph', contract)
+
+
 @app.route('/medicine/<medicine_id>', methods=['GET'])
 @verify_args
 def medicine_page(args, form, medicine_id):
@@ -241,6 +248,28 @@ def delete_algorithm(args, form):
     else:
         abort(404)
 
+@app.route('/api/graph/categories', methods=['GET'])
+@verify_args
+def graph_categories(args, form):
+    contract_id = args.get('contract_id')
+    categories = medsenger_api.get_available_categories(contract_id)
+
+    if categories:
+        return jsonify(categories)
+    else:
+        abort(404)
+
+@app.route('/api/graph/group', methods=['POST'])
+@verify_args
+def graph_data(args, form):
+    contract_id = args.get('contract_id')
+    group = request.json
+    answer = [medsenger_api.get_records(contract_id, category_name) for category_name in group['categories']]
+
+    if answer:
+        return jsonify(answer)
+    else:
+        abort(404)
 
 @app.route('/api/form/<form_id>', methods=['GET'])
 @verify_args

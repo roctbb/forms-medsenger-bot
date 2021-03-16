@@ -71,7 +71,7 @@ def verify_json(func):
     wrapper.__name__ = func.__name__
     return wrapper
 
-def get_ui(page, contract, categories, object_id = None):
+def get_ui(page, contract, categories='[]', object_id = None):
     return render_template('index.html', page=page, object_id=object_id, contract_id=contract.id, api_host=MAIN_HOST.replace('8001', '8000'), local_host=LOCALHOST, agent_token=contract.agent_token, agent_id=AGENT_ID, categories=json.dumps(categories), is_admin=str(bool(contract.is_admin)).lower())
 
 def delayed(delay, f, args):

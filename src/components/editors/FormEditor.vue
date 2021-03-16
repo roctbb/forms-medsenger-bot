@@ -110,6 +110,12 @@ export default {
                 this.errors.push('Добавьте хотя бы один вопрос')
             }
 
+            this.form.warning_days = parseInt(this.form.warning_days)
+            if (this.form.warning_days < 0)
+            {
+                this.form.warning_days = 0
+            }
+
             let prepare_field = (field) => {
                 if (['integer', 'float'].includes(field.type)) {
                     field.max = parseFloat(field.max)
@@ -227,6 +233,12 @@ export default {
 
         Event.listen('navigate-to-edit-form-page', form => {
             this.form = form
+
+            if (this.form.warning_days > 0)
+            {
+                this.form.warning_enabled = true;
+            }
+
             this.backup = JSON.stringify(form)
             this.$forceUpdate()
         });

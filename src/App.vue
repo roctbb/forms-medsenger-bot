@@ -13,12 +13,15 @@
                     <algorithm-editor v-show="state == 'algorithm-manager'"/>
                 </div>
             </div>
-            <div v-if="mode == 'form' || mode == 'done'">
+            <div v-if="mode == 'form' || mode == 'done' || mode == 'graph'">
                 <div class="container" style="margin-top: 15px;">
                     <form-presenter :data="form" v-if="state == 'form-presenter'"/>
+                    <graph-category-chooser :data="available_categories" v-if="state == 'graph-category-chooser'"/>
+                    <graph-presenter v-show="state == 'graph-presenter'" />
                     <action-done v-if="state == 'done'"></action-done>
                 </div>
             </div>
+
         </div>
     </div>
 </template>
@@ -33,11 +36,16 @@ import FormPresenter from "./components/presenters/FormPresenter";
 import AlgorithmEditor from "./components/editors/AlgorithmEditor";
 import DashboardHeader from "./components/dashboard/DashboardHeader";
 import ActionDone from "./components/presenters/ActionDone";
+import GraphCategoryChooser from "./components/presenters/GraphCategoryChooser";
+import GraphPresenter from "./components/presenters/GraphPresenter";
+
 
 
 export default {
     name: 'app',
     components: {
+        GraphPresenter,
+        GraphCategoryChooser,
         ActionDone,
         DashboardHeader, AlgorithmEditor, FormPresenter, FormEditor, Loading, Dashboard, MedicineEditor},
     data() {
@@ -102,6 +110,12 @@ export default {
             this.state = 'algorithm-manager'
             Event.fire('navigate-to-edit-algorithm-page', algorithm);
         });
+        Event.listen('load-graph', (form) => {
+            this.state = 'graph-presenter'
+        });
+        Event.listen('select-graph', () => {
+            this.state = 'graph-category-chooser'
+        });
     },
     methods: {
         load: function () {
@@ -119,6 +133,10 @@ export default {
             if (this.mode == 'form') {
                 this.axios.get(this.url('/api/form/' + this.object_id)).then(this.process_load_answer);
             }
+
+            if (this.mode == 'graph') {
+                this.axios.get(this.url('/api/graph/categories')).then(this.process_load_answer);
+            }
         },
         process_load_answer: function (response) {
             if (this.mode == 'settings') {
@@ -129,6 +147,12 @@ export default {
                 this.form = response.data;
                 this.state = 'form-presenter'
             }
+
+            if (this.mode == 'graph') {
+                this.available_categories = response.data;
+                this.state = 'graph-category-chooser'
+            }
+
 
         }
     },
