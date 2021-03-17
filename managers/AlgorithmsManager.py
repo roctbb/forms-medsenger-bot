@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from helpers import log
+from helpers import log,generate_description
 from managers.ContractsManager import ContractManager
 from managers.FormManager import FormManager
 from managers.Manager import Manager
@@ -72,19 +72,19 @@ class AlgorithmsManager(Manager):
             return None
 
         if mode == 'value':
-            return values[0]
+            return values[0], answer['values'][0]['id']
         if mode == 'sum':
-            return sum(values)
+            return sum(values), None
         if mode == 'difference':
-            return max(values) - min(values)
+            return max(values) - min(values), None
         if mode == 'delta':
-            return values[-1] - values[0]
+            return values[-1] - values[0], None
         if mode == 'average':
-            return sum(values) / len(values)
+            return sum(values) / len(values), None
         if mode == 'max':
-            return max(values)
+            return max(values), None
         if mode == 'min':
-            return min(values)
+            return min(values), None
 
         return None
 
@@ -106,25 +106,33 @@ class AlgorithmsManager(Manager):
 
         return False
 
-    def check_criteria(self, criteria, contract_id):
+    def check_criteria(self, criteria, contract_id, buffer):
         category_name = criteria['category']
 
-        left_value = self.get_value(category_name, criteria['left_mode'], contract_id, criteria.get('left_days'))
+        left_value, record_id = self.get_value(category_name, criteria['left_mode'], contract_id, criteria.get('left_days'))
 
         if criteria['right_mode'] == 'value':
-            right_value = criteria['value']
+            right_value = criteria.get('value')
         else:
             right_category = criteria.get('right_category')
             if right_category:
-                right_value = self.get_value(right_category, criteria['right_mode'], contract_id, criteria.get('right_days'))
+                right_value, _ = self.get_value(right_category, criteria['right_mode'], contract_id, criteria.get('right_days'))
             else:
-                right_value = self.get_value(category_name, criteria['right_mode'], contract_id,
+                right_value, _ = self.get_value(category_name, criteria['right_mode'], contract_id,
                                              criteria.get('right_days'))
 
         if not right_value or not left_value:
             return False
 
-        return self.check_values(left_value, right_value, criteria['sign'])
+        result = self.check_values(left_value, right_value, criteria['sign'])
+
+        if result and record_id:
+            buffer.append({
+                "id": record_id,
+                "comment": generate_description(criteria, right_value)
+            })
+
+        return result
 
     def run_action(self, action, contract_id):
         if action['type'] == 'patient_message':
@@ -227,9 +235,16 @@ class AlgorithmsManager(Manager):
         actions = algorithm.actions
         contract_id = algorithm.contract_id
 
-        result = any([all(list(map(lambda x: self.check_criteria(x, contract_id), block))) for block in criteria])
+        additions = []
+        result = any([all(list(map(lambda x: self.check_criteria(x, contract_id, additions), block))) for block in criteria])
 
         if result:
+            for addition in additions:
+                self.medsenger_api.send_addition(contract_id, addition['id'], {
+                    "algorithm_id": algorithm.id,
+                    "comment": addition["comment"]
+                })
+
             for action in actions:
                 self.run_action(action, contract_id)
 

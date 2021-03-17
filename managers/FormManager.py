@@ -95,7 +95,7 @@ class FormManager(Manager):
         packet = []
 
         for field in form.fields:
-            if field['uid'] in answers:
+            if answers.get(field['uid']):
                 if field['type'] == 'radio':
                     category = field['params']['variants'][answers[field['uid']]]['category']
 
@@ -113,7 +113,11 @@ class FormManager(Manager):
 
         packet.append(('action', 'Заполнение опросника ID {}'.format(form_id)))
 
-        return bool(self.medsenger_api.add_records(contract_id, packet))
+        params = {
+            "form_id": form.id
+        }
+
+        return bool(self.medsenger_api.add_records(contract_id, packet, params=params))
 
     def create_or_edit(self, data, contract):
         try:

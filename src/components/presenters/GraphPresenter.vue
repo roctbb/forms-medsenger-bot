@@ -56,8 +56,30 @@ export default {
                     line: {
                         dataLabels: {
                             enabled: true
-                        },
+                        }
+                    },
+                    series: {
+                        marker: {
+                            fillColor: '#FFFFFF',
+                            lineWidth: 2,
+                            lineColor: null,
+                        }
                     }
+                },
+                legend: {
+                    enabled: true
+                },
+                tooltip: {
+                    pointFormatter: function () {
+                        let point = this;
+                        let label = point.series.name + ': <b>' + point.y + '</b><br/>'
+                        if (point.comment) {
+                            label += '<strong style="color: red;">' + point.comment + '</strong><br/>';
+                        }
+                        return label
+                    },
+                    valueSuffix: ' cm',
+                    shared: true
                 },
             }
 
@@ -84,7 +106,22 @@ export default {
             this.data.forEach((graph) => {
                 this.options.series.push({
                     name: graph.category.description,
-                    data: graph.values.map((value) => [value.timestamp * 1000, value.value]).reverse()
+                    data: graph.values.map((value) => {
+                        return {
+                            x: value.timestamp * 1000,
+                            y: value.value,
+                            comment: this.get_comment(value),
+                            marker: {
+                                lineColor: this.get_color(value),
+                                radius: this.get_radius(value),
+                            }
+                        }
+                    }).reverse(),
+                    dashStyle: 'Dot',
+                    marker: {
+                        enabled: true,
+                        symbol: 'circle'
+                    }
                 })
             })
 
@@ -95,6 +132,24 @@ export default {
         select_graph: function () {
             this.loaded = false;
             Event.fire('select-graph')
+        },
+        get_color: function (point) {
+            if (point.additions) {
+                return '#FF0000';
+            }
+            return undefined;
+        },
+        get_radius: function (point) {
+            if (point.additions) {
+                return 5;
+            }
+            return undefined;
+        },
+        get_comment: function (point) {
+            if (point.additions) {
+                return point.additions[0]['addition']['comment'];
+            }
+            return undefined;
         }
     },
     computed: {},

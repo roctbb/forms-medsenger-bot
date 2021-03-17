@@ -58,7 +58,7 @@ class MedicineManager(Manager):
         medicine.filled_timestamp = int(time.time())
 
         self.medsenger_api.add_record(contract_id, 'medicine', medicine.title, params={
-            "forms_medicine_id": medicine_id
+            "medicine_id": medicine_id
         })
 
         return True

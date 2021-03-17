@@ -82,3 +82,37 @@ def dir_last_updated(folder):
     return str(max(os.path.getmtime(os.path.join(root_path, f))
                    for root_path, dirs, files in os.walk(folder)
                    for f in files))
+
+def generate_description(criteria, calculated):
+    signs = {
+        "equal": "равно",
+        "not_equal": "не равно",
+        "greater": "больше",
+        "less": "меньше",
+        "greater_or_equal": "больше или равно",
+        "less_or_equal": "меньше или равно",
+        "contains": "содержит"
+    }
+
+    modes = {
+         "sum": "сумме",
+         "difference": "разности крайних значений",
+         "delta": "разбросу",
+         "average": "среднему значению",
+         "max": "максимальному значению",
+         "min": "минимальному значению"
+    }
+
+
+    comment = "Значение {} ".format(signs[criteria.get('sign')])
+
+    if criteria['right_mode'] == 'value':
+        comment += "{}".format(criteria.get('value'))
+    else:
+        comment += "{} за {} дня (ей) ({})".format(modes[criteria.get('right_mode')], criteria.get('right_days'), calculated)
+
+        if criteria.get('right_category'):
+            comment += " категории {}".format(criteria.get('right_category'))
+            
+    return comment
+

@@ -106,6 +106,16 @@ class AgentApiClient:
 
         return self.__send_request__("/api/agents/hooks/remove", data)
 
+    def send_addition(self, contract_id, record_id, addition):
+        data = {
+            "contract_id": contract_id,
+            "api_key": self.api_key,
+            "record_id": record_id,
+            "addition": addition,
+        }
+
+        return self.__send_request__('/api/agents/records/addition', data)
+
     def add_record(self, contract_id, category_name, value, record_time=None, params=None):
         data = {
             "contract_id": contract_id,
@@ -123,17 +133,13 @@ class AgentApiClient:
 
         return self.__send_request__('/api/agents/records/add', data)
 
-    def add_records(self, contract_id, values, record_time=None):
+    def add_records(self, contract_id, values, record_time=None, params=None):
         data = {
             "contract_id": contract_id,
             "api_key": self.api_key,
         }
 
-        if record_time:
-            data['values'] = [{"category_name": category_name, "value": value, "time": record_time} for
-                              (category_name, value) in values]
-        else:
-            data['values'] = [{"category_name": category_name, "value": value} for (category_name, value) in values]
+        data['values'] = [{"category_name": category_name, "value": value, "params": params, "time": record_time} for (category_name, value) in values]
 
         return self.__send_request__('/api/agents/records/add', data)
 
