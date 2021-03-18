@@ -264,7 +264,7 @@ def graph_categories(args, form):
 def graph_data(args, form):
     contract_id = args.get('contract_id')
     group = request.json
-    answer = [medsenger_api.get_records(contract_id, category_name) for category_name in group['categories']]
+    answer = [medsenger_api.get_records(contract_id, category_name) for category_name in group['categories'] + ['medicine', 'symptom']]
 
     if answer:
         return jsonify(answer)
