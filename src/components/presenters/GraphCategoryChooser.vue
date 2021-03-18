@@ -26,6 +26,10 @@ export default {
                 {
                     "title": "Давление и пульс",
                     "categories": ['systolic_pressure', 'diastolic_pressure', 'pulse'],
+                },
+                {
+                    "title": "Обхват голеней",
+                    "categories": ['leg_circumference_right', 'leg_circumference_left'],
                 }
             ]
         }
