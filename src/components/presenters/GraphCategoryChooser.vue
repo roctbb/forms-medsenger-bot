@@ -42,7 +42,7 @@ export default {
     computed: {
         plottable_categories: function () {
             let plottable = this.data.filter((category) => {
-                return !category.is_legacy && category.default_representation == 'values' && category.type != 'string'
+                return !category.is_legacy && ['scatter', 'values'].includes(category.default_representation) && category.type != 'string'
             })
 
             console.log("plottable", plottable)
