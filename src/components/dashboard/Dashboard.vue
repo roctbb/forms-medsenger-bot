@@ -46,7 +46,9 @@
                         <small>Добавлен в другом контракте.</small>
                     </div>
 
-                    <small v-if="!empty(medicine.template_id)" class="text-muted">ID шаблона: {{ medicine.template_id }}</small>
+                    <small v-if="!empty(medicine.template_id)" class="text-muted">ID шаблона: {{
+                            medicine.template_id
+                        }}</small>
 
                 </card>
             </div>
@@ -76,7 +78,9 @@
                         <small>Добавлен в другом контракте.</small>
                     </div>
 
-                    <small v-if="!empty(algorithm.template_id)" class="text-muted">ID шаблона: {{ algorithm.template_id }}</small>
+                    <small v-if="!empty(algorithm.template_id)" class="text-muted">ID шаблона: {{
+                            algorithm.template_id
+                        }}</small>
 
                 </card>
             </div>
@@ -93,8 +97,14 @@
                     вопросы.</p>
             </div>
 
-            <div class="row">
-                <card v-for="(form, i) in templates.forms" :key="form.id" class="col-lg-3 col-md-4"
+            <div class="row" v-for="(group, name) in group_by(templates.forms.map((form) => {
+                if (!form.template_category) form.template_category = 'Общее'
+                return form
+            }), 'template_category')">
+
+                <div class="col-md-12"><h5>{{ name }}</h5></div>
+
+                <card v-for="(form, i) in group" :key="form.id" class="col-lg-3 col-md-4"
                       :image="images.form">
                     <h6>{{ form.title }}</h6>
                     <small>{{ form.doctor_description }}</small><br>
@@ -104,7 +114,8 @@
                     <a href="#" v-if="is_admin" @click="delete_form(form)">Удалить</a>
                     <a target="_blank" :href="preview_form_url(form)">Просмотр</a>
 
-                    <small v-if="form.algorithm_id"><br><b>Связанный алгоритм:</b> {{ find_algorithm(form.algorithm_id).title }}</small>
+                    <small v-if="form.algorithm_id"><br><b>Связанный алгоритм:</b>
+                        {{ find_algorithm(form.algorithm_id).title }}</small>
 
                     <br>
 
@@ -155,17 +166,24 @@
 
             <div class="alert alert-info" role="alert">
                 <h4 class="alert-heading">Выбор алгоритма</h4>
-                <p>Выберите алгоритм из списка ниже. В дальнейшем вы сможете посмотреть подробную схему его работы, но изменять ее без опыта не рекомендуется.</p>
+                <p>Выберите алгоритм из списка ниже. В дальнейшем вы сможете посмотреть подробную схему его работы, но
+                    изменять ее без опыта не рекомендуется.</p>
             </div>
 
 
-            <div class="row">
-                <card v-for="(algorithm, i) in templates.algorithms" :key="algorithm.id" :image="images.algorithm"
+            <div class="row" v-for="(group, name) in group_by(templates.algorithms.map((algorithms) => {
+                if (!algorithms.template_category) algorithms.template_category = 'Общее'
+                return algorithms
+            }), 'template_category')">
+
+                <div class="col-md-12"><h5>{{ name }}</h5></div>
+                <card v-for="(algorithm, i) in group" :key="algorithm.id" :image="images.algorithm"
                       class="col-lg-3 col-md-4">
                     <h6>{{ algorithm.title }}</h6>
                     <small>{{ algorithm.description }}</small><br>
                     <small v-html="alg_description(algorithm)"></small>
-                    <a href="#" v-if="need_filling(algorithm)" @click="setup_algorithm(algorithm)">Настроить и подключить</a>
+                    <a href="#" v-if="need_filling(algorithm)" @click="setup_algorithm(algorithm)">Настроить и
+                        подключить</a>
                     <a href="#" v-else @click="attach_algorithm(algorithm)">Подключить</a>
                     <a href="#" v-if="is_admin" @click="edit_algorithm(algorithm)">Редактировать</a>
                     <a href="#" v-if="is_admin" @click="delete_algorithm(algorithm)">Удалить</a>

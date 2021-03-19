@@ -18,7 +18,7 @@
             <div class="col-md-3">
                 <select @change="category_changed()" class="form-control form-control-sm" v-model="criteria.category">
                     <optgroup
-                        v-for="(group, name) in group_categories(category_list)"
+                        v-for="(group, name) in group_by(category_list, 'subcategory')"
                         v-bind:label="name">
                         <option v-for="category in group" :value="category.name">{{ category.description }}
                         </option>
@@ -52,7 +52,7 @@
                 <select class="form-control form-control-sm"
                         v-model="criteria.right_category">
                     <optgroup
-                        v-for="(group, name) in group_categories(category_list)"
+                        v-for="(group, name) in group_by(category_list, 'subcategory')"
                         v-bind:label="name">
                         <option v-for="category in group" :value="category.name">{{ category.description }}
                         </option>

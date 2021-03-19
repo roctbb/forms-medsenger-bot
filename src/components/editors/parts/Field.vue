@@ -20,7 +20,7 @@
                 <option value="none">Не сохранять ответ</option>
 
                 <optgroup
-                    v-for="(group, name) in group_categories(category_list.filter(c => c.type == native_types[field.type]))"
+                    v-for="(group, name) in group_by(category_list.filter(c => c.type == native_types[field.type]), 'subcategory')"
                     v-bind:label="name">
                     <option v-for="category in group" :value="category.name">{{ category.description }}
                     </option>
@@ -75,7 +75,7 @@
                     <select class="form-control form-control-sm" v-model="variant.category">
                         <option value="none">Не сохранять ответ</option>
 
-                        <optgroup v-for="(group, name) in group_categories(category_list)" v-bind:label="name">
+                        <optgroup v-for="(group, name) in group_by(category_list, 'subcategory')" v-bind:label="name">
                             <option v-for="category in group" :value="category.name">{{ category.description }}
                             </option>
                         </optgroup>

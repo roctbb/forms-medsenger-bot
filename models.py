@@ -123,6 +123,8 @@ class Form(db.Model):
     warning_timestamp = db.Column(db.Integer, default=0)
     filled_timestamp = db.Column(db.Integer, default=0)
 
+    template_category = db.Column(db.String(512), default="Общее", nullable=True)
+
     def as_dict(self):
         return {
             "id": self.id,
@@ -136,7 +138,8 @@ class Form(db.Model):
             "is_template": self.is_template,
             "template_id": self.template_id,
             "algorithm_id": self.algorithm_id,
-            "warning_days": self.warning_days
+            "warning_days": self.warning_days,
+            "template_category": self.template_category
         }
 
     def clone(self):
@@ -174,6 +177,8 @@ class Algorithm(db.Model):
     is_template = db.Column(db.Boolean, default=False)
     template_id = db.Column(db.Integer, db.ForeignKey('algorithm.id', ondelete="set null"), nullable=True)
 
+    template_category = db.Column(db.String(512), default="Общее", nullable=True)
+
     def as_dict(self, native=False):
         return {
             "id": self.id,
@@ -185,7 +190,8 @@ class Algorithm(db.Model):
             "actions": self.actions,
             "categories": self.categories,
             "is_template": self.is_template,
-            "template_id": self.template_id
+            "template_id": self.template_id,
+            "template_category": self.template_category
         }
 
     def clone(self):

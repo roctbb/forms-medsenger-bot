@@ -288,6 +288,7 @@ class AlgorithmsManager(Manager):
 
             if data.get('is_template'):
                 algorithm.is_template = True
+                algorithm.template_category = data.get('template_category')
             else:
                 algorithm.patient_id = contract.patient_id
                 algorithm.contract_id = contract.id

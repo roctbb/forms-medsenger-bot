@@ -2,7 +2,7 @@
     <div>
         <h3>Доступные графики</h3>
 
-        <a class="btn btn-info" v-for="category in plottable_categories" @click="load_graph(category)">{{ category.title }}</a>
+        <div v-for="category in plottable_categories"><a class="btn btn-info" @click="load_graph(category)">{{ category.title }}</a></div>
 
     </div>
 </template>
@@ -49,7 +49,6 @@ export default {
 
             let custom = this.groups.filter((group) => {
                 return group.categories.some((category_name) => {
-                    console.log(category_name, plottable)
                     return plottable.filter((category) => category.name == category_name).length > 0
                 })
             })

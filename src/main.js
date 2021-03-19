@@ -152,11 +152,11 @@ Vue.mixin({
         need_filling: function (algorithm) {
             return algorithm.criteria.some(c => c.some(b => b.ask_value == true))
         },
-        group_categories: function (categories) {
+        group_by: function (categories, field) {
             return categories.reduce((groups, item) => {
-                const group = (groups[item.subcategory] || []);
+                const group = (groups[item[field]] || []);
                 group.push(item);
-                groups[item.subcategory] = group;
+                groups[item[field]] = group;
                 return groups;
             }, {});
         }

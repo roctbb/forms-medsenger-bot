@@ -146,6 +146,7 @@ class FormManager(Manager):
 
             if data.get('is_template') and contract.is_admin:
                 form.is_template = True
+                form.template_category = data.get('template_category')
             else:
                 form.patient_id = contract.patient_id
                 form.contract_id = contract.id

@@ -27,6 +27,10 @@
                     <input class="form-control form-control-sm" v-model="form.algorithm_id"/>
                 </form-group48>
 
+                <form-group48 v-if="is_admin && (empty(form.id) || form.is_template)" title="Категория шаблона">
+                    <input class="form-control form-control-sm" value="Общее" v-model="form.template_category"/>
+                </form-group48>
+
                 <form-group48 title="Уведомить, если пациент не заполнят опросник">
                     <input class="form-check" type="checkbox" @change="warning_change()" v-model="form.warning_enabled"/>
                 </form-group48>

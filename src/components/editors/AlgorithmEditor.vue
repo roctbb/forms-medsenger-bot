@@ -10,6 +10,10 @@
                 <form-group48 title="Описание">
                     <textarea class="form-control form-control-sm" v-model="algorithm.description"></textarea>
                 </form-group48>
+
+                <form-group48 v-if="is_admin && (empty(algorithm.id) || algorithm.is_template)" title="Категория шаблона">
+                    <input class="form-control form-control-sm" value="Общее" v-model="algorithm.template_category"/>
+                </form-group48>
             </card>
 
             <card title="Критерий срабатывания">
