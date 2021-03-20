@@ -1,6 +1,6 @@
 <template>
     <card title="Расписание">
-        <form-group48 title="Режим">
+        <form-group48 title="Режим  ">
             <select @change="clear_time_points()" class="form-control form-control-sm"
                     v-model="mode">
                 <option value="manual">Заполняется вручную</option>
@@ -13,7 +13,6 @@
 
         <div v-if="timetable.mode != 'manual'">
             <hr>
-
             <div class="form-group row" v-for="(timepoint, i) in timetable.points">
                 <div class="col-md-3">
                     <div v-if="timetable.mode == 'weekly'">
@@ -27,17 +26,21 @@
                     <div v-if="timetable.mode == 'monthly'">
                         <small class="text-muted">День</small>
                         <input type="number" min="1" max="31" class="form-control form-control-sm"
+                               :class="save_clicked && (!timepoint.day || timepoint.day < 0 || timepoint.day > 31) ? 'is-invalid' : ''"
                                v-model="timepoint.day"/>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <small class="text-muted">Часы</small>
                     <input type="number" min="0" max="23" class="form-control form-control-sm"
+                           :class="save_clicked && (!timepoint.hour || timepoint.hour < 0 || timepoint.hour > 23) ? 'is-invalid' : ''"
                            v-model="timepoint.hour"/>
                 </div>
                 <div class="col-md-3">
                     <small class="text-muted">Минуты</small>
-                    <input type="number" min="0" max="59" class="form-control form-control-sm"
+                    <input type="number" min="0" max="59"
+                           class="form-control form-control-sm"
+                           :class="save_clicked && (!timepoint.minute || timepoint.minute < 0 || timepoint.minute > 59) ? 'is-invalid' : ''"
                            v-model="timepoint.minute"/>
                 </div>
                 <div class="col-md-3"><br>
@@ -61,8 +64,9 @@ export default {
     components: {FormGroup48, Card},
     props: {
         data: {
-            required: true,
-        }
+            required: true
+        },
+        save_clicked: false
     },
     methods: {
         clear_time_points: function () {

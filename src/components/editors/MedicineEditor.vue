@@ -5,7 +5,9 @@
         <div class="form">
             <card title="Описание лекарства">
                 <form-group48 title="Название">
-                    <input class="form-control form-control-sm" v-model="medicine.title"/>
+                    <input class="form-control form-control-sm"
+                           :class="this.save_clicked && !medicine.title ? 'is-invalid' : ''"
+                           v-model="medicine.title"/>
                 </form-group48>
 
                 <form-group48 title="Доза и правила приема">
@@ -17,12 +19,14 @@
                 </form-group48>
 
                 <form-group48 v-if="medicine.warning_enabled" title="Прислать уведомление о пропусках через">
-                    <input class="form-control form-control-sm" type="number" min="1" max="200" step="1" v-model="medicine.warning_days"/>
+                    <input class="form-control form-control-sm"
+                           :class="this.save_clicked && medicine.warning_days < 0 ? 'is-invalid' : ''"
+                           type="number" min="1" max="200" step="1" v-model="medicine.warning_days"/>
                     <small class="text-muted">дней</small>
                 </form-group48>
             </card>
 
-            <timetable-editor v-bind:data="medicine.timetable"/>
+            <timetable-editor v-bind:data="medicine.timetable" :save_clicked="save_clicked"/>
         </div>
 
         <button class="btn btn-danger" @click="go_back()">Назад</button>
@@ -48,7 +52,8 @@ export default {
     props: {
         data: {
             required: false,
-        }
+        },
+        save_clicked: false
     },
     methods: {
         go_back: function () {
@@ -84,8 +89,7 @@ export default {
             }
 
             this.medicine.warning_days = parseInt(this.medicine.warning_days)
-            if (this.medicine.warning_days < 0)
-            {
+            if (this.medicine.warning_days < 0) {
                 this.medicine.warning_days = 0
             }
 
@@ -100,7 +104,9 @@ export default {
             }
         },
         save: function (is_template) {
+            this.save_clicked = true
             if (this.check()) {
+                this.save_clicked = false
                 this.errors = []
 
                 if (is_template || this.medicine.is_template) {

@@ -12,7 +12,9 @@
                                                  @click="remove()">Удалить</button></span>
             </div>
             <div class="col-md-1" v-if="criteria.left_mode != 'value'">
-                <input class="form-control form-control-sm" v-model="criteria.left_days">
+                <input class="form-control form-control-sm"
+                       :class="this.save_clicked && !criteria.left_days ? 'is-invalid' : ''"
+                       v-model="criteria.left_days">
                 <small class="text-muted">дней</small>
             </div>
             <div class="col-md-3">
@@ -59,16 +61,19 @@
                     </optgroup>
                 </select>
 
-
                 <small class="text-muted">Код категории для сравнения</small>
             </div>
 
             <div class="col-md-1" v-if="!['value', 'category_value'].includes(criteria.right_mode)">
-                <input class="form-control form-control-sm" v-model="criteria.right_days">
+                <input class="form-control form-control-sm"
+                       :class="this.save_clicked && !criteria.right_days ? 'is-invalid' : ''"
+                       v-model="criteria.right_days">
                 <small class="text-muted">дней</small>
             </div>
             <div class="col-md-1" v-if="['value', 'category_value'].includes(criteria.right_mode)">
-                <input class="form-control form-control-sm" v-model="criteria.value">
+                <input class="form-control form-control-sm"
+                       :class="this.save_clicked && !criteria.value ? 'is-invalid' : ''"
+                       v-model="criteria.value">
             </div>
         </div>
         <div v-if="is_admin && ['value', 'category_value'].includes(criteria.right_mode)" class="row">
@@ -96,7 +101,7 @@ import FormGroup48 from "../../common/FormGroup-4-8";
 export default {
     name: "Criteria",
     components: {FormGroup48, Card},
-    props: ['data', 'rkey', 'pkey'],
+    props: ['data', 'rkey', 'pkey', 'save_clicked'],
     data() {
         return {
             mode: 'integer',

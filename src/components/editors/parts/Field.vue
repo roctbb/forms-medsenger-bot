@@ -1,11 +1,15 @@
 <template>
     <card>
         <form-group48 title="Текст вопроса">
-            <input class="form-control form-control-sm" v-model="field.text"/>
+            <input class="form-control form-control-sm"
+                   :class="save_clicked && !field.text ? 'is-invalid' : ''"
+                   v-model="field.text"/>
         </form-group48>
 
         <form-group48 title="Тип">
-            <select @change="clear_params()" class="form-control form-control-sm" v-model="mode">
+            <select @change="clear_params()"
+                    :class="save_clicked && !mode ? 'is-invalid' : ''"
+                    class="form-control form-control-sm" v-model="mode">
                 <option v-for="type in Object.entries(field_types)" :value="type[0]">{{ type[1] }}</option>
             </select>
         </form-group48>
@@ -16,7 +20,9 @@
 
         <form-group48 title="Код категории" v-if="field.type != 'radio'">
 
-            <select class="form-control form-control-sm" v-model="field.category">
+            <select class="form-control form-control-sm"
+                    :class="save_clicked && !field.category ? 'is-invalid' : ''"
+                    v-model="field.category">
                 <option value="none">Не сохранять ответ</option>
 
                 <optgroup
@@ -39,11 +45,15 @@
                     <strong>Ограничения</strong>
                 </div>
                 <div class="col-md-3">
-                    <small>от </small><input type="number" pattern="\d*" class="form-control form-control-sm"
+                    <small>от </small><input type="number" pattern="\d*"
+                                             :class="save_clicked && (!field.params.min || field.params.max < field.params.min) ? 'is-invalid' : ''"
+                                             class="form-control form-control-sm"
                                              v-model="field.params.min"/>
                 </div>
                 <div class="col-md-3">
-                    <small>до </small><input type="number" pattern="\d*" class="form-control form-control-sm"
+                    <small>до </small><input type="number" pattern="\d*"
+                                             :class="save_clicked && (!field.params.max || field.params.max < field.params.min) ? 'is-invalid' : ''"
+                                             class="form-control form-control-sm"
                                              v-model="field.params.max"/>
                 </div>
             </div>
@@ -56,10 +66,12 @@
                 </div>
                 <div class="col-md-3">
                     <small>от </small><input type="number" step="0.01" class="form-control form-control-sm"
+                                             :class="save_clicked && (!field.params.min || field.params.max < field.params.min) ? 'is-invalid' : ''"
                                              v-model="field.params.min"/>
                 </div>
                 <div class="col-md-3">
                     <small>до </small><input type="number" step="0.01" class="form-control form-control-sm"
+                                             :class="save_clicked && (!field.params.max || field.params.max < field.params.min) ? 'is-invalid' : ''"
                                              v-model="field.params.max"/>
                 </div>
             </div>
@@ -72,7 +84,9 @@
                 <div class="col-md-3">
                     <small class="text-mutted">Код категории</small><br>
 
-                    <select class="form-control form-control-sm" v-model="variant.category">
+                    <select class="form-control form-control-sm"
+                            :class="save_clicked && !variant.category ? 'is-invalid' : ''"
+                            v-model="variant.category">
                         <option value="none">Не сохранять ответ</option>
 
                         <optgroup v-for="(group, name) in group_by(category_list, 'subcategory')" v-bind:label="name">
@@ -87,7 +101,9 @@
                 </div>
                 <div class="col-md-5">
                     <small class="text-mutted">Текст варианта</small><br>
-                    <input type="text" class="form-control form-control-sm" v-model="variant.text"/>
+                    <input type="text"
+                           :class="save_clicked && !variant.text ? 'is-invalid' : ''"
+                           class="form-control form-control-sm" v-model="variant.text"/>
                 </div>
                 <div class="col-md-2"><br>
                     <a class="btn btn-default btn-sm" v-if="field.params.variants.length > 2"
@@ -110,7 +126,7 @@ import FormGroup48 from "../../common/FormGroup-4-8";
 export default {
     name: "Field",
     components: {FormGroup48, Card},
-    props: ['data', 'pkey'],
+    props: ['data', 'pkey', 'save_clicked'],
     data() {
         return {
             mode: 'integer',

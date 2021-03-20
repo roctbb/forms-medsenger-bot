@@ -1,6 +1,6 @@
 <template>
     <div>
-        <field v-for="(field, i) in fields" :data="field" :pkey="i" :key="field.uid"></field>
+        <field v-for="(field, i) in fields" :data="field" :pkey="i" :key="field.uid" :save_clicked="save_clicked"></field>
 
         <p class="text-center"><a class="btn btn-primary btn-sm" @click="add_field()">Добавить вопрос</a></p>
     </div>
@@ -16,8 +16,9 @@ export default {
     components: {Field, FormGroup48, Card},
     props: {
         data: {
-            required: true,
-        }
+            required: true
+        },
+        save_clicked: false
     },
     data() {
         return {

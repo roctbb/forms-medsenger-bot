@@ -4,7 +4,9 @@
         <div class="form">
             <card title="Параметры опросника">
                 <form-group48 title="Название опросника">
-                    <input class="form-control form-control-sm" v-model="form.title"/>
+                    <input class="form-control form-control-sm"
+                           :class="this.save_clicked && !form.title ? 'is-invalid' : ''"
+                           v-model="form.title"/>
                 </form-group48>
 
                 <form-group48 title="Краткое описание для врача">
@@ -20,7 +22,9 @@
                 </form-group48>
 
                 <form-group48 v-if="form.show_button" title="Название опросника для кнопки">
-                    <input class="form-control form-control-sm" v-model="form.button_title"/>
+                    <input class="form-control form-control-sm"
+                           :class="this.save_clicked && !form.button_title ? 'is-invalid' : ''"
+                           v-model="form.button_title"/>
                 </form-group48>
 
                 <form-group48 v-if="is_admin && (empty(form.id) || form.is_template)" title="ID связанного алгоритма">
@@ -36,15 +40,17 @@
                 </form-group48>
 
                 <form-group48 v-if="form.warning_enabled" title="Прислать уведомление о пропусках через">
-                    <input class="form-control form-control-sm" type="number" min="1" max="200" step="1" v-model="form.warning_days"/>
+                    <input class="form-control form-control-sm"
+                           :class="this.save_clicked && form.warning_days < 1 ? 'is-invalid' : ''"
+                           type="number" min="1" max="200" step="1" v-model="form.warning_days"/>
                     <small class="text-muted">дней</small>
                 </form-group48>
             </card>
 
-            <timetable-editor v-bind:data="form.timetable"/>
+            <timetable-editor v-bind:data="form.timetable" :save_clicked="this.save_clicked"/>
 
             <hr>
-            <fields-editor v-bind:data="form.fields"/>
+            <fields-editor v-bind:data="form.fields" :save_clicked="save_clicked"/>
         </div>
 
         <button class="btn btn-danger" @click="go_back()">Вернуться назад</button>
@@ -66,8 +72,9 @@ export default {
     components: {ErrorBlock, FieldsEditor, TimetableEditor, FormGroup48, Card},
     props: {
         data: {
-            required: false,
-        }
+            required: false
+        },
+        save_clicked: false
     },
     methods: {
         go_back: function () {
@@ -115,8 +122,7 @@ export default {
             }
 
             this.form.warning_days = parseInt(this.form.warning_days)
-            if (this.form.warning_days < 0)
-            {
+            if (this.form.warning_days < 0) {
                 this.form.warning_days = 0
             }
 
@@ -139,6 +145,7 @@ export default {
                 if (!Object.keys(this.field_types).includes(field.type)) return true;
                 if (['integer', 'float'].includes(field.type)) {
                     if (this.empty(field.params.max) || this.empty(field.params.min)) return true;
+                    if (field.params.max < field.params.min) return true;
                 }
                 if (field.type == 'radio') {
                     let variant_validator = (variant) => !variant.text || !variant.category
@@ -162,8 +169,10 @@ export default {
 
         },
         save: function (is_template) {
+            this.save_clicked = true
             if (this.check()) {
                 this.errors = []
+                this.save_clicked = false
 
                 if (is_template || this.form.is_template) {
                     this.form.contract_id = undefined

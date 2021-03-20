@@ -4,7 +4,9 @@
         <div class="form">
             <card title="Описание алгоритма">
                 <form-group48 title="Название">
-                    <input class="form-control form-control-sm" v-model="algorithm.title"/>
+                    <input class="form-control form-control-sm"
+                           :class="this.save_clicked && !algorithm.title ? 'is-invalid' : ''"
+                           v-model="algorithm.title"/>
                 </form-group48>
 
                 <form-group48 title="Описание">
@@ -19,7 +21,7 @@
             <card title="Критерий срабатывания">
                 <div v-for="(or_block, i) in algorithm.criteria">
                     <div v-for="(criteria, j) in or_block">
-                        <criteria :data="criteria" :rkey="i" :pkey="j" :key="criteria.uid"/>
+                        <criteria :data="criteria" :rkey="i" :pkey="j" :key="criteria.uid" :save_clicked="save_clicked"/>
                     </div>
                     <button class="btn btn-sm btn-primary" @click="add_criteria(or_block)">и</button>
                     <div class="separator">или</div>
@@ -28,7 +30,7 @@
             </card>
 
             <card title="Действия">
-                <action v-for="(action, i) in algorithm.actions" :data="action" :pkey="i" :key="action.uid"></action>
+                <action v-for="(action, i) in algorithm.actions" :data="action" :pkey="i" :key="action.uid" :save_clicked="save_clicked"></action>
                 <button class="btn btn-sm btn-primary" @click="add_action()">Добавить</button>
             </card>
 
@@ -55,7 +57,8 @@ export default {
     props: {
         data: {
             required: false,
-        }
+        },
+        save_clicked: false
     },
     methods: {
         go_back: function () {
@@ -182,7 +185,10 @@ export default {
             }
         },
         save: function (is_template) {
+            this.save_clicked = true
             if (this.check()) {
+                this.save_clicked = false
+
                 this.algorithm.categories = this.algorithm.criteria.map(block => block.map(c => c.category).join('|')).join('|')
                 this.errors = []
 

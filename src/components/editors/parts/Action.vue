@@ -29,7 +29,9 @@
         </div>
 
         <div class="col-md-5" v-if="['doctor_message', 'patient_message'].includes(action.type)">
-            <textarea class="form-control form-control-sm" v-model="action.params.text"></textarea>
+            <textarea class="form-control form-control-sm"
+                      :class="this.save_clicked && !action.params.text ? 'is-invalid' : ''"
+                      v-model="action.params.text"></textarea>
             <small class="text-muted">Текст сообщения</small>
         </div>
 
@@ -44,7 +46,9 @@
         </div>
 
         <div class="col-md-3" v-if="action.type == 'record'">
-            <input type="text" class="form-control form-control-sm" v-model="action.params.value">
+            <input type="text" class="form-control form-control-sm"
+                   :class="this.save_clicked && !action.params.value ? 'is-invalid' : ''"
+                   v-model="action.params.value">
             <small class="text-muted">Значение</small>
         </div>
         <div class="col-md-4" v-if="action.type == 'medicine'">
@@ -73,7 +77,7 @@ import FormGroup48 from "../../common/FormGroup-4-8";
 export default {
     name: "Action",
     components: {FormGroup48, Card},
-    props: ['data', 'pkey'],
+    props: ['data', 'pkey', 'save_clicked'],
     data() {
         return {
             action: {},
