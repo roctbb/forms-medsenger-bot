@@ -59,12 +59,12 @@ class AlgorithmsManager(Manager):
     def get_templates(self):
         return Algorithm.query.filter_by(is_template=True).all()
 
-    def get_value(self, category_name, mode, contract_id, days=1):
+    def get_value(self, category_name, mode, contract_id, hours=1):
         if mode == 'value':
             answer = self.medsenger_api.get_records(contract_id, category_name, limit=1)
         else:
             answer = self.medsenger_api.get_records(contract_id, category_name,
-                                                    time_from=int((datetime.now() - timedelta(days=days)).timestamp()))
+                                                    time_from=int((datetime.now() - timedelta(hours=hours)).timestamp()))
 
         values = list(map(lambda x: x['value'], answer['values']))
 
@@ -116,10 +116,10 @@ class AlgorithmsManager(Manager):
         else:
             right_category = criteria.get('right_category')
             if right_category:
-                right_value, _ = self.get_value(right_category, criteria['right_mode'], contract_id, criteria.get('right_days'))
+                right_value, _ = self.get_value(right_category, criteria['right_mode'], contract_id, criteria.get('right_hours'))
             else:
                 right_value, _ = self.get_value(category_name, criteria['right_mode'], contract_id,
-                                             criteria.get('right_days'))
+                                             criteria.get('right_hours'))
 
         if not right_value or not left_value:
             return False

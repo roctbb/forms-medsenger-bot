@@ -64,10 +64,10 @@
             </div>
 
             <div class="col-md-1" v-if="!['value', 'category_value'].includes(criteria.right_mode)">
-                <input class="form-control form-control-sm" v-model="criteria.right_days">
-                <small class="text-muted">дней</small>
+                <input class="form-control form-control-sm" v-model="criteria.right_hours">
+                <small class="text-muted">часов</small>
             </div>
-            <div class="col-md-1" v-if="['value', 'category_value'].includes(criteria.right_mode)">
+            <div class="col-md-1" v-if="['value'].includes(criteria.right_mode)">
                 <input class="form-control form-control-sm" v-model="criteria.value">
             </div>
         </div>

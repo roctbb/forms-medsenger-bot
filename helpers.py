@@ -109,10 +109,10 @@ def generate_description(criteria, calculated):
     if criteria['right_mode'] == 'value':
         comment += "{}".format(criteria.get('value'))
     else:
-        comment += "{} за {} дня (ей) ({})".format(modes[criteria.get('right_mode')], criteria.get('right_days'), calculated)
+        comment += "{} за {} дня (ей) ({})".format(modes[criteria.get('right_mode')], criteria.get('right_hours'), calculated)
 
         if criteria.get('right_category'):
             comment += " категории {}".format(criteria.get('right_category'))
-            
+
     return comment
 

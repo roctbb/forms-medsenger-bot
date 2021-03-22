@@ -117,7 +117,7 @@ export default {
             let prepare_criteria = (criteria) => {
                 if (!this.empty(criteria.left_days)) criteria.left_days = parseInt(criteria.left_days)
 
-                if (!this.empty(criteria.right_days)) criteria.right_days = parseInt(criteria.right_days)
+                if (!this.empty(criteria.right_hours)) criteria.right_hours = parseInt(criteria.right_hours)
 
 
                 if (!this.empty(criteria.value)) {
@@ -132,7 +132,7 @@ export default {
             let criteria_validator = (criteria) => {
                 let category = this.get_category(criteria.category)
                 if (criteria.left_mode != 'value' && this.empty(criteria.left_days)) return true;
-                if (criteria.right_mode != 'value' && this.empty(criteria.right_days)) return true;
+                if (criteria.right_mode != 'value' && this.empty(criteria.right_hours)) return true;
 
                 if (criteria.right_mode == 'value' && this.empty(criteria.value)) return true;
                 return false;
