@@ -34,7 +34,7 @@ class AlgorithmsManager(Manager):
             if setup:
                 for block in algorithm.criteria:
                     for criteria in block:
-                        if criteria['ask_value'] and setup.get(criteria['value_code']):
+                        if criteria.get('ask_value') and setup.get(criteria['value_code']):
                             criteria['value'] = setup.get(criteria['value_code'])
 
             self.db.session.add(new_algorithm)
