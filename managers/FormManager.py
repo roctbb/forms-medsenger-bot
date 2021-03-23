@@ -84,7 +84,9 @@ class FormManager(Manager):
             if time.time() - form.filled_timestamp > 24 * 60 * 60 * form.warning_days:
                 form.warning_timestamp = int(time.time())
 
-                self.medsenger_api.send_message(form.contract_id, "Пациент не заполнял опросник {} уже {} дней.".format(form.title, form.warning_days))
+                self.medsenger_api.send_message(form.contract_id,
+                                                "Пациент не заполнял опросник {} уже {} дней.".format(form.title,
+                                                                                                      form.warning_days))
                 self.__commit__()
 
     def submit(self, answers, form_id, contract_id):
@@ -109,7 +111,11 @@ class FormManager(Manager):
                     category = field['category']
                     value = field['category_value']
 
-                    checkbox[category] = checkbox.get(category, []).append(value)
+                    L = checkbox.get(category)
+                    if not L:
+                        L = []
+
+                    checkbox[category] = L.append(value)
                 else:
                     category = field['category']
                     packet.append((category, answers[field['uid']]))
@@ -166,7 +172,6 @@ class FormManager(Manager):
                 to_add = list(filter(lambda c: c not in old_names, names))
                 if to_add:
                     self.medsenger_api.add_hooks(contract.id, to_add)
-
 
             if data.get('algorithm_id') and contract.is_admin:
                 form.algorithm_id = data.get('algorithm_id')
