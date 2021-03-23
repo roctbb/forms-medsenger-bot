@@ -111,16 +111,16 @@ class FormManager(Manager):
                     category = field['category']
                     value = field['category_value']
 
-                    L = checkbox.get(category)
-                    if not L:
-                        L = []
-
-                    checkbox[category] = L.append(value)
+                    if checkbox.get(category):
+                        checkbox[category].append(value)
+                    else:
+                        checkbox[category] = [value]
                 else:
                     category = field['category']
                     packet.append((category, answers[field['uid']]))
 
         for category, value in checkbox.items():
+            print(value)
             packet.append((category, ", ".join(value)))
 
         packet.append(('action', 'Заполнение опросника ID {}'.format(form_id)))
