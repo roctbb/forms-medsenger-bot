@@ -95,7 +95,7 @@ class FormManager(Manager):
         packet = []
 
         for field in form.fields:
-            if answers.get(field['uid']):
+            if answers.get(field['uid']) and answers.get(field['uid']) != False:
                 if field['type'] == 'radio':
                     category = field['params']['variants'][answers[field['uid']]]['category']
 
@@ -106,7 +106,9 @@ class FormManager(Manager):
                     packet.append((category, value))
                 elif field['type'] == 'checkbox':
                     category = field['category']
-                    packet.append((category, 1))
+                    value = field['category_value']
+
+                    packet.append((category, value))
                 else:
                     category = field['category']
                     packet.append((category, answers[field['uid']]))

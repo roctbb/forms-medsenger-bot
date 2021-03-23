@@ -49,6 +49,12 @@
             </div>
         </div>
 
+        <div v-if="field.type == 'checkbox'">
+            <form-group48 title="Значение при включении">
+                <input type="text" class="form-control form-control-sm" v-model="field.category_value"/>
+            </form-group48>
+        </div>
+
         <div v-if="field.type == 'float'">
             <div class="form-group row">
                 <div class="col-md-4">
