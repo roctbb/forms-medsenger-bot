@@ -135,6 +135,8 @@ class Form(db.Model):
             "patient_description": self.patient_description,
             "fields": self.fields,
             "timetable": self.timetable,
+            "show_button": self.show_button,
+            "button_title": self.button_title,
             "is_template": self.is_template,
             "template_id": self.template_id,
             "algorithm_id": self.algorithm_id,
