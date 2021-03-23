@@ -20,7 +20,7 @@
                 <option value="none">Не сохранять ответ</option>
 
                 <optgroup
-                    v-for="(group, name) in group_by(category_list.filter(c => c.type == native_types[field.type]), 'subcategory')"
+                    v-for="(group, name) in group_by(category_list.filter(c => native_types[field.type].includes(c.type)), 'subcategory')"
                     v-bind:label="name">
                     <option v-for="category in group" :value="category.name">{{ category.description }}
                     </option>

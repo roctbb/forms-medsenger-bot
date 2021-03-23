@@ -177,11 +177,11 @@ Vue.mixin({
             axios: require('axios'),
             category_list: window.CATEGORY_LIST,
             native_types: {
-                integer: 'integer',
-                float: 'float',
-                string: 'string',
-                text: 'string',
-                checkbox: 'integer'
+                integer: ['integer'],
+                float: ['float'],
+                string: ['string'],
+                text: ['string'],
+                checkbox: ['integer', 'float', 'string']
             },
             images: {
                 form: window.LOCAL_HOST + '/static/images/icons8-fill-in-form-48.png',
