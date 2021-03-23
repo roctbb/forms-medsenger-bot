@@ -181,7 +181,7 @@ Vue.mixin({
                 float: ['float'],
                 string: ['string'],
                 text: ['string'],
-                checkbox: ['integer', 'float', 'string']
+                checkbox: ['string']
             },
             images: {
                 form: window.LOCAL_HOST + '/static/images/icons8-fill-in-form-48.png',

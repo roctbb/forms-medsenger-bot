@@ -93,6 +93,7 @@ class FormManager(Manager):
         form.filled_timestamp = int(time.time())
 
         packet = []
+        checkbox = {}
 
         for field in form.fields:
             if answers.get(field['uid']) and answers.get(field['uid']) != False:
@@ -108,10 +109,13 @@ class FormManager(Manager):
                     category = field['category']
                     value = field['category_value']
 
-                    packet.append((category, value))
+                    checkbox[category] = checkbox.get(category, []).append(value)
                 else:
                     category = field['category']
                     packet.append((category, answers[field['uid']]))
+
+        for category, value in checkbox.items():
+            packet.append((category, ", ".join(value)))
 
         packet.append(('action', 'Заполнение опросника ID {}'.format(form_id)))
 
