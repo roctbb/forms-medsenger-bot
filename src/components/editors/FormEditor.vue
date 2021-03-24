@@ -41,10 +41,10 @@
                 </form-group48>
             </card>
 
-            <timetable-editor v-bind:data="form.timetable"/>
+            <timetable-editor :data="form.timetable"/>
 
             <hr>
-            <fields-editor v-bind:data="form.fields"/>
+            <fields-editor v-if="form" :form="form" :data="form.fields"/>
         </div>
 
         <button class="btn btn-danger" @click="go_back()">Вернуться назад</button>

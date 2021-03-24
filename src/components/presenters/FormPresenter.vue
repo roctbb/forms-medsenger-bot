@@ -3,7 +3,7 @@
             <error-block :errors="errors"/>
             <h3>{{ this.form.title }}</h3>
             <p> {{ this.form.patient_description }}</p>
-            <form-group48 v-for="(field, i) in form.fields" :required="field.required" :title="field.text" :key="i"
+            <form-group48 v-for="(field, i) in form.fields" v-if="!field.show_if || answers[field.show_if]" :required="field.required" :title="field.text" :key="i"
                           :description="field.description">
                 <input type="number" min="field.params.min" max="field.params.max" step="1" class="form-control"
                        v-if="field.type == 'integer'" :required="field.required" v-model="answers[field.uid]"/>

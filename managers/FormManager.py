@@ -111,6 +111,9 @@ class FormManager(Manager):
                     category = field['category']
                     value = field['category_value']
 
+                    if not value:
+                        continue
+
                     if checkbox.get(category):
                         checkbox[category].append(value)
                     else:

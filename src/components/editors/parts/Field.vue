@@ -31,6 +31,14 @@
         <form-group48 title="Обязательный вопрос?">
             <input type="checkbox" class="form-check" v-model="field.required">
         </form-group48>
+
+        <form-group48 title="Показывать если...">
+            <select class="form-control form-control-sm" v-model="field.show_if">
+                <option value="">Всегда</option>
+
+                <option v-for="other in form.fields.filter(f => f.type == 'checkbox')" :value="other.uid">{{ other.text }}</option>
+            </select>
+        </form-group48>
         <hr>
 
         <div v-if="field.type == 'integer'">
@@ -116,7 +124,7 @@ import FormGroup48 from "../../common/FormGroup-4-8";
 export default {
     name: "Field",
     components: {FormGroup48, Card},
-    props: ['data', 'pkey'],
+    props: ['data', 'pkey', 'form'],
     data() {
         return {
             mode: 'integer',

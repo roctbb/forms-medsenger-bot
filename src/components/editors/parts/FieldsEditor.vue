@@ -1,6 +1,6 @@
 <template>
     <div>
-        <field v-for="(field, i) in fields" :data="field" :pkey="i" :key="field.uid"></field>
+        <field :form="form" v-for="(field, i) in fields" :data="field" :pkey="i" :key="field.uid"></field>
 
         <p class="text-center"><a class="btn btn-primary btn-sm" @click="add_field()">Добавить вопрос</a></p>
     </div>
@@ -17,6 +17,9 @@ export default {
     props: {
         data: {
             required: true,
+        },
+        form: {
+            required: true
         }
     },
     data() {
@@ -25,6 +28,7 @@ export default {
         }
     },
     created() {
+        console.log(this.form)
         this.fields = this.data
         Event.listen('remove-field', (i) => this.remove_field(i));
     },
