@@ -109,7 +109,7 @@ class FormManager(Manager):
                     packet.append((category, value))
                 elif field['type'] == 'checkbox':
                     category = field['category']
-                    value = field['category_value']
+                    value = field.get('category_value')
 
                     if not value:
                         continue
