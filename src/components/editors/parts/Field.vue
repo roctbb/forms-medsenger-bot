@@ -28,7 +28,7 @@
             </select>
         </form-group48>
 
-        <form-group48 title="Обязательный вопрос?">
+        <form-group48 title="Обязательный вопрос?" v-if="!field.show_if">
             <input type="checkbox" class="form-check" v-model="field.required">
         </form-group48>
 
