@@ -1,6 +1,6 @@
 <template>
     <div>
-        <field v-for="(field, i) in fields" :data="field" :pkey="i" :key="field.uid" :save_clicked="save_clicked"></field>
+        <field v-for="(field, i) in fields" :data="field" :pkey="i" :key="field.uid" :save_clicked="fields_save_clicked[i]"></field>
 
         <p class="text-center"><a class="btn btn-primary btn-sm" @click="add_field()">Добавить вопрос</a></p>
     </div>
@@ -18,7 +18,9 @@ export default {
         data: {
             required: true
         },
-        save_clicked: false
+        fields_save_clicked: {
+            required: true
+        }
     },
     data() {
         return {
@@ -36,6 +38,7 @@ export default {
                 params: {},
                 uid: this.uuidv4()
             });
+            this.fields_save_clicked.push(false)
         },
         remove_field: function (index) {
             this.$confirm({
@@ -47,6 +50,7 @@ export default {
                 callback: confirm => {
                     if (confirm) {
                         this.fields.splice(index, 1);
+                        this.fields_save_clicked.splice(index, 1);
                     }
                 }
             })

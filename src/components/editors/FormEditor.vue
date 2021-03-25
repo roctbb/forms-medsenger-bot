@@ -47,10 +47,10 @@
                 </form-group48>
             </card>
 
-            <timetable-editor v-bind:data="form.timetable" :save_clicked="this.save_clicked"/>
+            <timetable-editor v-bind:data="form.timetable" :timetable_save_clicked="this.timetable_save_clicked"/>
 
             <hr>
-            <fields-editor v-bind:data="form.fields" :save_clicked="save_clicked"/>
+            <fields-editor v-bind:data="form.fields" :fields_save_clicked="fields_save_clicked"/>
         </div>
 
         <button class="btn btn-danger" @click="go_back()">Вернуться назад</button>
@@ -73,8 +73,7 @@ export default {
     props: {
         data: {
             required: false
-        },
-        save_clicked: false
+        }
     },
     methods: {
         go_back: function () {
@@ -168,11 +167,19 @@ export default {
             }
 
         },
-        save: function (is_template) {
+        show_validation: function () {
             this.save_clicked = true
+            for (var i = 0; i < this.timetable_save_clicked.length; i++) {
+                this.$set(this.timetable_save_clicked, i, true)
+            }
+            for (var i = 0; i < this.fields_save_clicked.length; i++) {
+                this.$set(this.fields_save_clicked, i, true)
+            }
+        },
+        save: function (is_template) {
+            this.show_validation()
             if (this.check()) {
                 this.errors = []
-                this.save_clicked = false
 
                 if (is_template || this.form.is_template) {
                     this.form.contract_id = undefined
@@ -218,7 +225,10 @@ export default {
         return {
             errors: [],
             form: undefined,
-            backup: ""
+            backup: "",
+            save_clicked: false,
+            timetable_save_clicked: [false],
+            fields_save_clicked: []
         }
     },
     mounted() {

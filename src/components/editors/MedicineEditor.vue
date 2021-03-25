@@ -26,7 +26,7 @@
                 </form-group48>
             </card>
 
-            <timetable-editor v-bind:data="medicine.timetable" :save_clicked="save_clicked"/>
+            <timetable-editor v-bind:data="medicine.timetable" :timetable_save_clicked="timetable_save_clicked"/>
         </div>
 
         <button class="btn btn-danger" @click="go_back()">Назад</button>
@@ -52,8 +52,7 @@ export default {
     props: {
         data: {
             required: false,
-        },
-        save_clicked: false
+        }
     },
     methods: {
         go_back: function () {
@@ -103,10 +102,15 @@ export default {
                 return true;
             }
         },
-        save: function (is_template) {
+        show_validation: function () {
             this.save_clicked = true
+            for (let i = 0; i < this.timetable_save_clicked.length; i++) {
+                this.$set(this.timetable_save_clicked, i, true)
+            }
+        },
+        save: function (is_template) {
+            this.show_validation()
             if (this.check()) {
-                this.save_clicked = false
                 this.errors = []
 
                 if (is_template || this.medicine.is_template) {
@@ -150,7 +154,9 @@ export default {
         return {
             errors: [],
             medicine: undefined,
-            backup: ""
+            backup: "",
+            save_clicked: false,
+            timetable_save_clicked: [false]
         }
     },
     mounted() {

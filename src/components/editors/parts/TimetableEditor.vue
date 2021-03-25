@@ -13,7 +13,7 @@
 
         <div v-if="timetable.mode != 'manual'">
             <hr>
-            <div class="form-group row" v-for="(timepoint, i) in timetable.points">
+            <div class="form-group row" v-for="(timepoint, index) in timetable.points">
                 <div class="col-md-3">
                     <div v-if="timetable.mode == 'weekly'">
                         <small class="text-muted">День недели</small>
@@ -26,25 +26,25 @@
                     <div v-if="timetable.mode == 'monthly'">
                         <small class="text-muted">День</small>
                         <input type="number" min="1" max="31" class="form-control form-control-sm"
-                               :class="save_clicked && (!timepoint.day || timepoint.day < 0 || timepoint.day > 31) ? 'is-invalid' : ''"
+                               :class="timetable_save_clicked[index] && (!timepoint.day || timepoint.day < 1 || timepoint.day > 31) ? 'is-invalid' : ''"
                                v-model="timepoint.day"/>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <small class="text-muted">Часы</small>
                     <input type="number" min="0" max="23" class="form-control form-control-sm"
-                           :class="save_clicked && (!timepoint.hour || timepoint.hour < 0 || timepoint.hour > 23) ? 'is-invalid' : ''"
+                           :class="timetable_save_clicked[index] && ((!timepoint.hour && timepoint.hour !== 0)|| timepoint.hour < 0 || timepoint.hour > 23) ? 'is-invalid' : ''"
                            v-model="timepoint.hour"/>
                 </div>
                 <div class="col-md-3">
                     <small class="text-muted">Минуты</small>
                     <input type="number" min="0" max="59"
                            class="form-control form-control-sm"
-                           :class="save_clicked && (!timepoint.minute || timepoint.minute < 0 || timepoint.minute > 59) ? 'is-invalid' : ''"
+                           :class="timetable_save_clicked[index] && ((!timepoint.minute && timepoint.minute !== 0) || timepoint.minute < 0 || timepoint.minute > 59) ? 'is-invalid' : ''"
                            v-model="timepoint.minute"/>
                 </div>
                 <div class="col-md-3"><br>
-                    <a class="btn btn-sm btn-default" @click="remove_time_point(i)"
+                    <a class="btn btn-sm btn-default" @click="remove_time_point(index)"
                        v-if="timetable.points.length > 1">Удалить</a>
                 </div>
             </div>
@@ -66,7 +66,9 @@ export default {
         data: {
             required: true
         },
-        save_clicked: false
+        timetable_save_clicked: {
+            required: true
+        }
     },
     methods: {
         clear_time_points: function () {
@@ -77,6 +79,7 @@ export default {
                 this.timetable.points = JSON.parse(this.backup[this.mode])
             } else {
                 this.timetable.points = []
+                this.timetable_save_clicked = []
                 this.add_time_point();
             }
 
@@ -90,16 +93,19 @@ export default {
                     hour: '',
                     minute: ''
                 })
+                this.timetable_save_clicked.push(false)
             } else {
                 this.timetable.points.push({
                     day: '',
                     hour: '',
                     minute: ''
                 })
+                this.timetable_save_clicked.push(false)
             }
         },
         remove_time_point: function (index) {
             this.timetable.points.splice(index, 1);
+            this.timetable_save_clicked.splice(index, 1);
         },
     },
     data() {

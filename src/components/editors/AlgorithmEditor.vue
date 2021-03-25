@@ -21,16 +21,16 @@
             <card title="Критерий срабатывания">
                 <div v-for="(or_block, i) in algorithm.criteria">
                     <div v-for="(criteria, j) in or_block">
-                        <criteria :data="criteria" :rkey="i" :pkey="j" :key="criteria.uid" :save_clicked="save_clicked"/>
+                        <criteria :data="criteria" :rkey="i" :pkey="j" :key="criteria.uid" :save_clicked="criteria_save_clicked[i][j]"/>
                     </div>
-                    <button class="btn btn-sm btn-primary" @click="add_criteria(or_block)">и</button>
+                    <button class="btn btn-sm btn-primary" @click="add_criteria(or_block, i)">и</button>
                     <div class="separator">или</div>
                 </div>
                 <button class="btn btn-sm btn-primary" @click="add_or_block()">или</button>
             </card>
 
             <card title="Действия">
-                <action v-for="(action, i) in algorithm.actions" :data="action" :pkey="i" :key="action.uid" :save_clicked="save_clicked"></action>
+                <action v-for="(action, i) in algorithm.actions" :data="action" :pkey="i" :key="action.uid" :save_clicked="actions_save_clicked[i]"></action>
                 <button class="btn btn-sm btn-primary" @click="add_action()">Добавить</button>
             </card>
 
@@ -57,8 +57,7 @@ export default {
     props: {
         data: {
             required: false,
-        },
-        save_clicked: false
+        }
     },
     methods: {
         go_back: function () {
@@ -88,9 +87,11 @@ export default {
         },
         add_or_block: function () {
             this.algorithm.criteria.push([this.create_empty_criteria()])
+            this.criteria_save_clicked.push([false]);
         },
-        add_criteria: function (block) {
+        add_criteria: function (block, i) {
             block.push(this.create_empty_criteria())
+            this.criteria_save_clicked[i].push(false)
         },
         create_empty_criteria: function () {
             return {
@@ -103,6 +104,7 @@ export default {
         },
         add_action: function () {
             this.algorithm.actions.push(this.create_empty_action())
+            this.actions_save_clicked.push(false)
         },
         create_empty_action: function () {
             return {
@@ -184,11 +186,20 @@ export default {
                 return true;
             }
         },
-        save: function (is_template) {
+        show_validation: function () {
             this.save_clicked = true
+            for (let i = 0; i < this.actions_save_clicked.length; i++) {
+                this.$set(this.actions_save_clicked, i, true)
+            }
+            for (let i = 0; i < this.criteria_save_clicked.length; i++) {
+                for (let j = 0; j < this.criteria_save_clicked[i].length; j++) {
+                    this.$set(this.criteria_save_clicked[i], j, true)
+                }
+            }
+        },
+        save: function (is_template) {
+            this.show_validation()
             if (this.check()) {
-                this.save_clicked = false
-
                 this.algorithm.categories = this.algorithm.criteria.map(block => block.map(c => c.category).join('|')).join('|')
                 this.errors = []
 
@@ -219,12 +230,15 @@ export default {
         },
         remove_action: function (index) {
             this.algorithm.actions.splice(index, 1);
+            this.actions_save_clicked.splice(index, 1);
         },
         remove_criteria: function (index) {
             this.algorithm.criteria[index[0]].splice(index[1], 1);
+            this.criteria_save_clicked[index[0]].splice(index[1], 1);
 
             if (!this.algorithm.criteria[index[0]].length) {
                 this.algorithm.criteria.splice(index[0], 1);
+                this.criteria_save_clicked.splice(index[0], 1);
             }
         }
     },
@@ -232,7 +246,10 @@ export default {
         return {
             errors: [],
             algorithm: undefined,
-            backup: ""
+            backup: "",
+            save_clicked: false,
+            actions_save_clicked: [],
+            criteria_save_clicked:[]
         }
     },
     mounted() {
