@@ -97,7 +97,7 @@ class FormManager(Manager):
         packet = []
 
         for field in form.fields:
-            if answers.get(field['uid']) and answers.get(field['uid']) != False:
+            if field['uid'] in answers.keys():
                 if field['type'] == 'radio':
                     category = field['params']['variants'][answers[field['uid']]]['category']
 

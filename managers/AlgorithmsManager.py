@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from helpers import log,generate_description
+from helpers import log, generate_description
 from managers.ContractsManager import ContractManager
 from managers.FormManager import FormManager
 from managers.Manager import Manager
@@ -59,34 +59,36 @@ class AlgorithmsManager(Manager):
     def get_templates(self):
         return Algorithm.query.filter_by(is_template=True).all()
 
-    def get_value(self, category_name, mode, contract_id, hours=1):
+    def get_values(self, category_name, mode, contract_id, hours=1):
         if mode == 'value':
-            answer = self.medsenger_api.get_records(contract_id, category_name, limit=1)
+            answer = self.medsenger_api.get_records(contract_id, category_name, group=True)
         else:
             answer = self.medsenger_api.get_records(contract_id, category_name,
-                                                    time_from=int((datetime.now() - timedelta(hours=hours)).timestamp()))
+                                                    time_from=int(
+                                                        (datetime.now() - timedelta(hours=hours)).timestamp()))
 
         values = list(map(lambda x: x['value'], answer['values']))
+        ids = list(map(lambda x: x['id'], answer['values']))
 
         if not values:
-            return None
+            return None, None
 
         if mode == 'value':
-            return values[0], answer['values'][0]['id']
+            return values, ids
         if mode == 'sum':
-            return sum(values), None
+            return [sum(values)], None
         if mode == 'difference':
-            return max(values) - min(values), None
+            return [max(values) - min(values)], None
         if mode == 'delta':
-            return values[-1] - values[0], None
+            return [values[-1] - values[0]], None
         if mode == 'average':
-            return sum(values) / len(values), None
+            return [sum(values) / len(values)], None
         if mode == 'max':
-            return max(values), None
+            return [max(values)], None
         if mode == 'min':
-            return min(values), None
+            return [min(values)], None
 
-        return None
+        return None, None
 
     def check_values(self, left, right, sign):
         if sign == 'greater':
@@ -106,40 +108,62 @@ class AlgorithmsManager(Manager):
 
         return False
 
-    def check_criteria(self, criteria, contract_id, buffer):
+    def check_criteria(self, criteria, contract_id, buffer, descriptions, category_names):
         category_name = criteria['category']
 
-        left_value, record_id = self.get_value(category_name, criteria['left_mode'], contract_id, criteria.get('left_days'))
+        ids = None
+        left_values, ids = self.get_values(category_name, criteria['left_mode'], contract_id, criteria.get('left_days'))
 
         if criteria['right_mode'] == 'value':
-            right_value = criteria.get('value')
+            right_values = [criteria.get('value')]
         else:
             right_category = criteria.get('right_category')
             if right_category:
-                right_value, _ = self.get_value(right_category, criteria['right_mode'], contract_id, criteria.get('right_hours'))
+                right_values, _ = self.get_values(right_category, criteria['right_mode'], contract_id,
+                                                  criteria.get('right_hours'))
             else:
-                right_value, _ = self.get_value(category_name, criteria['right_mode'], contract_id,
-                                             criteria.get('right_hours'))
+                right_values, _ = self.get_values(category_name, criteria['right_mode'], contract_id,
+                                                  criteria.get('right_hours'))
 
-        if not right_value or not left_value:
+        if not right_values or not left_values:
             return False
 
-        result = self.check_values(left_value, right_value, criteria['sign'])
+        found = False
 
-        if result and record_id:
-            buffer.append({
-                "id": record_id,
-                "comment": generate_description(criteria, right_value)
-            })
+        for i in range(len(left_values)):
+            lvalue = left_values[i]
 
-        return result
+            for rvalue in right_values:
+                result = self.check_values(lvalue, rvalue, criteria['sign'])
 
-    def run_action(self, action, contract_id):
+                if result:
+                    description = generate_description(criteria, lvalue, rvalue, category_names)
+                    descriptions.append(description)
+
+                    if ids:
+                        buffer.append({
+                            "id": ids[i],
+                            "comment": description
+                        })
+
+                if result:
+                    found = True
+
+        return found
+
+    def run_action(self, action, contract_id, descriptions):
+        report = ""
+        if action['params'].get('send_report'):
+            report = '<br><br><strong>События:</strong><ul>' + ''.join(
+                ["<li>{}</li>".format(description) for description in descriptions]) + "</ul>"
+
         if action['type'] == 'patient_message':
-            self.medsenger_api.send_message(contract_id, action['params']['text'], only_patient=True,
+            self.medsenger_api.send_message(contract_id, action['params']['text'] + report,
+                                            only_patient=True,
                                             is_urgent=action['params'].get('is_urgent'))
         if action['type'] == 'doctor_message':
-            self.medsenger_api.send_message(contract_id, action['params']['text'], only_doctor=True,
+            self.medsenger_api.send_message(contract_id, action['params']['text'] + report,
+                                            only_doctor=True,
                                             is_urgent=action['params'].get('is_urgent'),
                                             need_answer=action['params'].get('need_answer'))
         if action['type'] == 'record':
@@ -180,7 +204,8 @@ class AlgorithmsManager(Manager):
 
                 if form:
                     form_manager.attach(template_id, contract)
-                    self.medsenger_api.send_message(contract_id, 'Опросник {} автоматически подключен.'.format(form.title),
+                    self.medsenger_api.send_message(contract_id,
+                                                    'Опросник {} автоматически подключен.'.format(form.title),
                                                     only_doctor=True)
 
             if action['type'] == 'detach_form':
@@ -188,7 +213,8 @@ class AlgorithmsManager(Manager):
 
                 if form:
                     form_manager.detach(template_id, contract)
-                    self.medsenger_api.send_message(contract_id, 'Опросник {} автоматически отключен.'.format(form.title),
+                    self.medsenger_api.send_message(contract_id,
+                                                    'Опросник {} автоматически отключен.'.format(form.title),
                                                     only_doctor=True)
 
             if action['type'] == 'attach_algorithm':
@@ -196,7 +222,8 @@ class AlgorithmsManager(Manager):
 
                 if algorithm:
                     self.attach(template_id, contract)
-                    self.medsenger_api.send_message(contract_id, 'Алгоритм {} автоматически подключен.'.format(algorithm.title),
+                    self.medsenger_api.send_message(contract_id,
+                                                    'Алгоритм {} автоматически подключен.'.format(algorithm.title),
                                                     only_doctor=True)
 
             if action['type'] == 'detach_algorithm':
@@ -204,7 +231,8 @@ class AlgorithmsManager(Manager):
 
                 if algorithm:
                     self.detach(template_id, contract)
-                    self.medsenger_api.send_message(contract_id, 'Алгоритм {} автоматически отключен.'.format(algorithm.title),
+                    self.medsenger_api.send_message(contract_id,
+                                                    'Алгоритм {} автоматически отключен.'.format(algorithm.title),
                                                     only_doctor=True)
 
             if action['type'] == 'attach_medicine':
@@ -215,7 +243,10 @@ class AlgorithmsManager(Manager):
                     self.medsenger_api.send_message(contract_id, 'Вам назначен препарат {} ({} / {}).'.format(
                         medicine.title, medicine.rules, medicine.timetable_description()),
                                                     only_patient=True)
-                    self.medsenger_api.send_message(contract_id, 'Внимание! Препарат {} ({} / {}) назначен автоматически.'.format(medicine.title, medicine.rules, medicine.timetable_description()),
+                    self.medsenger_api.send_message(contract_id,
+                                                    'Внимание! Препарат {} ({} / {}) назначен автоматически.'.format(
+                                                        medicine.title, medicine.rules,
+                                                        medicine.timetable_description()),
                                                     only_doctor=True)
 
             if action['type'] == 'detach_medicine':
@@ -227,7 +258,10 @@ class AlgorithmsManager(Manager):
                     self.medsenger_api.send_message(contract_id, 'Препарат {} ({} / {}) отменен.'.format(
                         medicine.title, medicine.rules, medicine.timetable_description()),
                                                     only_patient=True)
-                    self.medsenger_api.send_message(contract_id, 'Внимание! Препарат {} ({} / {}) отменен автоматически.'.format(medicine.title, medicine.rules, medicine.timetable_description()),
+                    self.medsenger_api.send_message(contract_id,
+                                                    'Внимание! Препарат {} ({} / {}) отменен автоматически.'.format(
+                                                        medicine.title, medicine.rules,
+                                                        medicine.timetable_description()),
                                                     only_doctor=True)
 
     def run(self, algorithm):
@@ -236,7 +270,12 @@ class AlgorithmsManager(Manager):
         contract_id = algorithm.contract_id
 
         additions = []
-        result = any([all(list(map(lambda x: self.check_criteria(x, contract_id, additions), block))) for block in criteria])
+        descriptions = []
+        category_names = {category['name']: category['description'] for category in self.medsenger_api.get_categories()}
+
+        result = any([all(
+            list(map(lambda x: self.check_criteria(x, contract_id, additions, descriptions, category_names), block)))
+            for block in criteria])
 
         if result:
             for addition in additions:
@@ -246,7 +285,7 @@ class AlgorithmsManager(Manager):
                 })
 
             for action in actions:
-                self.run_action(action, contract_id)
+                self.run_action(action, contract_id, descriptions)
 
     def examine(self, contract, form):
         categories = form.categories.split('|')
@@ -261,7 +300,8 @@ class AlgorithmsManager(Manager):
     def hook(self, contract, category_name):
         patient = contract.patient
 
-        algorithms = list(filter(lambda algorithm: category_name in algorithm.categories.split('|'), patient.algorithms))
+        algorithms = list(
+            filter(lambda algorithm: category_name in algorithm.categories.split('|'), patient.algorithms))
 
         for algorithm in algorithms:
             self.run(algorithm)

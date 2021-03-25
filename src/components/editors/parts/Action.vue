@@ -62,6 +62,11 @@
             <small class="text-muted">ID шаблона</small>
         </div>
 
+        <div class="col-md-12" v-if="['doctor_message', 'patient_message'].includes(action.type)">
+            <input type="checkbox" v-model="action.params.send_report">
+            <small class="text-muted">Приложить показатели?</small>
+        </div>
+
     </div>
 </template>
 

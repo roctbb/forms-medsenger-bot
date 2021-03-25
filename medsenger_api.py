@@ -1,4 +1,5 @@
 import uuid
+from copy import copy
 
 import requests
 from datetime import datetime
@@ -64,7 +65,7 @@ class AgentApiClient:
             'birthday': ''
         }
 
-    def get_records(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None, offset=None):
+    def get_records(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None, offset=None, group=False):
 
         data = {
             "contract_id": contract_id,
@@ -82,6 +83,8 @@ class AgentApiClient:
             data['from'] = time_from
         if time_to:
             data['to'] = time_to
+        if group:
+            data['last_group'] = True
 
         if not category_name:
             url = "/api/agents/records/get/all"
@@ -135,26 +138,19 @@ class AgentApiClient:
         return self.__send_request__('/api/agents/records/add', data)
 
     def add_records(self, contract_id, values, record_time=None, params=tuple()):
-        data = {
-            "contract_id": contract_id,
-            "api_key": self.api_key,
-        }
-
-        data['values'] = []
-        group_uid = str(uuid.uuid4())
+        data = {"contract_id": contract_id, "api_key": self.api_key, 'values': []}
 
         for record in values:
-            record_params = params
+            record_params = copy(params)
 
             if len(record) == 2:
                 category_name, value = record
             else:
                 category_name, value, custom_params = record
-                record_params += custom_params
+                record_params.update(custom_params)
 
             data['values'].append(
-                {"category_name": category_name, "value": value, "params": record_params, "time": record_time,
-                 "group": group_uid})
+                {"category_name": category_name, "value": value, "params": record_params, "time": record_time})
 
         return self.__send_request__('/api/agents/records/add', data)
 
