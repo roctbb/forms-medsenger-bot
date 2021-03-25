@@ -95,7 +95,6 @@ class FormManager(Manager):
         form.filled_timestamp = int(time.time())
 
         packet = []
-        checkbox = {}
 
         for field in form.fields:
             if answers.get(field['uid']) and answers.get(field['uid']) != False:
@@ -106,7 +105,9 @@ class FormManager(Manager):
                         continue
 
                     value = field['params']['variants'][answers[field['uid']]]['category_value']
-                    packet.append((category, value))
+                    packet.append((category, value, {
+                        "question_uid": field['uid']
+                    }))
                 elif field['type'] == 'checkbox':
                     category = field['category']
                     value = field.get('category_value')
@@ -114,17 +115,15 @@ class FormManager(Manager):
                     if not value:
                         continue
 
-                    if checkbox.get(category):
-                        checkbox[category].append(value)
-                    else:
-                        checkbox[category] = [value]
+                    packet.append((category, value, {
+                        "question_iud": field['uid']
+                    }))
                 else:
                     category = field['category']
-                    packet.append((category, answers[field['uid']]))
+                    packet.append((category, answers[field['uid']], {
+                        "question_uid": field['uid']
+                    }))
 
-        for category, value in checkbox.items():
-            print(value)
-            packet.append((category, ", ".join(value)))
 
         packet.append(('action', 'Заполнение опросника ID {}'.format(form_id)))
 

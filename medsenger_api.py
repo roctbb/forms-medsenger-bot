@@ -1,3 +1,5 @@
+import uuid
+
 import requests
 from datetime import datetime
 
@@ -127,19 +129,32 @@ class AgentApiClient:
         if params:
             data['params'] = params
 
-
         if record_time:
             data['time'] = record_time
 
         return self.__send_request__('/api/agents/records/add', data)
 
-    def add_records(self, contract_id, values, record_time=None, params=None):
+    def add_records(self, contract_id, values, record_time=None, params=tuple()):
         data = {
             "contract_id": contract_id,
             "api_key": self.api_key,
         }
 
-        data['values'] = [{"category_name": category_name, "value": value, "params": params, "time": record_time} for (category_name, value) in values]
+        data['values'] = []
+        group_uid = str(uuid.uuid4())
+
+        for record in values:
+            record_params = params
+
+            if len(record) == 2:
+                category_name, value = record
+            else:
+                category_name, value, custom_params = record
+                record_params += custom_params
+
+            data['values'].append(
+                {"category_name": category_name, "value": value, "params": record_params, "time": record_time,
+                 "group": group_uid})
 
         return self.__send_request__('/api/agents/records/add', data)
 
@@ -253,6 +268,7 @@ class AgentApiClient:
 
     def ajax_url(self, action, contract_id, agent_token):
         # TODO fix
-        return self.host.replace('8001', '8000') + "/api/client/agents/{agent_id}/?action={action}&contract_id={contract_id}&agent_token={agent_token}".format(
+        return self.host.replace('8001',
+                                 '8000') + "/api/client/agents/{agent_id}/?action={action}&contract_id={contract_id}&agent_token={agent_token}".format(
             agent_id=self.agent_id, action=action, contract_id=contract_id, agent_token=agent_token
         )
