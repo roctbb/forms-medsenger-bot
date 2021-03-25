@@ -84,14 +84,6 @@ export default {
     },
     created() {
         this.form = this.data
-
-        let prepare_answer = (field, i) => {
-            if (field.type == 'radio') {
-                this.answers[field.uid] = 0
-            }
-        }
-
-        this.form.fields.map(prepare_answer);
     }
 }
 </script>
