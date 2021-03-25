@@ -69,6 +69,12 @@ def init(data):
             for template_id in algorithms.split(','):
                 algorithm_manager.attach(template_id, contract, params)
 
+        medicines = params.get('medicines')
+
+        if medicines:
+            for template_id in medicines.split(','):
+                medicine_manager.attach(template_id, contract)
+
     return "ok"
 
 @app.route('/hook', methods=['POST'])
