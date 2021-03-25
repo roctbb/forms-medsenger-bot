@@ -83,7 +83,7 @@ class Medicine(db.Model):
     def clone(self):
         new_medicine = Medicine()
         new_medicine.title = self.title
-        new_medicine.rules = self.drules
+        new_medicine.rules = self.rules
 
         new_medicine.timetable = self.timetable
         new_medicine.actions = self.actions
