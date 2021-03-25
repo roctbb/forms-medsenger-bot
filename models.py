@@ -86,7 +86,6 @@ class Medicine(db.Model):
         new_medicine.rules = self.rules
 
         new_medicine.timetable = self.timetable
-        new_medicine.actions = self.actions
         new_medicine.warning_days = self.warning_days
 
         if self.is_template:
