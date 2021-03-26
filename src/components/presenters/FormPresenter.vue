@@ -25,7 +25,7 @@
                 </div>
             </form-group48>
 
-            <a @click="save()" v-if="!form.preview" class="btn btn-success">Отправить ответ</a>
+            <a @click="save()" class="btn btn-success">Отправить ответ</a>
     </div>
 </template>
 

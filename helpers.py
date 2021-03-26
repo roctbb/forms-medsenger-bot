@@ -44,8 +44,8 @@ def only_doctor_args(func):
             abort(422)
         if request.args.get('api_key') != API_KEY:
             abort(401)
-        if request.args.get('source') == 'patient':
-            abort(401)
+        #if request.args.get('source') == 'patient':
+        #    abort(401)
         try:
             return func(request.args, request.form, *args, **kargs)
         except Exception as e:
