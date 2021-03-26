@@ -61,6 +61,9 @@ export default {
         },
         check: function () {
             let prepare_field = (field, i) => {
+                if (this.empty(this.answers[field.uid])) {
+                    return;
+                }
                 if (field.type == 'integer') {
                     this.answers[field.uid] = parseInt(this.answers[field.uid])
                 }
