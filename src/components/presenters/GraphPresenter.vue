@@ -110,7 +110,7 @@ export default {
                     resetZoom: 'Весь график'
                 }
             });
-
+            /*
             this.data.filter((graph) => graph.category.type == 'string').forEach((graph) => {
                 graph.values.map((value) => {
 
@@ -126,7 +126,7 @@ export default {
                     })
                 })
 
-            });
+            });*/
 
             this.data.filter((graph) => graph.category.type != 'string').forEach((graph) => {
                 this.options.series.push({
