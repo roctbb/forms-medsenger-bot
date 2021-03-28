@@ -110,23 +110,33 @@ export default {
                     resetZoom: 'Весь график'
                 }
             });
-            /*
+
             this.data.filter((graph) => graph.category.type == 'string').forEach((graph) => {
-                graph.values.map((value) => {
+                this.options.series.push({
+                    name: graph.category.description,
+                    data: graph.values.map((value) => {
+                        let comment = 'Препарат: '
+                        if (graph.category.name == 'symptom') comment = 'Симптом: '
+                        if (graph.category.name == 'action') comment = 'Действие: '
 
-                    let comment = 'Препарат: '
-                    if (graph.category.name == 'symptom') comment = 'Симптом: '
-
-                    this.options.xAxis.plotLines.push({
-                        width: 1,
-                        value: value.timestamp * 1000,
-                        label: {
-                            text: comment + value.value
+                        return {
+                            x: value.timestamp * 1000,
+                            y: 30,
+                            comment: comment + value.value,
+                            marker: {
+                                lineColor: '#000',
+                                radius: 1,
+                            }
                         }
-                    })
+                    }).reverse(),
+                    dashStyle: 'Dot',
+                    marker: {
+                        enabled: true,
+                        symbol: 'circle'
+                    }
                 })
 
-            });*/
+            });
 
             this.data.filter((graph) => graph.category.type != 'string').forEach((graph) => {
                 this.options.series.push({
