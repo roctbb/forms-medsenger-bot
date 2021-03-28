@@ -51,7 +51,7 @@ export default {
                 xAxis: {
                     type: 'datetime',
                     plotLines: [],
-                    max: + new Date() + 60 * 60 * 1000,
+                    max: +new Date() + 60 * 60 * 1000,
                     ordinal: false
                 },
                 zoom: 'x',
@@ -120,6 +120,9 @@ export default {
                         if (graph.category.name == 'action') comment = 'Действие: '
 
                         return {
+                            dataLabels: {
+                                enabled: false,
+                            },
                             x: value.timestamp * 1000,
                             y: 30,
                             comment: comment + value.value,
