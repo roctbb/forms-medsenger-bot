@@ -71,7 +71,8 @@ export default {
                             fillColor: '#FFFFFF',
                             lineWidth: 2,
                             lineColor: null,
-                        }
+                        },
+
                     }
                 },
                 legend: {
@@ -80,11 +81,9 @@ export default {
                 tooltip: {
                     pointFormatter: function () {
                         let point = this;
-                        let label = point.series.name + ': <b>' + point.y + '</b><br/>'
-                        if (point.comment) {
-                            label += point.comment;
-                        }
-                        return label
+                        return point.series.userOptions.data.filter(p => p.x == point.x).map(p => {
+                            return p.comment
+                        }).join('<br>')
                     },
                     valueSuffix: ' cm',
                     shared: true
@@ -115,17 +114,13 @@ export default {
                 this.options.series.push({
                     name: graph.category.description,
                     data: graph.values.map((value) => {
-                        let comment = 'Препарат: '
-                        if (graph.category.name == 'symptom') comment = 'Симптом: '
-                        if (graph.category.name == 'action') comment = 'Действие: '
-
                         return {
                             dataLabels: {
                                 enabled: false,
                             },
                             x: value.timestamp * 1000,
                             y: 30,
-                            comment: comment + value.value,
+                            comment: this.get_comment(value, graph.category.description),
                             marker: {
                                 lineColor: '#000',
                                 radius: 1,
@@ -148,7 +143,7 @@ export default {
                         return {
                             x: value.timestamp * 1000,
                             y: value.value,
-                            comment: this.get_comment(value),
+                            comment: this.get_comment(value, graph.category.description),
                             marker: {
                                 lineColor: this.get_color(value),
                                 radius: this.get_radius(value),
@@ -183,17 +178,15 @@ export default {
             }
             return undefined;
         },
-        get_comment: function (point) {
+        get_comment: function (point, category) {
+
+            let comment = category + ': ' + point.value
             if (point.additions) {
-                let comment = ''
-
                 point.additions.forEach((value) => {
-                    comment += '<strong style="color: red;">' + value['addition']['comment'] + '</strong><br/>'
+                    comment += '<br/><strong style="color: red;">' + value['addition']['comment'] + '</strong>'
                 })
-
-                return comment
             }
-            return undefined;
+            return comment
         }
     },
     computed: {},

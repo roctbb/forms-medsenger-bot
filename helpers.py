@@ -95,13 +95,13 @@ def generate_description(criteria, l_value, r_value, category_names):
     }
 
     left_modes = {
-        "value": "Значение категории",
-        "sum": "Сумма категории",
-        "difference": "Разность крайних значений категории",
-        "delta": "Разброс категории",
-        "average": "Среднее значение категории",
-        "max": "Максимальному значение категории",
-        "min": "Минимальное значение категории"
+        "value": "Значение в категории",
+        "sum": "Сумма в категории",
+        "difference": "Разность крайних значений в категории",
+        "delta": "Разброс в категории",
+        "average": "Среднее значение в категории",
+        "max": "Максимальному значение в категории",
+        "min": "Минимальное значение в категории"
     }
 
     right_modes = {
@@ -117,8 +117,10 @@ def generate_description(criteria, l_value, r_value, category_names):
     LEFT_CATEGORY = category_names.get(criteria.get('category'))
     SIGN = signs[criteria.get('sign')]
 
-
-    comment = "{} {} ({}) {} ".format(LEFT_MODE, LEFT_CATEGORY, l_value, SIGN)
+    if criteria.get('right_mode') != 'value':
+        comment = "{} {} ({}) {} ".format(LEFT_MODE, LEFT_CATEGORY, l_value, SIGN)
+    else:
+        comment = "{} {} {} ".format(LEFT_MODE, LEFT_CATEGORY, SIGN)
 
     if criteria.get('right_mode') == 'value':
         comment += "{}".format(criteria.get('value'))
