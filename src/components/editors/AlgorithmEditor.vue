@@ -224,6 +224,9 @@ export default {
             else Event.fire('back-to-dashboard', this.algorithm)
 
             this.algorithm = undefined
+            this.save_clicked = false
+            this.actions_save_clicked = []
+            this.criteria_save_clicked = []
         },
         process_save_error: function (response) {
             this.errors.push('Ошибка сохранения');

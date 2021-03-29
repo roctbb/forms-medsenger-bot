@@ -134,6 +134,8 @@ export default {
             else Event.fire('back-to-dashboard', this.medicine)
 
             this.medicine = undefined
+            this.timetable_save_clicked = [false]
+            this.save_clicked = false
         },
         process_save_error: function (response) {
             console.log(response)

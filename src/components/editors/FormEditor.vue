@@ -206,6 +206,9 @@ export default {
             }
 
             this.form = undefined
+            this.save_clicked = false
+            this.fields_save_clicked = []
+            this.timetable_save_clicked = [false]
         },
         process_save_error: function (response) {
             this.errors.push('Ошибка сохранения');
