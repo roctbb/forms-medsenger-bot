@@ -15,7 +15,7 @@ export default {
     name: "FieldsEditor",
     components: {Field, FormGroup48, Card},
     props: {
-        data: {
+        fields: {
             required: true
         },
         fields_save_clicked: {
@@ -24,11 +24,9 @@ export default {
     },
     data() {
         return {
-            fields: []
         }
     },
     created() {
-        this.fields = this.data
         Event.listen('remove-field', (i) => this.remove_field(i));
     },
     methods: {

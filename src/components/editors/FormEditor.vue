@@ -50,7 +50,7 @@
             <timetable-editor v-bind:data="form.timetable" :timetable_save_clicked="this.timetable_save_clicked"/>
 
             <hr>
-            <fields-editor v-bind:data="form.fields" :fields_save_clicked="fields_save_clicked"/>
+            <fields-editor v-bind:fields="form.fields" :fields_save_clicked="fields_save_clicked"/>
         </div>
 
         <button class="btn btn-danger" @click="go_back()">Вернуться назад</button>
@@ -158,7 +158,6 @@ export default {
                 console.log(this.form.fields.filter(validate_field))
                 this.errors.push('Проверьте корректность вопросов')
             }
-
 
             if (this.errors.length != 0) {
                 return false;
