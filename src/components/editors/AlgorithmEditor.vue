@@ -153,16 +153,13 @@ export default {
                 }
                 if (criteria.left_mode != 'value' && this.empty(criteria.left_hours))
                 {
-                    console.log(1);
                     return true;
                 }
 
-                if (criteria.right_mode != 'value' && this.empty(criteria.right_hours)) {
-                    console.log(2);
+                if (!['value', 'category_value'].includes(criteria.right_mode) && this.empty(criteria.right_hours)) {
                     return true;
                 }
                 if (criteria.right_mode == 'value' && this.empty(criteria.value)) {
-                    console.log(3);
                     return true;
                 }
 
