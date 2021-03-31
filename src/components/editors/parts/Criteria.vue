@@ -10,9 +10,10 @@
                         <option value="difference" v-if="is_int()">разброс за</option>
                         <option value="time">текущая дата</option>
                     </select>
-                    <span class="text-muted"><button class="btn btn-sm btn-default"
-                                                     @click="remove()">Удалить</button></span>
+                    <span class="text-muted"><button class="btn btn-sm btn-default" @click="remove()">Удалить</button></span>
                 </div>
+
+                <!-- not time -->
 
                 <div class="col-md-1" v-if="criteria.left_mode != 'value' && criteria.left_mode != 'time'">
                     <input class="form-control form-control-sm" v-model="criteria.left_hours">
@@ -52,7 +53,7 @@
                     </select>
                 </div>
 
-                <div class="col-md-3" v-if="criteria.right_mode != 'value' && criteria.left_mode != 'time'">
+                <div class="col-md-2" v-if="criteria.right_mode != 'value' && criteria.left_mode != 'time'">
                     <select class="form-control form-control-sm"
                             v-model="criteria.right_category">
                         <optgroup
@@ -72,10 +73,13 @@
                     <input class="form-control form-control-sm" v-model="criteria.right_hours">
                     <small class="text-muted">часов</small>
                 </div>
-                <div class="col-md-1" v-if="['value'].includes(criteria.right_mode) && criteria.left_mode != 'time'">
+                <div class="col-md-1" v-if="criteria.left_mode != 'time'">
                     <input class="form-control form-control-sm" v-model="criteria.value">
+                    <small class="text-muted" v-if="criteria.right_mode == 'value'">значение для сравнения</small>
+                    <small class="text-muted" v-else>модификатор</small>
                 </div>
 
+                <!-- time -->
 
                 <div class="col-md-1" v-if="criteria.left_mode == 'time'">
                     <select class="form-control form-control-sm" v-model="criteria.sign">

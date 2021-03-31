@@ -95,15 +95,21 @@ class AlgorithmsManager(Manager):
 
         return None, None
 
-    def check_values(self, left, right, sign):
+    def check_values(self, left, right, sign, modifier = 0):
+
+        try:
+            modifier = float(modifier)
+        except:
+            modifier = 0
+
         if sign == 'greater':
-            return left > right
+            return left > right + modifier
         if sign == 'less':
-            return left < right
+            return left < right + modifier
         if sign == 'greater_or_equal':
-            return left >= right
+            return left >= right + modifier
         if sign == 'less_or_equal':
-            return left <= right
+            return left <= right + modifier
         if sign == 'equal':
             return left == right
         if sign == 'not_equal':
@@ -118,7 +124,6 @@ class AlgorithmsManager(Manager):
         mode = criteria.get('left_mode')
 
         if mode != 'time':
-
             ids = None
             left_values, ids = self.get_values(category_name, criteria['left_mode'], contract_id,
                                                criteria.get('left_hours'))
@@ -143,7 +148,7 @@ class AlgorithmsManager(Manager):
                 lvalue = left_values[i]
 
                 for rvalue in right_values:
-                    result = self.check_values(lvalue, rvalue, criteria['sign'])
+                    result = self.check_values(lvalue, rvalue, criteria['sign'], criteria.get('value'))
 
                     if result:
                         description = generate_description(criteria, lvalue, rvalue, category_names)
