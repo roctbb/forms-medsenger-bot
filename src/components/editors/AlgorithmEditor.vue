@@ -48,6 +48,7 @@ import FormGroup48 from "../common/FormGroup-4-8";
 import ErrorBlock from "../common/ErrorBlock";
 import Criteria from "./parts/Criteria";
 import Action from "./parts/Action";
+import * as moment from "moment/moment";
 
 export default {
     name: "AlgorithmEditor",
@@ -115,15 +116,28 @@ export default {
             }
 
             let prepare_criteria = (criteria) => {
-                if (!this.empty(criteria.left_days)) criteria.left_days = parseInt(criteria.left_days)
+                if (criteria.left_mode != 'time')
+                {
+                    if (!this.empty(criteria.left_hours)) criteria.left_hours = parseInt(criteria.left_hours)
 
-                if (!this.empty(criteria.right_hours)) criteria.right_hours = parseInt(criteria.right_hours)
+                    if (!this.empty(criteria.right_hours)) criteria.right_hours = parseInt(criteria.right_hours)
 
 
-                if (!this.empty(criteria.value)) {
-                    let category = this.get_category(criteria.category)
-                    if (category.type == 'integer') criteria.value = parseInt(criteria.value)
-                    if (category.type == 'float') criteria.value = parseFloat(criteria.value)
+                    if (!this.empty(criteria.value)) {
+                        let category = this.get_category(criteria.category)
+                        if (category.type == 'integer') criteria.value = parseInt(criteria.value)
+                        if (category.type == 'float') criteria.value = parseFloat(criteria.value)
+                    }
+                }
+                else {
+                    if (!this.empty(criteria.right_hours)) criteria.right_hours = parseInt(criteria.right_hours)
+
+                    if (criteria.sign == 'equal') {
+                        criteria.category = 'exact_time'
+                    }
+                    else {
+                        criteria.category = 'time'
+                    }
                 }
 
                 return criteria
@@ -131,9 +145,14 @@ export default {
 
             let criteria_validator = (criteria) => {
                 let category = this.get_category(criteria.category)
-                if (criteria.left_mode != 'value' && this.empty(criteria.left_days)) return true;
-                if (criteria.right_mode != 'value' && this.empty(criteria.right_hours)) return true;
 
+                if (criteria.left_mode == 'time')
+                {
+                    if (moment(criteria.value, 'DD.MM.YYYY',true).isValid() && !this.empty(criteria.right_hours)) return false;
+                    return true;
+                }
+                if (criteria.left_mode != 'value' && this.empty(criteria.left_hours)) return true;
+                if (criteria.right_mode != 'value' && this.empty(criteria.right_hours)) return true;
                 if (criteria.right_mode == 'value' && this.empty(criteria.value)) return true;
                 return false;
             }

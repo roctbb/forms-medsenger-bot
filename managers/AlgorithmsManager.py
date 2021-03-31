@@ -109,47 +109,67 @@ class AlgorithmsManager(Manager):
         return False
 
     def check_criteria(self, criteria, contract_id, buffer, descriptions, category_names):
-        category_name = criteria['category']
+        category_name = criteria.get('category')
+        mode = criteria.get('left_mode')
 
-        ids = None
-        left_values, ids = self.get_values(category_name, criteria['left_mode'], contract_id, criteria.get('left_days'))
+        if mode != 'time':
 
-        if criteria['right_mode'] == 'value':
-            right_values = [criteria.get('value')]
-        else:
-            right_category = criteria.get('right_category')
-            if right_category:
-                right_values, _ = self.get_values(right_category, criteria['right_mode'], contract_id,
-                                                  criteria.get('right_hours'))
+            ids = None
+            left_values, ids = self.get_values(category_name, criteria['left_mode'], contract_id,
+                                               criteria.get('left_hours'))
+
+            if criteria['right_mode'] == 'value':
+                right_values = [criteria.get('value')]
             else:
-                right_values, _ = self.get_values(category_name, criteria['right_mode'], contract_id,
-                                                  criteria.get('right_hours'))
+                right_category = criteria.get('right_category')
+                if right_category:
+                    right_values, _ = self.get_values(right_category, criteria['right_mode'], contract_id,
+                                                      criteria.get('right_hours'))
+                else:
+                    right_values, _ = self.get_values(category_name, criteria['right_mode'], contract_id,
+                                                      criteria.get('right_hours'))
 
-        if not right_values or not left_values:
+            if not right_values or not left_values:
+                return False
+
+            found = False
+
+            for i in range(len(left_values)):
+                lvalue = left_values[i]
+
+                for rvalue in right_values:
+                    result = self.check_values(lvalue, rvalue, criteria['sign'])
+
+                    if result:
+                        description = generate_description(criteria, lvalue, rvalue, category_names)
+                        descriptions.append(description)
+
+                        if ids:
+                            buffer.append({
+                                "id": ids[i],
+                                "comment": description
+                            })
+
+                    if result:
+                        found = True
+
+            return found
+
+        else:
+            date = criteria.get('value')
+            add_hours = criteria.get('right_hours')
+            sign = criteria.get('sign')
+
+            date_obj = datetime.strptime(date, '%d.%m.%Y') + timedelta(hours=add_hours)
+            now_obj = datetime.now()
+
+            if sign == 'equal' and 0 <= (now_obj - date_obj).total_seconds() < 60 * 60:
+                return True
+            if sign == 'greater' and (now_obj - date_obj).total_seconds() > 0:
+                return True
+            if sign == 'less' and (now_obj - date_obj).total_seconds() < 0:
+                return True
             return False
-
-        found = False
-
-        for i in range(len(left_values)):
-            lvalue = left_values[i]
-
-            for rvalue in right_values:
-                result = self.check_values(lvalue, rvalue, criteria['sign'])
-
-                if result:
-                    description = generate_description(criteria, lvalue, rvalue, category_names)
-                    descriptions.append(description)
-
-                    if ids:
-                        buffer.append({
-                            "id": ids[i],
-                            "comment": description
-                        })
-
-                if result:
-                    found = True
-
-        return found
 
     def run_action(self, action, contract_id, descriptions):
         report = ""
