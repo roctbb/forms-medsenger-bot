@@ -160,7 +160,7 @@ class AlgorithmsManager(Manager):
             add_hours = criteria.get('right_hours')
             sign = criteria.get('sign')
 
-            date_obj = datetime.strptime(date, '%d.%m.%Y') + timedelta(hours=add_hours)
+            date_obj = datetime.strptime(date, '%Y-%m-%d') + timedelta(hours=add_hours)
             now_obj = datetime.now()
 
             if sign == 'equal' and 0 <= (now_obj - date_obj).total_seconds() < 60 * 60:

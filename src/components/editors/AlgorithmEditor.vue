@@ -148,7 +148,7 @@ export default {
 
                 if (criteria.left_mode == 'time')
                 {
-                    if (moment(criteria.value, 'DD.MM.YYYY',true).isValid() && !this.empty(criteria.right_hours)) return false;
+                    if (moment(criteria.value, 'YYYY-MM-DD',true).isValid() && !this.empty(criteria.right_hours)) return false;
                     return true;
                 }
                 if (criteria.left_mode != 'value' && this.empty(criteria.left_hours)) return true;
