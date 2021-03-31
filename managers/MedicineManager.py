@@ -63,6 +63,11 @@ class MedicineManager(Manager):
 
         return True
 
+    def clear(self, contract):
+        Medicine.query.filter_by(contract_id=contract.id).delete()
+        self.__commit__()
+        return True
+
     def remove(self, id, contract):
 
         medicine = Medicine.query.filter_by(id=id).first_or_404()

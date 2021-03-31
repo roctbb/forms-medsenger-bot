@@ -44,6 +44,11 @@ class AlgorithmsManager(Manager):
         else:
             return False
 
+    def clear(self, contract):
+        Algorithm.query.filter_by(contract_id=contract.id).delete()
+        self.__commit__()
+        return True
+
     def remove(self, id, contract):
 
         algorithm = Algorithm.query.filter_by(id=id).first_or_404()

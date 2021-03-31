@@ -16,6 +16,11 @@ class FormManager(Manager):
     def get_templates(self):
         return Form.query.filter_by(is_template=True).all()
 
+    def clear(self, contract):
+        Form.query.filter_by(contract_id=contract.id).delete()
+        self.__commit__()
+        return True
+
     def remove(self, id, contract):
 
         form = Form.query.filter_by(id=id).first_or_404()
