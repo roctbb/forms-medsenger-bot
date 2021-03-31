@@ -151,9 +151,21 @@ export default {
                     if (moment(criteria.value, 'YYYY-MM-DD',true).isValid() && !this.empty(criteria.right_hours)) return false;
                     return true;
                 }
-                if (criteria.left_mode != 'value' && this.empty(criteria.left_hours)) return true;
-                if (criteria.right_mode != 'value' && this.empty(criteria.right_hours)) return true;
-                if (criteria.right_mode == 'value' && this.empty(criteria.value)) return true;
+                if (criteria.left_mode != 'value' && this.empty(criteria.left_hours))
+                {
+                    console.log(1);
+                    return true;
+                }
+
+                if (criteria.right_mode != 'value' && this.empty(criteria.right_hours)) {
+                    console.log(2);
+                    return true;
+                }
+                if (criteria.right_mode == 'value' && this.empty(criteria.value)) {
+                    console.log(3);
+                    return true;
+                }
+
                 return false;
             }
 
