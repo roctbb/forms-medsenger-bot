@@ -168,10 +168,10 @@ export default {
         },
         show_validation: function () {
             this.save_clicked = true
-            for (var i = 0; i < this.timetable_save_clicked.length; i++) {
+            for (let i of  this.timetable_save_clicked.keys()) {
                 this.$set(this.timetable_save_clicked, i, true)
             }
-            for (var i = 0; i < this.fields_save_clicked.length; i++) {
+            for (let i of this.fields_save_clicked.keys()) {
                 this.$set(this.fields_save_clicked, i, true)
             }
         },
@@ -252,12 +252,30 @@ export default {
 
         Event.listen('navigate-to-create-form-page', () => {
             this.form = this.create_empty_form()
+
+            this.save_clicked = false
+            this.timetable_save_clicked = [false]
+            this.fields_save_clicked = []
+
             console.log("create", this.form)
             this.backup = JSON.stringify(this.form)
         });
 
         Event.listen('navigate-to-edit-form-page', form => {
             this.form = form
+
+            this.save_clicked = false
+
+            if (this.form.timetable.points) {
+                for (let i of  this.form.timetable.points.keys()) {
+                    this.$set(this.timetable_save_clicked, i, false)
+                }
+            }
+
+            for (let i of this.form.fields.keys()) {
+                this.$set(this.fields_save_clicked, i, false)
+            }
+
 
             if (this.form.warning_days > 0)
             {
@@ -266,6 +284,18 @@ export default {
 
             this.backup = JSON.stringify(form)
             this.$forceUpdate()
+        });
+
+        Event.listen('add-time-point', () => {
+            this.timetable_save_clicked.push(false)
+        });
+
+        Event.listen('remove-time-point', (index) => {
+            this.timetable_save_clicked.splice(index, 1);
+        });
+
+        Event.listen('clear-time-points', (index) => {
+            this.timetable_save_clicked = [];
         });
     }
 }

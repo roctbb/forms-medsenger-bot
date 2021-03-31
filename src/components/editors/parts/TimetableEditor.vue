@@ -78,8 +78,7 @@ export default {
             if (this.backup[this.mode]) {
                 this.timetable.points = JSON.parse(this.backup[this.mode])
             } else {
-                this.timetable.points = []
-                this.timetable_save_clicked = []
+                Event.fire('clear-time-points')
                 this.add_time_point();
             }
 
@@ -93,19 +92,19 @@ export default {
                     hour: '',
                     minute: ''
                 })
-                this.timetable_save_clicked.push(false)
+                Event.fire('add-time-point')
             } else {
                 this.timetable.points.push({
                     day: '',
                     hour: '',
                     minute: ''
                 })
-                this.timetable_save_clicked.push(false)
+                Event.fire('add-time-point')
             }
         },
         remove_time_point: function (index) {
             this.timetable.points.splice(index, 1);
-            this.timetable_save_clicked.splice(index, 1);
+            Event.fire('remove-time-point', index);
         },
     },
     data() {

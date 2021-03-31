@@ -104,7 +104,7 @@ export default {
         },
         show_validation: function () {
             this.save_clicked = true
-            for (let i = 0; i < this.timetable_save_clicked.length; i++) {
+            for (let i of this.timetable_save_clicked.keys()) {
                 this.$set(this.timetable_save_clicked, i, true)
             }
         },
@@ -190,8 +190,26 @@ export default {
                 this.medicine.warning_enabled = true;
             }
 
+            if (this.medicine.timetable.points) {
+                for (let i of  this.medicine.timetable.points.keys()) {
+                    this.$set(this.timetable_save_clicked, i, false)
+                }
+            }
+
             this.backup = JSON.stringify(medicine)
             this.$forceUpdate()
+        });
+
+        Event.listen('add-time-point', () => {
+            this.timetable_save_clicked.push(false)
+        });
+
+        Event.listen('remove-time-point', (index) => {
+            this.timetable_save_clicked.splice(index, 1);
+        });
+
+        Event.listen('clear-time-points', (index) => {
+            this.timetable_save_clicked = [];
         });
     }
 }

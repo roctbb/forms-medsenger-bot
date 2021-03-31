@@ -293,6 +293,24 @@ export default {
 
         Event.listen('navigate-to-edit-algorithm-page', algorithm => {
             this.algorithm = algorithm
+
+            if (this.algorithm.criteria) {
+                for (let i of  this.algorithm.criteria.keys()) {
+                    this.$set(this.criteria_save_clicked, i, [])
+                    for (let j of  this.algorithm.criteria[i].keys()) {
+                        this.$set(this.criteria_save_clicked[i], j, false)
+                    }
+
+                }
+            }
+
+            if (this.algorithm.actions) {
+                for (let i of  this.algorithm.actions.keys()) {
+                    this.$set(this.actions_save_clicked, i, false)
+                }
+            }
+
+
             this.backup = JSON.stringify(algorithm)
             this.$forceUpdate()
         });
