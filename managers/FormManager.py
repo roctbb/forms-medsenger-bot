@@ -125,9 +125,15 @@ class FormManager(Manager):
                     }))
                 else:
                     category = field['category']
-                    packet.append((category, answers[field['uid']], {
-                        "question_uid": field['uid']
-                    }))
+
+                    if field['type'] in ['string', 'text'] and field.get('prefix'):
+                        packet.append((category, "{}{}".format(field.get('prefix'), answers[field['uid']]), {
+                            "question_uid": field['uid']
+                        }))
+                    else:
+                        packet.append((category, answers[field['uid']], {
+                            "question_uid": field['uid']
+                        }))
 
 
         packet.append(('action', 'Заполнение опросника ID {}'.format(form_id)))

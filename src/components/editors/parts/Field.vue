@@ -57,6 +57,12 @@
             </div>
         </div>
 
+        <div v-if="field.type == 'text' || field.type == 'string'">
+            <form-group48 title="Префикс">
+                <input type="text" class="form-control form-control-sm" v-model="field.prefix"/>
+            </form-group48>
+        </div>
+
         <div v-if="field.type == 'checkbox'">
             <form-group48 title="Значение при включении">
                 <input type="text" class="form-control form-control-sm" v-model="field.category_value"/>
