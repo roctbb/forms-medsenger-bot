@@ -19,6 +19,7 @@
                     <graph-category-chooser :data="available_categories" v-if="state == 'graph-category-chooser'"/>
                     <graph-presenter v-show="state == 'graph-presenter'" />
                     <action-done v-if="state == 'done'"></action-done>
+                    <load-error v-if="state == 'load-error'"></load-error>
                 </div>
             </div>
 
@@ -38,12 +39,14 @@ import DashboardHeader from "./components/dashboard/DashboardHeader";
 import ActionDone from "./components/presenters/ActionDone";
 import GraphCategoryChooser from "./components/presenters/GraphCategoryChooser";
 import GraphPresenter from "./components/presenters/GraphPresenter";
+import LoadError from "./components/presenters/LoadError";
 
 
 
 export default {
     name: 'app',
     components: {
+        LoadError,
         GraphPresenter,
         GraphCategoryChooser,
         ActionDone,
@@ -131,7 +134,7 @@ export default {
                 this.axios.get(this.url('/api/settings/get_templates')).then(response => this.templates = response.data);
             }
             if (this.mode == 'form') {
-                this.axios.get(this.url('/api/form/' + this.object_id)).then(this.process_load_answer);
+                this.axios.get(this.url('/api/form/' + this.object_id)).then(this.process_load_answer).catch(this.process_load_error);
             }
 
             if (this.mode == 'graph') {
@@ -153,7 +156,9 @@ export default {
                 this.state = 'graph-category-chooser'
             }
 
-
+        },
+        process_load_error: function (response) {
+            this.state = 'load-error'
         }
     },
     mounted: function () {

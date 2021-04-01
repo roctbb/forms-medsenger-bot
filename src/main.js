@@ -194,6 +194,7 @@ Vue.mixin({
                 medicine: window.LOCAL_HOST + '/static/images/icons8-pill-96.png',
                 algorithm: window.LOCAL_HOST + '/static/images/icons8-artificial-intelligence-96.png',
                 ok: window.LOCAL_HOST + '/static/images/icons8-ok-128.png',
+                error: window.LOCAL_HOST + '/static/images/icons8-delete-128.png',
             },
             is_admin: window.IS_ADMIN
         }
