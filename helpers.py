@@ -117,7 +117,7 @@ def generate_description(criteria, l_value, r_value, category_names):
     LEFT_CATEGORY = category_names.get(criteria.get('category'))
     SIGN = signs[criteria.get('sign')]
 
-    if criteria.get('right_mode') != 'value':
+    if criteria.get('right_mode') != 'value' or criteria.get('sign') == 'contains':
         comment = "{} {} ({}) {} ".format(LEFT_MODE, LEFT_CATEGORY, l_value, SIGN)
     else:
         comment = "{} {} {} ".format(LEFT_MODE, LEFT_CATEGORY, SIGN)
