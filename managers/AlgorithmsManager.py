@@ -148,7 +148,10 @@ class AlgorithmsManager(Manager):
                 lvalue = left_values[i]
 
                 for rvalue in right_values:
-                    result = self.check_values(lvalue, rvalue, criteria['sign'], criteria.get('value'))
+                    modifier = 0
+                    if criteria.get('right_mode') != 'value':
+                        modifier = criteria.get('value')
+                    result = self.check_values(lvalue, rvalue, criteria['sign'], modifier)
 
                     if result:
                         description = generate_description(criteria, lvalue, rvalue, category_names)
