@@ -154,7 +154,7 @@ class AgentApiClient:
 
         return self.__send_request__('/api/agents/records/add', data)
 
-    def send_message(self, contract_id, text, action_link=None, action_name=None, action_onetime=True,
+    def send_message(self, contract_id, text, action_link=None, action_name=None, action_onetime=True, action_big=True,
                      only_doctor=False,
                      only_patient=False, action_deadline=None, is_urgent=False, need_answer=False,
                      attachments=None):
@@ -170,6 +170,9 @@ class AgentApiClient:
 
         if action_onetime:
             message['action_onetime'] = action_onetime
+
+        if action_big:
+            message['action_big'] = action_big
 
         if only_doctor:
             message['only_doctor'] = only_doctor

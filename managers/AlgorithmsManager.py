@@ -191,12 +191,26 @@ class AlgorithmsManager(Manager):
                 ["<li>{}</li>".format(description) for description in descriptions]) + "</ul>"
 
         if action['type'] == 'patient_message':
+            if action['params'].get('add_action'):
+                action_name = action['params'].get('action_name')
+                action_link = action['params'].get('action_link')
+            else:
+                action_name = None
+                action_link = None
+
             self.medsenger_api.send_message(contract_id, action['params']['text'] + report,
-                                            only_patient=True,
+                                            only_patient=True, action_name=action_name, action_link=action_link,
                                             is_urgent=action['params'].get('is_urgent'))
         if action['type'] == 'doctor_message':
+            if action['params'].get('add_action'):
+                action_name = action['params'].get('action_name')
+                action_link = action['params'].get('action_link')
+            else:
+                action_name = None
+                action_link = None
+
             self.medsenger_api.send_message(contract_id, action['params']['text'] + report,
-                                            only_doctor=True,
+                                            only_doctor=True, action_name=action_name, action_link=action_link,
                                             is_urgent=action['params'].get('is_urgent'),
                                             need_answer=action['params'].get('need_answer'))
         if action['type'] == 'record':
