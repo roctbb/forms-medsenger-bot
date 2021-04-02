@@ -95,7 +95,7 @@ class AlgorithmsManager(Manager):
 
         return None, None
 
-    def check_values(self, left, right, sign, modifier = 0):
+    def check_values(self, left, right, sign, modifier=0):
 
         try:
             modifier = float(modifier)
@@ -317,7 +317,10 @@ class AlgorithmsManager(Manager):
                     "comment": addition["comment"]
                 })
 
-            for action in actions:
+            for action in filter(lambda x: not x.get('params', {}).get('is_negative'), actions):
+                self.run_action(action, contract_id, descriptions)
+        else:
+            for action in filter(lambda x: x.get('params', {}).get('is_negative'), actions):
                 self.run_action(action, contract_id, descriptions)
 
     def examine(self, contract, form):

@@ -67,6 +67,11 @@
             <small class="text-muted">Приложить показатели?</small>
         </div>
 
+        <div class="col-md-12">
+            <input type="checkbox" v-model="action.params.is_negative">
+            <small class="text-muted">Выполнить если критерии не выполняются.</small>
+        </div>
+
     </div>
 </template>
 
