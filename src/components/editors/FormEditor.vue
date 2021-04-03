@@ -47,10 +47,10 @@
                 </form-group48>
             </card>
 
-            <timetable-editor v-bind:data="form.timetable" :timetable_save_clicked="this.timetable_save_clicked"/>
+            <timetable-editor :data="form.timetable" :timetable_save_clicked="this.timetable_save_clicked"/>
 
             <hr>
-            <fields-editor v-bind:fields="form.fields" :fields_save_clicked="fields_save_clicked"/>
+            <fields-editor v-if="form" :form="form" :fields="form.fields" :fields_save_clicked="fields_save_clicked"/>
         </div>
 
         <button class="btn btn-danger" @click="go_back()">Вернуться назад</button>
@@ -286,6 +286,7 @@ export default {
             this.$forceUpdate()
         });
 
+        // Обработка добавления времени
         Event.listen('add-time-point', () => {
             this.timetable_save_clicked.push(false)
         });

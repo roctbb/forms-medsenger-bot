@@ -57,6 +57,10 @@ def init(data):
     if params:
         forms = params.get('forms')
         if forms:
+            form_manager.clear(contract)
+            algorithm_manager.clear(contract)
+            medicine_manager.clear(contract)
+
             for template_id in forms.split(','):
                 form = form_manager.attach(template_id, contract)
 
@@ -68,6 +72,12 @@ def init(data):
         if algorithms:
             for template_id in algorithms.split(','):
                 algorithm_manager.attach(template_id, contract, params)
+
+        medicines = params.get('medicines')
+
+        if medicines:
+            for template_id in medicines.split(','):
+                medicine_manager.attach(template_id, contract)
 
     return "ok"
 

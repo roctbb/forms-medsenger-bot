@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import time
 from helpers import log
+from managers.AlgorithmsManager import AlgorithmsManager
 from managers.FormManager import FormManager
 from managers.Manager import Manager
 from managers.MedicineManager import MedicineManager
@@ -36,6 +37,18 @@ class TimetableManager(Manager):
         for object in objects:
             if object and self.should_run(object):
                 manager.run(object)
+
+    def check_hours(self, app):
+        with app.app_context():
+            contracts = list(Contract.query.filter_by(is_active=True).all())
+            algorithm_groups = list(map(lambda x: x.algorithms, contracts))
+
+            algorithm_manager = AlgorithmsManager(self.medsenger_api, self.db)
+
+            for group in algorithm_groups:
+                for alg in group:
+                    if "exact_time" in alg.categories:
+                        algorithm_manager.run(alg)
 
     def iterate(self, app):
         with app.app_context():

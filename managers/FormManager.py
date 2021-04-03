@@ -16,6 +16,11 @@ class FormManager(Manager):
     def get_templates(self):
         return Form.query.filter_by(is_template=True).all()
 
+    def clear(self, contract):
+        Form.query.filter_by(contract_id=contract.id).delete()
+        self.__commit__()
+        return True
+
     def remove(self, id, contract):
 
         form = Form.query.filter_by(id=id).first_or_404()
@@ -84,7 +89,9 @@ class FormManager(Manager):
             if time.time() - form.filled_timestamp > 24 * 60 * 60 * form.warning_days:
                 form.warning_timestamp = int(time.time())
 
-                self.medsenger_api.send_message(form.contract_id, "Пациент не заполнял опросник {} уже {} дней.".format(form.title, form.warning_days))
+                self.medsenger_api.send_message(form.contract_id,
+                                                "Пациент не заполнял опросник {} уже {} дней.".format(form.title,
+                                                                                                      form.warning_days))
                 self.__commit__()
 
     def submit(self, answers, form_id, contract_id):
@@ -95,7 +102,7 @@ class FormManager(Manager):
         packet = []
 
         for field in form.fields:
-            if answers.get(field['uid']):
+            if field['uid'] in answers.keys():
                 if field['type'] == 'radio':
                     category = field['params']['variants'][answers[field['uid']]]['category']
 
@@ -103,13 +110,31 @@ class FormManager(Manager):
                         continue
 
                     value = field['params']['variants'][answers[field['uid']]]['category_value']
-                    packet.append((category, value))
+                    packet.append((category, value, {
+                        "question_uid": field['uid']
+                    }))
                 elif field['type'] == 'checkbox':
                     category = field['category']
-                    packet.append((category, 1))
+                    value = field.get('category_value')
+
+                    if not value:
+                        continue
+
+                    packet.append((category, value, {
+                        "question_iud": field['uid']
+                    }))
                 else:
                     category = field['category']
-                    packet.append((category, answers[field['uid']]))
+
+                    if field['type'] in ['string', 'text'] and field.get('prefix'):
+                        packet.append((category, "{}{}".format(field.get('prefix'), answers[field['uid']]), {
+                            "question_uid": field['uid']
+                        }))
+                    else:
+                        packet.append((category, answers[field['uid']], {
+                            "question_uid": field['uid']
+                        }))
+
 
         packet.append(('action', 'Заполнение опросника ID {}'.format(form_id)))
 
@@ -160,7 +185,6 @@ class FormManager(Manager):
                 to_add = list(filter(lambda c: c not in old_names, names))
                 if to_add:
                     self.medsenger_api.add_hooks(contract.id, to_add)
-
 
             if data.get('algorithm_id') and contract.is_admin:
                 form.algorithm_id = data.get('algorithm_id')

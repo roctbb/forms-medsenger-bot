@@ -66,6 +66,34 @@
             <small class="text-muted">ID шаблона</small>
         </div>
 
+        <div class="col-md-12" v-if="['doctor_message', 'patient_message'].includes(action.type)">
+            <input type="checkbox" v-model="action.params.send_report">
+            <small class="text-muted">Приложить показатели?</small>
+        </div>
+
+        <div class="col-md-12" v-if="['doctor_message', 'patient_message'].includes(action.type)">
+            <input type="checkbox" v-model="action.params.add_action">
+            <small class="text-muted">Приложить действие?</small>
+
+            <div class="row" v-if="action.params.add_action">
+                <div class="col-md-4">
+                    <input type="text" class="form-control form-control-sm" v-model="action.params.action_link">
+                    <small class="text-muted">Имя действия</small>
+                </div>
+
+                <div class="col-md-4">
+                    <input type="text" class="form-control form-control-sm" v-model="action.params.action_name">
+                    <small class="text-muted">Текст для кнопки</small>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-12">
+            <input type="checkbox" v-model="action.params.is_negative">
+            <small class="text-muted">Выполнить если критерии не выполняются.</small>
+        </div>
+
     </div>
 </template>
 
@@ -103,6 +131,10 @@ export default {
     },
     created() {
         this.action = this.data;
+        if (this.data.type)
+        {
+            this.mode = this.action.type
+        }
     }
 }
 </script>

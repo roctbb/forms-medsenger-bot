@@ -88,6 +88,12 @@ Vue.mixin({
             );
         },
         get_category: function (category_name) {
+            if (category_name == 'time' || category_name == "exact_time") {
+                return {
+                    description: 'время'
+                }
+            }
+
             return this.category_list.find(x => x.name == category_name)
         },
         copy: function (to, from) {
@@ -177,17 +183,18 @@ Vue.mixin({
             axios: require('axios'),
             category_list: window.CATEGORY_LIST,
             native_types: {
-                integer: 'integer',
-                float: 'float',
-                string: 'string',
-                text: 'string',
-                checkbox: 'integer'
+                integer: ['integer'],
+                float: ['float'],
+                string: ['string'],
+                text: ['string'],
+                checkbox: ['string']
             },
             images: {
                 form: window.LOCAL_HOST + '/static/images/icons8-fill-in-form-48.png',
                 medicine: window.LOCAL_HOST + '/static/images/icons8-pill-96.png',
                 algorithm: window.LOCAL_HOST + '/static/images/icons8-artificial-intelligence-96.png',
                 ok: window.LOCAL_HOST + '/static/images/icons8-ok-128.png',
+                error: window.LOCAL_HOST + '/static/images/icons8-delete-128.png',
             },
             is_admin: window.IS_ADMIN
         }

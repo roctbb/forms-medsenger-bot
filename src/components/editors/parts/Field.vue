@@ -26,7 +26,7 @@
                 <option value="none">Не сохранять ответ</option>
 
                 <optgroup
-                    v-for="(group, name) in group_by(category_list.filter(c => c.type == native_types[field.type]), 'subcategory')"
+                    v-for="(group, name) in group_by(category_list.filter(c => native_types[field.type].includes(c.type)), 'subcategory')"
                     v-bind:label="name">
                     <option v-for="category in group" :value="category.name">{{ category.description }}
                     </option>
@@ -34,8 +34,16 @@
             </select>
         </form-group48>
 
-        <form-group48 title="Обязательный вопрос?">
+        <form-group48 title="Обязательный вопрос?" v-if="!field.show_if">
             <input type="checkbox" class="form-check" v-model="field.required">
+        </form-group48>
+
+        <form-group48 title="Показывать если...">
+            <select class="form-control form-control-sm" v-model="field.show_if">
+                <option value="">Всегда</option>
+
+                <option v-for="other in form.fields.filter(f => f.type == 'checkbox')" :value="other.uid">{{ other.text }}</option>
+            </select>
         </form-group48>
         <hr>
 
@@ -46,17 +54,31 @@
                 </div>
                 <div class="col-md-3">
                     <small>от </small><input type="number" pattern="\d*"
-                                             :class="save_clicked && (!field.params.min || field.params.max < field.params.min) ? 'is-invalid' : ''"
+                                             :class="save_clicked && ((!field.params.min && field.params.min !== 0) || field.params.max < field.params.min) ? 'is-invalid' : ''"
                                              class="form-control form-control-sm"
                                              v-model="field.params.min"/>
                 </div>
                 <div class="col-md-3">
                     <small>до </small><input type="number" pattern="\d*"
-                                             :class="save_clicked && (!field.params.max || field.params.max < field.params.min) ? 'is-invalid' : ''"
+                                             :class="save_clicked && ((!field.params.max && field.params.max !== 0) || field.params.max < field.params.min) ? 'is-invalid' : ''"
                                              class="form-control form-control-sm"
                                              v-model="field.params.max"/>
                 </div>
             </div>
+        </div>
+
+        <div v-if="field.type == 'text' || field.type == 'string'">
+            <form-group48 title="Префикс">
+                <input type="text" class="form-control form-control-sm"
+                       :class="save_clicked && !field.prefix ? 'is-invalid' : ''"
+                       v-model="field.prefix"/>
+            </form-group48>
+        </div>
+
+        <div v-if="field.type == 'checkbox'">
+            <form-group48 title="Значение при включении">
+                <input type="text" class="form-control form-control-sm" v-model="field.category_value"/>
+            </form-group48>
         </div>
 
         <div v-if="field.type == 'float'">
@@ -66,12 +88,12 @@
                 </div>
                 <div class="col-md-3">
                     <small>от </small><input type="number" step="0.01" class="form-control form-control-sm"
-                                             :class="save_clicked && (!field.params.min || field.params.max < field.params.min) ? 'is-invalid' : ''"
+                                             :class="save_clicked && ((!field.params.min && field.params.min !== 0) || field.params.max < field.params.min) ? 'is-invalid' : ''"
                                              v-model="field.params.min"/>
                 </div>
                 <div class="col-md-3">
                     <small>до </small><input type="number" step="0.01" class="form-control form-control-sm"
-                                             :class="save_clicked && (!field.params.max || field.params.max < field.params.min) ? 'is-invalid' : ''"
+                                             :class="save_clicked && ((!field.params.max && field.params.max !== 0) || field.params.max < field.params.min) ? 'is-invalid' : ''"
                                              v-model="field.params.max"/>
                 </div>
             </div>
@@ -126,7 +148,7 @@ import FormGroup48 from "../../common/FormGroup-4-8";
 export default {
     name: "Field",
     components: {FormGroup48, Card},
-    props: ['data', 'pkey', 'save_clicked'],
+    props: ['data', 'pkey', 'form', 'save_clicked'],
     data() {
         return {
             mode: 'integer',

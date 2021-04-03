@@ -44,8 +44,8 @@ def only_doctor_args(func):
             abort(422)
         if request.args.get('api_key') != API_KEY:
             abort(401)
-        if request.args.get('source') == 'patient':
-            abort(401)
+        #if request.args.get('source') == 'patient':
+        #    abort(401)
         try:
             return func(request.args, request.form, *args, **kargs)
         except Exception as e:
@@ -83,7 +83,7 @@ def dir_last_updated(folder):
                    for root_path, dirs, files in os.walk(folder)
                    for f in files))
 
-def generate_description(criteria, calculated):
+def generate_description(criteria, l_value, r_value, category_names):
     signs = {
         "equal": "равно",
         "not_equal": "не равно",
@@ -94,7 +94,17 @@ def generate_description(criteria, calculated):
         "contains": "содержит"
     }
 
-    modes = {
+    left_modes = {
+        "value": "Значение в категории",
+        "sum": "Сумма в категории",
+        "difference": "Разность крайних значений в категории",
+        "delta": "Разброс в категории",
+        "average": "Среднее значение в категории",
+        "max": "Максимальному значение в категории",
+        "min": "Минимальное значение в категории"
+    }
+
+    right_modes = {
          "sum": "сумме",
          "difference": "разности крайних значений",
          "delta": "разбросу",
@@ -103,16 +113,22 @@ def generate_description(criteria, calculated):
          "min": "минимальному значению"
     }
 
+    LEFT_MODE = left_modes.get(criteria.get('left_mode'))
+    LEFT_CATEGORY = category_names.get(criteria.get('category'))
+    SIGN = signs[criteria.get('sign')]
 
-    comment = "Значение {} ".format(signs[criteria.get('sign')])
+    if criteria.get('right_mode') != 'value' or criteria.get('sign') == 'contains':
+        comment = "{} {} ({}) {} ".format(LEFT_MODE, LEFT_CATEGORY, l_value, SIGN)
+    else:
+        comment = "{} {} {} ".format(LEFT_MODE, LEFT_CATEGORY, SIGN)
 
-    if criteria['right_mode'] == 'value':
+    if criteria.get('right_mode') == 'value':
         comment += "{}".format(criteria.get('value'))
     else:
-        comment += "{} за {} дня (ей) ({})".format(modes[criteria.get('right_mode')], criteria.get('right_days'), calculated)
+        comment += "{} за {} дня (ей) ({})".format(right_modes[criteria.get('right_mode')], criteria.get('right_hours'), r_value)
 
         if criteria.get('right_category'):
-            comment += " категории {}".format(criteria.get('right_category'))
-            
+            comment += " категории {}".format(category_names.get(criteria.get('right_category')))
+
     return comment
 

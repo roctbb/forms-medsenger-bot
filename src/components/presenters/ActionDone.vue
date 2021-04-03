@@ -9,7 +9,7 @@
         </p>
 
         <p style="text-align: center">
-            <button class="btn btn-success">Закрыть окно</button>
+            <button class="btn btn-success" @click="close()">Закрыть окно</button>
         </p>
     </div>
 </template>

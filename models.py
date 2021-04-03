@@ -83,10 +83,9 @@ class Medicine(db.Model):
     def clone(self):
         new_medicine = Medicine()
         new_medicine.title = self.title
-        new_medicine.rules = self.drules
+        new_medicine.rules = self.rules
 
         new_medicine.timetable = self.timetable
-        new_medicine.actions = self.actions
         new_medicine.warning_days = self.warning_days
 
         if self.is_template:
@@ -135,6 +134,8 @@ class Form(db.Model):
             "patient_description": self.patient_description,
             "fields": self.fields,
             "timetable": self.timetable,
+            "show_button": self.show_button,
+            "button_title": self.button_title,
             "is_template": self.is_template,
             "template_id": self.template_id,
             "algorithm_id": self.algorithm_id,

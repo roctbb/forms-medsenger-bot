@@ -1,6 +1,6 @@
 <template>
     <div>
-        <field v-for="(field, i) in fields" :data="field" :pkey="i" :key="field.uid" :save_clicked="fields_save_clicked[i]"></field>
+        <field :form="form" v-for="(field, i) in fields" :data="field" :pkey="i" :key="field.uid" :save_clicked="fields_save_clicked[i]"></field>
 
         <p class="text-center"><a class="btn btn-primary btn-sm" @click="add_field()">Добавить вопрос</a></p>
     </div>
@@ -16,6 +16,9 @@ export default {
     components: {Field, FormGroup48, Card},
     props: {
         fields: {
+            required: true,
+        },
+        form: {
             required: true
         },
         fields_save_clicked: {
@@ -27,6 +30,7 @@ export default {
         }
     },
     created() {
+        console.log(this.form)
         Event.listen('remove-field', (i) => this.remove_field(i));
     },
     methods: {

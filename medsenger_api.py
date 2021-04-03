@@ -1,3 +1,6 @@
+import uuid
+from copy import copy
+
 import requests
 from datetime import datetime
 
@@ -62,7 +65,7 @@ class AgentApiClient:
             'birthday': ''
         }
 
-    def get_records(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None, offset=None):
+    def get_records(self, contract_id, category_name=None, time_from=None, time_to=None, limit=None, offset=None, group=False):
 
         data = {
             "contract_id": contract_id,
@@ -80,6 +83,8 @@ class AgentApiClient:
             data['from'] = time_from
         if time_to:
             data['to'] = time_to
+        if group:
+            data['last_group'] = True
 
         if not category_name:
             url = "/api/agents/records/get/all"
@@ -127,23 +132,29 @@ class AgentApiClient:
         if params:
             data['params'] = params
 
-
         if record_time:
             data['time'] = record_time
 
         return self.__send_request__('/api/agents/records/add', data)
 
-    def add_records(self, contract_id, values, record_time=None, params=None):
-        data = {
-            "contract_id": contract_id,
-            "api_key": self.api_key,
-        }
+    def add_records(self, contract_id, values, record_time=None, params=tuple()):
+        data = {"contract_id": contract_id, "api_key": self.api_key, 'values': []}
 
-        data['values'] = [{"category_name": category_name, "value": value, "params": params, "time": record_time} for (category_name, value) in values]
+        for record in values:
+            record_params = copy(params)
+
+            if len(record) == 2:
+                category_name, value = record
+            else:
+                category_name, value, custom_params = record
+                record_params.update(custom_params)
+
+            data['values'].append(
+                {"category_name": category_name, "value": value, "params": record_params, "time": record_time})
 
         return self.__send_request__('/api/agents/records/add', data)
 
-    def send_message(self, contract_id, text, action_link=None, action_name=None, action_onetime=True,
+    def send_message(self, contract_id, text, action_link=None, action_name=None, action_onetime=True, action_big=True,
                      only_doctor=False,
                      only_patient=False, action_deadline=None, is_urgent=False, need_answer=False,
                      attachments=None):
@@ -159,6 +170,9 @@ class AgentApiClient:
 
         if action_onetime:
             message['action_onetime'] = action_onetime
+
+        if action_big:
+            message['action_big'] = action_big
 
         if only_doctor:
             message['only_doctor'] = only_doctor
@@ -253,6 +267,7 @@ class AgentApiClient:
 
     def ajax_url(self, action, contract_id, agent_token):
         # TODO fix
-        return self.host.replace('8001', '8000') + "/api/client/agents/{agent_id}/?action={action}&contract_id={contract_id}&agent_token={agent_token}".format(
+        return self.host.replace('8001',
+                                 '8000') + "/api/client/agents/{agent_id}/?action={action}&contract_id={contract_id}&agent_token={agent_token}".format(
             agent_id=self.agent_id, action=action, contract_id=contract_id, agent_token=agent_token
         )

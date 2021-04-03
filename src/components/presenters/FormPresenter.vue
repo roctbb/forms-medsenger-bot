@@ -3,15 +3,21 @@
             <error-block :errors="errors"/>
             <h3>{{ this.form.title }}</h3>
             <p> {{ this.form.patient_description }}</p>
-            <form-group48 v-for="(field, i) in form.fields" :required="field.required" :title="field.text" :key="i"
+            <form-group48 v-for="(field, i) in form.fields" v-if="!field.show_if || answers[field.show_if]" :required="field.required" :title="field.text" :key="i"
                           :description="field.description">
                 <input type="number" min="field.params.min" max="field.params.max" step="1" class="form-control"
+                       :class="save_clicked && field.required &&
+                       (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
                        v-if="field.type == 'integer'" :required="field.required" v-model="answers[field.uid]"/>
                 <input type="number" min="field.params.min" max="field.params.max" step="0.01" class="form-control"
+                       :class="save_clicked && field.required &&
+                       (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
                        v-if="field.type == 'float'" :required="field.required" v-model="answers[field.uid]"/>
                 <input type="text" class="form-control" v-if="field.type == 'text'" :required="field.required"
+                       :class="save_clicked && field.required && !answers[field.uid] && answers[field.uid] !== 0 ? 'is-invalid' : ''"
                        v-model="answers[field.uid]"/>
                 <textarea class="form-control" v-if="field.type == 'textarea'" :required="field.required"
+                          :class="save_clicked && field.required && !answers[field.uid] && answers[field.uid] !== 0 ? 'is-invalid' : ''"
                           v-model="answers[field.uid]"></textarea>
                 <div v-if="field.type == 'checkbox'" style="width: 100%;"><input type="checkbox"
                                                                                  v-model="answers[field.uid]"/></div>
@@ -25,7 +31,7 @@
                 </div>
             </form-group48>
 
-            <a @click="save()" v-if="!form.preview" class="btn btn-success">Отправить ответ</a>
+            <a @click="save()" class="btn btn-success">Отправить ответ</a>
     </div>
 </template>
 
@@ -47,12 +53,14 @@ export default {
             form: {},
             answers: {},
             errors: [],
-            submitted: false
+            submitted: false,
+            save_clicked: false
         }
     },
     methods: {
         save: function () {
             this.errors = []
+            this.save_clicked = true
             if (this.check()) {
                 this.axios.post(this.url('/api/form/' + this.form.id), this.answers).then(r => Event.fire('form-done')).catch(r => this.errors.push('Ошибка сохранения'));
             } else {
@@ -61,6 +69,9 @@ export default {
         },
         check: function () {
             let prepare_field = (field, i) => {
+                if (this.empty(this.answers[field.uid])) {
+                    return;
+                }
                 if (field.type == 'integer') {
                     this.answers[field.uid] = parseInt(this.answers[field.uid])
                 }
@@ -73,7 +84,7 @@ export default {
 
             let validate_field = (field, i) => {
                 if (field.required && this.empty(this.answers[field.uid])) return true;
-                if (field.type == 'integer' || field.type == 'integer') {
+                if (field.type == 'integer' || field.type == 'float') {
                     if (this.answers[field.uid] < field.params.min || this.answers[field.uid] > field.params.max) return true
                 }
                 return false
@@ -84,14 +95,6 @@ export default {
     },
     created() {
         this.form = this.data
-
-        let prepare_answer = (field, i) => {
-            if (field.type == 'radio') {
-                this.answers[field.uid] = 0
-            }
-        }
-
-        this.form.fields.map(prepare_answer);
     }
 }
 </script>
