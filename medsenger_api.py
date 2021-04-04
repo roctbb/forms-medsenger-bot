@@ -154,10 +154,10 @@ class AgentApiClient:
 
         return self.__send_request__('/api/agents/records/add', data)
 
-    def send_message(self, contract_id, text, action_link=None, action_name=None, action_onetime=True, action_big=True,
+    def send_message(self, contract_id, text, action_link=None, action_name=None, action_onetime=True,
                      only_doctor=False,
                      only_patient=False, action_deadline=None, is_urgent=False, need_answer=False,
-                     attachments=None):
+                     attachments=None, action_big=True):
         message = {
             "text": text
         }
