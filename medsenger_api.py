@@ -135,6 +135,7 @@ class AgentApiClient:
         if record_time:
             data['time'] = record_time
 
+
         return self.__send_request__('/api/agents/records/add', data)
 
     def add_records(self, contract_id, values, record_time=None, params=tuple()):

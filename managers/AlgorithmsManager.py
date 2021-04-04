@@ -1,3 +1,4 @@
+import time
 from datetime import datetime, timedelta
 
 from helpers import log, generate_description
@@ -77,7 +78,8 @@ class AlgorithmsManager(Manager):
 
         if not values:
             return None, None
-
+        if mode == 'value' and time.time() - int(answer['values'][0].get('timestamp')) > 60:
+            return None, None
         if mode == 'value':
             return values, ids
         if mode == 'sum':
