@@ -156,19 +156,16 @@ export default {
                                 enabled: false,
                             },
                             x: (value.timestamp + offset) * 1000,
-                            y: 30,
+                            y: this.get_value(graph.category.name),
                             comment: this.get_comment(value, graph.category.description),
-                            marker: {
-                                lineColor: '#ad0eca',
-                                radius: 3,
-                                symbol: 'triangle'
-                            }
                         }
                     }).reverse(),
                     dashStyle: 'Dot',
                     marker: {
                         enabled: true,
-                        symbol: 'circle'
+                        lineColor: '#ad0eca',
+                        radius: 3,
+                        symbol: 'triangle'
                     }
                 })
 
@@ -223,6 +220,12 @@ export default {
                 })
             }
             return comment
+        },
+        get_value: function (name) {
+            if (name == 'symptom') return 30;
+            if (name == 'medicine') return 40;
+            return 20;
+
         }
     },
     computed: {},
