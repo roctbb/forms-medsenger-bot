@@ -1,10 +1,10 @@
 <template>
     <div>
-        <h3>График "{{ group.title }}"</h3>
-
         <highcharts :constructor-type="'stockChart'" v-if="loaded" :options="options"></highcharts>
 
-        <a class="btn btn-danger" @click="select_graph()">Назад</a>
+        <div class="container">
+            <a class="btn btn-danger" @click="select_graph()">Назад</a>
+        </div>
 
     </div>
 </template>
@@ -110,6 +110,8 @@ export default {
                 }
             });
 
+            let offset = -1 * new Date().getTimezoneOffset() * 60
+
             this.data.filter((graph) => graph.category.type == 'string').forEach((graph) => {
                 this.options.series.push({
                     name: graph.category.description,
@@ -118,7 +120,7 @@ export default {
                             dataLabels: {
                                 enabled: false,
                             },
-                            x: value.timestamp * 1000,
+                            x: (value.timestamp + offset) * 1000,
                             y: 30,
                             comment: this.get_comment(value, graph.category.description),
                             marker: {
@@ -141,7 +143,7 @@ export default {
                     name: graph.category.description,
                     data: graph.values.map((value) => {
                         return {
-                            x: value.timestamp * 1000,
+                            x: (value.timestamp + offset) * 1000,
                             y: value.value,
                             comment: this.get_comment(value, graph.category.description),
                             marker: {

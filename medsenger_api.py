@@ -91,7 +91,7 @@ class AgentApiClient:
         else:
             url = "/api/agents/records/get"
 
-        return self.__send_request__(url, data) or []
+        return self.__send_request__(url, data) or None
 
     def add_hooks(self, contract_id, names):
         data = {

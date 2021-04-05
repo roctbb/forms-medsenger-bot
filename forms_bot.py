@@ -79,6 +79,34 @@ def init(data):
             for template_id in medicines.split(','):
                 medicine_manager.attach(template_id, contract)
 
+        custom_forms = filter(lambda x: "form_" in x, params.keys())
+        for custom_form in custom_forms:
+            try:
+                form_id = int(custom_form.split('_')[1])
+
+                form = form_manager.attach(form_id, contract)
+
+                if form.algorithm_id:
+                    algorithm_manager.attach(form.algorithm_id, contract, params)
+            except:
+                pass
+
+        custom_medicines = filter(lambda x: "medicine_" in x, params.keys())
+        for custom_medicine in custom_medicines:
+            try:
+                medicine_id = int(custom_medicine.split('_')[1])
+                medicine_manager.attach(medicine_id, contract)
+            except:
+                pass
+
+        custom_algorithms = filter(lambda x: "algorithm_" in x, params.keys())
+        for custom_algorithm in custom_algorithms:
+            try:
+                algorithm_id = int(custom_algorithm.split('_')[1])
+                algorithm_manager.attach(algorithm_id, contract)
+            except:
+                pass
+
     return "ok"
 
 @app.route('/hook', methods=['POST'])
@@ -275,6 +303,7 @@ def graph_data(args, form):
     contract_id = args.get('contract_id')
     group = request.json
     answer = [medsenger_api.get_records(contract_id, category_name) for category_name in group['categories'] + ['medicine', 'symptom']]
+    answer = list(filter(lambda x: x != None, answer))
 
     if answer:
         return jsonify(answer)

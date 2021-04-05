@@ -17,10 +17,11 @@
                 <div class="container" style="margin-top: 15px;">
                     <form-presenter :data="form" v-if="state == 'form-presenter'"/>
                     <graph-category-chooser :data="available_categories" v-if="state == 'graph-category-chooser'"/>
-                    <graph-presenter v-show="state == 'graph-presenter'" />
                     <action-done v-if="state == 'done'"></action-done>
                     <load-error v-if="state == 'load-error'"></load-error>
                 </div>
+
+                <graph-presenter v-show="state == 'graph-presenter'" />
             </div>
 
         </div>

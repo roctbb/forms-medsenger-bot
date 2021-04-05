@@ -110,8 +110,12 @@ class FormManager(Manager):
                         continue
 
                     value = field['params']['variants'][answers[field['uid']]]['category_value']
+                    answer = field['params']['variants'][answers[field['uid']]].get('text')
                     packet.append((category, value, {
-                        "question_uid": field['uid']
+                        "question_uid": field['uid'],
+                        "question_text": field.get('text'),
+                        "variant_text": answer,
+
                     }))
                 elif field['type'] == 'checkbox':
                     category = field['category']
@@ -121,18 +125,21 @@ class FormManager(Manager):
                         continue
 
                     packet.append((category, value, {
-                        "question_iud": field['uid']
+                        "question_iud": field['uid'],
+                        "question_text": field.get('text')
                     }))
                 else:
                     category = field['category']
 
                     if field['type'] in ['string', 'text'] and field.get('prefix'):
                         packet.append((category, "{}{}".format(field.get('prefix'), answers[field['uid']]), {
-                            "question_uid": field['uid']
+                            "question_uid": field['uid'],
+                            "question_text": field.get('text')
                         }))
                     else:
                         packet.append((category, answers[field['uid']], {
-                            "question_uid": field['uid']
+                            "question_uid": field['uid'],
+                            "question_text": field.get('text')
                         }))
 
 
