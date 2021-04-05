@@ -156,11 +156,11 @@ export default {
                                 enabled: false,
                             },
                             x: (value.timestamp + offset) * 1000,
-                            y: this.get_value(graph.category.name),
+                            y: 30,
                             comment: this.get_comment(value, graph.category.description),
                         }
                     }).reverse(),
-                    dashStyle: 'Dot',
+                    lineWidth: 0,
                     marker: {
                         enabled: true,
                         lineColor: '#ad0eca',
@@ -220,12 +220,6 @@ export default {
                 })
             }
             return comment
-        },
-        get_value: function (name) {
-            if (name == 'symptom') return 30;
-            if (name == 'medicine') return 40;
-            return 20;
-
         }
     },
     computed: {},
