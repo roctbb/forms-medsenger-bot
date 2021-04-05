@@ -200,9 +200,14 @@ class AlgorithmsManager(Manager):
                 action_name = None
                 action_link = None
 
+            if action['params'].get('add_deadline') and action['params'].get('action_deadline'):
+                action_deadline = time.time() + int(action['params'].get('action_deadline'))  * 60 * 60
+            else:
+                action_deadline = None
+
             self.medsenger_api.send_message(contract_id, action['params']['text'] + report,
                                             only_patient=True, action_name=action_name, action_link=action_link,
-                                            is_urgent=action['params'].get('is_urgent'))
+                                            is_urgent=action['params'].get('is_urgent'), action_deadline=action_deadline)
         if action['type'] == 'doctor_message':
             if action['params'].get('add_action'):
                 action_name = action['params'].get('action_name')
@@ -211,10 +216,15 @@ class AlgorithmsManager(Manager):
                 action_name = None
                 action_link = None
 
+            if action['params'].get('add_deadline') and action['params'].get('action_deadline'):
+                action_deadline = time.time() + int(action['params'].get('action_deadline'))  * 60 * 60
+            else:
+                action_deadline = None
+
             self.medsenger_api.send_message(contract_id, action['params']['text'] + report,
                                             only_doctor=True, action_name=action_name, action_link=action_link,
                                             is_urgent=action['params'].get('is_urgent'),
-                                            need_answer=action['params'].get('need_answer'))
+                                            need_answer=action['params'].get('need_answer'), action_deadline=action_deadline)
         if action['type'] == 'record':
             category_name = action['params'].get('category')
             value = action['params'].get('value')

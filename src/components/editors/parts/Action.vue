@@ -88,6 +88,18 @@
             </div>
         </div>
 
+        <div class="col-md-12" v-if="['doctor_message', 'patient_message'].includes(action.type)">
+            <input type="checkbox" v-model="action.params.add_deadline">
+            <small class="text-muted">Ограничить время видимости?</small>
+
+            <div class="row" v-if="action.params.add_deadline">
+                <div class="col-md-4">
+                    <input type="number" class="form-control form-control-sm" v-model="action.params.action_deadline">
+                    <small class="text-muted">Время жизни сообщения в часах</small>
+                </div>
+            </div>
+        </div>
+
 
         <div class="col-md-12">
             <input type="checkbox" v-model="action.params.is_negative">
