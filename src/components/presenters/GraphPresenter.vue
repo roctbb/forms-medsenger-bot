@@ -159,8 +159,9 @@ export default {
                             y: 30,
                             comment: this.get_comment(value, graph.category.description),
                             marker: {
-                                lineColor: '#000',
-                                radius: 1,
+                                lineColor: '#ad0eca',
+                                radius: 3,
+                                symbol: 'triangle'
                             }
                         }
                     }).reverse(),
