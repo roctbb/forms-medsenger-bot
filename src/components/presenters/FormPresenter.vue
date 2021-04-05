@@ -78,6 +78,10 @@ export default {
                 if (field.type == 'float') {
                     this.answers[field.uid] = parseFloat(this.answers[field.uid])
                 }
+                if (field.show_if && !this.answers[field.show_if])
+                {
+                    this.answers[field.uid] = undefined;
+                }
             }
 
             this.form.fields.map(prepare_field)
