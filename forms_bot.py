@@ -79,7 +79,7 @@ def init(data):
             for template_id in medicines.split(','):
                 medicine_manager.attach(template_id, contract)
 
-        custom_forms = filter(lambda x: "form_" in x, params.keys())
+        custom_forms = filter(lambda x: "form_" in x and params.get(x), params.keys())
         for custom_form in custom_forms:
             try:
                 form_id = int(custom_form.split('_')[1])
@@ -91,7 +91,7 @@ def init(data):
             except:
                 pass
 
-        custom_medicines = filter(lambda x: "medicine_" in x, params.keys())
+        custom_medicines = filter(lambda x: "medicine_" in x and params.get(x), params.keys())
         for custom_medicine in custom_medicines:
             try:
                 medicine_id = int(custom_medicine.split('_')[1])
@@ -99,7 +99,7 @@ def init(data):
             except:
                 pass
 
-        custom_algorithms = filter(lambda x: "algorithm_" in x, params.keys())
+        custom_algorithms = filter(lambda x: "algorithm_" in x and params.get(x), params.keys())
         for custom_algorithm in custom_algorithms:
             try:
                 algorithm_id = int(custom_algorithm.split('_')[1])
