@@ -38,11 +38,46 @@ export default {
 
             this.options = {
                 rangeSelector: {
-                    selected: 1
+                    allButtonsEnabled: true,
+                    buttons: [{
+                        type: 'day',
+                        count: 1,
+                        text: 'День',
+                        dataGrouping: {
+                            forced: true,
+                            units: [['day', [1]]]
+                        }
+                    },{
+                        type: 'day',
+                        count: 2,
+                        text: '3 дня',
+                        dataGrouping: {
+                            forced: true,
+                            units: [['day', [3]]]
+                        }
+                    }, {
+                        type: 'week',
+                        count: 3,
+                        text: '2 недели',
+                        dataGrouping: {
+                            forced: true,
+                            units: [['week', [1]]]
+                        }
+                    }, {
+                        type: 'all',
+                        text: 'Все',
+                        count: 4,
+                    }],
+                    buttonTheme: {
+                        width: 60
+                    },
+                    selected: 3
                 },
+
                 chart: {
                     type: 'line',
                     zoomType: 'x',
+                    height: window.innerHeight - 70
                 },
                 title: {
                     text: this.group.title
@@ -159,8 +194,6 @@ export default {
                     }
                 })
             })
-
-            console.log(this.options)
 
             this.loaded = true
         },
