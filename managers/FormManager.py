@@ -1,3 +1,4 @@
+import json
 import time
 from copy import copy
 from datetime import datetime
@@ -111,12 +112,21 @@ class FormManager(Manager):
 
                     value = field['params']['variants'][answers[field['uid']]]['category_value']
                     answer = field['params']['variants'][answers[field['uid']]].get('text')
-                    packet.append((category, value, {
+
+                    params = {
                         "question_uid": field['uid'],
                         "question_text": field.get('text'),
-                        "variant_text": answer,
+                        "variant_text": answer
+                    }
 
-                    }))
+                    if field['params']['variants'][answers[field['uid']]].get('custom_params'):
+                        try:
+                            params.update(
+                                json.loads(field['params']['variants'][answers[field['uid']]].get('custom_params')))
+                        except:
+                            pass
+
+                    packet.append((category, value, params))
                 elif field['type'] == 'checkbox':
                     category = field['category']
                     value = field.get('category_value')
@@ -124,24 +134,35 @@ class FormManager(Manager):
                     if not value:
                         continue
 
-                    packet.append((category, value, {
+                    params = {
                         "question_iud": field['uid'],
                         "question_text": field.get('text')
-                    }))
+                    }
+
+                    if field.get('params', {}).get('custom_params'):
+                        try:
+                            params.update(json.loads(field.get('params', {}).get('custom_params')))
+                        except:
+                            pass
+
+                    packet.append((category, value, params))
                 else:
                     category = field['category']
+                    params = {
+                        "question_uid": field['uid'],
+                        "question_text": field.get('text')
+                    }
+
+                    if field.get('params', {}).get('custom_params'):
+                        try:
+                            params.update(json.loads(field.get('params', {}).get('custom_params')))
+                        except:
+                            pass
 
                     if field['type'] in ['string', 'text'] and field.get('prefix'):
-                        packet.append((category, "{}{}".format(field.get('prefix'), answers[field['uid']]), {
-                            "question_uid": field['uid'],
-                            "question_text": field.get('text')
-                        }))
+                        packet.append((category, "{}{}".format(field.get('prefix'), answers[field['uid']]), params))
                     else:
-                        packet.append((category, answers[field['uid']], {
-                            "question_uid": field['uid'],
-                            "question_text": field.get('text')
-                        }))
-
+                        packet.append((category, answers[field['uid']], params))
 
         packet.append(('action', 'Заполнение опросника ID {}'.format(form_id)))
 
