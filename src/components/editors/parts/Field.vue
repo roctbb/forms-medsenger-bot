@@ -99,6 +99,12 @@
             </div>
         </div>
 
+        <div v-if="field.type != 'radio' && is_admin">
+            <form-group48 title="Дополнительные параметры">
+                <input type="text" class="form-control form-control-sm" v-model="field.params.custom_params"/>
+            </form-group48>
+        </div>
+
         <div v-if="field.type == 'radio'">
             <strong>Варианты ответа</strong>
 
@@ -132,6 +138,12 @@
                        @click="remove_variant(j)">Удалить
                         вариант</a>
                 </div>
+
+                <div class="col-md-12" v-if="field.type != 'radio' && is_admin">
+                    <small class="text-mutted">Дополнительные параметры</small><br>
+                        <input type="text" class="form-control form-control-sm" v-model="field.params.custom_params"/>
+                </div>
+        </div>
             </div>
         </div>
         <a v-if="field.type == 'radio'" class="btn btn-primary btn-sm" @click="add_variant()">Добавить вариант</a>

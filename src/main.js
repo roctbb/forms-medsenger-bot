@@ -27,6 +27,7 @@ window.Event = new class {
 Vue.mixin({
     methods: {
         br: function (doc) {
+            if (!doc) return doc;
             return doc.replace(/([^>])\n/g, '$1<br/>')
         },
         url: function (action) {
