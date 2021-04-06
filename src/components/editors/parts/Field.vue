@@ -42,7 +42,10 @@
             <select class="form-control form-control-sm" v-model="field.show_if">
                 <option value="">Всегда</option>
 
-                <option v-for="other in form.fields.filter(f => f.type == 'checkbox')" :value="other.uid">{{ other.text }}</option>
+                <option v-for="other in form.fields.filter(f => f.type == 'checkbox')" :value="other.uid">{{
+                        other.text
+                    }}
+                </option>
             </select>
         </form-group48>
         <hr>
@@ -139,11 +142,10 @@
                         вариант</a>
                 </div>
 
-                <div class="col-md-12" v-if="field.type != 'radio' && is_admin">
+                <div class="col-md-12" v-if="is_admin">
                     <small class="text-mutted">Дополнительные параметры</small><br>
-                        <input type="text" class="form-control form-control-sm" v-model="field.params.custom_params"/>
+                    <input type="text" class="form-control form-control-sm" v-model="field.params.custom_params"/>
                 </div>
-        </div>
             </div>
         </div>
         <a v-if="field.type == 'radio'" class="btn btn-primary btn-sm" @click="add_variant()">Добавить вариант</a>
