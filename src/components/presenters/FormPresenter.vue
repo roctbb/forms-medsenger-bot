@@ -2,7 +2,7 @@
     <div>
             <error-block :errors="errors"/>
             <h3>{{ this.form.title }}</h3>
-            <p> {{ br(form.patient_description) }}</p>
+            <p v-html="br(form.patient_description)"></p>
             <form-group48 v-for="(field, i) in form.fields" v-if="!field.show_if || answers[field.show_if]" :required="field.required" :title="field.text" :key="i"
                           :description="field.description">
                 <input type="number" min="field.params.min" max="field.params.max" step="1" class="form-control"
