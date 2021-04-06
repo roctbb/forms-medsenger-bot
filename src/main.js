@@ -26,6 +26,9 @@ window.Event = new class {
 
 Vue.mixin({
     methods: {
+        br: function (doc) {
+            return doc.replace(/(\\r)*\\n/g, '<br>')
+        },
         url: function (action) {
             let api_host = window.API_HOST;
             let agent_token = window.AGENT_TOKEN;
