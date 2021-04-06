@@ -144,7 +144,7 @@
 
                 <div class="col-md-12" v-if="is_admin">
                     <small class="text-mutted">Дополнительные параметры</small><br>
-                    <input type="text" class="form-control form-control-sm" v-model="field.params.custom_params"/>
+                    <input type="text" class="form-control form-control-sm" v-model="variant.custom_params"/>
                 </div>
             </div>
         </div>
