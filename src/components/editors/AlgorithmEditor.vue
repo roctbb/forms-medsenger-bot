@@ -168,6 +168,10 @@ export default {
                     return true;
                 }
 
+                if (['value', 'category_value'].includes(criteria.right_mode) &&
+                    (criteria.ask_value && (this.empty(criteria.value_name) || this.empty(criteria.value_code))))
+                        return true;
+
                 return false;
             }
 
@@ -195,6 +199,9 @@ export default {
             let action_validator = (action) => {
                 if (action.type == 'record' && this.empty(action.params.value)) return true;
                 if ((action.type == 'patient_message' || action.type == 'doctor_message') && this.empty(action.params.text)) return true;
+                if (action.params.add_deadline && !action.params.action_deadline) return true;
+                if (action.params.add_action && this.empty(action.params.action_name)) return true;
+
                 return false;
             }
 

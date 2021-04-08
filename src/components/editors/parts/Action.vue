@@ -77,12 +77,16 @@
 
             <div class="row" v-if="action.params.add_action">
                 <div class="col-md-4">
-                    <input type="text" class="form-control form-control-sm" v-model="action.params.action_link">
+                    <input type="text" class="form-control form-control-sm"
+                           :class="this.save_clicked && empty(action.params.action_link) ? 'is-invalid' : ''"
+                           v-model="action.params.action_link">
                     <small class="text-muted">Имя действия</small>
                 </div>
 
                 <div class="col-md-4">
-                    <input type="text" class="form-control form-control-sm" v-model="action.params.action_name">
+                    <input type="text" class="form-control form-control-sm"
+                           :class="this.save_clicked && empty(action.params.action_name) ? 'is-invalid' : ''"
+                           v-model="action.params.action_name">
                     <small class="text-muted">Текст для кнопки</small>
                 </div>
             </div>
@@ -94,7 +98,9 @@
 
             <div class="row" v-if="action.params.add_deadline">
                 <div class="col-md-4">
-                    <input type="number" class="form-control form-control-sm" v-model="action.params.action_deadline">
+                    <input type="number" class="form-control form-control-sm"
+                           :class="this.save_clicked && !action.params.action_deadline ? 'is-invalid' : ''"
+                           v-model="action.params.action_deadline">
                     <small class="text-muted">Время жизни сообщения в часах</small>
                 </div>
             </div>
@@ -140,6 +146,9 @@ export default {
             }
 
         },
+    },
+    empty: function (e) {
+        return !e && e !== 0
     },
     created() {
         this.action = this.data;

@@ -118,11 +118,15 @@
                     <small class="text-muted">Запросить при подключении шаблона?</small>
                 </div>
                 <div class="col-md-5" v-if="criteria.ask_value">
-                    <input class="form-control form-control-sm" v-model="criteria.value_name">
+                    <input class="form-control form-control-sm"
+                           :class="this.save_clicked && empty(criteria.value_name) ? 'is-invalid' : ''"
+                           v-model="criteria.value_name">
                     <small class="text-muted">Имя поля</small>
                 </div>
                 <div class="col-md-3" v-if="criteria.ask_value">
-                    <input class="form-control form-control-sm" v-model="criteria.value_code">
+                    <input class="form-control form-control-sm"
+                           :class="this.save_clicked && empty(criteria.value_code) ? 'is-invalid' : ''"
+                           v-model="criteria.value_code">
                     <small class="text-muted">Код (для сценариев)</small>
                 </div>
             </div>
@@ -168,6 +172,9 @@ export default {
 
         }
 
+    },
+    empty: function (e) {
+        return !e && e !== 0
     },
     created() {
         this.mode = this.data.type;

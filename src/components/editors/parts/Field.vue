@@ -21,7 +21,7 @@
         <form-group48 title="Код категории" v-if="field.type != 'radio'">
 
             <select class="form-control form-control-sm"
-                    :class="save_clicked && !field.category ? 'is-invalid' : ''"
+                    :class="save_clicked && empty(field.category) ? 'is-invalid' : ''"
                     v-model="field.category">
                 <option value="none">Не сохранять ответ</option>
 
@@ -57,13 +57,13 @@
                 </div>
                 <div class="col-md-3">
                     <small>от </small><input type="number" pattern="\d*"
-                                             :class="save_clicked && ((!field.params.min && field.params.min !== 0) || field.params.max < field.params.min) ? 'is-invalid' : ''"
+                                             :class="save_clicked && (empty(field.params.min) || field.params.max < field.params.min) ? 'is-invalid' : ''"
                                              class="form-control form-control-sm"
                                              v-model="field.params.min"/>
                 </div>
                 <div class="col-md-3">
                     <small>до </small><input type="number" pattern="\d*"
-                                             :class="save_clicked && ((!field.params.max && field.params.max !== 0) || field.params.max < field.params.min) ? 'is-invalid' : ''"
+                                             :class="save_clicked && (empty(field.params.max) || field.params.max < field.params.min) ? 'is-invalid' : ''"
                                              class="form-control form-control-sm"
                                              v-model="field.params.max"/>
                 </div>
@@ -73,7 +73,7 @@
         <div v-if="field.type == 'text' || field.type == 'string'">
             <form-group48 title="Префикс">
                 <input type="text" class="form-control form-control-sm"
-                       :class="save_clicked && !field.prefix ? 'is-invalid' : ''"
+                       :class="save_clicked && empty(field.prefix) ? 'is-invalid' : ''"
                        v-model="field.prefix"/>
             </form-group48>
         </div>
@@ -91,12 +91,12 @@
                 </div>
                 <div class="col-md-3">
                     <small>от </small><input type="number" step="0.01" class="form-control form-control-sm"
-                                             :class="save_clicked && ((!field.params.min && field.params.min !== 0) || field.params.max < field.params.min) ? 'is-invalid' : ''"
+                                             :class="save_clicked && (empty(field.params.min) || field.params.max < field.params.min) ? 'is-invalid' : ''"
                                              v-model="field.params.min"/>
                 </div>
                 <div class="col-md-3">
                     <small>до </small><input type="number" step="0.01" class="form-control form-control-sm"
-                                             :class="save_clicked && ((!field.params.max && field.params.max !== 0) || field.params.max < field.params.min) ? 'is-invalid' : ''"
+                                             :class="save_clicked && (empty(field.params.max) || field.params.max < field.params.min) ? 'is-invalid' : ''"
                                              v-model="field.params.max"/>
                 </div>
             </div>
@@ -104,7 +104,9 @@
 
         <div v-if="field.type != 'radio' && is_admin">
             <form-group48 title="Дополнительные параметры">
-                <input type="text" class="form-control form-control-sm" v-model="field.params.custom_params"/>
+                <input type="text" class="form-control form-control-sm"
+                       :class="save_clicked && !isJsonString(field.params.custom_params) ? 'is-invalid' : ''"
+                       v-model="field.params.custom_params"/>
             </form-group48>
         </div>
 
@@ -128,12 +130,14 @@
                 </div>
                 <div class="col-md-2" v-if="variant.category != 'none'">
                     <small class="text-mutted">Значение</small><br>
-                    <input type="text" class="form-control form-control-sm" v-model="variant.category_value"/>
+                    <input type="text" class="form-control form-control-sm"
+                           :class="save_clicked && empty(variant.category_value) ? 'is-invalid' : ''"
+                           v-model="variant.category_value"/>
                 </div>
                 <div class="col-md-5">
                     <small class="text-mutted">Текст варианта</small><br>
                     <input type="text"
-                           :class="save_clicked && !variant.text ? 'is-invalid' : ''"
+                           :class="save_clicked && empty(variant.text) ? 'is-invalid' : ''"
                            class="form-control form-control-sm" v-model="variant.text"/>
                 </div>
                 <div class="col-md-2"><br>
@@ -144,7 +148,9 @@
 
                 <div class="col-md-12" v-if="is_admin">
                     <small class="text-mutted">Дополнительные параметры</small><br>
-                    <input type="text" class="form-control form-control-sm" v-model="variant.custom_params"/>
+                    <input type="text" class="form-control form-control-sm"
+                           :class="save_clicked && !isJsonString(variant.custom_params) ? 'is-invalid' : ''"
+                           v-model="variant.custom_params"/>
                 </div>
             </div>
         </div>
@@ -203,8 +209,20 @@ export default {
         },
         remove: function () {
             Event.fire('remove-field', this.pkey)
+        },
+        empty: function (e) {
+            return !e && e !== 0
+        },
+        isJsonString: function(str) {
+            if (!str)
+                return true;
+            try {
+                JSON.parse(str);
+            } catch (e) {
+                return false;
+            }
+            return true;
         }
-
     },
     created() {
         this.mode = this.data.type;

@@ -146,8 +146,10 @@ export default {
                     if (this.empty(field.params.max) || this.empty(field.params.min)) return true;
                     if (field.params.max < field.params.min) return true;
                 }
+                if (!this.isJsonString(field.params.custom_params)) return true;
                 if (field.type == 'radio') {
-                    let variant_validator = (variant) => !variant.text || !variant.category
+                    let variant_validator = (variant) => !variant.text || !variant.category ||
+                        this.empty(variant.text) || !this.isJsonString(variant.custom_params)
                     if (field.params.variants.length < 2) return true
                     if (field.params.variants.filter(variant_validator).length) return true;
                 }
@@ -165,6 +167,16 @@ export default {
                 return true;
             }
 
+        },
+        isJsonString: function(str) {
+            if (this.empty(str))
+                return true;
+            try {
+                JSON.parse(str);
+            } catch (e) {
+                return false;
+            }
+            return true;
         },
         show_validation: function () {
             this.save_clicked = true

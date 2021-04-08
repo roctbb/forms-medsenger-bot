@@ -11,7 +11,9 @@
                 </form-group48>
 
                 <form-group48 title="Доза и правила приема">
-                    <textarea class="form-control form-control-sm" v-model="medicine.rules"></textarea>
+                    <textarea class="form-control form-control-sm"
+                              :class="this.save_clicked && !medicine.rules ? 'is-invalid' : ''"
+                              v-model="medicine.rules"></textarea>
                 </form-group48>
 
                 <form-group48 title="Уведомить, если пациент не заполнят опросник">
@@ -85,6 +87,10 @@ export default {
             this.errors = [];
             if (!this.medicine.title) {
                 this.errors.push('Укажите название опросника')
+            }
+
+            if (!this.medicine.rules) {
+                this.errors.push('Укажите дозу и правила приема лекарства')
             }
 
             this.medicine.warning_days = parseInt(this.medicine.warning_days)
