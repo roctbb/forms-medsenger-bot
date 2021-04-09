@@ -98,7 +98,15 @@ Vue.mixin({
                 }
             }
 
-            return this.category_list.find(x => x.name == category_name)
+            let category = this.category_list.find(x => x.name == category_name)
+
+            if (!category)
+            {
+                return {
+                    description: ''
+                }
+            }
+            return category
         },
         copy: function (to, from) {
             Object.keys(from).forEach(k => {

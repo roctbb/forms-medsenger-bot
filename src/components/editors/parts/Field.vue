@@ -210,9 +210,6 @@ export default {
         remove: function () {
             Event.fire('remove-field', this.pkey)
         },
-        empty: function (e) {
-            return !e && e !== 0
-        },
         isJsonString: function(str) {
             if (!str)
                 return true;
