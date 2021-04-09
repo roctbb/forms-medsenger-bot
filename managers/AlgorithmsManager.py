@@ -66,12 +66,17 @@ class AlgorithmsManager(Manager):
         return Algorithm.query.filter_by(is_template=True).all()
 
     def get_values(self, category_name, mode, contract_id, hours=1):
+
         if mode == 'value':
-            answer = self.medsenger_api.get_records(contract_id, category_name, group=True)
+            offset = 0
+        else:
+            offset = 1
+
+        if mode == 'value':
+            answer = self.medsenger_api.get_records(contract_id, category_name, group=True, offset=offset)
         else:
             answer = self.medsenger_api.get_records(contract_id, category_name,
-                                                    time_from=int(
-                                                        (datetime.now() - timedelta(hours=hours)).timestamp()))
+                                                    time_from=int((datetime.now() - timedelta(hours=hours)).timestamp()), offset=offset)
 
         values = list(map(lambda x: x['value'], answer['values']))
         ids = list(map(lambda x: x['id'], answer['values']))
