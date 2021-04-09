@@ -161,6 +161,7 @@ def form_page(args, form, form_id):
     contract = contract_manager.get(args.get('contract_id'))
     return get_ui('form', contract, medsenger_api.get_categories(), form_id)
 
+
 @app.route('/graph', methods=['GET'])
 @verify_args
 def graph_page(args, form):
@@ -310,6 +311,7 @@ def graph_data(args, form):
     else:
         abort(404)
 
+
 @app.route('/api/form/<form_id>', methods=['GET'])
 @verify_args
 def get_form(args, form, form_id):
@@ -346,6 +348,22 @@ def post_form(args, form, form_id):
     else:
         abort(404)
 
+
+@app.route('/confirm-medicine', methods=['GET'])
+@verify_args
+def medicines_page(args, form):
+    contract = contract_manager.get(args.get('contract_id'))
+    return get_ui('confirm-medicine', contract, medsenger_api.get_categories())
+
+
+@app.route('/api/confirm-medicine/<medicine_id>', methods=['POST'])
+@verify_args
+def post_medicines(args, form, medicine_id):
+    contract_id = int(args.get('contract_id'))
+    contract = contract_manager.get(contract_id)
+
+    medicine_manager.submit(medicine_id, contract.id)
+    return get_ui('done', contract, [])
 
 
 with app.app_context():
