@@ -173,9 +173,6 @@ export default {
         }
 
     },
-    empty: function (e) {
-        return !e && e !== 0
-    },
     created() {
         this.mode = this.data.type;
         this.criteria = this.data;

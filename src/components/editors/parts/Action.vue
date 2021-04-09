@@ -147,9 +147,6 @@ export default {
 
         },
     },
-    empty: function (e) {
-        return !e && e !== 0
-    },
     created() {
         this.action = this.data;
         if (this.data.type)
