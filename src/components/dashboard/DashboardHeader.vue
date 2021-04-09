@@ -2,7 +2,9 @@
     <div style="background-color: white;">
         <div class="container">
             <div class="row">
-                <p><strong>Пациент:</strong> {{ patient.info.name }} ({{ patient.info.birthday }}) <span class="float-right"><a @click="go_home()" href="#">Вернуться к началу</a></span></p>
+                <div class="col-12">
+                    <p><strong>Пациент:</strong> {{ patient.info.name }} ({{ patient.info.birthday }}) <span class="float-right"><a @click="go_home()" href="#">Вернуться к началу</a></span></p>
+                </div>
             </div>
         </div>
     </div>
