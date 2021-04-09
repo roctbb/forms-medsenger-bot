@@ -83,7 +83,10 @@ def dir_last_updated(folder):
                    for root_path, dirs, files in os.walk(folder)
                    for f in files))
 
-def generate_description(criteria, l_value, r_value, category_names):
+def generate_description(criteria, l_value, r_value, category_names, current_answer):
+    if current_answer:
+        return "<strong>{}</strong>: {}".format(current_answer['params']['question_text'], current_answer['params']['answer'])
+
     signs = {
         "equal": "равно",
         "not_equal": "не равно",
@@ -95,13 +98,13 @@ def generate_description(criteria, l_value, r_value, category_names):
     }
 
     left_modes = {
-        "value": "Значение в категории",
-        "sum": "Сумма в категории",
-        "difference": "Разность крайних значений в категории",
-        "delta": "Разброс в категории",
-        "average": "Среднее значение в категории",
-        "max": "Максимальному значение в категории",
-        "min": "Минимальное значение в категории"
+        "value": "Значение ",
+        "sum": "Сумма ",
+        "difference": "Разность крайних значений ",
+        "delta": "Разброс ",
+        "average": "Среднее значение ",
+        "max": "Максимальному значение ",
+        "min": "Минимальное значение "
     }
 
     right_modes = {
@@ -117,18 +120,18 @@ def generate_description(criteria, l_value, r_value, category_names):
     LEFT_CATEGORY = category_names.get(criteria.get('category'))
     SIGN = signs[criteria.get('sign')]
 
+
     if criteria.get('right_mode') != 'value' or criteria.get('sign') == 'contains':
-        comment = "{} {} ({}) {} ".format(LEFT_MODE, LEFT_CATEGORY, l_value, SIGN)
+        comment = "{} '{}' (<strong>{}</strong>) {} ".format(LEFT_MODE, LEFT_CATEGORY, l_value, SIGN)
     else:
-        comment = "{} {} {} ".format(LEFT_MODE, LEFT_CATEGORY, SIGN)
+        comment = "{} '{}' {} ".format(LEFT_MODE, LEFT_CATEGORY, SIGN)
 
     if criteria.get('right_mode') == 'value':
-        comment += "{}".format(criteria.get('value'))
+        comment += "<strong>{}</strong>".format(criteria.get('value'))
     else:
-        comment += "{} за {} часа (ов) ({})".format(right_modes[criteria.get('right_mode')], criteria.get('right_hours'), r_value)
+        comment += "{} за {} часа (ов) (<strong>{}</strong>)".format(right_modes[criteria.get('right_mode')], criteria.get('right_hours'), r_value)
 
         if criteria.get('right_category'):
-            comment += " категории {}".format(category_names.get(criteria.get('right_category')))
+            comment += " '{}'".format(category_names.get(criteria.get('right_category')))
 
     return comment
-

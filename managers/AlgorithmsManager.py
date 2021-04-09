@@ -79,14 +79,14 @@ class AlgorithmsManager(Manager):
                                                     time_from=int((datetime.now() - timedelta(hours=hours)).timestamp()), offset=offset)
 
         values = list(map(lambda x: x['value'], answer['values']))
-        ids = list(map(lambda x: x['id'], answer['values']))
+        objects = answer['values']
 
         if not values:
             return None, None
         if mode == 'value' and time.time() - int(answer['values'][0].get('timestamp')) > 60:
             return None, None
         if mode == 'value':
-            return values, ids
+            return values, objects
         if mode == 'sum':
             return [sum(values)], None
         if mode == 'difference':
@@ -131,8 +131,8 @@ class AlgorithmsManager(Manager):
         mode = criteria.get('left_mode')
 
         if mode != 'time':
-            ids = None
-            left_values, ids = self.get_values(category_name, criteria['left_mode'], contract_id,
+            objects = None
+            left_values, objects = self.get_values(category_name, criteria['left_mode'], contract_id,
                                                criteria.get('left_hours'))
 
             if criteria['right_mode'] == 'value':
@@ -161,12 +161,16 @@ class AlgorithmsManager(Manager):
                     result = self.check_values(lvalue, rvalue, criteria['sign'], modifier)
 
                     if result:
-                        description = generate_description(criteria, lvalue, rvalue, category_names)
+                        current_answer = None
+                        if objects:
+                            current_answer = objects[i]
+
+                        description = generate_description(criteria, lvalue, rvalue, category_names, current_answer)
                         descriptions.append(description)
 
-                        if ids:
+                        if current_answer:
                             buffer.append({
-                                "id": ids[i],
+                                "id": current_answer['id'],
                                 "comment": description
                             })
 

@@ -116,7 +116,7 @@ class FormManager(Manager):
                     params = {
                         "question_uid": field['uid'],
                         "question_text": field.get('text'),
-                        "variant_text": answer
+                        "answer": answer
                     }
 
                     if field['params']['variants'][answers[field['uid']]].get('custom_params'):
@@ -136,7 +136,8 @@ class FormManager(Manager):
 
                     params = {
                         "question_iud": field['uid'],
-                        "question_text": field.get('text')
+                        "question_text": field.get('text'),
+                        "answer": value
                     }
 
                     if field.get('params', {}).get('custom_params'):
@@ -150,7 +151,8 @@ class FormManager(Manager):
                     category = field['category']
                     params = {
                         "question_uid": field['uid'],
-                        "question_text": field.get('text')
+                        "question_text": field.get('text'),
+                        "answer": answers[field['uid']]
                     }
 
                     if field.get('params', {}).get('custom_params'):
