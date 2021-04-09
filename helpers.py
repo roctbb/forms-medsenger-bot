@@ -84,7 +84,7 @@ def dir_last_updated(folder):
                    for f in files))
 
 def generate_description(criteria, l_value, r_value, category_names, current_answer):
-    if current_answer:
+    if criteria.get('left_mode') != 'value' and criteria.get('right_mode') != 'value' and current_answer:
         return "<strong>{}</strong>: {}".format(current_answer['params']['question_text'], current_answer['params']['answer'])
 
     signs = {
