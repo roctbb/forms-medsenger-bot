@@ -25,7 +25,7 @@
                 <div v-if="field.type == 'radio'">
                     <div class="form-check" v-for="(variant, j) in field.params.variants">
                         <input class="form-check-input" type="radio" :name="'radio_' + i" v-model="answers[field.uid]"
-                               :value="j" :checked="j==0">
+                               :value="j">
                         <label class="form-check-label">{{ variant.text }}</label>
                     </div>
                 </div>
@@ -95,10 +95,20 @@ export default {
             }
 
             return this.form.fields.filter(validate_field).length == 0
+        },
+        set_default: function () {
+            let prepare_field = (field, i) => {
+                if (field.type == 'radio') {
+                    this.answers[field.uid] = 0
+                }
+            }
+
+            this.form.fields.map(prepare_field)
         }
     },
     created() {
         this.form = this.data
+        this.set_default()
     }
 }
 </script>
