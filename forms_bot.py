@@ -356,13 +356,18 @@ def medicines_page(args, form):
     return get_ui('confirm-medicine', contract, medsenger_api.get_categories())
 
 
-@app.route('/api/confirm-medicine/<medicine_id>', methods=['POST'])
+@app.route('/api/confirm-medicine', methods=['POST'])
 @verify_args
-def post_medicines(args, form, medicine_id):
+def post_medicines(args, form):
     contract_id = int(args.get('contract_id'))
     contract = contract_manager.get(contract_id)
 
-    medicine_manager.submit(medicine_id, contract.id)
+    data = request.json
+
+    if data['custom']:
+        medsenger_api.add_record(contract_id, 'medicine', data['medicine'])
+    else:
+        medicine_manager.submit(data['medicine'], contract.id)
     return get_ui('done', contract, [])
 
 
