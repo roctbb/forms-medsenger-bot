@@ -62,8 +62,7 @@ def init(data):
             medicine_manager.clear(contract)
 
             for template_id in forms.split(','):
-                form = form_manager.attach(template_id, contract)
-
+                form = form_manager.attach(template_id, contract, params.get('form_timetable_{}'.format(template_id)))
                 if form.algorithm_id:
                     algorithm_manager.attach(form.algorithm_id, contract, params)
 
@@ -77,7 +76,7 @@ def init(data):
 
         if medicines:
             for template_id in medicines.split(','):
-                medicine_manager.attach(template_id, contract)
+                medicine_manager.attach(template_id, contract, params.get('medicine_timetable_{}'.format(template_id)))
 
         custom_forms = filter(lambda x: "form_" in x and params.get(x), params.keys())
         for custom_form in custom_forms:
@@ -108,6 +107,7 @@ def init(data):
                 pass
 
     return "ok"
+
 
 @app.route('/hook', methods=['POST'])
 @verify_json
@@ -287,6 +287,7 @@ def delete_algorithm(args, form):
     else:
         abort(404)
 
+
 @app.route('/api/graph/categories', methods=['GET'])
 @verify_args
 def graph_categories(args, form):
@@ -297,6 +298,7 @@ def graph_categories(args, form):
         return jsonify(categories)
     else:
         abort(404)
+
 
 @app.route('/api/graph/group', methods=['POST'])
 @verify_args
@@ -374,9 +376,10 @@ def post_medicines(args, form):
 with app.app_context():
     db.create_all()
 
+
 def tasks():
     timetable_manager.run(app)
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     app.run(HOST, PORT, debug=API_DEBUG)

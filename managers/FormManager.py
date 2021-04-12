@@ -45,7 +45,7 @@ class FormManager(Manager):
 
         self.__commit__()
 
-    def attach(self, template_id, contract):
+    def attach(self, template_id, contract, custom_timetable=None):
         form = self.get(template_id)
 
         if form:
@@ -55,6 +55,12 @@ class FormManager(Manager):
 
             if new_form.categories:
                 self.medsenger_api.add_hooks(contract.id, new_form.categories.split('|'))
+
+            if custom_timetable:
+                try:
+                    new_form.timetable = custom_timetable
+                except Exception as e:
+                    log(e, False)
 
             self.db.session.add(new_form)
             self.__commit__()
