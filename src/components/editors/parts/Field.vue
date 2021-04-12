@@ -2,13 +2,13 @@
     <card>
         <form-group48 title="Текст вопроса">
             <input class="form-control form-control-sm"
-                   :class="save_clicked && !field.text ? 'is-invalid' : ''"
+                   :class="save_clicked && empty(field.text) ? 'is-invalid' : ''"
                    v-model="field.text"/>
         </form-group48>
 
         <form-group48 title="Тип">
             <select @change="clear_params()"
-                    :class="save_clicked && !mode ? 'is-invalid' : ''"
+                    :class="save_clicked && empty(mode) ? 'is-invalid' : ''"
                     class="form-control form-control-sm" v-model="mode">
                 <option v-for="type in Object.entries(field_types)" :value="type[0]">{{ type[1] }}</option>
             </select>

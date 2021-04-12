@@ -168,16 +168,6 @@ export default {
             }
 
         },
-        isJsonString: function(str) {
-            if (this.empty(str))
-                return true;
-            try {
-                JSON.parse(str);
-            } catch (e) {
-                return false;
-            }
-            return true;
-        },
         show_validation: function () {
             this.save_clicked = true
             for (let i of  this.timetable_save_clicked.keys()) {

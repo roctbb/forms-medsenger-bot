@@ -41,6 +41,16 @@ Vue.mixin({
         empty: function (e) {
             return !e && e !== 0
         },
+        isJsonString: function(str) {
+            if (!str)
+                return true;
+            try {
+                JSON.parse(str);
+            } catch (e) {
+                return false;
+            }
+            return true;
+        },
         verify_timetable: function (timetable) {
             if (timetable.mode == 'manual') return true;
             let prepare_point = (point) => {

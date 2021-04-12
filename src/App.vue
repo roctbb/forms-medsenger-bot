@@ -13,8 +13,9 @@
                     <algorithm-editor v-show="state == 'algorithm-manager'"/>
                 </div>
             </div>
-            <div v-if="mode == 'form' || mode == 'done' || mode == 'graph'">
+            <div v-if="mode == 'form' || mode == 'done' || mode == 'graph' || mode == 'confirm-medicine'">
                 <div class="container" style="margin-top: 15px;">
+                    <confirm-medicine-presenter :data="patient.medicines" v-if="state == 'confirm-medicine'"/>
                     <form-presenter :data="form" v-if="state == 'form-presenter'"/>
                     <graph-category-chooser :data="available_categories" v-if="state == 'graph-category-chooser'"/>
                     <action-done v-if="state == 'done'"></action-done>
@@ -23,6 +24,7 @@
 
                 <graph-presenter v-show="state == 'graph-presenter'" />
             </div>
+
 
         </div>
     </div>
@@ -41,12 +43,14 @@ import ActionDone from "./components/presenters/ActionDone";
 import GraphCategoryChooser from "./components/presenters/GraphCategoryChooser";
 import GraphPresenter from "./components/presenters/GraphPresenter";
 import LoadError from "./components/presenters/LoadError";
+import ConfirmMedicinePresenter from "./components/presenters/ConfirmMedicinePresenter";
 
 
 
 export default {
     name: 'app',
     components: {
+        ConfirmMedicinePresenter,
         LoadError,
         GraphPresenter,
         GraphCategoryChooser,
@@ -74,6 +78,7 @@ export default {
         Event.listen('back-to-dashboard', () => this.state = 'dashboard');
         Event.listen('home', () => this.state = 'dashboard');
         Event.listen('form-done', () => this.state = 'done');
+        Event.listen('confirm-medicine-done', () => this.state = 'done');
         Event.listen('form-created', (form) => {
             this.state = 'dashboard'
             if (!form.is_template) {
@@ -137,7 +142,9 @@ export default {
             if (this.mode == 'form') {
                 this.axios.get(this.url('/api/form/' + this.object_id)).then(this.process_load_answer).catch(this.process_load_error);
             }
-
+            if (this.mode == 'confirm-medicine') {
+                this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
+            }
             if (this.mode == 'graph') {
                 this.axios.get(this.url('/api/graph/categories')).then(this.process_load_answer);
             }
@@ -147,9 +154,15 @@ export default {
                 this.patient = response.data;
                 this.state = 'dashboard';
             }
+
             if (this.mode == 'form') {
                 this.form = response.data;
                 this.state = 'form-presenter'
+            }
+
+            if (this.mode == 'confirm-medicine') {
+                this.patient = response.data;
+                this.state = 'confirm-medicine'
             }
 
             if (this.mode == 'graph') {
