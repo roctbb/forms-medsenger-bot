@@ -83,7 +83,7 @@ def init(data):
             try:
                 form_id = int(custom_form.split('_')[1])
 
-                form = form_manager.attach(form_id, contract)
+                form = form_manager.attach(form_id, contract, params.get('form_timetable_{}'.format(form_id)))
 
                 if form.algorithm_id:
                     algorithm_manager.attach(form.algorithm_id, contract, params)
@@ -94,7 +94,7 @@ def init(data):
         for custom_medicine in custom_medicines:
             try:
                 medicine_id = int(custom_medicine.split('_')[1])
-                medicine_manager.attach(medicine_id, contract)
+                medicine_manager.attach(medicine_id, contract, params.get('medicine_timetable_{}'.format(medicine_id)))
             except:
                 pass
 
