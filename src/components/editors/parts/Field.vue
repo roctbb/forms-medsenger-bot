@@ -70,7 +70,7 @@
             </div>
         </div>
 
-        <div v-if="field.type == 'text' || field.type == 'string'">
+        <div v-if="field.type == 'text' || field.type == 'textarea'">
             <form-group48 title="Префикс">
                 <input type="text" class="form-control form-control-sm"
                        :class="save_clicked && empty(field.prefix) ? 'is-invalid' : ''"
