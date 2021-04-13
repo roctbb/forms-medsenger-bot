@@ -3,7 +3,7 @@
         <h5>Доступные графики</h5>
 
         <div class="row">
-                <card v-for="category in plottable_categories" :image="images.graph"
+                <card v-for="(category, i) in plottable_categories" :key="i" :image="images.graph"
                       class="col-lg-3 col-md-4">
                     <h6>{{ category.title }}</h6>
 
