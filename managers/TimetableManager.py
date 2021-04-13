@@ -29,7 +29,7 @@ class TimetableManager(Manager):
         if timetable['mode'] == 'montly':
             points = list(filter(lambda x: x['day'] == now.weekday(), points))
 
-        points = list(map(lambda p: datetime(minute=p['minute'], hour=p['hour'], day=now.day, month=now.month, year=now.year), points))
+        points = list(map(lambda p: datetime(minute=int(p['minute']), hour=int(p['hour']), day=now.day, month=now.month, year=now.year), points))
 
         return bool(list(filter(lambda p: p <= now and p > last_sent, points)))
 
