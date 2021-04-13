@@ -207,7 +207,7 @@ Vue.mixin({
             native_types: {
                 integer: ['integer'],
                 float: ['float'],
-                string: ['string'],
+                textarea: ['string'],
                 text: ['string'],
                 checkbox: ['string']
             },
