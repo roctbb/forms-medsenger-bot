@@ -84,7 +84,7 @@ def dir_last_updated(folder):
                    for f in files))
 
 def generate_description(criteria, l_value, r_value, category_names, current_answer):
-    if criteria.get('left_mode') != 'value' and criteria.get('right_mode') != 'value' and current_answer:
+    if criteria.get('left_mode') == 'value' and criteria.get('right_mode') == 'value' and criteria.get('sign') in ['equals', 'contains'] and current_answer:
         return "<strong>{}</strong>: {}".format(current_answer['params']['question_text'], current_answer['params']['answer'])
 
     signs = {
@@ -121,7 +121,7 @@ def generate_description(criteria, l_value, r_value, category_names, current_ans
     SIGN = signs[criteria.get('sign')]
 
 
-    if criteria.get('right_mode') != 'value' or criteria.get('sign') == 'contains':
+    if criteria.get('sign') not in ['equals', 'contains'] or criteria.get('left_mode') != 'value':
         comment = "{} '{}' (<strong>{}</strong>) {} ".format(LEFT_MODE, LEFT_CATEGORY, l_value, SIGN)
     else:
         comment = "{} '{}' {} ".format(LEFT_MODE, LEFT_CATEGORY, SIGN)

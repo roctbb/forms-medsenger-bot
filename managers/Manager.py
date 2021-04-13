@@ -16,12 +16,12 @@ class Manager:
         points = timetable['points']
 
         if timetable['mode'] == 'daily':
-            points = list(map(lambda p: datetime(minute=p['minute'], hour=p['hour'], day=now.day, month=now.month, year=now.year), points))
+            points = list(map(lambda p: datetime(minute=int(p['minute']), hour=int(p['hour']), day=now.day, month=now.month, year=now.year), points))
             points.sort()
             points.append(points[0] + timedelta(days=1))
         if timetable['mode'] == 'weekly':
             current_weekday_points = list(filter(lambda x: x['day'] == now.weekday(), points))
-            current_weekday_points = list(map(lambda p: datetime(minute=p['minute'], hour=p['hour'], day=now.day, month=now.month, year=now.year), current_weekday_points))
+            current_weekday_points = list(map(lambda p: datetime(minute=int(p['minute']), hour=int(p['hour']), day=now.day, month=now.month, year=now.year), current_weekday_points))
 
             next_points = []
             for i in range(1, 8):
@@ -30,13 +30,13 @@ class Manager:
                 if next_points:
                     break
 
-            next_points = list(map(lambda p: datetime(minute=p['minute'], hour=p['hour'], day=now.day, month=now.month, year=now.year) + timedelta(days=i), next_points))
+            next_points = list(map(lambda p: datetime(minute=int(p['minute']), hour=int(p['hour']), day=now.day, month=now.month, year=now.year) + timedelta(days=i), next_points))
 
             points = current_weekday_points + next_points
             points.sort()
 
         if timetable['mode'] == 'monthly':
-            points = list(map(lambda p: datetime(minute=p['minute'], hour=p['hour'], day=p['day'], month=now.month, year=now.year), points))
+            points = list(map(lambda p: datetime(minute=int(p['minute']), hour=int(p['hour']), day=int(p['day']), month=now.month, year=now.year), points))
             points.sort()
             points.append(datetime(minute=points[0].minute, hour=points[0].hour, day=points[0].day, month=points[0].month + 1, year=now.year))
         return points

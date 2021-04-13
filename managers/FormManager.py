@@ -92,8 +92,8 @@ class FormManager(Manager):
         return result
 
     def check_warning(self, form):
-        if form.warning_days > 0 and form.warning_timestamp == 0:
-            if time.time() - form.filled_timestamp > 24 * 60 * 60 * form.warning_days:
+        if form.warning_days and form.warning_timestamp == 0:
+            if form.filled_timestamp and time.time() - form.filled_timestamp > 24 * 60 * 60 * form.warning_days:
                 form.warning_timestamp = int(time.time())
 
                 self.medsenger_api.send_message(form.contract_id,
