@@ -124,6 +124,10 @@ Vue.mixin({
             })
         },
         tt_description: function (timetable) {
+            if (timetable.mode == 'manual')
+            {
+                return 'Заполняется вручную или присылается алгоритмом.'
+            }
             if (timetable.mode == 'daily') {
                 return timetable.points.length + ' раз(а) в день.'
             } else if (timetable.mode == 'weekly') {
