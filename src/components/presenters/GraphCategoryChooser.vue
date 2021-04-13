@@ -1,20 +1,29 @@
 <template>
     <div>
-        <h3>Доступные графики</h3>
+        <h5>Доступные графики</h5>
 
-        <div v-for="category in plottable_categories"><a class="btn btn-info" @click="load_graph(category)">{{ category.title }}</a></div>
+        <div class="row">
+                <card v-for="category in plottable_categories" :image="images.graph"
+                      class="col-lg-3 col-md-4">
+                    <h6>{{ category.title }}</h6>
+
+                    <a @click="load_graph(category)" href="#" class="btn btn-primary">Открыть</a>
+                </card>
+            </div>
+
+        <div style="margin-top: 15px;" class="alert alert-info" role="alert">
+            <p>В этой разделе можно посмотреть внесенные данные в виде графиков. Числовые данные отображаются в виде кривых, а текстовые (симптомы и лекарства) на линии в нижней части графика. Чтобы посмотреть подробную информацию, наведите мышку на нужную точку графика.</p>
+        </div>
 
     </div>
 </template>
 
 <script>
-import FormGroup48 from "../common/FormGroup-4-8";
-import ErrorBlock from "../common/ErrorBlock";
-import ActionDone from "./ActionDone";
+import Card from "../common/Card";
 
 export default {
     name: "GraphCategoryChooser",
-    components: {ActionDone, FormGroup48, ErrorBlock},
+    components: {Card},
     props: {
         data: {
             required: true,

@@ -217,6 +217,7 @@ Vue.mixin({
                 algorithm: window.LOCAL_HOST + '/static/images/icons8-artificial-intelligence-96.png',
                 ok: window.LOCAL_HOST + '/static/images/icons8-ok-128.png',
                 error: window.LOCAL_HOST + '/static/images/icons8-delete-128.png',
+                graph: window.LOCAL_HOST + '/static/images/icons8-play-graph-report-48.png',
             },
             is_admin: window.IS_ADMIN
         }
