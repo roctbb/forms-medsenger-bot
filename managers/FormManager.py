@@ -167,7 +167,7 @@ class FormManager(Manager):
                         except:
                             pass
 
-                    if field['type'] in ['string', 'text'] and field.get('prefix'):
+                    if field['type'] in ['textarea', 'text'] and field.get('prefix'):
                         packet.append((category, "{}{}".format(field.get('prefix'), answers[field['uid']]), params))
                     else:
                         packet.append((category, answers[field['uid']], params))
