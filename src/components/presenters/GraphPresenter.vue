@@ -49,7 +49,7 @@ export default {
                         }
                     },{
                         type: 'day',
-                        count: 2,
+                        count: 3,
                         text: '3 дня',
                         dataGrouping: {
                             forced: true,
@@ -57,16 +57,31 @@ export default {
                         }
                     }, {
                         type: 'week',
-                        count: 3,
-                        text: '2 недели',
+                        count: 1,
+                        text: 'Неделя',
                         dataGrouping: {
                             forced: true,
                             units: [['week', [1]]]
                         }
                     }, {
+                        type: 'week',
+                        count: 2,
+                        text: '2 недели',
+                        dataGrouping: {
+                            forced: true,
+                            units: [['week', [2]]]
+                        }
+                    }, {
+                        type: 'month',
+                        count: 1,
+                        text: 'Месяц',
+                        dataGrouping: {
+                            forced: true,
+                            units: [['month', [1]]]
+                        }
+                    }, {
                         type: 'all',
-                        text: 'Все',
-                        count: 4,
+                        text: 'Все'
                     }],
                     buttonTheme: {
                         width: 60
