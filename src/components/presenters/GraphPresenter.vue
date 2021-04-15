@@ -86,7 +86,7 @@ export default {
                     buttonTheme: {
                         width: 60
                     },
-                    selected: 3
+                    selected: 2
                 },
 
                 chart: {
