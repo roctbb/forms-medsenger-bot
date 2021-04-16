@@ -123,6 +123,7 @@ class Form(db.Model):
     filled_timestamp = db.Column(db.Integer, default=0)
 
     template_category = db.Column(db.String(512), default="Общее", nullable=True)
+    instant_report = db.Column(db.Boolean, default=False, nullable=False, server_default='false')
 
     def as_dict(self):
         return {
@@ -140,7 +141,8 @@ class Form(db.Model):
             "template_id": self.template_id,
             "algorithm_id": self.algorithm_id,
             "warning_days": self.warning_days,
-            "template_category": self.template_category
+            "template_category": self.template_category,
+            "instant_report": self.instant_report
         }
 
     def clone(self):
@@ -155,6 +157,7 @@ class Form(db.Model):
         new_form.algorithm_id = self.algorithm_id
         new_form.categories = self.categories
         new_form.warning_days = self.warning_days
+        new_form.instant_report = self.instant_report
 
         if self.is_template:
             new_form.template_id = self.id

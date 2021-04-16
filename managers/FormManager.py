@@ -222,6 +222,7 @@ class FormManager(Manager):
             form.categories = data.get('categories')
             form.template_id = data.get('template_id')
             form.warning_days = data.get('warning_days')
+            form.instant_report = data.get('instant_report')
 
             if data.get('is_template') and contract.is_admin:
                 form.is_template = True
