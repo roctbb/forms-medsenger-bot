@@ -193,7 +193,7 @@ class FormManager(Manager):
             "form_id": form.id
         }
 
-        if form.get('instant_report'):
+        if form.instant_report:
             self.__instant_report__(contract_id, form, report)
 
         return bool(self.medsenger_api.add_records(contract_id, packet, params=params))
