@@ -31,7 +31,7 @@
                 </div>
             </form-group48>
 
-            <a @click="save()" class="btn btn-success">Отправить ответ</a>
+            <button @click="save()" class="btn btn-success" :disabled="submitted">Отправить ответ</button>
     </div>
 </template>
 
@@ -61,7 +61,9 @@ export default {
         save: function () {
             this.errors = []
             this.save_clicked = true
+
             if (this.check()) {
+                this.submitted = true
                 this.axios.post(this.url('/api/form/' + this.form.id), this.answers).then(r => Event.fire('form-done')).catch(r => this.errors.push('Ошибка сохранения'));
             } else {
                 this.errors.push('Проверьте правильность заполнения опросника')
