@@ -1,37 +1,37 @@
 <template>
     <div @click="window.document.activeElement.blur()">
-            <error-block :errors="errors"/>
-            <h3>{{ this.form.title }}</h3>
-            <p v-html="br(form.patient_description)"></p>
-            <form-group48 v-for="(field, i) in form.fields" v-if="!field.show_if || answers[field.show_if]" :required="field.required" :title="field.text" :key="i"
-                          :description="field.description">
-                <input type="number" min="field.params.min" max="field.params.max" step="1" class="form-control"
-                       :class="save_clicked && field.required &&
+        <error-block :errors="errors"/>
+        <h3>{{ this.form.title }}</h3>
+        <p v-html="br(form.patient_description)"></p>
+        <form-group48 v-for="(field, i) in form.fields" v-if="!field.show_if || answers[field.show_if]" :required="field.required" :title="field.text" :key="i"
+                      :description="field.description">
+            <input type="number" min="field.params.min" max="field.params.max" step="1" class="form-control"
+                   :class="save_clicked && field.required &&
                        (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
-                       v-if="field.type == 'integer'" :required="field.required" v-model="answers[field.uid]"/>
-                <input type="number" min="field.params.min" max="field.params.max" step="0.01" class="form-control"
-                       :class="save_clicked && field.required &&
+                   v-if="field.type == 'integer'" :required="field.required" v-model="answers[field.uid]"/>
+            <input type="number" min="field.params.min" max="field.params.max" step="0.01" class="form-control"
+                   :class="save_clicked && field.required &&
                        (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
-                       v-if="field.type == 'float'" :required="field.required" v-model="answers[field.uid]"/>
-                <input type="text" class="form-control" v-if="field.type == 'text'" :required="field.required"
-                       :class="save_clicked && field.required && !answers[field.uid] && answers[field.uid] !== 0 ? 'is-invalid' : ''"
-                       v-model="answers[field.uid]"/>
-                <textarea class="form-control" v-if="field.type == 'textarea'" :required="field.required"
-                          :class="save_clicked && field.required && !answers[field.uid] && answers[field.uid] !== 0 ? 'is-invalid' : ''"
-                          v-model="answers[field.uid]"></textarea>
-                <div v-if="field.type == 'checkbox'" style="width: 100%;"><input type="checkbox"
-                                                                                 v-model="answers[field.uid]"/></div>
+                   v-if="field.type == 'float'" :required="field.required" v-model="answers[field.uid]"/>
+            <input type="text" class="form-control" v-if="field.type == 'text'" :required="field.required"
+                   :class="save_clicked && field.required && !answers[field.uid] && answers[field.uid] !== 0 ? 'is-invalid' : ''"
+                   v-model="answers[field.uid]"/>
+            <textarea class="form-control" v-if="field.type == 'textarea'" :required="field.required"
+                      :class="save_clicked && field.required && !answers[field.uid] && answers[field.uid] !== 0 ? 'is-invalid' : ''"
+                      v-model="answers[field.uid]"></textarea>
+            <div v-if="field.type == 'checkbox'" style="width: 100%;"><input type="checkbox"
+                                                                             v-model="answers[field.uid]"/></div>
 
-                <div v-if="field.type == 'radio'">
-                    <div class="form-check" v-for="(variant, j) in field.params.variants">
-                        <input class="form-check-input" type="radio" :name="'radio_' + i" v-model="answers[field.uid]"
-                               :value="j">
-                        <label class="form-check-label">{{ variant.text }}</label>
-                    </div>
+            <div v-if="field.type == 'radio'">
+                <div class="form-check" v-for="(variant, j) in field.params.variants">
+                    <input class="form-check-input" type="radio" :name="'radio_' + i" v-model="answers[field.uid]"
+                           :value="j">
+                    <label class="form-check-label">{{ variant.text }}</label>
                 </div>
-            </form-group48>
+            </div>
+        </form-group48>
 
-            <button @click="save()" class="btn btn-success" :disabled="submitted">Отправить ответ</button>
+        <button @click="save()" class="btn btn-success" :disabled="submitted">Отправить ответ</button>
     </div>
 </template>
 
@@ -64,7 +64,10 @@ export default {
 
             if (this.check()) {
                 this.submitted = true
-                this.axios.post(this.url('/api/form/' + this.form.id), this.answers).then(r => Event.fire('form-done')).catch(r => this.errors.push('Ошибка сохранения'));
+                this.axios.post(this.url('/api/form/' + this.form.id), this.answers).then(r => Event.fire('form-done')).catch(r => {
+                    this.errors.push('Ошибка сохранения')
+                    this.submitted = false
+                });
             } else {
                 this.errors.push('Проверьте правильность заполнения опросника')
             }
@@ -80,8 +83,7 @@ export default {
                 if (field.type == 'float') {
                     this.answers[field.uid] = parseFloat(this.answers[field.uid])
                 }
-                if (field.show_if && !this.answers[field.show_if])
-                {
+                if (field.show_if && !this.answers[field.show_if]) {
                     this.answers[field.uid] = undefined;
                 }
             }
