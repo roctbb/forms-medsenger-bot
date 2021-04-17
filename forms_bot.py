@@ -294,10 +294,7 @@ def graph_categories(args, form):
     contract_id = args.get('contract_id')
     categories = medsenger_api.get_available_categories(contract_id)
 
-    if categories:
-        return jsonify(categories)
-    else:
-        abort(404)
+    return jsonify(categories)
 
 
 @app.route('/api/graph/group', methods=['POST'])
@@ -308,10 +305,7 @@ def graph_data(args, form):
     answer = [medsenger_api.get_records(contract_id, category_name) for category_name in group['categories'] + ['medicine', 'symptom']]
     answer = list(filter(lambda x: x != None, answer))
 
-    if answer:
-        return jsonify(answer)
-    else:
-        abort(404)
+    return jsonify(answer)
 
 
 @app.route('/api/form/<form_id>', methods=['GET'])
