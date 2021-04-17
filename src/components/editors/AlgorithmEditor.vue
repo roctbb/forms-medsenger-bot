@@ -121,12 +121,19 @@ export default {
             }
 
             let prepare_criteria = (criteria) => {
-                if (criteria.left_mode != 'time')
+               if (criteria.left_mode != 'time')
                 {
-                    if (!this.empty(criteria.left_hours)) criteria.left_hours = parseInt(criteria.left_hours)
+                    if (criteria.left_dimension == 'hours') {
+                        if (!this.empty(criteria.left_hours)) criteria.left_hours = parseInt(criteria.left_hours)
+                    } else {
+                        if (!this.empty(criteria.left_times)) criteria.left_times = parseInt(criteria.left_times)
+                    }
 
-                    if (!this.empty(criteria.right_hours)) criteria.right_hours = parseInt(criteria.right_hours)
-
+                    if (criteria.right_dimension == 'hours'){
+                        if (!this.empty(criteria.right_hours)) criteria.right_hours = parseInt(criteria.right_hours)
+                    } else {
+                        if (!this.empty(criteria.right_times)) criteria.right_times = parseInt(criteria.right_times)
+                    }
 
                     if (!this.empty(criteria.value)) {
                         let category = this.get_category(criteria.category)
@@ -135,7 +142,11 @@ export default {
                     }
                 }
                 else {
-                    if (!this.empty(criteria.right_hours)) criteria.right_hours = parseInt(criteria.right_hours)
+                   if (criteria.right_dimension == 'hours'){
+                       if (!this.empty(criteria.right_hours)) criteria.right_hours = parseInt(criteria.right_hours)
+                   } else {
+                       if (!this.empty(criteria.right_times)) criteria.right_times = parseInt(criteria.right_times)
+                   }
 
                     if (criteria.sign == 'equal') {
                         criteria.category = 'exact_time'

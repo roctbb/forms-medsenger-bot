@@ -65,7 +65,7 @@ class AlgorithmsManager(Manager):
     def get_templates(self):
         return Algorithm.query.filter_by(is_template=True).all()
 
-    def get_values(self, category_name, mode, contract_id, hours=1):
+    def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1):
 
         if mode == 'value':
             offset = 0
@@ -75,8 +75,11 @@ class AlgorithmsManager(Manager):
         if mode == 'value':
             answer = self.medsenger_api.get_records(contract_id, category_name, group=True, offset=offset)
         else:
-            answer = self.medsenger_api.get_records(contract_id, category_name,
-                                                    time_from=int((datetime.now() - timedelta(hours=hours)).timestamp()), offset=offset)
+            if dimension == 'hours':
+                answer = self.medsenger_api.get_records(contract_id, category_name,
+                                                        time_from=int((datetime.now() - timedelta(hours=hours)).timestamp()), offset=offset)
+            else:
+                answer = self.medsenger_api.get_records(contract_id, category_name, limit=times, offset=offset)
 
         values = list(map(lambda x: x['value'], answer['values']))
         objects = answer['values']
@@ -132,19 +135,33 @@ class AlgorithmsManager(Manager):
 
         if mode != 'time':
             objects = None
-            left_values, objects = self.get_values(category_name, criteria['left_mode'], contract_id,
-                                               criteria.get('left_hours'))
+            dimension = criteria.get('left_dimension')
+            if dimension == 'hours':
+                left_values, objects = self.get_values(category_name, criteria['left_mode'], contract_id, dimension,
+                                                       hours=criteria.get('left_hours'))
+            else:
+                left_values, objects = self.get_values(category_name, criteria['left_mode'], contract_id, dimension,
+                                                       times=criteria.get('left_times'))
 
             if criteria['right_mode'] == 'value':
                 right_values = [criteria.get('value')]
             else:
                 right_category = criteria.get('right_category')
+                dimension = criteria.get('right_dimension')
                 if right_category:
-                    right_values, _ = self.get_values(right_category, criteria['right_mode'], contract_id,
-                                                      criteria.get('right_hours'))
+                    if dimension == 'hours':
+                        right_values, _ = self.get_values(right_category, criteria['right_mode'], contract_id, dimension,
+                                                          hours=criteria.get('right_hours'))
+                    else:
+                        right_values, _ = self.get_values(right_category, criteria['right_mode'], contract_id,
+                                                          dimension=dimension, times=criteria.get('right_times'))
                 else:
-                    right_values, _ = self.get_values(category_name, criteria['right_mode'], contract_id,
-                                                      criteria.get('right_hours'))
+                    if dimension == 'hours':
+                        right_values, _ = self.get_values(category_name, criteria['right_mode'], contract_id,
+                                                          dimension=dimension, hours=criteria.get('right_hours'))
+                    else:
+                        right_values, _ = self.get_values(category_name, criteria['right_mode'], contract_id,
+                                                          dimension=dimension, times=criteria.get('right_times'))
 
             if not right_values or not left_values:
                 return False

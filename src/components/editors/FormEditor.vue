@@ -45,6 +45,10 @@
                            type="number" min="1" max="200" step="1" v-model="form.warning_days"/>
                     <small class="text-muted">дней</small>
                 </form-group48>
+
+                <form-group48 title="Сразу же присылать ответы врачу" v-if="is_admin">
+                    <input class="form-check" type="checkbox" v-model="form.instant_report"/>
+                </form-group48>
             </card>
 
             <timetable-editor :data="form.timetable" :timetable_save_clicked="this.timetable_save_clicked"/>
