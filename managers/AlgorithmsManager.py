@@ -433,10 +433,12 @@ class AlgorithmsManager(Manager):
             algorithm.description = data.get('description')
             algorithm.categories = data.get('categories')
             algorithm.template_id = data.get('template_id')
+
             if data.get('attached_form'):
                 algorithm.attached_form = data.get('attached_form')
 
-            if data.get('is_template'):
+            if data.get('is_template') and contract.is_admin:
+                algorithm.clinics = data.get('clinics')
                 algorithm.is_template = True
                 algorithm.template_category = data.get('template_category')
             else:

@@ -8,7 +8,8 @@
     <script>
         window.AGENT_ID = '{{ agent_id }}';
         window.IS_ADMIN = {{ is_admin }};
-        window.CONTRACT_ID = '{{ contract_id }}';
+        window.CONTRACT_ID = parseInt('{{ contract_id }}');
+        window.CLINIC_ID = parseInt('{{ clinic_id }}');
         window.API_HOST = '{{ api_host }}';
         window.LOCAL_HOST = '{{ local_host }}';
         window.AGENT_TOKEN = '{{ agent_token }}';

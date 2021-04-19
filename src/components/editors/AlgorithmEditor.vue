@@ -20,6 +20,10 @@
                 <form-group48 v-if="is_admin" title="Привязать к форме">
                     <input class="form-control form-control-sm" type="number" v-model="algorithm.attached_form"/>
                 </form-group48>
+
+                <form-group48 v-if="is_admin" title="Показывать шаблон клиникам (JSON)">
+                    <input class="form-control form-control-sm" type="text" v-model="algorithm.clinics"/>
+                </form-group48>
             </card>
 
             <card title="Критерий срабатывания">

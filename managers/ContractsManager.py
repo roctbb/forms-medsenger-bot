@@ -27,6 +27,7 @@ class ContractManager(Manager):
             self.db.session.add(contract)
 
         contract.is_active = True
+        contract.clinic_id = clinic_id
         contract.agent_token = self.medsenger_api.get_agent_token(contract_id).get('agent_token')
 
         self.__commit__()

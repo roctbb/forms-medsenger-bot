@@ -117,6 +117,7 @@ class Form(db.Model):
     categories = db.Column(db.String(512), nullable=True)
 
     algorithm_id = db.Column(db.Integer, db.ForeignKey('algorithm.id', ondelete="set null"), nullable=True)
+    clinics = db.Column(db.JSON, nullable=True)
 
     last_sent = db.Column(db.DateTime(), nullable=True)
 
@@ -144,7 +145,8 @@ class Form(db.Model):
             "algorithm_id": self.algorithm_id,
             "warning_days": self.warning_days,
             "template_category": self.template_category,
-            "instant_report": self.instant_report
+            "instant_report": self.instant_report,
+            "clinics": self.clinics
         }
 
     def clone(self):
@@ -160,6 +162,7 @@ class Form(db.Model):
         new_form.categories = self.categories
         new_form.warning_days = self.warning_days
         new_form.instant_report = self.instant_report
+
 
         if self.is_template:
             new_form.template_id = self.id
@@ -185,6 +188,7 @@ class Algorithm(db.Model):
     attached_form = db.Column(db.Integer, nullable=True)
 
     template_category = db.Column(db.String(512), default="Общее", nullable=True)
+    clinics = db.Column(db.JSON, nullable=True)
 
     def as_dict(self, native=False):
         return {
@@ -199,7 +203,8 @@ class Algorithm(db.Model):
             "is_template": self.is_template,
             "template_id": self.template_id,
             "template_category": self.template_category,
-            "attached_form": self.attached_form
+            "attached_form": self.attached_form,
+            "clinics": self.clinics
         }
 
     def clone(self):
