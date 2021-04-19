@@ -365,7 +365,7 @@ class AlgorithmsManager(Manager):
                                                         medicine.timetable_description()),
                                                     only_doctor=True)
 
-    def run(self, algorithm):
+    def run(self, algorithm, is_prime=True):
         criteria = algorithm.criteria
         actions = algorithm.actions
         contract_id = algorithm.contract_id
@@ -388,8 +388,9 @@ class AlgorithmsManager(Manager):
             for action in filter(lambda x: not x.get('params', {}).get('is_negative'), actions):
                 self.run_action(action, contract_id, descriptions)
         else:
-            for action in filter(lambda x: x.get('params', {}).get('is_negative'), actions):
-                self.run_action(action, contract_id, descriptions)
+            if is_prime:
+                for action in filter(lambda x: x.get('params', {}).get('is_negative'), actions):
+                    self.run_action(action, contract_id, descriptions)
 
     def examine(self, contract, form):
         categories = form.categories.split('|')
@@ -397,13 +398,12 @@ class AlgorithmsManager(Manager):
 
         algorithms = filter(lambda algorithm: any([cat in algorithm.categories.split('|') for cat in categories]),
                                  patient.algorithms)
-        if form.template_id:
-            algorithms = filter(lambda a: not a.attached_form or a.attached_form == form.template_id, algorithms)
-        else:
-            algorithms = filter(lambda a: not a.attached_form or a.attached_form == form.id, algorithms)
 
         for algorithm in algorithms:
-            self.run(algorithm)
+            if form.template_id:
+                self.run(algorithm, algorithm.attached_form == form.template_id)
+            else:
+                self.run(algorithm, algorithm.attached_form == form.id)
 
     def hook(self, contract, category_name):
         patient = contract.patient
