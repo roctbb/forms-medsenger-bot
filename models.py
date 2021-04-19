@@ -23,6 +23,7 @@ class Patient(db.Model):
 class Contract(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=False)
+    clinic_id = db.Column(db.Integer, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
     agent_token = db.Column(db.String(255), nullable=True)
 
@@ -35,6 +36,7 @@ class Contract(db.Model):
     def as_dict(self, native=False):
         serialized = {
             "id": self.id,
+            "clinic_id": self.clinic_id
         }
 
         if native:

@@ -47,10 +47,11 @@ def order(data):
 @verify_json
 def init(data):
     contract_id = data.get('contract_id')
+    clinic_id = data.get('clinic_id')
     if not contract_id:
         abort(422)
 
-    contract = contract_manager.add(contract_id)
+    contract = contract_manager.add(contract_id, clinic_id)
 
     params = data.get('params')
     print(params)
