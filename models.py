@@ -180,6 +180,7 @@ class Algorithm(db.Model):
     categories = db.Column(db.String(512), nullable=True)
     is_template = db.Column(db.Boolean, default=False)
     template_id = db.Column(db.Integer, db.ForeignKey('algorithm.id', ondelete="set null"), nullable=True)
+    attached_form = db.Column(db.Integer, nullable=True)
 
     template_category = db.Column(db.String(512), default="Общее", nullable=True)
 
@@ -195,7 +196,8 @@ class Algorithm(db.Model):
             "categories": self.categories,
             "is_template": self.is_template,
             "template_id": self.template_id,
-            "template_category": self.template_category
+            "template_category": self.template_category,
+            "attached_form": self.attached_form
         }
 
     def clone(self):
@@ -206,6 +208,7 @@ class Algorithm(db.Model):
         new_algorithm.criteria = self.criteria
         new_algorithm.actions = self.actions
         new_algorithm.categories = self.categories
+        new_algorithm.attached_form = self.attached_form
 
         if self.is_template:
             new_algorithm.template_id = self.id

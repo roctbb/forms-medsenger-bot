@@ -65,6 +65,14 @@ class AlgorithmsManager(Manager):
     def get_templates(self):
         return Algorithm.query.filter_by(is_template=True).all()
 
+    def check_action(self, contract_id, form_id):
+        answer = self.medsenger_api.get_records(contract_id, "action", group=True)
+
+        if not answer or not answer['values']:
+            return False
+
+        return answer['values'][0] == 'Заполнение опросника ID {}'.format(form_id)
+
     def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1):
 
         if mode == 'value':
@@ -77,7 +85,9 @@ class AlgorithmsManager(Manager):
         else:
             if dimension == 'hours':
                 answer = self.medsenger_api.get_records(contract_id, category_name,
-                                                        time_from=int((datetime.now() - timedelta(hours=hours)).timestamp()), offset=offset)
+                                                        time_from=int(
+                                                            (datetime.now() - timedelta(hours=hours)).timestamp()),
+                                                        offset=offset)
             else:
                 answer = self.medsenger_api.get_records(contract_id, category_name, limit=times, offset=offset)
 
@@ -153,7 +163,8 @@ class AlgorithmsManager(Manager):
                 dimension = criteria.get('right_dimension')
                 if right_category:
                     if dimension == 'hours':
-                        right_values, _ = self.get_values(right_category, criteria['right_mode'], contract_id, dimension,
+                        right_values, _ = self.get_values(right_category, criteria['right_mode'], contract_id,
+                                                          dimension,
                                                           hours=criteria.get('right_hours'))
                     else:
                         right_values, _ = self.get_values(right_category, criteria['right_mode'], contract_id,
@@ -230,13 +241,14 @@ class AlgorithmsManager(Manager):
                 action_link = None
 
             if action['params'].get('add_deadline') and action['params'].get('action_deadline'):
-                action_deadline = time.time() + int(action['params'].get('action_deadline'))  * 60 * 60
+                action_deadline = time.time() + int(action['params'].get('action_deadline')) * 60 * 60
             else:
                 action_deadline = None
 
             self.medsenger_api.send_message(contract_id, action['params']['text'] + report,
                                             only_patient=True, action_name=action_name, action_link=action_link,
-                                            is_urgent=action['params'].get('is_urgent'), action_deadline=action_deadline)
+                                            is_urgent=action['params'].get('is_urgent'),
+                                            action_deadline=action_deadline)
         if action['type'] == 'doctor_message':
             if action['params'].get('add_action'):
                 action_name = action['params'].get('action_name')
@@ -246,14 +258,15 @@ class AlgorithmsManager(Manager):
                 action_link = None
 
             if action['params'].get('add_deadline') and action['params'].get('action_deadline'):
-                action_deadline = time.time() + int(action['params'].get('action_deadline'))  * 60 * 60
+                action_deadline = time.time() + int(action['params'].get('action_deadline')) * 60 * 60
             else:
                 action_deadline = None
 
             self.medsenger_api.send_message(contract_id, action['params']['text'] + report,
                                             only_doctor=True, action_name=action_name, action_link=action_link,
                                             is_urgent=action['params'].get('is_urgent'),
-                                            need_answer=action['params'].get('need_answer'), action_deadline=action_deadline)
+                                            need_answer=action['params'].get('need_answer'),
+                                            action_deadline=action_deadline)
         if action['type'] == 'record':
             category_name = action['params'].get('category')
             value = action['params'].get('value')
@@ -382,8 +395,12 @@ class AlgorithmsManager(Manager):
         categories = form.categories.split('|')
         patient = contract.patient
 
-        algorithms = list(filter(lambda algorithm: any([cat in algorithm.categories.split('|') for cat in categories]),
-                                 patient.algorithms))
+        algorithms = filter(lambda algorithm: any([cat in algorithm.categories.split('|') for cat in categories]),
+                                 patient.algorithms)
+        if form.template_id:
+            algorithms = filter(lambda a: not a.attached_form or a.attached_form == form.template_id, algorithms)
+        else:
+            algorithms = filter(lambda a: not a.attached_form or a.attached_form == form.id, algorithms)
 
         for algorithm in algorithms:
             self.run(algorithm)
@@ -416,6 +433,8 @@ class AlgorithmsManager(Manager):
             algorithm.description = data.get('description')
             algorithm.categories = data.get('categories')
             algorithm.template_id = data.get('template_id')
+            if data.get('attached_form'):
+                algorithm.attached_form = data.get('attached_form')
 
             if data.get('is_template'):
                 algorithm.is_template = True
