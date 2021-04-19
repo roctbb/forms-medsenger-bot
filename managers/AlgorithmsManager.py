@@ -81,6 +81,9 @@ class AlgorithmsManager(Manager):
             else:
                 answer = self.medsenger_api.get_records(contract_id, category_name, limit=times, offset=offset)
 
+        if not answer:
+            return None, None
+
         values = list(map(lambda x: x['value'], answer['values']))
         objects = answer['values']
 
