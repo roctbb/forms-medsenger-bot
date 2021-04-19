@@ -189,7 +189,11 @@ class FormManager(Manager):
                     else:
                         packet.append((category, answers[field['uid']], params))
 
-        packet.append(('action', 'Заполнение опросника ID {}'.format(form_id)))
+        if form.template_id:
+            packet.append(('action', 'Заполнение опросника ID {}'.format(form.template_id)))
+        else:
+            packet.append(('action', 'Заполнение опросника ID {}'.format(form_id)))
+
 
         params = {
             "form_id": form.id
