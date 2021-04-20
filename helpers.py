@@ -3,6 +3,7 @@ import threading
 from datetime import datetime
 from flask import request, abort, jsonify, render_template
 from config import *
+from sentry_sdk import capture_exception
 import sys, os
 
 
@@ -14,6 +15,9 @@ def gts():
 def log(error, terminating=False):
     exc_type, exc_obj, exc_tb = sys.exc_info()
     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+
+    if PRODUCTION:
+        capture_exception(error)
 
     if terminating:
         print(gts(), exc_type, fname, exc_tb.tb_lineno, error, "CRITICAL")

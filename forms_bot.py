@@ -20,6 +20,10 @@ algorithm_manager = AlgorithmsManager(medsenger_api, db)
 def index():
     return "Waiting for the thunder"
 
+@app.route('/debug-sentry')
+def trigger_error():
+    division_by_zero = 1 / 0
+
 
 # monitoring and common api
 

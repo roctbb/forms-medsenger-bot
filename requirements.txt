@@ -3,5 +3,6 @@ flask_sqlalchemy
 flask_migrate
 Flask-Script
 apscheduler
-psycopg2
 psycopg2-binary
+requests
+sentry-sdk[flask]
