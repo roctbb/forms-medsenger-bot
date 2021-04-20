@@ -26,7 +26,7 @@ def trigger_error():
         division_by_zero = 1 / 0
     except Exception as e:
         log(e, True)
-
+        abort(500)
 
 # monitoring and common api
 
