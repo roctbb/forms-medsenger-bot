@@ -22,7 +22,10 @@ def index():
 
 @app.route('/debug-sentry')
 def trigger_error():
-    division_by_zero = 1 / 0
+    try:
+        division_by_zero = 1 / 0
+    except Exception as e:
+        log(e, True)
 
 
 # monitoring and common api
