@@ -179,8 +179,16 @@ class Algorithm(db.Model):
     title = db.Column(db.String(255), nullable=True)
     description = db.Column(db.Text, nullable=True)
 
+    # legacy
+    # todo - make transition
     criteria = db.Column(db.JSON, nullable=True)
     actions = db.Column(db.JSON, nullable=True)
+
+    # actual
+    steps = db.Column(db.JSON, nullable=True)
+    initial_step = db.Column(db.String(128), nullable=True)
+    current_step = db.Column(db.String(128), nullable=True)
+    reset_at = db.Column(db.DateTime, nullable=True)
 
     categories = db.Column(db.String(512), nullable=True)
     is_template = db.Column(db.Boolean, default=False)

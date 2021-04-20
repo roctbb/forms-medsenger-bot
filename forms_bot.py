@@ -6,7 +6,7 @@ from managers.MedicineManager import MedicineManager
 from managers.TimetableManager import TimetableManager
 from medsenger_api import AgentApiClient
 from helpers import *
-from models import Form
+from models import Form, Algorithm
 
 medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG)
 contract_manager = ContractManager(medsenger_api, db)
@@ -27,6 +27,12 @@ def trigger_error():
     except Exception as e:
         log(e, True)
         abort(500)
+
+@app.route('/migrate-algorithms')
+def trigger_error():
+    algorithm_manager.migrate()
+
+
 
 # monitoring and common api
 

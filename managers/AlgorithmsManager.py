@@ -1,4 +1,5 @@
 import time
+import uuid
 from datetime import datetime, timedelta
 
 from helpers import log, generate_description
@@ -12,6 +13,29 @@ from models import Patient, Contract, Algorithm
 class AlgorithmsManager(Manager):
     def __init__(self, *args):
         super(AlgorithmsManager, self).__init__(*args)
+
+    def __migrate__(self):
+        algorithms = Algorithm.query.all()
+
+        for algorithm in algorithms:
+            algorithm.steps = [
+                {
+                    "uid": str(uuid.uuid4()),
+                    "title": algorithm.title,
+                    "conditions": [
+                        {
+                            "uid": str(uuid.uuid4()),
+                            "criteria": algorithm.criteria,
+                            "actions": algorithm.actions
+                        }
+                    ],
+                    "reset_seconds": 0
+                }
+            ]
+            algorithm.current_step = algorithm.steps[0]['uid']
+            algorithm.initial_step = algorithm.steps[0]['uid']
+
+        self.__commit__()
 
     def get(self, algorithm_id):
         return Algorithm.query.filter_by(id=algorithm_id).first_or_404()
