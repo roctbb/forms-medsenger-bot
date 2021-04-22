@@ -205,8 +205,7 @@ class Algorithm(db.Model):
             "patient_id": self.patient_id,
             "title": self.title,
             "description": self.description,
-            "criteria": self.criteria,
-            "actions": self.actions,
+            "steps": self.steps,
             "categories": self.categories,
             "is_template": self.is_template,
             "template_id": self.template_id,
@@ -219,9 +218,7 @@ class Algorithm(db.Model):
         new_algorithm = Algorithm()
         new_algorithm.title = self.title
         new_algorithm.description = self.description
-
-        new_algorithm.criteria = self.criteria
-        new_algorithm.actions = self.actions
+        new_algorithm.steps = self.steps
         new_algorithm.categories = self.categories
         new_algorithm.attached_form = self.attached_form
 

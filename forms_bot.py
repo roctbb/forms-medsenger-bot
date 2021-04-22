@@ -28,11 +28,6 @@ def trigger_error():
         log(e, True)
         abort(500)
 
-@app.route('/migrate-algorithms')
-def trigger_error():
-    algorithm_manager.migrate()
-
-
 
 # monitoring and common api
 

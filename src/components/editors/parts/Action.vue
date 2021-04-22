@@ -123,7 +123,7 @@ import FormGroup48 from "../../common/FormGroup-4-8";
 export default {
     name: "Action",
     components: {FormGroup48, Card},
-    props: ['data', 'pkey', 'save_clicked'],
+    props: ['data', 'pkey', 'save_clicked', 'condition'],
     data() {
         return {
             action: {},
@@ -134,7 +134,7 @@ export default {
     methods: {
 
         remove: function () {
-            Event.fire('remove-action', this.pkey)
+            Event.fire('remove-action', [this.pkey, this.condition])
         },
         clear_params: function () {
             this.backup[this.action.type] = JSON.stringify(this.action.params)

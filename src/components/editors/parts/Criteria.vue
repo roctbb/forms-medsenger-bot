@@ -159,7 +159,7 @@ import FormGroup48 from "../../common/FormGroup-4-8";
 export default {
     name: "Criteria",
     components: {FormGroup48, Card},
-    props: ['data', 'rkey', 'pkey', 'save_clicked'],
+    props: ['data', 'rkey', 'pkey', 'save_clicked', 'condition'],
     data() {
         return {
             mode: 'integer',
@@ -170,7 +170,7 @@ export default {
     methods: {
 
         remove: function () {
-            Event.fire('remove-criteria', [this.rkey, this.pkey])
+            Event.fire('remove-criteria', [this.rkey, this.pkey, this.condition])
         },
         is_int: function () {
             return this.category.type != 'string'

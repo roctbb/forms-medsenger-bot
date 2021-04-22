@@ -5,7 +5,7 @@ from models import db
 from flask_script import Command
 
 class MigrateLegacyStructure(Command):
-    "prints hello world"
+    "legacy db structure migration"
 
     def run(self):
         medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG)
