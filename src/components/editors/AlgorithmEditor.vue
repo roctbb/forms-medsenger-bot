@@ -18,10 +18,6 @@
                     <input class="form-control form-control-sm" value="Общее" v-model="algorithm.template_category"/>
                 </form-group48>
 
-                <form-group48 v-if="is_admin" title="Привязать к форме">
-                    <input class="form-control form-control-sm" type="number" v-model="algorithm.attached_form"/>
-                </form-group48>
-
                 <form-group48 v-if="is_admin" title="Показывать шаблон клиникам (JSON)">
                     <input class="form-control form-control-sm" type="text" v-model="algorithm.clinics"/>
                 </form-group48>
@@ -32,32 +28,47 @@
                     <input class="form-control form-control-sm" v-model="step.title"/>
                 </form-group48>
 
-                <form-group48 title="Сброс к исходному состоянию">
-                    <input class="form-control form-control-sm" type="number" v-model="step.reset_minutes"/>
+                <form-group48 title="Таймаут (секунды)">
+                    <input class="form-control form-control-sm" type="number" v-model="step.reset_seconds"/>
                 </form-group48>
 
-                <card v-for="(condition, condition_index) in step.conditions" :key="condition.uid">
-                    <hr>
-                    <h5>Критерии срабатывания</h5>
+                <card v-for="(condition, condition_index) in step.conditions" additional_class="border-primary" :key="condition.uid">
+                    <h6>Критерии срабатывания</h6>
+
                     <div v-for="(or_block, i) in condition.criteria">
                         <div v-for="(criteria, j) in or_block">
-                            <criteria :data="criteria" :rkey="i" :pkey="j" :condition="condition" :key="criteria.uid"/>
+                            <criteria class="alert alert-primary" :data="criteria" :rkey="i" :pkey="j" :condition="condition" :key="criteria.uid"/>
                         </div>
-                        <button class="btn btn-sm btn-primary" @click="add_criteria(or_block, i)">и</button>
+                        <p class="text-center"><button class="btn btn-sm btn-default" @click="add_criteria(or_block, i)">и</button></p>
                         <div class="separator">или</div>
                     </div>
-                    <button class="btn btn-sm btn-primary" @click="add_or_block(condition)">или</button>
+                    <p class="text-center"><button class="btn btn-sm btn-default" @click="add_or_block(condition)">или</button></p>
+
+                    <h6 style="margin-top: 10px;">Действия если условие выполняется</h6>
+
+                    <action class="alert alert-success" v-for="(action, i) in condition.positive_actions" :algorithm="algorithm" :data="action" :pkey="i" :parent="condition.positive_actions" :key="action.uid"></action>
+                    <p class="text-center"><button class="btn btn-sm btn-default" @click="add_action(condition.positive_actions)">Добавить</button></p>
+
+                    <h6 style="margin-top: 10px;">Действия если условие не выполняется</h6>
+
+                    <action class="alert alert-danger" v-for="(action, i) in condition.negative_actions" :algorithm="algorithm" :data="action" :pkey="i" :parent="condition.negative_actions" :key="action.uid"></action>
+                    <p class="text-center"><button class="btn btn-sm btn-default" @click="add_action(condition.negative_actions)">Добавить</button></p>
 
                     <hr>
-                    <h5>Действия</h5>
-
-                    <action v-for="(action, i) in condition.actions" :data="action" :pkey="i" :condition="condition" :key="action.uid"></action>
-                    <button class="btn btn-sm btn-primary" @click="add_action(condition)">Добавить</button>
 
                     <button class="btn btn-sm btn-danger" @click="remove_condition(step, condition_index)">Удалить условие</button>
                 </card>
 
                 <button class="btn btn-sm btn-primary" @click="add_condition(step)">Добавить условие</button>
+
+                <hr>
+
+                <h6>Действие по таймауту</h6>
+
+                    <action class="alert alert-warning" v-for="(action, i) in step.timeout_actions" :algorithm="algorithm" :data="action" :pkey="i" :parent="step.timeout_actions" :key="action.uid"></action>
+                    <button class="btn btn-sm btn-primary" @click="add_action(step.timeout_actions)">Добавить</button>
+
+
                 <button class="btn btn-sm btn-danger" @click="remove_step(step_index)">Удалить ступень</button>
             </card>
 
@@ -111,8 +122,7 @@ export default {
         },
         create_empty_algorithm: function () {
             return {
-                criteria: [],
-                actions: []
+                steps: [this.create_step()],
             };
         },
         add_or_block: function (condition) {
@@ -121,7 +131,6 @@ export default {
         },
         add_criteria: function (block, i) {
             block.push(this.create_empty_criteria())
-            this.criteria_save_clicked[i].push(false)
         },
         add_condition: function (step) {
             step.conditions.push(this.create_condition());
@@ -134,14 +143,18 @@ export default {
             return {
                 title: 'ступень',
                 reset_minutes: 60,
-                conditions: [this.create_condition()]
+                conditions: [this.create_condition()],
+                timeout_actions: [],
+                uid: this.uuidv4()
             }
         },
 
         create_condition: function () {
             return {
                 criteria: [[this.create_empty_criteria()]],
-                actions: [this.create_empty_action()]
+                positive_actions: [this.create_empty_action()],
+                negative_actions: [],
+                uid: this.uuidv4()
             }
         },
         create_empty_criteria: function () {
@@ -153,9 +166,8 @@ export default {
                 uid: this.uuidv4()
             }
         },
-        add_action: function (condition) {
-            condition.actions.push(this.create_empty_action())
-            this.actions_save_clicked.push(false)
+        add_action: function (parent) {
+            parent.push(this.create_empty_action())
         },
         create_empty_action: function () {
             return {
@@ -231,14 +243,21 @@ export default {
                 return false;
             }
 
-            this.algorithm.criteria = this.algorithm.criteria.map((L) => L.map(prepare_criteria))
+            this.algorithm.steps.forEach(step => {
+                step.conditions.forEach(condition => {
+                    condition.criteria = condition.criteria.map((L) => L.map(prepare_criteria))
+                })
+            })
 
-            if (!this.algorithm.criteria.length) {
-                this.errors.push('Добавьте хотя бы одно условие.')
+            if (!this.algorithm.steps.length) {
+                this.errors.push('Добавьте хотя бы одну ступень.')
             }
 
-            console.log(this.algorithm.criteria.filter((L) => L.filter(criteria_validator)))
-            if (this.algorithm.criteria.filter((L) => L.filter(criteria_validator).length > 0).length) {
+            let has_errors = this.algorithm.steps.some(step => {
+               step.conditions.some(condition => condition.criteria.filter((L) => L.filter(criteria_validator).length > 0).length);
+            });
+
+            if (has_errors) {
                 this.errors.push('Проверьте правильность условий.')
             }
 
@@ -261,13 +280,22 @@ export default {
                 return false;
             }
 
-            this.algorithm.actions = this.algorithm.actions.map(prepare_action)
+            this.algorithm.steps.forEach(step => {
+                step.timeout_actions = step.timeout_actions.map(prepare_action)
 
-            if (!this.algorithm.actions.length) {
-                this.errors.push('Добавьте хотя бы одно действие.')
-            }
+                step.conditions.forEach(condition => {
+                    condition.positive_actions = condition.positive_actions.map(prepare_action)
+                    condition.negative_actions = condition.negative_actions.map(prepare_action)
+                })
+            })
 
-            if (this.algorithm.actions.filter(action_validator).length) {
+            has_errors = this.algorithm.steps.some(step => {
+               step.conditions.some(condition => condition.positive_actions.filter(action_validator).length > 0);
+            }) || this.algorithm.steps.some(step => {
+               step.conditions.some(condition => condition.negative_actions.filter(action_validator).length);
+            }) || this.algorithm.steps.some(step => step.timeout_actions.filter(action_validator).length);
+
+            if (has_errors) {
                 this.errors.push('Проверьте правильность действий.')
             }
 
@@ -292,7 +320,6 @@ export default {
         save: function (is_template) {
             this.show_validation()
             if (this.check()) {
-                this.algorithm.categories = this.algorithm.criteria.map(block => block.map(c => c.category).join('|')).join('|')
                 this.errors = []
 
                 if (is_template || this.algorithm.is_template) {
@@ -316,15 +343,12 @@ export default {
             else Event.fire('back-to-dashboard', this.algorithm)
 
             this.algorithm = undefined
-            this.save_clicked = false
-            this.actions_save_clicked = []
-            this.criteria_save_clicked = []
         },
         process_save_error: function (response) {
             this.errors.push('Ошибка сохранения');
         },
         remove_action: function (index) {
-            index[1].algorithm.actions.splice(index[0], 1);
+            index[1].splice(index[0], 1);
         },
         remove_criteria: function (index) {
             index[2].criteria[index[0]].splice(index[1], 1);

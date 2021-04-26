@@ -184,7 +184,8 @@ Vue.mixin({
             return criteria /* + actions */
         },
         need_filling: function (algorithm) {
-            return algorithm.criteria.some(c => c.some(b => b.ask_value == true))
+            console.log(algorithm.steps)
+            return algorithm.steps.some(s => s.conditions.some(k => k.criteria.some(c => c.some(b => b.ask_value == true))));
         },
         group_by: function (categories, field) {
             return categories.reduce((groups, item) => {

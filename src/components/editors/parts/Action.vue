@@ -2,6 +2,7 @@
     <div class="form-group row" v-if="action">
         <div class="col-md-3">
             <select class="form-control form-control-sm" @change="clear_params()" v-model="mode">
+                <option value="change_step">перейти к ступени</option>
                 <option value="doctor_message">сообщение врачу</option>
                 <option value="patient_message">сообщение пациенту</option>
                 <option value="record">запись в карту</option>
@@ -16,6 +17,12 @@
                 <!-- назначение/отключения мониторинга/лекарства/алгоритма / order -->
             </select>
             <small class="text-muted"><button class="btn btn-sm btn-default" @click="remove()">Удалить</button></small>
+        </div>
+
+        <div class="col-md-9" v-if="['change_step'].includes(action.type)">
+            <select class="form-control form-control-sm" v-model="action.params.target">
+                <option v-for="step in algorithm.steps" :value="step.uid">{{ step.title }}</option>
+            </select>
         </div>
 
         <div class="col-md-2" v-if="['doctor_message', 'patient_message'].includes(action.type)">
@@ -106,12 +113,6 @@
             </div>
         </div>
 
-
-        <div class="col-md-12">
-            <input type="checkbox" v-model="action.params.is_negative">
-            <small class="text-muted">Выполнить если критерии не выполняются.</small>
-        </div>
-
     </div>
 </template>
 
@@ -123,7 +124,7 @@ import FormGroup48 from "../../common/FormGroup-4-8";
 export default {
     name: "Action",
     components: {FormGroup48, Card},
-    props: ['data', 'pkey', 'save_clicked', 'condition'],
+    props: ['data', 'pkey', 'save_clicked', 'parent', 'algorithm'],
     data() {
         return {
             action: {},
@@ -134,7 +135,7 @@ export default {
     methods: {
 
         remove: function () {
-            Event.fire('remove-action', [this.pkey, this.condition])
+            Event.fire('remove-action', [this.pkey, this.parent])
         },
         clear_params: function () {
             this.backup[this.action.type] = JSON.stringify(this.action.params)

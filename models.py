@@ -105,6 +105,7 @@ class Form(db.Model):
     title = db.Column(db.String(255), nullable=True)
     doctor_description = db.Column(db.Text, nullable=True)
     patient_description = db.Column(db.Text, nullable=True)
+    thanks_text = db.Column(db.Text, nullable=True)
 
     show_button = db.Column(db.Boolean, default=False)
     button_title = db.Column(db.String(255), nullable=True)
@@ -136,6 +137,7 @@ class Form(db.Model):
             "title": self.title,
             "doctor_description": self.doctor_description,
             "patient_description": self.patient_description,
+            "thanks_text": self.thanks_text,
             "fields": self.fields,
             "timetable": self.timetable,
             "show_button": self.show_button,
@@ -154,6 +156,7 @@ class Form(db.Model):
         new_form.title = self.title
         new_form.doctor_description = self.doctor_description
         new_form.patient_description = self.patient_description
+        new_form.thanks_text = self.thanks_text
         new_form.show_button = self.show_button
         new_form.button_title = self.button_title
         new_form.fields = self.fields
@@ -188,7 +191,7 @@ class Algorithm(db.Model):
     steps = db.Column(db.JSON, nullable=True)
     initial_step = db.Column(db.String(128), nullable=True)
     current_step = db.Column(db.String(128), nullable=True)
-    reset_at = db.Column(db.DateTime, nullable=True)
+    timeout_at = db.Column(db.Integer, server_default="0")
 
     categories = db.Column(db.String(512), nullable=True)
     is_template = db.Column(db.Boolean, default=False)
