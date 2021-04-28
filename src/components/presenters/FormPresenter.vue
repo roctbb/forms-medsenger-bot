@@ -3,7 +3,8 @@
         <error-block :errors="errors"/>
         <h3>{{ this.form.title }}</h3>
         <p v-html="br(form.patient_description)"></p>
-        <form-group48 v-for="(field, i) in form.fields" v-if="!field.show_if || answers[field.show_if]" :required="field.required" :title="field.text" :key="i"
+        <form-group48 v-for="(field, i) in form.fields" v-if="!field.show_if || answers[field.show_if]" :required="field.required"
+                      :title="field.text" :key="i"
                       :description="field.description">
             <input type="number" min="field.params.min" max="field.params.max" step="1" class="form-control"
                    :class="save_clicked && field.required &&
@@ -24,14 +25,17 @@
 
             <div v-if="field.type == 'radio'">
                 <div class="form-check" v-for="(variant, j) in field.params.variants">
-                    <input class="form-check-input" type="radio" :name="'radio_' + i" v-model="answers[field.uid]"
-                           :value="j">
-                    <label class="form-check-label">{{ variant.text }}</label>
+                    <input class="form-check-input" type="radio"
+                           :id="'radio_' + i + '_' + j" :name="'radio_' + i"
+                           v-model="answers[field.uid]" :value="j">
+                    <label class="form-check-label" :for="'radio_' + i + '_' + j">{{ variant.text }}</label>
                 </div>
             </div>
         </form-group48>
 
         <button @click="save()" class="btn btn-success" :disabled="submitted">Отправить ответ</button>
+
+
     </div>
 </template>
 
