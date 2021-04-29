@@ -30,11 +30,23 @@ export default {
     },
     computed: {
         fillable_fields: function () {
-            if (!this.algorithm || !this.algorithm.criteria) {
+            if (!this.algorithm || !this.algorithm.steps) {
                 return []
             }
-            console.log('alg is ', this.algorithm)
-            return [].concat.apply([], this.algorithm.criteria.map(b => b.filter(c => c.ask_value == true)));
+
+            let fields = [];
+
+            this.algorithm.steps.map(step => step.conditions.map(condition => {
+                    condition.criteria.forEach((block) => {
+                        block.forEach(c => {
+                            if (c.ask_value == true) {
+                                fields.push(c);
+                            }
+                        })
+                    })
+                }))
+
+            return fields;
         }
     },
     methods: {

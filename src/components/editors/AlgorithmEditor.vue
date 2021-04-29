@@ -28,8 +28,8 @@
                     <input class="form-control form-control-sm" v-model="step.title"/>
                 </form-group48>
 
-                <form-group48 title="Таймаут (секунды)">
-                    <input class="form-control form-control-sm" type="number" v-model="step.reset_seconds"/>
+                <form-group48 title="Таймаут (минуты)">
+                    <input class="form-control form-control-sm" type="number" v-model="step.reset_minutes"/>
                 </form-group48>
 
                 <card v-for="(condition, condition_index) in step.conditions" additional_class="border-primary" :key="condition.uid">
@@ -39,20 +39,30 @@
                         <div v-for="(criteria, j) in or_block">
                             <criteria class="alert alert-primary" :data="criteria" :rkey="i" :pkey="j" :condition="condition" :key="criteria.uid"/>
                         </div>
-                        <p class="text-center"><button class="btn btn-sm btn-default" @click="add_criteria(or_block, i)">и</button></p>
+                        <p class="text-center">
+                            <button class="btn btn-sm btn-default" @click="add_criteria(or_block, i)">и</button>
+                        </p>
                         <div class="separator">или</div>
                     </div>
-                    <p class="text-center"><button class="btn btn-sm btn-default" @click="add_or_block(condition)">или</button></p>
+                    <p class="text-center">
+                        <button class="btn btn-sm btn-default" @click="add_or_block(condition)">или</button>
+                    </p>
 
                     <h6 style="margin-top: 10px;">Действия если условие выполняется</h6>
 
-                    <action class="alert alert-success" v-for="(action, i) in condition.positive_actions" :algorithm="algorithm" :data="action" :pkey="i" :parent="condition.positive_actions" :key="action.uid"></action>
-                    <p class="text-center"><button class="btn btn-sm btn-default" @click="add_action(condition.positive_actions)">Добавить</button></p>
+                    <action class="alert alert-success" v-for="(action, i) in condition.positive_actions" :algorithm="algorithm" :data="action" :pkey="i" :parent="condition.positive_actions"
+                            :key="action.uid"></action>
+                    <p class="text-center">
+                        <button class="btn btn-sm btn-default" @click="add_action(condition.positive_actions)">Добавить</button>
+                    </p>
 
                     <h6 style="margin-top: 10px;">Действия если условие не выполняется</h6>
 
-                    <action class="alert alert-danger" v-for="(action, i) in condition.negative_actions" :algorithm="algorithm" :data="action" :pkey="i" :parent="condition.negative_actions" :key="action.uid"></action>
-                    <p class="text-center"><button class="btn btn-sm btn-default" @click="add_action(condition.negative_actions)">Добавить</button></p>
+                    <action class="alert alert-danger" v-for="(action, i) in condition.negative_actions" :algorithm="algorithm" :data="action" :pkey="i" :parent="condition.negative_actions"
+                            :key="action.uid"></action>
+                    <p class="text-center">
+                        <button class="btn btn-sm btn-default" @click="add_action(condition.negative_actions)">Добавить</button>
+                    </p>
 
                     <hr>
 
@@ -65,8 +75,8 @@
 
                 <h6>Действие по таймауту</h6>
 
-                    <action class="alert alert-warning" v-for="(action, i) in step.timeout_actions" :algorithm="algorithm" :data="action" :pkey="i" :parent="step.timeout_actions" :key="action.uid"></action>
-                    <button class="btn btn-sm btn-primary" @click="add_action(step.timeout_actions)">Добавить</button>
+                <action class="alert alert-warning" v-for="(action, i) in step.timeout_actions" :algorithm="algorithm" :data="action" :pkey="i" :parent="step.timeout_actions" :key="action.uid"></action>
+                <button class="btn btn-sm btn-primary" @click="add_action(step.timeout_actions)">Добавить</button>
 
 
                 <button class="btn btn-sm btn-danger" @click="remove_step(step_index)">Удалить ступень</button>
@@ -254,7 +264,7 @@ export default {
             }
 
             let has_errors = this.algorithm.steps.some(step => {
-               step.conditions.some(condition => condition.criteria.filter((L) => L.filter(criteria_validator).length > 0).length);
+                step.conditions.some(condition => condition.criteria.filter((L) => L.filter(criteria_validator).length > 0).length);
             });
 
             if (has_errors) {
@@ -290,9 +300,9 @@ export default {
             })
 
             has_errors = this.algorithm.steps.some(step => {
-               step.conditions.some(condition => condition.positive_actions.filter(action_validator).length > 0);
+                step.conditions.some(condition => condition.positive_actions.filter(action_validator).length > 0);
             }) || this.algorithm.steps.some(step => {
-               step.conditions.some(condition => condition.negative_actions.filter(action_validator).length);
+                step.conditions.some(condition => condition.negative_actions.filter(action_validator).length);
             }) || this.algorithm.steps.some(step => step.timeout_actions.filter(action_validator).length);
 
             if (has_errors) {
@@ -383,13 +393,16 @@ export default {
             this.algorithm.template_id = algorithm.id;
 
             if (!this.empty(this.algorithm.setup)) {
-                this.algorithm.criteria.forEach((block) => {
-                    block.forEach(c => {
-                        if (c.ask_value == true) {
-                            c.value = algorithm.setup[c.uid]
-                        }
+
+                this.algorithm.steps.map(step => step.conditions.map(condition => {
+                    condition.criteria.forEach((block) => {
+                        block.forEach(c => {
+                            if (c.ask_value == true) {
+                                c.value = algorithm.setup[c.uid]
+                            }
+                        })
                     })
-                })
+                }))
 
                 this.algorithm.setup = undefined
             }

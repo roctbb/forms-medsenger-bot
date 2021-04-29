@@ -31,7 +31,7 @@ class AlgorithmsManager(Manager):
                         }
                     ],
                     "timeout_actions": [],
-                    "reset_seconds": 0
+                    "reset_minutes": 0
                 }
             ]
             algorithm.current_step = algorithm.steps[0]['uid']
@@ -404,14 +404,21 @@ class AlgorithmsManager(Manager):
 
         algorithm.current_step = new_step['uid']
 
-        if new_step['reset_seconds'] and int(new_step['reset_seconds']):
-            algorithm.timeout_at = time.time() + int(new_step['reset_seconds'])
+        if new_step.get('reset_minutes'):
+            algorithm.timeout_at = time.time() + 60 * int(new_step['reset_minutes'])
         else:
             algorithm.timeout_at = 0
 
         algorithm.categories = '|'.join(map(lambda c: '|'.join(['|'.join(k['category'] for k in block) for block in c['criteria']]), new_step['conditions']))
 
         self.__commit__()
+
+    def check_timeouts(self, app):
+        with app.app_context():
+            algorithms = list(Algorithm.query.filter((Algorithm.contract_id != None) & (Algorithm.timeout_at != 0) & (Algorithm.timeout_at < time.time())).all())
+
+            for algorithm in algorithms:
+                self.timeout(algorithm)
 
     def timeout(self, algorithm):
         current_step = self.get_step(algorithm)
@@ -425,6 +432,7 @@ class AlgorithmsManager(Manager):
 
     def run(self, algorithm):
         current_step = self.get_step(algorithm)
+        fired = False
 
         for condition in current_step['conditions']:
             criteria = condition['criteria']
@@ -444,12 +452,14 @@ class AlgorithmsManager(Manager):
                         "algorithm_id": algorithm.id,
                         "comment": addition["comment"]
                     })
-
+                fired = True
                 for action in condition['positive_actions']:
                     self.run_action(action, contract_id, descriptions, algorithm)
             else:
                 for action in condition['negative_actions']:
                     self.run_action(action, contract_id, descriptions, algorithm)
+
+            return fired
 
     def examine(self, contract, form):
         categories = form.categories.split('|')
@@ -458,8 +468,12 @@ class AlgorithmsManager(Manager):
         algorithms = filter(lambda algorithm: any([cat in algorithm.categories.split('|') for cat in categories]),
                                  patient.algorithms)
 
+        fired = False
         for algorithm in algorithms:
-            self.run(algorithm)
+            fired = fired or self.run(algorithm)
+
+        if not fired and form.thanks_text:
+            self.medsenger_api.send_message(contract.id, text=form.thanks_text, only_patient=True)
 
     def hook(self, contract, category_name):
         patient = contract.patient

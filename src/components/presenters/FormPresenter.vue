@@ -1,5 +1,5 @@
 <template>
-    <div @click="window.document.activeElement.blur()">
+    <div @click="getWindow().activeElement.blur()">
         <error-block :errors="errors"/>
         <h3>{{ this.form.title }}</h3>
         <p v-html="br(form.patient_description)"></p>

@@ -30,6 +30,9 @@ Vue.mixin({
             if (!doc) return doc;
             return doc.replace(/([^>])\n/g, '$1<br/>')
         },
+        getWindow: function () {
+            return window;
+        },
         url: function (action) {
             let api_host = window.API_HOST;
             let agent_token = window.AGENT_TOKEN;

@@ -53,6 +53,10 @@
                 <form-group48 v-if="is_admin" title="Показывать шаблон клиникам (JSON)">
                     <input class="form-control form-control-sm" type="text" v-model="form.clinics"/>
                 </form-group48>
+
+                <form-group48 title="Текст после успешного заполнения (если не сработал алгоритм)">
+                    <textarea class="form-control form-control-sm" v-model="form.thanks_text"></textarea>
+                </form-group48>
             </card>
 
             <timetable-editor :data="form.timetable" :timetable_save_clicked="this.timetable_save_clicked"/>

@@ -18,6 +18,10 @@ class TimetableManager(Manager):
     def should_run(self, object):
         now = datetime.now()
         timetable = object.timetable
+
+        if timetable.get('mode') == 'manual':
+            return False
+
         if object.last_sent:
             last_sent = max(object.last_sent, now - timedelta(minutes=5))
         else:

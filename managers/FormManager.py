@@ -72,6 +72,7 @@ class FormManager(Manager):
     def run(self, form, commit=True, contract_id=None):
 
         text = 'Пожалуйста, заполните опросник "{}".'.format(form.title)
+        text = 'Пожалуйста, заполните опросник "{}".'.format(form.title)
         action = 'form/{}'.format(form.id)
         action_name = 'Заполнить опросник'
 
@@ -221,6 +222,7 @@ class FormManager(Manager):
             form.title = data.get('title')
             form.doctor_description = data.get('doctor_description')
             form.patient_description = data.get('patient_description')
+            form.thanks_text = data.get('thanks_text')
             form.show_button = data.get('show_button')
             form.button_title = data.get('button_title')
             form.timetable = data.get('timetable')
