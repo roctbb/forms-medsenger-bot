@@ -26,8 +26,8 @@ class AlgorithmsManager(Manager):
                         {
                             "uid": str(uuid.uuid4()),
                             "criteria": algorithm.criteria,
-                            "positive_actions": [action for action in algorithm.actions if not action.get('is_negative')],
-                            "negative_actions": [action for action in algorithm.actions if action.get('is_negative')]
+                            "positive_actions": [action for action in algorithm.actions if not action['params'].get('is_negative')],
+                            "negative_actions": [action for action in algorithm.actions if action['params'].get('is_negative')]
                         }
                     ],
                     "timeout_actions": [],
