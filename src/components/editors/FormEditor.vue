@@ -189,9 +189,9 @@ export default {
                 this.$set(this.fields_save_clicked, i, true)
             }
         },
-        save: function (is_template) {
+        save: function (is_template, bypass_validation) {
             this.show_validation()
-            if (this.check()) {
+            if (this.check() || bypass_validation) {
                 this.errors = []
 
                 if (is_template || this.form.is_template) {
@@ -255,7 +255,7 @@ export default {
             this.form.is_template = false;
             this.form.contract_id = undefined;
             this.form.template_id = form.id;
-            this.save()
+            this.save(false, true)
         });
 
         Event.listen('home', (form) => {
