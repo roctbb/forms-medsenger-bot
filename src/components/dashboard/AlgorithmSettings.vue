@@ -35,7 +35,7 @@ export default {
             }
 
             let fields = [];
-            let codes = {}
+            let codes = new Set();
 
             this.algorithm.steps.map(step => step.conditions.map(condition => {
                     condition.criteria.forEach((block) => {
