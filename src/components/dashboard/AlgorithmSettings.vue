@@ -3,8 +3,8 @@
         <div class="container">
             <h5>Настройка параметров алгоритма {{ algorithm.title }}</h5>
             <error-block :errors="errors"></error-block>
-            <form-group48 v-for="field in fillable_fields" :key="field.uid" :title="field.value_name">
-                <input type="form-control form-control-sm" v-model="algorithm.setup[field.uid]"/>
+            <form-group48 v-for="field in fillable_fields" :key="field.value_code" :title="field.value_name">
+                <input type="form-control form-control-sm" v-model="algorithm.setup[field.value_code]"/>
             </form-group48>
 
             <button class="btn btn-danger btn-sm" @click="close()">Не подключать алгоритм</button>
@@ -81,6 +81,7 @@ export default {
         beforeOpen(event) {
             this.algorithm = event.params.algorithm;
             this.algorithm.setup = {}
+            console.log(this.fillable_fields);
             this.fillable_fields.forEach(f => {
                 this.algorithm.setup[f.value_code] = f.value
             })
