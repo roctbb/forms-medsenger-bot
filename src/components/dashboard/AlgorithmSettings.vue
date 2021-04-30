@@ -35,12 +35,14 @@ export default {
             }
 
             let fields = [];
+            let codes = {}
 
             this.algorithm.steps.map(step => step.conditions.map(condition => {
                     condition.criteria.forEach((block) => {
                         block.forEach(c => {
-                            if (c.ask_value == true) {
+                            if (c.ask_value == true && !codes.has(c.value_code)) {
                                 fields.push(c);
+                                codes.add(c.value_code);
                             }
                         })
                     })
@@ -63,13 +65,13 @@ export default {
         check: function () {
             let prepare_field = (field) => {
                 let category = this.get_category(field.category)
-                if (category.type == 'integer') this.algorithm.setup[field.uid] = parseInt(this.algorithm.setup[field.uid])
-                if (category.type == 'float') this.algorithm.setup[field.uid] = parseFloat(this.algorithm.setup[field.uid])
+                if (category.type == 'integer') this.algorithm.setup[field.value_code] = parseInt(this.algorithm.setup[field.value_code])
+                if (category.type == 'float') this.algorithm.setup[field.value_code] = parseFloat(this.algorithm.setup[field.value_code])
             }
 
             this.fillable_fields.map(prepare_field)
 
-            if (this.fillable_fields.filter(f => this.empty(this.algorithm.setup[f.uid])).length > 0)
+            if (this.fillable_fields.filter(f => this.empty(this.algorithm.setup[f.value_code])).length > 0)
             {
                 this.errors.push('Заполните все поля!')
                 return false
@@ -80,7 +82,7 @@ export default {
             this.algorithm = event.params.algorithm;
             this.algorithm.setup = {}
             this.fillable_fields.forEach(f => {
-                this.algorithm.setup[f.uid] = f.value
+                this.algorithm.setup[f.value_code] = f.value
             })
             this.errors = []
         }

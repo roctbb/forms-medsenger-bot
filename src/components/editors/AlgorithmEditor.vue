@@ -398,7 +398,7 @@ export default {
                     condition.criteria.forEach((block) => {
                         block.forEach(c => {
                             if (c.ask_value == true) {
-                                c.value = algorithm.setup[c.uid]
+                                c.value = algorithm.setup[c.value_code]
                             }
                         })
                     })
