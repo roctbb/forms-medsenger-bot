@@ -459,7 +459,7 @@ class AlgorithmsManager(Manager):
                 for action in condition['negative_actions']:
                     self.run_action(action, contract_id, descriptions, algorithm)
 
-            return fired
+        return fired
 
     def examine(self, contract, form):
         categories = form.categories.split('|')
