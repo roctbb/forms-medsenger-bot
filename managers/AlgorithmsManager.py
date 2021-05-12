@@ -175,6 +175,9 @@ class AlgorithmsManager(Manager):
         category_name = criteria.get('category')
         mode = criteria.get('left_mode')
 
+        if mode == 'init':
+            return False
+
         if mode != 'time':
             objects = None
             dimension = criteria.get('left_dimension')
