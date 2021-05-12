@@ -62,6 +62,9 @@ class FormManager(Manager):
                 except Exception as e:
                     log(e, False)
 
+            if new_form.timetable.get('send_on_init'):
+                self.run(new_form)
+
             self.db.session.add(new_form)
             self.__commit__()
 
@@ -256,6 +259,9 @@ class FormManager(Manager):
             if not form_id:
                 self.db.session.add(form)
             self.__commit__()
+
+            if form.timetable.get('send_on_init') and form.contract_id:
+                self.run(form)
 
             return form
         except Exception as e:

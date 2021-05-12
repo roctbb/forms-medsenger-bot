@@ -50,6 +50,10 @@
                     <input class="form-check" type="checkbox" v-model="form.instant_report"/>
                 </form-group48>
 
+                <form-group48 title="Отправить при подключении" v-if="is_admin">
+                    <input class="form-check" type="checkbox" v-model="form.timetable.send_on_init"/>
+                </form-group48>
+
                 <form-group48 v-if="is_admin" title="Показывать шаблон клиникам (JSON)">
                     <input class="form-control form-control-sm" type="text" v-model="form.clinics"/>
                 </form-group48>

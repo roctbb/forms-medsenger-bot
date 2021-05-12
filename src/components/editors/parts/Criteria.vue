@@ -9,13 +9,14 @@
                         <option value="sum" v-if="is_int()">сумма за</option>
                         <option value="difference" v-if="is_int()">разброс за</option>
                         <option value="time">текущая дата</option>
+                        <option value="init">активация контракта</option>
                     </select>
                     <span class="text-muted"><button class="btn btn-sm btn-default" @click="remove()">Удалить</button></span>
                 </div>
 
                 <!-- not time -->
 
-                <div class="col-md-2" v-if="criteria.left_mode != 'value' && criteria.left_mode != 'time'">
+                <div class="col-md-2" v-if="criteria.left_mode != 'value' && !['time', 'init'].includes(criteria.left_mode)">
                     <input class="form-control form-control-sm"
                            v-if="criteria.left_dimension == 'hours'"
                            :class="this.save_clicked && empty(criteria.left_hours) ? 'is-invalid' : ''"
@@ -29,7 +30,7 @@
                         <option value="times">раз</option>
                     </select>
                 </div>
-                <div class="col-md-3" v-if="criteria.left_mode != 'time'">
+                <div class="col-md-3" v-if="!['time', 'init'].includes(criteria.left_mode)">
                     <select @change="category_changed()" class="form-control form-control-sm"
                             v-model="criteria.category">
                         <optgroup
@@ -41,7 +42,7 @@
                     </select>
                     <small class="text-muted">Код категории</small>
                 </div>
-                <div class="col-md-1" v-if="criteria.left_mode != 'time'">
+                <div class="col-md-1" v-if="!['time', 'init'].includes(criteria.left_mode)">
                     <select class="form-control form-control-sm" v-model="criteria.sign">
                         <option value="equal">=</option>
                         <option value="contains" v-if="!is_int()">содержит</option>
@@ -53,7 +54,7 @@
                     </select>
                 </div>
 
-                    <div class="col-md-2" v-if="criteria.left_mode != 'time'">
+                    <div class="col-md-2" v-if="!['time', 'init'].includes(criteria.left_mode)">
                         <select class="form-control form-control-sm" v-model="criteria.right_mode">
                             <option value="value">фиксированное значение</option>
                             <option value="category_value">значение</option>
@@ -63,7 +64,7 @@
                         </select>
                     </div>
 
-                    <div class="col-md-2" v-if="criteria.right_mode != 'value' && criteria.left_mode != 'time'">
+                    <div class="col-md-2" v-if="criteria.right_mode != 'value' && !['time', 'init'].includes(criteria.left_mode)">
                         <select class="form-control form-control-sm"
                                 v-model="criteria.right_category">
                             <optgroup
@@ -78,7 +79,7 @@
                 </div>
 
                 <div class="col-md-2"
-                     v-if="!['value', 'category_value'].includes(criteria.right_mode) && criteria.left_mode != 'time'">
+                     v-if="!['value', 'category_value'].includes(criteria.right_mode) && !['time', 'init'].includes(criteria.left_mode)">
                     <input class="form-control form-control-sm"
                            v-if="criteria.right_dimension == 'hours'"
                            :class="this.save_clicked && empty(criteria.right_hours) ? 'is-invalid' : ''"
@@ -92,7 +93,7 @@
                         <option value="times">раз</option>
                     </select>
                 </div>
-                <div class="col-md-1" v-if="criteria.left_mode != 'time'">
+                <div class="col-md-1" v-if="!['time', 'init'].includes(criteria.left_mode)">
                     <input class="form-control form-control-sm"
                            :class="this.save_clicked && empty(criteria.value) ? 'is-invalid' : ''"
                            v-model="criteria.value">
@@ -128,7 +129,7 @@
                 </div>
             </div>
 
-            <div v-if="is_admin && ['value', 'category_value'].includes(criteria.right_mode)" class="row">
+            <div v-if="is_admin && criteria.left_mode !='init' && ['value', 'category_value'].includes(criteria.right_mode)" class="row">
                 <div class="col-md-4">
                     <input type="checkbox" v-model="criteria.ask_value">
                     <small class="text-muted">Запросить при подключении шаблона?</small>

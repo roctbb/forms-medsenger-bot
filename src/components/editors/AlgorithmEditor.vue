@@ -193,7 +193,7 @@ export default {
             }
 
             let prepare_criteria = (criteria) => {
-                if (criteria.left_mode != 'time') {
+                if (criteria.left_mode != 'time' && criteria.left_mode != 'init') {
                     if (criteria.left_dimension == 'hours') {
                         if (!this.empty(criteria.left_hours)) criteria.left_hours = parseInt(criteria.left_hours)
                     } else {
@@ -211,7 +211,8 @@ export default {
                         if (category.type == 'integer') criteria.value = parseInt(criteria.value)
                         if (category.type == 'float') criteria.value = parseFloat(criteria.value)
                     }
-                } else {
+                }
+                if (criteria.left_mode == 'time') {
                     if (criteria.right_dimension == 'hours') {
                         if (!this.empty(criteria.right_hours)) criteria.right_hours = parseInt(criteria.right_hours)
                     } else {
@@ -223,6 +224,10 @@ export default {
                     } else {
                         criteria.category = 'time'
                     }
+                }
+                if (criteria.left_mode == 'init')
+                {
+                    criteria.category = 'init'
                 }
 
                 return criteria

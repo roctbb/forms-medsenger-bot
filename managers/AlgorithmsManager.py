@@ -69,6 +69,8 @@ class AlgorithmsManager(Manager):
             self.db.session.add(new_algorithm)
             self.__commit__()
 
+            self.check_inits(algorithm)
+
             return True
         else:
             return False
@@ -393,6 +395,7 @@ class AlgorithmsManager(Manager):
                                                         medicine.title, medicine.rules,
                                                         medicine.timetable_description()),
                                                     only_doctor=True)
+
     def get_step(self, algorithm, step=None):
         if not step:
             step = algorithm.current_step
@@ -466,7 +469,7 @@ class AlgorithmsManager(Manager):
         patient = contract.patient
 
         algorithms = filter(lambda algorithm: any([cat in algorithm.categories.split('|') for cat in categories]),
-                                 patient.algorithms)
+                            patient.algorithms)
 
         fired = False
         for algorithm in algorithms:
@@ -485,6 +488,14 @@ class AlgorithmsManager(Manager):
             self.run(algorithm)
 
         return True
+
+    def check_inits(self, algorithm):
+        if 'init' in algorithm.categories.split('|') and algorithm.contract_id:
+            for step in algorithm.steps:
+                for condition in step['conditions']:
+                    if any(any(criteria['category'] == 'init' for criteria in block) for block in condition['criteria']):
+                        for action in condition['positive_actions']:
+                            self.run_action(action, algorithm.contract.id, [], algorithm)
 
     def create_or_edit(self, data, contract):
         try:
@@ -516,6 +527,8 @@ class AlgorithmsManager(Manager):
                 self.db.session.add(algorithm)
 
             self.change_step(algorithm, algorithm.initial_step)
+
+            self.check_inits(algorithm)
 
             return algorithm
         except Exception as e:
