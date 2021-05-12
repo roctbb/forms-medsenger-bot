@@ -1,5 +1,8 @@
+import time
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import backref
+from helpers import get_step
 
 db = SQLAlchemy()
 
@@ -224,6 +227,14 @@ class Algorithm(db.Model):
         new_algorithm.steps = self.steps
         new_algorithm.categories = self.categories
         new_algorithm.attached_form = self.attached_form
+        new_algorithm.initial_step = self.initial_step
+        new_algorithm.current_step = self.current_step
+
+        step = get_step(self)
+        if int(step['reset_minutes']) == 0:
+            new_algorithm.timeout_at = 0
+        else:
+            new_algorithm.timeout_at = time.time() + 60 * int(step['reset_minutes'])
 
         if self.is_template:
             new_algorithm.template_id = self.id

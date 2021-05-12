@@ -32,11 +32,11 @@ def verify_args(func):
             abort(422)
         if request.args.get('api_key') != API_KEY:
             abort(401)
-        #try:
-        return func(request.args, request.form, *args, **kargs)
-        #except Exception as e:
-        #    log(e, True)
-        #    abort(500)
+        try:
+            return func(request.args, request.form, *args, **kargs)
+        except Exception as e:
+            log(e, True)
+            abort(500)
 
     wrapper.__name__ = func.__name__
     return wrapper
@@ -139,3 +139,9 @@ def generate_description(criteria, l_value, r_value, category_names, current_ans
             comment += " '{}'".format(category_names.get(criteria.get('right_category')))
 
     return comment
+
+def get_step(algorithm, step=None):
+    if not step:
+        step = algorithm.current_step
+
+    return next(s for s in algorithm.steps if s['uid'] == step)
