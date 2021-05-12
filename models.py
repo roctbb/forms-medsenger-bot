@@ -231,7 +231,7 @@ class Algorithm(db.Model):
         new_algorithm.current_step = self.current_step
 
         step = get_step(self)
-        if int(step['reset_minutes']) == 0:
+        if not step.get('reset_minutes') or int(step['reset_minutes']) == 0:
             new_algorithm.timeout_at = 0
         else:
             new_algorithm.timeout_at = time.time() + 60 * int(step['reset_minutes'])

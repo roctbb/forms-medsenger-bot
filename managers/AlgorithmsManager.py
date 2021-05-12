@@ -68,8 +68,9 @@ class AlgorithmsManager(Manager):
 
             self.db.session.add(new_algorithm)
             self.__commit__()
+            self.db.session.refresh(new_algorithm)
 
-            self.check_inits(algorithm)
+            self.check_inits(new_algorithm)
 
             return True
         else:

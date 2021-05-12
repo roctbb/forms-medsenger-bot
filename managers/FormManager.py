@@ -62,19 +62,18 @@ class FormManager(Manager):
                 except Exception as e:
                     log(e, False)
 
-            if new_form.timetable.get('send_on_init'):
-                self.run(new_form)
-
             self.db.session.add(new_form)
             self.__commit__()
+
+            if new_form.timetable.get('send_on_init'):
+                self.db.session.refresh(new_form)
+                self.run(new_form)
 
             return new_form
         else:
             return False
 
     def run(self, form, commit=True, contract_id=None):
-
-        text = 'Пожалуйста, заполните опросник "{}".'.format(form.title)
         text = 'Пожалуйста, заполните опросник "{}".'.format(form.title)
         action = 'form/{}'.format(form.id)
         action_name = 'Заполнить опросник'
@@ -261,6 +260,7 @@ class FormManager(Manager):
             self.__commit__()
 
             if form.timetable.get('send_on_init') and form.contract_id:
+                self.db.session.refresh(form)
                 self.run(form)
 
             return form
