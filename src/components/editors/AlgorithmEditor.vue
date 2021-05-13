@@ -296,7 +296,14 @@ export default {
             }
 
             this.algorithm.steps.forEach(step => {
-                step.timeout_actions = step.timeout_actions.map(prepare_action)
+                if (step.timeout_actions)
+                {
+                    step.timeout_actions = step.timeout_actions.map(prepare_action)
+                }
+                else {
+                    step.timeout_actions = []
+                }
+
 
                 step.conditions.forEach(condition => {
                     condition.positive_actions = condition.positive_actions.map(prepare_action)

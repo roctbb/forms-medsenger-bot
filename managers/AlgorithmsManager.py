@@ -261,7 +261,7 @@ class AlgorithmsManager(Manager):
 
     def run_action(self, action, contract_id, descriptions, algorithm):
         report = ""
-        if action['params'].get('send_report'):
+        if action['params'].get('send_report') and descriptions:
             report = '<br><br><strong>События:</strong><ul>' + ''.join(
                 ["<li>{}</li>".format(description) for description in descriptions]) + "</ul>"
         if action['type'] == 'change_step':
