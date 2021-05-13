@@ -66,7 +66,7 @@ def verify_json(func):
             abort(422)
         if request.json.get('api_key') != API_KEY:
             abort(401)
-        return func(request.json, *args, **kargs)
+        #return func(request.json, *args, **kargs)
         try:
             return func(request.json, *args, **kargs)
         except Exception as e:
