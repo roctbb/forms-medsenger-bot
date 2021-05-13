@@ -48,7 +48,11 @@ class Manager:
         now = datetime.now()
 
         points = self.get_timepoints(timetable)
-        greater = list(filter(lambda x: x > now, points))[0]
+
+        if points:
+            greater = next(filter(lambda x: x > now, points))
+        else:
+            return None
 
         return int(greater.timestamp() - 1)
 
