@@ -480,7 +480,7 @@ class AlgorithmsManager(Manager):
             fired = fired or self.run(algorithm)
 
         if not fired and form.thanks_text:
-            self.medsenger_api.send_message(contract.id, text=form.thanks_text, only_patient=True)
+            self.medsenger_api.send_message(contract.id, text=form.thanks_text, only_patient=True, action_deadline=time.time() + 60 * 60)
 
     def hook(self, contract, category_name):
         patient = contract.patient
