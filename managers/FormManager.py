@@ -75,8 +75,15 @@ class FormManager(Manager):
 
     def run(self, form, commit=True, contract_id=None):
         text = 'Пожалуйста, заполните опросник "{}".'.format(form.title)
+
+        if form.custom_text:
+            text = form.custom_text
+
         action = 'form/{}'.format(form.id)
         action_name = 'Заполнить опросник'
+
+        if form.custom_title:
+            action_name = form.custom_title
 
         if not contract_id:
             deadline = self.calculate_deadline(form.timetable)
@@ -135,7 +142,8 @@ class FormManager(Manager):
                     params = {
                         "question_uid": field['uid'],
                         "question_text": field.get('text'),
-                        "answer": answer
+                        "answer": answer,
+                        "type": field['type']
                     }
 
                     report.append((field.get('text'), answer))
@@ -161,7 +169,8 @@ class FormManager(Manager):
                     params = {
                         "question_iud": field['uid'],
                         "question_text": field.get('text'),
-                        "answer": value
+                        "answer": value,
+                        "type": field['type']
                     }
 
                     if field.get('params', {}).get('custom_params'):
@@ -176,7 +185,8 @@ class FormManager(Manager):
                     params = {
                         "question_uid": field['uid'],
                         "question_text": field.get('text'),
-                        "answer": answers[field['uid']]
+                        "answer": answers[field['uid']],
+                        "type": field['type']
                     }
 
                     report.append((field.get('text'), answers[field['uid']]))
@@ -227,6 +237,8 @@ class FormManager(Manager):
             form.thanks_text = data.get('thanks_text')
             form.show_button = data.get('show_button')
             form.button_title = data.get('button_title')
+            form.custom_title = data.get('custom_title')
+            form.custom_text = data.get('custom_text')
             form.timetable = data.get('timetable')
             form.fields = data.get('fields')
             form.categories = data.get('categories')
