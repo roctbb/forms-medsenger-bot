@@ -110,6 +110,9 @@ class Form(db.Model):
     show_button = db.Column(db.Boolean, default=False)
     button_title = db.Column(db.String(255), nullable=True)
 
+    custom_title = db.Column(db.String(255), nullable=True)
+    custom_text = db.Column(db.String(255), nullable=True)
+
     fields = db.Column(db.JSON, nullable=True)
     timetable = db.Column(db.JSON, nullable=True)
 
@@ -142,6 +145,8 @@ class Form(db.Model):
             "timetable": self.timetable,
             "show_button": self.show_button,
             "button_title": self.button_title,
+            "custom_title": self.custom_title,
+            "custom_text": self.custom_text,
             "is_template": self.is_template,
             "template_id": self.template_id,
             "algorithm_id": self.algorithm_id,
@@ -159,6 +164,8 @@ class Form(db.Model):
         new_form.thanks_text = self.thanks_text
         new_form.show_button = self.show_button
         new_form.button_title = self.button_title
+        new_form.custom_title = self.custom_title
+        new_form.custom_text = self.custom_text
         new_form.fields = self.fields
         new_form.timetable = self.timetable
         new_form.algorithm_id = self.algorithm_id

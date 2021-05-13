@@ -27,6 +27,14 @@
                            v-model="form.button_title"/>
                 </form-group48>
 
+                <form-group48 v-if="is_admin" title="Текст для кнопки">
+                    <input class="form-control form-control-sm" v-model="form.custom_title"/>
+                </form-group48>
+
+                <form-group48 v-if="is_admin" title="Текст для сообщения">
+                    <input class="form-control form-control-sm" v-model="form.custom_text"/>
+                </form-group48>
+
                 <form-group48 v-if="is_admin && (empty(form.id) || form.is_template)" title="ID связанного алгоритма">
                     <input class="form-control form-control-sm" v-model="form.algorithm_id"/>
                 </form-group48>
