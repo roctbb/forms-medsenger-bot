@@ -15,6 +15,9 @@ class Manager:
         now = datetime.now()
         points = timetable['points']
 
+        if timetable['mode'] == 'manual':
+            return []
+
         if timetable['mode'] == 'daily':
             points = list(map(lambda p: datetime(minute=int(p['minute']), hour=int(p['hour']), day=now.day, month=now.month, year=now.year), points))
             points.sort()
@@ -45,7 +48,6 @@ class Manager:
         now = datetime.now()
 
         points = self.get_timepoints(timetable)
-        print(points)
         greater = list(filter(lambda x: x > now, points))[0]
 
         return int(greater.timestamp() - 1)
