@@ -13,22 +13,21 @@ class Manager:
 
     def get_timepoints(self, timetable):
         now = datetime.now()
-        points = timetable['points']
-
-        if timetable['mode'] == 'manual':
-            return []
+        raw = timetable['points']
+        points = []
 
         if timetable['mode'] == 'daily':
-            points = list(map(lambda p: datetime(minute=int(p['minute']), hour=int(p['hour']), day=now.day, month=now.month, year=now.year), points))
+            points = list(map(lambda p: datetime(minute=int(p['minute']), hour=int(p['hour']), day=now.day, month=now.month, year=now.year), raw))
             points.sort()
-            points.append(points[0] + timedelta(days=1))
+            if points:
+                points.append(points[0] + timedelta(days=1))
         if timetable['mode'] == 'weekly':
-            current_weekday_points = list(filter(lambda x: x['day'] == now.weekday(), points))
+            current_weekday_points = list(filter(lambda x: x['day'] == now.weekday(), raw))
             current_weekday_points = list(map(lambda p: datetime(minute=int(p['minute']), hour=int(p['hour']), day=now.day, month=now.month, year=now.year), current_weekday_points))
 
             next_points = []
             for i in range(1, 8):
-                next_points = list(filter(lambda x: x['day'] == (now.weekday() + i) % 7, points))
+                next_points = list(filter(lambda x: x['day'] == (now.weekday() + i) % 7, raw))
 
                 if next_points:
                     break
@@ -39,9 +38,10 @@ class Manager:
             points.sort()
 
         if timetable['mode'] == 'monthly':
-            points = list(map(lambda p: datetime(minute=int(p['minute']), hour=int(p['hour']), day=int(p['day']), month=now.month, year=now.year), points))
+            points = list(map(lambda p: datetime(minute=int(p['minute']), hour=int(p['hour']), day=int(p['day']), month=now.month, year=now.year), raw))
             points.sort()
-            points.append(datetime(minute=points[0].minute, hour=points[0].hour, day=points[0].day, month=points[0].month + 1, year=now.year))
+            if points:
+                points.append(datetime(minute=points[0].minute, hour=points[0].hour, day=points[0].day, month=points[0].month + 1, year=now.year))
         return points
 
     def calculate_deadline(self, timetable):
