@@ -45,7 +45,11 @@ class Manager:
         return points
 
     def calculate_deadline(self, timetable):
+
+        if timetable.get('mode') == 'manual':
+            return None
         now = datetime.now()
+
 
         points = self.get_timepoints(timetable)
 
