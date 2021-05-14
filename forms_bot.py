@@ -379,7 +379,10 @@ def post_medicines(args, form):
         medsenger_api.add_record(contract_id, 'medicine', data['medicine'])
     else:
         medicine_manager.submit(data['medicine'], contract.id)
-    return get_ui('done', contract, [])
+        if 'medicine-{}'.format(data['medicine']) in contract.tasks:
+            medsenger_api.finish_task(contract.id, contract.tasks['medicine-{}'.format(data['medicine'])])
+
+        return get_ui('done', contract, [])
 
 
 with app.app_context():
