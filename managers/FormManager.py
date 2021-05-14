@@ -101,12 +101,22 @@ class FormManager(Manager):
                                                                                                       form.warning_days))
                 self.__commit__()
 
+    def __instant_report__(self, contract_id, form, report):
+        text = 'Пациент заполнил опросник "{}" и дал следующие ответы.<br><br>'.format(form.title)
+        text += '<ul>{}</ul>'.format(''.join(list(map(lambda line: '<li><strong>{}</strong>: {};</li>'.format(*line), report))))
+
+        deadline = time.time() + 1 * 60 * 60
+
+        self.medsenger_api.send_message(contract_id, text, only_doctor=True)
+        self.medsenger_api.send_message(contract_id, 'Спасибо за заполнение опросника "{}". Ответы отправлены вашему лечащему врачу.'.format(form.title), only_patient=True, action_deadline=deadline)
+
     def submit(self, answers, form_id, contract_id):
         form = Form.query.filter_by(id=form_id).first_or_404()
         form.warning_timestamp = 0
         form.filled_timestamp = int(time.time())
 
         packet = []
+        report = []
 
         for field in form.fields:
             if field['uid'] in answers.keys():
@@ -125,6 +135,8 @@ class FormManager(Manager):
                         "answer": answer
                     }
 
+                    report.append((field.get('text'), answer))
+
                     if field['params']['variants'][answers[field['uid']]].get('custom_params'):
                         try:
                             params.update(
@@ -138,7 +150,10 @@ class FormManager(Manager):
                     value = field.get('category_value')
 
                     if not value:
+                        report.append((field.get('text'), "Нет"))
                         continue
+                    else:
+                        report.append((field.get('text'), "Да"))
 
                     params = {
                         "question_iud": field['uid'],
@@ -161,6 +176,8 @@ class FormManager(Manager):
                         "answer": answers[field['uid']]
                     }
 
+                    report.append((field.get('text'), answers[field['uid']]))
+
                     if field.get('params', {}).get('custom_params'):
                         try:
                             params.update(json.loads(field.get('params', {}).get('custom_params')))
@@ -172,11 +189,18 @@ class FormManager(Manager):
                     else:
                         packet.append((category, answers[field['uid']], params))
 
-        packet.append(('action', 'Заполнение опросника ID {}'.format(form_id)))
+        if form.template_id:
+            packet.append(('action', 'Заполнение опросника ID {}'.format(form.template_id)))
+        else:
+            packet.append(('action', 'Заполнение опросника ID {}'.format(form_id)))
+
 
         params = {
             "form_id": form.id
         }
+
+        if form.instant_report:
+            self.__instant_report__(contract_id, form, report)
 
         return bool(self.medsenger_api.add_records(contract_id, packet, params=params))
 
@@ -204,10 +228,12 @@ class FormManager(Manager):
             form.categories = data.get('categories')
             form.template_id = data.get('template_id')
             form.warning_days = data.get('warning_days')
+            form.instant_report = data.get('instant_report')
 
             if data.get('is_template') and contract.is_admin:
                 form.is_template = True
                 form.template_category = data.get('template_category')
+                form.clinics = data.get('clinics')
             else:
                 form.patient_id = contract.patient_id
                 form.contract_id = contract.id

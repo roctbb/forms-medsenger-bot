@@ -7,7 +7,7 @@ class ContractManager(Manager):
     def __init__(self, *args):
         super(ContractManager, self).__init__(*args)
 
-    def add(self, contract_id):
+    def add(self, contract_id, clinic_id):
         contract = Contract.query.filter_by(id=contract_id).first()
 
         if not contract:
@@ -23,10 +23,11 @@ class ContractManager(Manager):
                 patient = Patient(id=patient_id)
                 self.db.session.add(patient)
 
-            contract = Contract(id=contract_id, patient_id=patient.id)
+            contract = Contract(id=contract_id, patient_id=patient.id, clinic_id=clinic_id)
             self.db.session.add(contract)
 
         contract.is_active = True
+        contract.clinic_id = clinic_id
         contract.agent_token = self.medsenger_api.get_agent_token(contract_id).get('agent_token')
 
         self.__commit__()

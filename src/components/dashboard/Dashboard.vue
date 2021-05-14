@@ -122,7 +122,7 @@
 
                 <div class="col-md-12"><h5>{{ name }}</h5></div>
 
-                <card v-for="(form, i) in group" :key="form.id" class="col-lg-3 col-md-4"
+                <card v-for="(form, i) in group" v-if="is_admin || !form.clinics || form.clinics.includes(clinic_id)" :key="form.id" class="col-lg-3 col-md-4"
                       :image="images.form">
                     <h6>{{ form.title }}</h6>
                     <small>{{ form.doctor_description }}</small><br>
@@ -195,7 +195,7 @@
             }), 'template_category')">
 
                 <div class="col-md-12"><h5>{{ name }}</h5></div>
-                <card v-for="(algorithm, i) in group" :key="algorithm.id" :image="images.algorithm"
+                <card v-for="(algorithm, i) in group" v-if="is_admin || !algorithm.clinics || algorithm.clinics.includes(clinic_id)" :key="algorithm.id" :image="images.algorithm"
                       class="col-lg-3 col-md-4">
                     <h6>{{ algorithm.title }}</h6>
                     <small>{{ algorithm.description }}</small><br>

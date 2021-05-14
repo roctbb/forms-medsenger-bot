@@ -23,6 +23,7 @@ class Patient(db.Model):
 class Contract(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=False)
+    clinic_id = db.Column(db.Integer, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
     agent_token = db.Column(db.String(255), nullable=True)
 
@@ -35,6 +36,7 @@ class Contract(db.Model):
     def as_dict(self, native=False):
         serialized = {
             "id": self.id,
+            "clinic_id": self.clinic_id
         }
 
         if native:
@@ -115,6 +117,7 @@ class Form(db.Model):
     categories = db.Column(db.String(512), nullable=True)
 
     algorithm_id = db.Column(db.Integer, db.ForeignKey('algorithm.id', ondelete="set null"), nullable=True)
+    clinics = db.Column(db.JSON, nullable=True)
 
     last_sent = db.Column(db.DateTime(), nullable=True)
 
@@ -123,6 +126,7 @@ class Form(db.Model):
     filled_timestamp = db.Column(db.Integer, default=0)
 
     template_category = db.Column(db.String(512), default="Общее", nullable=True)
+    instant_report = db.Column(db.Boolean, default=False, nullable=False, server_default='false')
 
     def as_dict(self):
         return {
@@ -140,7 +144,9 @@ class Form(db.Model):
             "template_id": self.template_id,
             "algorithm_id": self.algorithm_id,
             "warning_days": self.warning_days,
-            "template_category": self.template_category
+            "template_category": self.template_category,
+            "instant_report": self.instant_report,
+            "clinics": self.clinics
         }
 
     def clone(self):
@@ -155,6 +161,8 @@ class Form(db.Model):
         new_form.algorithm_id = self.algorithm_id
         new_form.categories = self.categories
         new_form.warning_days = self.warning_days
+        new_form.instant_report = self.instant_report
+
 
         if self.is_template:
             new_form.template_id = self.id
@@ -177,8 +185,10 @@ class Algorithm(db.Model):
     categories = db.Column(db.String(512), nullable=True)
     is_template = db.Column(db.Boolean, default=False)
     template_id = db.Column(db.Integer, db.ForeignKey('algorithm.id', ondelete="set null"), nullable=True)
+    attached_form = db.Column(db.Integer, nullable=True)
 
     template_category = db.Column(db.String(512), default="Общее", nullable=True)
+    clinics = db.Column(db.JSON, nullable=True)
 
     def as_dict(self, native=False):
         return {
@@ -192,7 +202,9 @@ class Algorithm(db.Model):
             "categories": self.categories,
             "is_template": self.is_template,
             "template_id": self.template_id,
-            "template_category": self.template_category
+            "template_category": self.template_category,
+            "attached_form": self.attached_form,
+            "clinics": self.clinics
         }
 
     def clone(self):
@@ -203,6 +215,7 @@ class Algorithm(db.Model):
         new_algorithm.criteria = self.criteria
         new_algorithm.actions = self.actions
         new_algorithm.categories = self.categories
+        new_algorithm.attached_form = self.attached_form
 
         if self.is_template:
             new_algorithm.template_id = self.id

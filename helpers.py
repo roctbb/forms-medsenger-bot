@@ -3,6 +3,7 @@ import threading
 from datetime import datetime
 from flask import request, abort, jsonify, render_template
 from config import *
+from sentry_sdk import capture_exception
 import sys, os
 
 
@@ -14,6 +15,9 @@ def gts():
 def log(error, terminating=False):
     exc_type, exc_obj, exc_tb = sys.exc_info()
     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+
+    if PRODUCTION:
+        capture_exception(error)
 
     if terminating:
         print(gts(), exc_type, fname, exc_tb.tb_lineno, error, "CRITICAL")
@@ -72,7 +76,7 @@ def verify_json(func):
     return wrapper
 
 def get_ui(page, contract, categories='[]', object_id = None):
-    return render_template('index.html', page=page, object_id=object_id, contract_id=contract.id, api_host=MAIN_HOST.replace('8001', '8000'), local_host=LOCALHOST, agent_token=contract.agent_token, agent_id=AGENT_ID, categories=json.dumps(categories), is_admin=str(bool(contract.is_admin)).lower(), lc=dir_last_updated('static'))
+    return render_template('index.html', page=page, object_id=object_id, contract_id=contract.id, api_host=MAIN_HOST.replace('8001', '8000'), local_host=LOCALHOST, agent_token=contract.agent_token, agent_id=AGENT_ID, categories=json.dumps(categories), is_admin=str(bool(contract.is_admin)).lower(), lc=dir_last_updated('static'), clinic_id=contract.clinic_id)
 
 def delayed(delay, f, args):
     timer = threading.Timer(delay, f, args=args)

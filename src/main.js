@@ -223,7 +223,8 @@ Vue.mixin({
                 error: window.LOCAL_HOST + '/static/images/icons8-delete-128.png',
                 graph: window.LOCAL_HOST + '/static/images/icons8-play-graph-report-48.png',
             },
-            is_admin: window.IS_ADMIN
+            is_admin: window.IS_ADMIN,
+            clinic_id: window.CLINIC_ID
         }
     }
 })

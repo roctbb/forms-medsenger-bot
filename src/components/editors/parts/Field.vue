@@ -14,7 +14,7 @@
             </select>
         </form-group48>
 
-        <form-group48 title="Пояснение к вопросу" v-if="field.type != 'radio'">
+        <form-group48 title="Пояснение к вопросу">
             <input class="form-control form-control-sm" v-model="field.description"/>
         </form-group48>
 

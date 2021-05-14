@@ -15,11 +15,19 @@
 
                 <!-- not time -->
 
-                <div class="col-md-1" v-if="criteria.left_mode != 'value' && criteria.left_mode != 'time'">
+                <div class="col-md-2" v-if="criteria.left_mode != 'value' && criteria.left_mode != 'time'">
                     <input class="form-control form-control-sm"
-                           :class="this.save_clicked && !criteria.left_hours ? 'is-invalid' : ''"
+                           v-if="criteria.left_dimension == 'hours'"
+                           :class="this.save_clicked && empty(criteria.left_hours) ? 'is-invalid' : ''"
                            v-model="criteria.left_hours">
-                    <small class="text-muted">часов</small>
+                    <input class="form-control form-control-sm"
+                           v-if="criteria.left_dimension == 'times'"
+                           :class="this.save_clicked && empty(criteria.left_times) ? 'is-invalid' : ''"
+                           v-model="criteria.left_times">
+                    <select class="form-control form-control-sm" v-model="criteria.left_dimension">
+                        <option value="hours">часов</option>
+                        <option value="times">раз</option>
+                    </select>
                 </div>
                 <div class="col-md-3" v-if="criteria.left_mode != 'time'">
                     <select @change="category_changed()" class="form-control form-control-sm"
@@ -69,16 +77,24 @@
                     <small class="text-muted">Код категории для сравнения</small>
                 </div>
 
-                <div class="col-md-1"
+                <div class="col-md-2"
                      v-if="!['value', 'category_value'].includes(criteria.right_mode) && criteria.left_mode != 'time'">
                     <input class="form-control form-control-sm"
-                           :class="this.save_clicked && !criteria.right_hours ? 'is-invalid' : ''"
+                           v-if="criteria.right_dimension == 'hours'"
+                           :class="this.save_clicked && empty(criteria.right_hours) ? 'is-invalid' : ''"
                            v-model="criteria.right_hours">
-                    <small class="text-muted">часов</small>
+                    <input class="form-control form-control-sm"
+                           v-if="criteria.right_dimension == 'times'"
+                           :class="this.save_clicked && empty(criteria.right_times) ? 'is-invalid' : ''"
+                           v-model="criteria.right_times">
+                    <select class="form-control form-control-sm" v-model="criteria.right_dimension">
+                        <option value="hours">часов</option>
+                        <option value="times">раз</option>
+                    </select>
                 </div>
                 <div class="col-md-1" v-if="criteria.left_mode != 'time'">
                     <input class="form-control form-control-sm"
-                           :class="this.save_clicked && !criteria.value ? 'is-invalid' : ''"
+                           :class="this.save_clicked && empty(criteria.value) ? 'is-invalid' : ''"
                            v-model="criteria.value">
                     <small class="text-muted" v-if="criteria.right_mode == 'value'">значение для сравнения</small>
                     <small class="text-muted" v-else>модификатор</small>
@@ -96,7 +112,7 @@
 
                 <div class="col-md-2" v-if="criteria.left_mode == 'time'">
                     <input class="form-control form-control-sm"
-                           :class="this.save_clicked && !criteria.value ? 'is-invalid' : ''"
+                           :class="this.save_clicked && empty(criteria.value) ? 'is-invalid' : ''"
                            v-model="criteria.value">
                 </div>
 
@@ -106,7 +122,7 @@
 
                 <div class="col-md-1" v-if="criteria.left_mode == 'time'">
                     <input class="form-control form-control-sm"
-                           :class="this.save_clicked && !criteria.right_hours ? 'is-invalid' : ''"
+                           :class="this.save_clicked && empty(criteria.right_hours) ? 'is-invalid' : ''"
                            v-model="criteria.right_hours">
                     <small class="text-muted">часов</small>
                 </div>
@@ -176,6 +192,8 @@ export default {
     created() {
         this.mode = this.data.type;
         this.criteria = this.data;
+        if (this.empty(this.criteria.left_dimension)) this.criteria.left_dimension = 'hours';
+        if (this.empty(this.criteria.right_dimension)) this.criteria.right_dimension = 'hours';
         this.category = this.get_category(this.criteria.category)
 
     }
