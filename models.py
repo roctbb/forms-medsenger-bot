@@ -1,10 +1,37 @@
 import time
+from datetime import datetime
+from functools import reduce
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import backref
 from helpers import get_step
 
 db = SQLAlchemy()
+
+
+class Compliance:
+    def current_month_compliance(self, action=None):
+        return self.count_compliance(action, start_date=datetime.today().replace(day=1))
+
+    def count_compliance(self, action=None, start_date=None, end_date=None):
+        if not action:
+            if isinstance(self, Form):
+                action = "form_{}".format(self.id)
+            if isinstance(self, Medicine):
+                action = "medicine_{}".format(self.id)
+
+        request = ActionRequest.query.filter_by(contract_id=self.contract_id, action=action)
+
+        if start_date:
+            request = request.filter(ActionRequest.sent >= start_date)
+
+        if end_date:
+            request = request.filter(ActionRequest.sent <= end_date)
+
+        records = request.all()
+
+        return len(records), len(list(filter(lambda x: x.is_done, records)))
+
 
 # models
 class Patient(db.Model):
@@ -17,11 +44,31 @@ class Patient(db.Model):
     def as_dict(self):
         return {
             "id": self.id,
+            "month_compliance": self.count_month_compliance(),
             "contracts": [contract.as_dict() for contract in self.contracts],
             "forms": [form.as_dict() for form in self.forms],
             "medicines": [medicine.as_dict() for medicine in self.medicines],
             "algorithms": [algorithm.as_dict() for algorithm in self.algorithms]
         }
+
+    def count_month_compliance(self):
+        def sum_compliance(compliance, object):
+            sent, done = object.current_month_compliance()
+            compliance[0] += sent
+            compliance[1] += done
+            return compliance
+
+        return reduce(sum_compliance, list(self.forms) + list(self.medicines), [0, 0])
+
+    def count_full_compliance(self):
+        def sum_compliance(compliance, object):
+            sent, done = object.count_compliance()
+            compliance[0] += sent
+            compliance[1] += done
+            return compliance
+
+        return reduce(sum_compliance, list(self.forms) + list(self.medicines), [0, 0])
+
 
 class Contract(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -48,7 +95,8 @@ class Contract(db.Model):
 
         return serialized
 
-class Medicine(db.Model):
+
+class Medicine(db.Model, Compliance):
     id = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=True)
     contract_id = db.Column(db.Integer, db.ForeignKey('contract.id', ondelete="CASCADE"), nullable=True)
@@ -66,6 +114,11 @@ class Medicine(db.Model):
     filled_timestamp = db.Column(db.Integer, default=0)
 
     def as_dict(self):
+        if self.contract_id:
+            sent, done = self.current_month_compliance()
+        else:
+            sent, done = 0, 0
+
         return {
             "id": self.id,
             "contract_id": self.contract_id,
@@ -75,7 +128,9 @@ class Medicine(db.Model):
             "timetable": self.timetable,
             "is_template": self.is_template,
             "template_id": self.template_id,
-            "warning_days": self.warning_days
+            "warning_days": self.warning_days,
+            "sent": sent,
+            "done": done
         }
 
     def timetable_description(self):
@@ -101,7 +156,8 @@ class Medicine(db.Model):
 
         return new_medicine
 
-class Form(db.Model):
+
+class Form(db.Model, Compliance):
     id = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=True)
     contract_id = db.Column(db.Integer, db.ForeignKey('contract.id', ondelete="CASCADE"), nullable=True)
@@ -137,6 +193,11 @@ class Form(db.Model):
     instant_report = db.Column(db.Boolean, default=False, nullable=False, server_default='false')
 
     def as_dict(self):
+        if self.contract_id:
+            sent, done = self.current_month_compliance()
+        else:
+            sent, done = 0, 0
+
         return {
             "id": self.id,
             "contract_id": self.contract_id,
@@ -157,7 +218,9 @@ class Form(db.Model):
             "warning_days": self.warning_days,
             "template_category": self.template_category,
             "instant_report": self.instant_report,
-            "clinics": self.clinics
+            "clinics": self.clinics,
+            "sent": sent,
+            "done": done
         }
 
     def clone(self):
@@ -177,13 +240,13 @@ class Form(db.Model):
         new_form.warning_days = self.warning_days
         new_form.instant_report = self.instant_report
 
-
         if self.is_template:
             new_form.template_id = self.id
         else:
             new_form.template_id = self.template_id
 
         return new_form
+
 
 class Algorithm(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -192,11 +255,6 @@ class Algorithm(db.Model):
 
     title = db.Column(db.String(255), nullable=True)
     description = db.Column(db.Text, nullable=True)
-
-    # legacy
-    # todo - make transition
-    criteria = db.Column(db.JSON, nullable=True)
-    actions = db.Column(db.JSON, nullable=True)
 
     # actual
     steps = db.Column(db.JSON, nullable=True)
@@ -250,3 +308,16 @@ class Algorithm(db.Model):
             new_algorithm.template_id = self.template_id
 
         return new_algorithm
+
+
+class ActionRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    contract_id = db.Column(db.Integer, db.ForeignKey('contract.id', ondelete="CASCADE"), nullable=True)
+
+    action = db.Column(db.String(255), nullable=True)
+    description = db.Column(db.Text, nullable=True)
+
+    is_done = db.Column(db.Boolean, default=False)
+
+    sent = db.Column(db.DateTime(), default=db.func.current_timestamp())
+    done = db.Column(db.DateTime(), nullable=True)

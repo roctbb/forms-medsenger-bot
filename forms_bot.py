@@ -20,6 +20,7 @@ algorithm_manager = AlgorithmsManager(medsenger_api, db)
 def index():
     return "Waiting for the thunder"
 
+
 @app.route('/debug-sentry')
 def trigger_error():
     try:
@@ -153,6 +154,14 @@ def actions(data):
     actions = [{'link': 'form/{}'.format(form.id), 'type': 'patient', 'name': form.button_title} for form in forms]
 
     return jsonify(actions)
+
+
+@app.route('/compliance', methods=['POST'])
+@verify_json
+def compliance(data):
+    contract = contract_manager.get(data.get('contract_id'))
+    sent, done = contract.patient.count_month_compliance()
+    return jsonify({"sent": sent, "done": done})
 
 
 # settings and views
@@ -315,7 +324,8 @@ def graph_categories(args, form):
 def graph_data(args, form):
     contract_id = args.get('contract_id')
     group = request.json
-    answer = [medsenger_api.get_records(contract_id, category_name) for category_name in group['categories'] + ['medicine', 'symptom']]
+    answer = [medsenger_api.get_records(contract_id, category_name) for category_name in
+              group['categories'] + ['medicine', 'symptom']]
     answer = list(filter(lambda x: x != None, answer))
 
     return jsonify(answer)

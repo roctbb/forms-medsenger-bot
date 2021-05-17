@@ -460,10 +460,10 @@ class AlgorithmsManager(Manager):
                         "comment": addition["comment"]
                     })
                 fired = True
-                for action in condition['positive_actions']:
+                for action in condition.get('positive_actions', []):
                     self.run_action(action, contract_id, descriptions, algorithm)
             else:
-                for action in condition['negative_actions']:
+                for action in condition.get('negative_actions', []):
                     self.run_action(action, contract_id, descriptions, algorithm)
 
         return fired

@@ -3,6 +3,8 @@
         <algorithm-settings/>
         <div v-if="state == 'main'">
 
+            <h6 v-if="patient.month_compliance[0]" class="badge badge-info">Общая комплаентность за месяц: {{ Math.round(100 * patient.month_compliance[1] / patient.month_compliance[0]) }}%</h6>
+
             <h5>Опросники</h5>
 
             <div class="row">
@@ -11,6 +13,8 @@
                     <h6>{{ form.title }}</h6>
                     <small>{{ form.doctor_description }}</small><br>
                     <small><i>{{ tt_description(form.timetable) }}</i></small><br>
+                    <small v-if="form.sent">Заполнен {{ form.done }} раз(а) / отправлен {{ form.sent }} раз(а) за последний месяц</small>
+                    <small v-else>Пока не отправлялось</small><br>
                     <div v-if="form.contract_id == current_contract_id">
                         <a href="#" @click="edit_form(form)">Редактировать</a>
                         <a href="#" @click="delete_form(form)">Удалить</a>
@@ -38,6 +42,8 @@
                     <h6>{{ medicine.title }}</h6>
                     <small>{{ medicine.rules }}</small><br>
                     <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
+                    <small v-if="medicine.sent">Подтверждено {{ medicine.done }} раз(а) / отправлено {{ medicine.sent }} раз(а) за последний месяц</small>
+                    <small v-else>Пока не отправлялось</small><br>
                     <div v-if="medicine.contract_id == current_contract_id">
                         <a href="#" @click="edit_medicine(medicine)">Редактировать</a>
                         <a href="#" @click="delete_medicine(medicine)">Удалить</a>

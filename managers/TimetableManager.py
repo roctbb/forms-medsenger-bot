@@ -43,6 +43,7 @@ class TimetableManager(Manager):
         for object in objects:
             if object and self.should_run(object):
                 manager.run(object)
+                manager.log_request(object)
 
     def update_daily_tasks(self, app):
         with app.app_context():

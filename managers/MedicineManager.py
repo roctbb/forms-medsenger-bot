@@ -55,7 +55,9 @@ class MedicineManager(Manager):
             if time.time() - medicine.filled_timestamp > 24 * 60 * 60 * medicine.warning_days:
                 medicine.warning_timestamp = int(time.time())
 
-                self.medsenger_api.send_message(medicine.contract_id, "Пациент не сообщал о приеме лекарства {} уже {} дней.".format(medicine.title, medicine.warning_days))
+                self.medsenger_api.send_message(medicine.contract_id,
+                                                "Пациент не сообщал о приеме лекарства {} уже {} дней.".format(
+                                                    medicine.title, medicine.warning_days))
                 self.__commit__()
 
     def submit(self, medicine_id, contract_id):
@@ -66,6 +68,8 @@ class MedicineManager(Manager):
         self.medsenger_api.add_record(contract_id, 'medicine', medicine.title, params={
             "medicine_id": medicine_id
         })
+
+        self.log_done("form_{}".format(medicine_id), contract_id)
 
         return True
 
@@ -90,6 +94,15 @@ class MedicineManager(Manager):
 
         self.__commit__()
         return id
+
+
+    def log_request(self, medicine, contract_id=None, description=None):
+        if not contract_id:
+            contract_id = medicine.contract_id
+        if not description:
+            description = "Подтверждение приема лекарства {}".format(medicine.title)
+
+        super().log_request("medicine_{}".format(medicine.id), contract_id, description)
 
     def run(self, medicine, commit=True):
         text = 'Пожалуйста, не забудьте принять лекарство "{}" ({}).'.format(medicine.title, medicine.rules)

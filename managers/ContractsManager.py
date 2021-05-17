@@ -47,7 +47,6 @@ class ContractManager(Manager):
             log(e)
 
     def get_patient(self, contract_id):
-        contract_id
         contract = Contract.query.filter_by(id=contract_id).first()
 
         if not contract:

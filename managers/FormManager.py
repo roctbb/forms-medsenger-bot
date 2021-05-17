@@ -4,7 +4,7 @@ from copy import copy
 from datetime import datetime
 from helpers import log
 from managers.Manager import Manager
-from models import Patient, Contract, Form
+from models import Patient, Contract, Form, ActionRequest
 
 
 class FormManager(Manager):
@@ -72,6 +72,14 @@ class FormManager(Manager):
             return new_form
         else:
             return False
+
+    def log_request(self, form, contract_id=None, description=None):
+        if not contract_id:
+            contract_id = form.contract_id
+        if not description:
+            description = "Заполнение опросника {}".format(form.title)
+
+        super().log_request("form_{}".format(form.id), contract_id, description)
 
     def run(self, form, commit=True, contract_id=None):
         text = 'Пожалуйста, заполните опросник "{}".'.format(form.title)
@@ -215,7 +223,12 @@ class FormManager(Manager):
         if form.instant_report:
             self.__instant_report__(contract_id, form, report)
 
-        return bool(self.medsenger_api.add_records(contract_id, packet, params=params))
+        result = bool(self.medsenger_api.add_records(contract_id, packet, params=params))
+
+        if result:
+            self.log_done("form_{}".format(form.id), contract_id)
+
+        return result
 
     def create_or_edit(self, data, contract):
         try:
