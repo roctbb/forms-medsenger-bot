@@ -33,6 +33,7 @@ class Contract(db.Model):
     forms = db.relationship('Form', backref=backref('contract', uselist=False), lazy=True)
     medicines = db.relationship('Medicine', backref=backref('contract', uselist=False), lazy=True)
     algorithms = db.relationship('Algorithm', backref=backref('contract', uselist=False), lazy=True)
+    tasks = db.Column(db.JSON, nullable=True)
 
     is_admin = db.Column(db.Boolean, default=False)
 

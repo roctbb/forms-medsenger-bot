@@ -183,6 +183,10 @@ def graph_page(args, form):
 def medicine_page(args, form, medicine_id):
     contract = contract_manager.get(args.get('contract_id'))
     medicine_manager.submit(medicine_id, contract.id)
+
+    if 'medicine-{}'.format(medicine_id) in contract.tasks:
+        medsenger_api.finish_task(contract.id, contract.tasks['medicine-{}'.format(medicine_id)])
+
     return get_ui('done', contract, [])
 
 
@@ -347,9 +351,12 @@ def post_form(args, form, form_id):
         contract = contract_manager.get(contract_id)
         algorithm_manager.examine(contract, form)
 
+        if 'form-{}'.format(form_id) in contract.tasks:
+            medsenger_api.finish_task(contract.id, contract.tasks['form-{}'.format(form_id)])
+
         return jsonify({
-            "result": "ok",
-        })
+                "result": "ok",
+            })
     else:
         abort(404)
 
@@ -373,7 +380,10 @@ def post_medicines(args, form):
         medsenger_api.add_record(contract_id, 'medicine', data['medicine'])
     else:
         medicine_manager.submit(data['medicine'], contract.id)
-    return get_ui('done', contract, [])
+        if 'medicine-{}'.format(data['medicine']) in contract.tasks:
+            medsenger_api.finish_task(contract.id, contract.tasks['medicine-{}'.format(data['medicine'])])
+
+        return get_ui('done', contract, [])
 
 
 with app.app_context():
