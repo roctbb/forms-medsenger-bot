@@ -47,34 +47,38 @@ class TimetableManager(Manager):
 
     def update_daily_tasks(self, app):
         with app.app_context():
-            contracts = list(Contract.query.filter_by(is_active=True).all())
+            try:
+                contracts = list(Contract.query.filter_by(is_active=True).all())
 
-            for contract in contracts:
-                daily_forms = list(filter(lambda f: f.timetable['mode'] == 'daily', contract.forms))
-                daily_medicines = list(filter(lambda m: m.timetable['mode'] == 'daily', contract.medicines))
+                for contract in contracts:
+                    daily_forms = list(filter(lambda f: f.timetable['mode'] == 'daily', contract.forms))
+                    daily_medicines = list(filter(lambda m: m.timetable['mode'] == 'daily', contract.medicines))
 
-                # FIXME разобраться с законченными заданиями
+                    # FIXME разобраться с законченными заданиями
 
-                if contract.tasks is not None:
-                    for task_id in contract.tasks.values():
-                        self.medsenger_api.delete_task(contract.id, task_id)
+                    if contract.tasks is not None:
+                        for task_id in contract.tasks.values():
+                            self.medsenger_api.delete_task(contract.id, task_id)
 
-                tasks = {}
-                for form in daily_forms:
-                    task_id = self.medsenger_api.add_task(contract.id, form.title,
-                                                          target_number=len(form.timetable['points']),
-                                                          action_link='form/{}'.format(form.id))['task_id']
-                    tasks.update({'form-{}'.format(form.id): task_id})
+                    tasks = {}
+                    for form in daily_forms:
+                        task_id = self.medsenger_api.add_task(contract.id, form.title,
+                                                              target_number=len(form.timetable['points']),
+                                                              action_link='form/{}'.format(form.id))['task_id']
+                        tasks.update({'form-{}'.format(form.id): task_id})
 
-                for medicine in daily_medicines:
-                    task_id = self.medsenger_api.add_task(contract.id, medicine.title,
-                                                          target_number=len(medicine.timetable['points']),
-                                                          action_link='medicine/{}'.format(medicine.id))['task_id']
-                    tasks.update({'medicine-{}'.format(medicine.id): task_id})
+                    for medicine in daily_medicines:
+                        task_id = self.medsenger_api.add_task(contract.id, medicine.title,
+                                                              target_number=len(medicine.timetable['points']),
+                                                              action_link='medicine/{}'.format(medicine.id))['task_id']
+                        tasks.update({'medicine-{}'.format(medicine.id): task_id})
 
-                contract.tasks = tasks
-                print(tasks)
-                self.__commit__()
+                    contract.tasks = tasks
+                    print(tasks)
+                    self.__commit__()
+            except Exception as e:
+                log(e, True)
+
 
 
     def check_hours(self, app):
