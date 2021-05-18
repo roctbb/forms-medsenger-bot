@@ -47,10 +47,11 @@ class TimetableManager(Manager):
 
     def update_daily_tasks(self, app):
         with app.app_context():
-            try:
-                contracts = list(Contract.query.filter_by(is_active=True).all())
 
-                for contract in contracts:
+            contracts = list(Contract.query.filter_by(is_active=True).all())
+
+            for contract in contracts:
+                try:
                     daily_forms = list(filter(lambda f: f.timetable['mode'] == 'daily', contract.forms))
                     daily_medicines = list(filter(lambda m: m.timetable['mode'] == 'daily', contract.medicines))
 
@@ -61,13 +62,10 @@ class TimetableManager(Manager):
                     tasks = {}
 
                     for form in daily_forms:
-                        try:
-                            task_id = self.medsenger_api.add_task(contract.id, form.title,
-                                                                  target_number=len(form.timetable['points']),
-                                                                  action_link='form/{}'.format(form.id))['task_id']
-                            tasks.update({'form-{}'.format(form.id): task_id})
-                        except Exception as e:
-                            log(e, False)
+                        task_id = self.medsenger_api.add_task(contract.id, form.title,
+                                                              target_number=len(form.timetable['points']),
+                                                              action_link='form/{}'.format(form.id))['task_id']
+                        tasks.update({'form-{}'.format(form.id): task_id})
 
                     for medicine in daily_medicines:
                         task_id = self.medsenger_api.add_task(contract.id, medicine.title,
@@ -78,10 +76,8 @@ class TimetableManager(Manager):
                     contract.tasks = tasks
                     print(tasks)
                     self.__commit__()
-            except Exception as e:
-                log(e, True)
-
-
+                except Exception as e:
+                    log(e, True)
 
     def check_hours(self, app):
         with app.app_context():
@@ -130,7 +126,6 @@ class TimetableManager(Manager):
             self.iterate(app)
             self.check_forgotten(app)
             time.sleep(60)
-
 
     def run(self, app):
         thread = Thread(target=self.worker, args=[app, ])
