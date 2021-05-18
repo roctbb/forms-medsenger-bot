@@ -130,7 +130,7 @@ class AlgorithmsManager(Manager):
 
         if not values:
             return None, None
-        if mode == 'value' and time.time() - int(answer['values'][0].get('timestamp')) > 60:
+        if mode == 'value' and time.time() - int(answer['values'][0].get('timestamp')) > 10:
             return None, None
         if mode == 'value':
             return values, objects
