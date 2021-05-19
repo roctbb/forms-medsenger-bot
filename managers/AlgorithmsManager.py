@@ -230,7 +230,9 @@ class AlgorithmsManager(Manager):
                             current_answer = objects[i]
 
                         description = generate_description(criteria, lvalue, rvalue, category_names, current_answer)
-                        descriptions.append(description)
+
+                        if not criteria.get('hide_in_description'):
+                            descriptions.append(description)
 
                         if current_answer:
                             buffer.append({

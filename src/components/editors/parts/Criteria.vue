@@ -147,6 +147,13 @@
                     <small class="text-muted">Код (для сценариев)</small>
                 </div>
             </div>
+
+            <div v-if="is_admin">
+                <div class="col-md-12">
+                    <input type="checkbox" v-model="criteria.hide_in_description">
+                    <small class="text-muted">Не выводить в показателях?</small>
+                </div>
+            </div>
         </div>
     </div>
 </template>
