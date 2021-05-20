@@ -2,7 +2,7 @@ from flask import Flask
 from models import db
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
-from commands import MigrateLegacyStructure
+from commands import MigrateLegacyStructure, ReinitTasks
 from sentry_sdk.integrations.flask import FlaskIntegration
 import sentry_sdk
 
@@ -25,7 +25,8 @@ migrate = Migrate(app, db)
 
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
-manager.add_command('db_legacy', MigrateLegacyStructure)
+manager.add_command('migrate_to_complex_algs', MigrateLegacyStructure)
+manager.add_command('reinit_tasks', ReinitTasks)
 
 
 
