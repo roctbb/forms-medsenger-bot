@@ -26,7 +26,7 @@ export default {
             group: {},
             data: [],
             options: {},
-            loaded: false,
+            loaded: false
         }
     },
     methods: {
@@ -43,42 +43,22 @@ export default {
                         type: 'day',
                         count: 1,
                         text: 'День',
-                        dataGrouping: {
-                            forced: true,
-                            units: [['day', [1]]]
-                        }
-                    }, {
+                    },{
                         type: 'day',
                         count: 3,
                         text: '3 дня',
-                        dataGrouping: {
-                            forced: true,
-                            units: [['day', [3]]]
-                        }
                     }, {
                         type: 'week',
                         count: 1,
                         text: 'Неделя',
-                        dataGrouping: {
-                            forced: true,
-                            units: [['week', [1]]]
-                        }
                     }, {
                         type: 'week',
                         count: 2,
                         text: '2 недели',
-                        dataGrouping: {
-                            forced: true,
-                            units: [['week', [2]]]
-                        }
                     }, {
                         type: 'month',
                         count: 1,
                         text: 'Месяц',
-                        dataGrouping: {
-                            forced: true,
-                            units: [['month', [1]]]
-                        }
                     }, {
                         type: 'all',
                         text: 'Все'
