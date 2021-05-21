@@ -46,6 +46,7 @@ class TimetableManager(Manager):
                 manager.log_request(object)
 
     def update_daily_tasks(self, app):
+        print("Start tasks update")
         with app.app_context():
 
             contracts = list(Contract.query.filter_by(is_active=True).all())
