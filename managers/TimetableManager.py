@@ -18,6 +18,10 @@ class TimetableManager(Manager):
     def should_run(self, object):
         now = datetime.now()
         timetable = object.timetable
+
+        if timetable.get('mode') == 'manual':
+            return False
+
         if object.last_sent:
             last_sent = max(object.last_sent, now - timedelta(minutes=5))
         else:
@@ -25,11 +29,13 @@ class TimetableManager(Manager):
 
         points = timetable['points']
         if timetable['mode'] == 'weekly':
-            points = list(filter(lambda x:x['day'] == now.weekday(), points))
-        if timetable['mode'] == 'montly':
             points = list(filter(lambda x: x['day'] == now.weekday(), points))
-
-        points = list(map(lambda p: datetime(minute=int(p['minute']), hour=int(p['hour']), day=now.day, month=now.month, year=now.year), points))
+        if timetable['mode'] == 'monthly':
+            points = list(filter(lambda x: x['day'] == now.weekday(), points))
+        if timetable['mode'] == 'daily':
+            points = list(map(lambda p: datetime(minute=int(p['minute']), hour=int(p['hour']), day=now.day, month=now.month, year=now.year), points))
+        else:
+            points = []
 
         return bool(list(filter(lambda p: p <= now and p > last_sent, points)))
 
@@ -37,6 +43,42 @@ class TimetableManager(Manager):
         for object in objects:
             if object and self.should_run(object):
                 manager.run(object)
+                manager.log_request(object)
+
+    def update_daily_tasks(self, app):
+        print("Start tasks update")
+        with app.app_context():
+
+            contracts = list(Contract.query.filter_by(is_active=True).all())
+
+            for contract in contracts:
+                try:
+                    daily_forms = list(filter(lambda f: f.timetable['mode'] == 'daily', contract.forms))
+                    daily_medicines = list(filter(lambda m: m.timetable['mode'] == 'daily', contract.medicines))
+
+                    if contract.tasks is not None:
+                        for task_id in contract.tasks.values():
+                            self.medsenger_api.delete_task(contract.id, task_id)
+
+                    tasks = {}
+
+                    for form in daily_forms:
+                        task_id = self.medsenger_api.add_task(contract.id, form.title,
+                                                              target_number=len(form.timetable['points']),
+                                                              action_link='form/{}'.format(form.id))['task_id']
+                        tasks.update({'form-{}'.format(form.id): task_id})
+
+                    for medicine in daily_medicines:
+                        task_id = self.medsenger_api.add_task(contract.id, medicine.title,
+                                                              target_number=len(medicine.timetable['points']),
+                                                              action_link='medicine/{}'.format(medicine.id))['task_id']
+                        tasks.update({'medicine-{}'.format(medicine.id): task_id})
+
+                    contract.tasks = tasks
+                    print(tasks)
+                    self.__commit__()
+                except Exception as e:
+                    log(e, True)
 
     def check_hours(self, app):
         with app.app_context():
@@ -85,7 +127,6 @@ class TimetableManager(Manager):
             self.iterate(app)
             self.check_forgotten(app)
             time.sleep(60)
-
 
     def run(self, app):
         thread = Thread(target=self.worker, args=[app, ])

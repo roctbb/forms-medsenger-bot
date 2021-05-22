@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="card" :style="bg">
+        <div class="card"  :class="additional_class" :style="bg">
             <div class="card-body">
                 <h5 class="card-title" v-if="title">{{ title }}</h5>
                 <slot></slot>
@@ -12,7 +12,7 @@
 <script>
 export default {
     name: "Card",
-    props: ['title', 'image'],
+    props: ['title', 'image', 'additional_class'],
     computed: {
         bg: function () {
             if (this.image)

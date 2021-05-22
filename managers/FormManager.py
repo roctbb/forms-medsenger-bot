@@ -4,7 +4,7 @@ from copy import copy
 from datetime import datetime
 from helpers import log
 from managers.Manager import Manager
-from models import Patient, Contract, Form
+from models import Patient, Contract, Form, ActionRequest
 
 
 class FormManager(Manager):
@@ -65,15 +65,33 @@ class FormManager(Manager):
             self.db.session.add(new_form)
             self.__commit__()
 
+            if new_form.timetable.get('send_on_init'):
+                self.db.session.refresh(new_form)
+                self.run(new_form)
+
             return new_form
         else:
             return False
 
-    def run(self, form, commit=True, contract_id=None):
+    def log_request(self, form, contract_id=None, description=None):
+        if not contract_id:
+            contract_id = form.contract_id
+        if not description:
+            description = "Заполнение опросника {}".format(form.title)
 
+        super().log_request("form_{}".format(form.id), contract_id, description)
+
+    def run(self, form, commit=True, contract_id=None):
         text = 'Пожалуйста, заполните опросник "{}".'.format(form.title)
+
+        if form.custom_text:
+            text = form.custom_text
+
         action = 'form/{}'.format(form.id)
         action_name = 'Заполнить опросник'
+
+        if form.custom_title:
+            action_name = form.custom_title
 
         if not contract_id:
             deadline = self.calculate_deadline(form.timetable)
@@ -98,7 +116,7 @@ class FormManager(Manager):
 
                 self.medsenger_api.send_message(form.contract_id,
                                                 "Пациент не заполнял опросник {} уже {} дней.".format(form.title,
-                                                                                                      form.warning_days))
+                                                                                                      form.warning_days), only_doctor=True, need_answer=True)
                 self.__commit__()
 
     def __instant_report__(self, contract_id, form, report):
@@ -132,7 +150,8 @@ class FormManager(Manager):
                     params = {
                         "question_uid": field['uid'],
                         "question_text": field.get('text'),
-                        "answer": answer
+                        "answer": answer,
+                        "type": field['type']
                     }
 
                     report.append((field.get('text'), answer))
@@ -158,7 +177,8 @@ class FormManager(Manager):
                     params = {
                         "question_iud": field['uid'],
                         "question_text": field.get('text'),
-                        "answer": value
+                        "answer": value,
+                        "type": field['type']
                     }
 
                     if field.get('params', {}).get('custom_params'):
@@ -173,7 +193,8 @@ class FormManager(Manager):
                     params = {
                         "question_uid": field['uid'],
                         "question_text": field.get('text'),
-                        "answer": answers[field['uid']]
+                        "answer": answers[field['uid']],
+                        "type": field['type']
                     }
 
                     report.append((field.get('text'), answers[field['uid']]))
@@ -202,7 +223,12 @@ class FormManager(Manager):
         if form.instant_report:
             self.__instant_report__(contract_id, form, report)
 
-        return bool(self.medsenger_api.add_records(contract_id, packet, params=params))
+        result = bool(self.medsenger_api.add_records(contract_id, packet, params=params))
+
+        if result:
+            self.log_done("form_{}".format(form.id), contract_id)
+
+        return result
 
     def create_or_edit(self, data, contract):
         try:
@@ -221,8 +247,11 @@ class FormManager(Manager):
             form.title = data.get('title')
             form.doctor_description = data.get('doctor_description')
             form.patient_description = data.get('patient_description')
+            form.thanks_text = data.get('thanks_text')
             form.show_button = data.get('show_button')
             form.button_title = data.get('button_title')
+            form.custom_title = data.get('custom_title')
+            form.custom_text = data.get('custom_text')
             form.timetable = data.get('timetable')
             form.fields = data.get('fields')
             form.categories = data.get('categories')
@@ -254,6 +283,10 @@ class FormManager(Manager):
             if not form_id:
                 self.db.session.add(form)
             self.__commit__()
+
+            if form.timetable.get('send_on_init') and form.contract_id:
+                self.db.session.refresh(form)
+                self.run(form)
 
             return form
         except Exception as e:

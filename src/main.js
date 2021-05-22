@@ -30,6 +30,9 @@ Vue.mixin({
             if (!doc) return doc;
             return doc.replace(/([^>])\n/g, '$1<br/>')
         },
+        getWindow: function () {
+            return window;
+        },
         url: function (action) {
             let api_host = window.API_HOST;
             let agent_token = window.AGENT_TOKEN;
@@ -138,6 +141,8 @@ Vue.mixin({
         },
         alg_description: function (algorithm) {
             let criteria = `<b>Анализирует:</b> ` + algorithm.categories.split('|').map((c) => this.get_category(c).description.toLowerCase()).filter((v, i, a) => a.indexOf(v) === i).join(', ') + `<br>`;
+
+            /*
             let actions = new Set();
 
             algorithm.actions.forEach((a) => {
@@ -174,15 +179,16 @@ Vue.mixin({
                 if (a.type == 'detach_algorithm') {
                     actions.add('отключение алгоритма');
                 }
-            })
+            })*/
 
 
-            actions = `<b>Действия:</b> ` + Array.from(actions).join(', ')
+            /*actions = `<b>Действия:</b> ` + Array.from(actions).join(', ')*/
 
-            return criteria + actions
+            return criteria /* + actions */
         },
         need_filling: function (algorithm) {
-            return algorithm.criteria.some(c => c.some(b => b.ask_value == true))
+            console.log(algorithm.steps)
+            return algorithm.steps.some(s => s.conditions.some(k => k.criteria.some(c => c.some(b => b.ask_value == true))));
         },
         group_by: function (categories, field) {
             return categories.reduce((groups, item) => {

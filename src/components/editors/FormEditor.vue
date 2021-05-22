@@ -27,6 +27,14 @@
                            v-model="form.button_title"/>
                 </form-group48>
 
+                <form-group48 v-if="is_admin" title="Текст для кнопки">
+                    <input class="form-control form-control-sm" v-model="form.custom_title"/>
+                </form-group48>
+
+                <form-group48 v-if="is_admin" title="Текст для сообщения">
+                    <input class="form-control form-control-sm" v-model="form.custom_text"/>
+                </form-group48>
+
                 <form-group48 v-if="is_admin && (empty(form.id) || form.is_template)" title="ID связанного алгоритма">
                     <input class="form-control form-control-sm" v-model="form.algorithm_id"/>
                 </form-group48>
@@ -50,8 +58,16 @@
                     <input class="form-check" type="checkbox" v-model="form.instant_report"/>
                 </form-group48>
 
+                <form-group48 title="Отправить при подключении" v-if="is_admin">
+                    <input class="form-check" type="checkbox" v-model="form.timetable.send_on_init"/>
+                </form-group48>
+
                 <form-group48 v-if="is_admin" title="Показывать шаблон клиникам (JSON)">
                     <input class="form-control form-control-sm" type="text" v-model="form.clinics"/>
+                </form-group48>
+
+                <form-group48 title="Текст после успешного заполнения (если не сработал алгоритм)">
+                    <textarea class="form-control form-control-sm" v-model="form.thanks_text"></textarea>
                 </form-group48>
             </card>
 
@@ -185,9 +201,9 @@ export default {
                 this.$set(this.fields_save_clicked, i, true)
             }
         },
-        save: function (is_template) {
+        save: function (is_template, bypass_validation) {
             this.show_validation()
-            if (this.check()) {
+            if (this.check() || bypass_validation) {
                 this.errors = []
 
                 if (is_template || this.form.is_template) {
@@ -251,7 +267,7 @@ export default {
             this.form.is_template = false;
             this.form.contract_id = undefined;
             this.form.template_id = form.id;
-            this.save()
+            this.save(false, true)
         });
 
         Event.listen('home', (form) => {

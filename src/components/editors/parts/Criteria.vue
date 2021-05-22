@@ -9,13 +9,14 @@
                         <option value="sum" v-if="is_int()">сумма за</option>
                         <option value="difference" v-if="is_int()">разброс за</option>
                         <option value="time">текущая дата</option>
+                        <option value="init">активация контракта</option>
                     </select>
                     <span class="text-muted"><button class="btn btn-sm btn-default" @click="remove()">Удалить</button></span>
                 </div>
 
                 <!-- not time -->
 
-                <div class="col-md-2" v-if="criteria.left_mode != 'value' && criteria.left_mode != 'time'">
+                <div class="col-md-2" v-if="criteria.left_mode != 'value' && !['time', 'init'].includes(criteria.left_mode)">
                     <input class="form-control form-control-sm"
                            v-if="criteria.left_dimension == 'hours'"
                            :class="this.save_clicked && empty(criteria.left_hours) ? 'is-invalid' : ''"
@@ -29,7 +30,7 @@
                         <option value="times">раз</option>
                     </select>
                 </div>
-                <div class="col-md-3" v-if="criteria.left_mode != 'time'">
+                <div class="col-md-3" v-if="!['time', 'init'].includes(criteria.left_mode)">
                     <select @change="category_changed()" class="form-control form-control-sm"
                             v-model="criteria.category">
                         <optgroup
@@ -41,7 +42,7 @@
                     </select>
                     <small class="text-muted">Код категории</small>
                 </div>
-                <div class="col-md-1" v-if="criteria.left_mode != 'time'">
+                <div class="col-md-1" v-if="!['time', 'init'].includes(criteria.left_mode)">
                     <select class="form-control form-control-sm" v-model="criteria.sign">
                         <option value="equal">=</option>
                         <option value="contains" v-if="!is_int()">содержит</option>
@@ -53,32 +54,32 @@
                     </select>
                 </div>
 
-                    <div class="col-md-2" v-if="criteria.left_mode != 'time'">
-                        <select class="form-control form-control-sm" v-model="criteria.right_mode">
-                            <option value="value">фиксированное значение</option>
-                            <option value="category_value">значение</option>
-                            <option value="average" v-if="is_int()">среднее за</option>
-                            <option value="sum" v-if="is_int()">сумма за</option>
-                            <option value="difference" v-if="is_int()">разброс за</option>
-                        </select>
-                    </div>
+                <div class="col-md-2" v-if="!['time', 'init'].includes(criteria.left_mode)">
+                    <select class="form-control form-control-sm" v-model="criteria.right_mode">
+                        <option value="value">фиксированное значение</option>
+                        <option value="category_value">значение</option>
+                        <option value="average" v-if="is_int()">среднее за</option>
+                        <option value="sum" v-if="is_int()">сумма за</option>
+                        <option value="difference" v-if="is_int()">разброс за</option>
+                    </select>
+                </div>
 
-                    <div class="col-md-2" v-if="criteria.right_mode != 'value' && criteria.left_mode != 'time'">
-                        <select class="form-control form-control-sm"
-                                v-model="criteria.right_category">
-                            <optgroup
-                                v-for="(group, name) in group_by(category_list, 'subcategory')"
-                                v-bind:label="name">
-                                <option v-for="category in group" :value="category.name">{{ category.description }}
-                                </option>
-                            </optgroup>
-                        </select>
+                <div class="col-md-2" v-if="criteria.right_mode != 'value' && !['time', 'init'].includes(criteria.left_mode)">
+                    <select class="form-control form-control-sm"
+                            v-model="criteria.right_category">
+                        <optgroup
+                            v-for="(group, name) in group_by(category_list, 'subcategory')"
+                            v-bind:label="name">
+                            <option v-for="category in group" :value="category.name">{{ category.description }}
+                            </option>
+                        </optgroup>
+                    </select>
 
                     <small class="text-muted">Код категории для сравнения</small>
                 </div>
 
                 <div class="col-md-2"
-                     v-if="!['value', 'category_value'].includes(criteria.right_mode) && criteria.left_mode != 'time'">
+                     v-if="!['value', 'category_value'].includes(criteria.right_mode) && !['time', 'init'].includes(criteria.left_mode)">
                     <input class="form-control form-control-sm"
                            v-if="criteria.right_dimension == 'hours'"
                            :class="this.save_clicked && empty(criteria.right_hours) ? 'is-invalid' : ''"
@@ -92,7 +93,7 @@
                         <option value="times">раз</option>
                     </select>
                 </div>
-                <div class="col-md-1" v-if="criteria.left_mode != 'time'">
+                <div class="col-md-1" v-if="!['time', 'init'].includes(criteria.left_mode)">
                     <input class="form-control form-control-sm"
                            :class="this.save_clicked && empty(criteria.value) ? 'is-invalid' : ''"
                            v-model="criteria.value">
@@ -128,7 +129,14 @@
                 </div>
             </div>
 
-            <div v-if="is_admin && ['value', 'category_value'].includes(criteria.right_mode)" class="row">
+            <div v-if="is_admin" class="row">
+                <div class="col-md-12">
+                    <input type="checkbox" v-model="criteria.hide_in_description">
+                    <small class="text-muted">Не выводить в показателях?</small>
+                </div>
+            </div>
+
+            <div v-if="is_admin && criteria.left_mode !='init' && ['value', 'category_value'].includes(criteria.right_mode)" class="row">
                 <div class="col-md-4">
                     <input type="checkbox" v-model="criteria.ask_value">
                     <small class="text-muted">Запросить при подключении шаблона?</small>
@@ -159,7 +167,7 @@ import FormGroup48 from "../../common/FormGroup-4-8";
 export default {
     name: "Criteria",
     components: {FormGroup48, Card},
-    props: ['data', 'rkey', 'pkey', 'save_clicked'],
+    props: ['data', 'rkey', 'pkey', 'save_clicked', 'condition'],
     data() {
         return {
             mode: 'integer',
@@ -170,7 +178,7 @@ export default {
     methods: {
 
         remove: function () {
-            Event.fire('remove-criteria', [this.rkey, this.pkey])
+            Event.fire('remove-criteria', [this.rkey, this.pkey, this.condition])
         },
         is_int: function () {
             return this.category.type != 'string'

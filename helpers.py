@@ -66,6 +66,7 @@ def verify_json(func):
             abort(422)
         if request.json.get('api_key') != API_KEY:
             abort(401)
+        #return func(request.json, *args, **kargs)
         try:
             return func(request.json, *args, **kargs)
         except Exception as e:
@@ -89,7 +90,10 @@ def dir_last_updated(folder):
 
 def generate_description(criteria, l_value, r_value, category_names, current_answer):
     if criteria.get('left_mode') == 'value' and criteria.get('right_mode') == 'value' and criteria.get('sign') in ['equal', 'contains'] and current_answer:
-        return "<strong>{}</strong>: {}".format(current_answer['params']['question_text'], current_answer['params']['answer'])
+        if current_answer['params']['type'] != 'checkbox':
+            return "<strong>{}</strong>: {}".format(current_answer['params']['question_text'], current_answer['params']['answer'])
+        else:
+            return "{}".format(current_answer['params']['answer'])
 
     signs = {
         "equal": "равно",
@@ -139,3 +143,9 @@ def generate_description(criteria, l_value, r_value, category_names, current_ans
             comment += " '{}'".format(category_names.get(criteria.get('right_category')))
 
     return comment
+
+def get_step(algorithm, step=None):
+    if not step:
+        step = algorithm.current_step
+
+    return next(s for s in algorithm.steps if s['uid'] == step)

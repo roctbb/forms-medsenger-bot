@@ -6,7 +6,7 @@ from managers.MedicineManager import MedicineManager
 from managers.TimetableManager import TimetableManager
 from medsenger_api import AgentApiClient
 from helpers import *
-from models import Form
+from models import Form, Algorithm
 
 medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG)
 contract_manager = ContractManager(medsenger_api, db)
@@ -20,6 +20,7 @@ algorithm_manager = AlgorithmsManager(medsenger_api, db)
 def index():
     return "Waiting for the thunder"
 
+
 @app.route('/debug-sentry')
 def trigger_error():
     try:
@@ -27,6 +28,7 @@ def trigger_error():
     except Exception as e:
         log(e, True)
         abort(500)
+
 
 # monitoring and common api
 
@@ -154,6 +156,14 @@ def actions(data):
     return jsonify(actions)
 
 
+@app.route('/compliance', methods=['POST'])
+@verify_json
+def compliance(data):
+    contract = contract_manager.get(data.get('contract_id'))
+    sent, done = contract.patient.count_month_compliance()
+    return jsonify({"sent": sent, "done": done})
+
+
 # settings and views
 
 @app.route('/settings', methods=['GET'])
@@ -182,6 +192,10 @@ def graph_page(args, form):
 def medicine_page(args, form, medicine_id):
     contract = contract_manager.get(args.get('contract_id'))
     medicine_manager.submit(medicine_id, contract.id)
+
+    if contract.tasks and 'medicine-{}'.format(medicine_id) in contract.tasks:
+        medsenger_api.finish_task(contract.id, contract.tasks['medicine-{}'.format(medicine_id)])
+
     return get_ui('done', contract, [])
 
 
@@ -310,7 +324,8 @@ def graph_categories(args, form):
 def graph_data(args, form):
     contract_id = args.get('contract_id')
     group = request.json
-    answer = [medsenger_api.get_records(contract_id, category_name) for category_name in group['categories'] + ['medicine', 'symptom']]
+    answer = [medsenger_api.get_records(contract_id, category_name) for category_name in
+              group['categories'] + ['medicine', 'symptom']]
     answer = list(filter(lambda x: x != None, answer))
 
     return jsonify(answer)
@@ -346,9 +361,12 @@ def post_form(args, form, form_id):
         contract = contract_manager.get(contract_id)
         algorithm_manager.examine(contract, form)
 
+        if contract.tasks and 'form-{}'.format(form_id) in contract.tasks:
+            medsenger_api.finish_task(contract.id, contract.tasks['form-{}'.format(form_id)])
+
         return jsonify({
-            "result": "ok",
-        })
+                "result": "ok",
+            })
     else:
         abort(404)
 
@@ -372,7 +390,10 @@ def post_medicines(args, form):
         medsenger_api.add_record(contract_id, 'medicine', data['medicine'])
     else:
         medicine_manager.submit(data['medicine'], contract.id)
-    return get_ui('done', contract, [])
+        if contract.tasks and 'medicine-{}'.format(data['medicine']) in contract.tasks:
+            medsenger_api.finish_task(contract.id, contract.tasks['medicine-{}'.format(data['medicine'])])
+
+        return get_ui('done', contract, [])
 
 
 with app.app_context():

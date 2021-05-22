@@ -43,42 +43,22 @@ export default {
                         type: 'day',
                         count: 1,
                         text: 'День',
-                        dataGrouping: {
-                            forced: true,
-                            units: [['day', [1]]]
-                        }
                     },{
                         type: 'day',
                         count: 3,
                         text: '3 дня',
-                        dataGrouping: {
-                            forced: true,
-                            units: [['day', [3]]]
-                        }
                     }, {
                         type: 'week',
                         count: 1,
                         text: 'Неделя',
-                        dataGrouping: {
-                            forced: true,
-                            units: [['week', [1]]]
-                        }
                     }, {
                         type: 'week',
                         count: 2,
                         text: '2 недели',
-                        dataGrouping: {
-                            forced: true,
-                            units: [['week', [2]]]
-                        }
                     }, {
                         type: 'month',
                         count: 1,
                         text: 'Месяц',
-                        dataGrouping: {
-                            forced: true,
-                            units: [['month', [1]]]
-                        }
                     }, {
                         type: 'all',
                         text: 'Все'
@@ -105,11 +85,34 @@ export default {
                     ordinal: false
                 },
                 zoom: 'x',
-                yAxis: {
+                yAxis: [{
+                    labels: {
+                        align: 'right',
+                        x: -3
+                    },
+                    height: '80%',
+                    lineWidth: 2,
+                    resize: {
+                        enabled: true
+                    },
                     title: {
                         text: 'Значение'
                     }
                 },
+                    {
+                        labels: {
+                            align: 'right',
+                            x: -3
+                        },
+                        title: {
+                            text: 'События'
+                        },
+                        top: '85%',
+                        height: '15%',
+                        offset: 0,
+                        lineWidth: 2
+                    }
+                ],
                 plotOptions: {
                     line: {
                         dataLabels: {
@@ -161,9 +164,11 @@ export default {
             });
 
             let offset = -1 * new Date().getTimezoneOffset() * 60
+            let y = 1;
 
             this.data.filter((graph) => graph.category.type == 'string').forEach((graph) => {
                 this.options.series.push({
+                    yAxis: 1,
                     name: graph.category.description,
                     data: graph.values.map((value) => {
                         return {
@@ -171,7 +176,7 @@ export default {
                                 enabled: false,
                             },
                             x: (value.timestamp + offset) * 1000,
-                            y: 30,
+                            y: y,
                             comment: this.get_comment(value, graph.category.description),
                         }
                     }).reverse(),
@@ -183,7 +188,7 @@ export default {
                         symbol: 'triangle'
                     }
                 })
-
+                y += 1;
             });
 
             this.data.filter((graph) => graph.category.type != 'string').forEach((graph) => {
@@ -235,7 +240,7 @@ export default {
                 })
             }
             return comment
-        }
+        },
     },
     computed: {},
     created() {

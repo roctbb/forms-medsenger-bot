@@ -1,4 +1,5 @@
 import time
+import uuid
 from datetime import datetime, timedelta
 
 from helpers import log, generate_description
@@ -12,6 +13,31 @@ from models import Patient, Contract, Algorithm
 class AlgorithmsManager(Manager):
     def __init__(self, *args):
         super(AlgorithmsManager, self).__init__(*args)
+
+    def __migrate__(self):
+        algorithms = Algorithm.query.all()
+
+        for algorithm in algorithms:
+            algorithm.steps = [
+                {
+                    "uid": str(uuid.uuid4()),
+                    "title": algorithm.title,
+                    "conditions": [
+                        {
+                            "uid": str(uuid.uuid4()),
+                            "criteria": algorithm.criteria,
+                            "positive_actions": [action for action in algorithm.actions if not action['params'].get('is_negative')],
+                            "negative_actions": [action for action in algorithm.actions if action['params'].get('is_negative')]
+                        }
+                    ],
+                    "timeout_actions": [],
+                    "reset_minutes": 0
+                }
+            ]
+            algorithm.current_step = algorithm.steps[0]['uid']
+            algorithm.initial_step = algorithm.steps[0]['uid']
+
+        self.__commit__()
 
     def get(self, algorithm_id):
         return Algorithm.query.filter_by(id=algorithm_id).first_or_404()
@@ -33,13 +59,18 @@ class AlgorithmsManager(Manager):
             new_algorithm.patient_id = contract.patient.id
 
             if setup:
-                for block in algorithm.criteria:
-                    for criteria in block:
-                        if criteria.get('ask_value') and setup.get(criteria['value_code']):
-                            criteria['value'] = setup.get(criteria['value_code'])
+                for step in algorithm.steps:
+                    for condition in step['conditions']:
+                        for block in condition['criteria']:
+                            for criteria in block:
+                                if criteria.get('ask_value') and setup.get(criteria['value_code']):
+                                    criteria['value'] = setup.get(criteria['value_code'])
 
             self.db.session.add(new_algorithm)
             self.__commit__()
+            self.db.session.refresh(new_algorithm)
+
+            self.check_inits(new_algorithm)
 
             return True
         else:
@@ -99,7 +130,7 @@ class AlgorithmsManager(Manager):
 
         if not values:
             return None, None
-        if mode == 'value' and time.time() - int(answer['values'][0].get('timestamp')) > 60:
+        if mode == 'value' and time.time() - int(answer['values'][0].get('timestamp')) > 10:
             return None, None
         if mode == 'value':
             return values, objects
@@ -119,7 +150,6 @@ class AlgorithmsManager(Manager):
         return None, None
 
     def check_values(self, left, right, sign, modifier=0):
-
         try:
             modifier = float(modifier)
         except:
@@ -145,6 +175,9 @@ class AlgorithmsManager(Manager):
     def check_criteria(self, criteria, contract_id, buffer, descriptions, category_names):
         category_name = criteria.get('category')
         mode = criteria.get('left_mode')
+
+        if mode == 'init':
+            return False
 
         if mode != 'time':
             objects = None
@@ -197,7 +230,9 @@ class AlgorithmsManager(Manager):
                             current_answer = objects[i]
 
                         description = generate_description(criteria, lvalue, rvalue, category_names, current_answer)
-                        descriptions.append(description)
+
+                        if not criteria.get('hide_in_description'):
+                            descriptions.append(description)
 
                         if current_answer:
                             buffer.append({
@@ -226,11 +261,13 @@ class AlgorithmsManager(Manager):
                 return True
             return False
 
-    def run_action(self, action, contract_id, descriptions):
+    def run_action(self, action, contract_id, descriptions, algorithm):
         report = ""
-        if action['params'].get('send_report'):
+        if action['params'].get('send_report') and descriptions:
             report = '<br><br><strong>События:</strong><ul>' + ''.join(
                 ["<li>{}</li>".format(description) for description in descriptions]) + "</ul>"
+        if action['type'] == 'change_step':
+            self.change_step(algorithm, action['params']['target'])
 
         if action['type'] == 'patient_message':
             if action['params'].get('add_action'):
@@ -365,45 +402,87 @@ class AlgorithmsManager(Manager):
                                                         medicine.timetable_description()),
                                                     only_doctor=True)
 
-    def run(self, algorithm, is_prime=True):
-        criteria = algorithm.criteria
-        actions = algorithm.actions
+    def get_step(self, algorithm, step=None):
+        if not step:
+            step = algorithm.current_step
+
+        return next(s for s in algorithm.steps if s['uid'] == step)
+
+    def change_step(self, algorithm, step):
+        new_step = self.get_step(algorithm, step)
+
+        algorithm.current_step = new_step['uid']
+
+        if new_step.get('reset_minutes'):
+            algorithm.timeout_at = time.time() + 60 * int(new_step['reset_minutes'])
+        else:
+            algorithm.timeout_at = 0
+
+        algorithm.categories = '|'.join(map(lambda c: '|'.join(['|'.join(k['category'] for k in block) for block in c['criteria']]), new_step['conditions']))
+
+        self.__commit__()
+
+    def check_timeouts(self, app):
+        with app.app_context():
+            algorithms = list(Algorithm.query.filter((Algorithm.contract_id != None) & (Algorithm.timeout_at != 0) & (Algorithm.timeout_at < time.time())).all())
+
+            for algorithm in algorithms:
+                self.timeout(algorithm)
+
+    def timeout(self, algorithm):
+        current_step = self.get_step(algorithm)
+        algorithm.timeout_at = 0
         contract_id = algorithm.contract_id
 
-        additions = []
-        descriptions = []
-        category_names = {category['name']: category['description'] for category in self.medsenger_api.get_categories()}
+        for action in current_step['timeout_actions']:
+            self.run_action(action, contract_id, [], algorithm)
 
-        result = any([all(
-            list(map(lambda x: self.check_criteria(x, contract_id, additions, descriptions, category_names), block)))
-            for block in criteria])
+        self.__commit__()
 
-        if result:
-            for addition in additions:
-                self.medsenger_api.send_addition(contract_id, addition['id'], {
-                    "algorithm_id": algorithm.id,
-                    "comment": addition["comment"]
-                })
+    def run(self, algorithm):
+        current_step = self.get_step(algorithm)
+        fired = False
 
-            for action in filter(lambda x: not x.get('params', {}).get('is_negative'), actions):
-                self.run_action(action, contract_id, descriptions)
-        else:
-            if is_prime:
-                for action in filter(lambda x: x.get('params', {}).get('is_negative'), actions):
-                    self.run_action(action, contract_id, descriptions)
+        for condition in current_step['conditions']:
+            criteria = condition['criteria']
+            contract_id = algorithm.contract_id
+
+            additions = []
+            descriptions = []
+            category_names = {category['name']: category['description'] for category in self.medsenger_api.get_categories()}
+
+            result = any([all(
+                list(map(lambda x: self.check_criteria(x, contract_id, additions, descriptions, category_names), block)))
+                for block in criteria])
+
+            if result:
+                for addition in additions:
+                    self.medsenger_api.send_addition(contract_id, addition['id'], {
+                        "algorithm_id": algorithm.id,
+                        "comment": addition["comment"]
+                    })
+                fired = True
+                for action in condition.get('positive_actions', []):
+                    self.run_action(action, contract_id, descriptions, algorithm)
+            else:
+                for action in condition.get('negative_actions', []):
+                    self.run_action(action, contract_id, descriptions, algorithm)
+
+        return fired
 
     def examine(self, contract, form):
         categories = form.categories.split('|')
         patient = contract.patient
 
         algorithms = filter(lambda algorithm: any([cat in algorithm.categories.split('|') for cat in categories]),
-                                 patient.algorithms)
+                            patient.algorithms)
 
+        fired = False
         for algorithm in algorithms:
-            if form.template_id:
-                self.run(algorithm, algorithm.attached_form == form.template_id)
-            else:
-                self.run(algorithm, algorithm.attached_form == form.id)
+            fired = fired or self.run(algorithm)
+
+        if not fired and form.thanks_text:
+            self.medsenger_api.send_message(contract.id, text=form.thanks_text, only_patient=True, action_deadline=time.time() + 60 * 60)
 
     def hook(self, contract, category_name):
         patient = contract.patient
@@ -415,6 +494,14 @@ class AlgorithmsManager(Manager):
             self.run(algorithm)
 
         return True
+
+    def check_inits(self, algorithm):
+        if 'init' in algorithm.categories.split('|') and algorithm.contract_id:
+            for step in algorithm.steps:
+                for condition in step['conditions']:
+                    if any(any(criteria['category'] == 'init' for criteria in block) for block in condition['criteria']):
+                        for action in condition['positive_actions']:
+                            self.run_action(action, algorithm.contract.id, [], algorithm)
 
     def create_or_edit(self, data, contract):
         try:
@@ -428,14 +515,11 @@ class AlgorithmsManager(Manager):
                     return None
 
             algorithm.title = data.get('title')
-            algorithm.criteria = data.get('criteria')
-            algorithm.actions = data.get('actions')
+            algorithm.steps = data.get('steps')
             algorithm.description = data.get('description')
             algorithm.categories = data.get('categories')
             algorithm.template_id = data.get('template_id')
-
-            if data.get('attached_form'):
-                algorithm.attached_form = data.get('attached_form')
+            algorithm.initial_step = data.get('steps')[0].get('uid')
 
             if data.get('is_template') and contract.is_admin:
                 algorithm.clinics = data.get('clinics')
@@ -447,7 +531,10 @@ class AlgorithmsManager(Manager):
 
             if not algorithm_id:
                 self.db.session.add(algorithm)
-            self.__commit__()
+
+            self.change_step(algorithm, algorithm.initial_step)
+
+            self.check_inits(algorithm)
 
             return algorithm
         except Exception as e:
