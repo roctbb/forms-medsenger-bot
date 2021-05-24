@@ -80,6 +80,7 @@ export default {
                 series: [],
                 xAxis: {
                     type: 'datetime',
+                    gridLineWidth: 1,
                     plotLines: [],
                     max: +new Date() + 60 * 60 * 1000,
                     ordinal: false
@@ -91,12 +92,13 @@ export default {
                         x: -3
                     },
                     height: '80%',
+                    gridLineWidth: 1,
                     lineWidth: 2,
                     resize: {
                         enabled: true
                     },
                     title: {
-                        text: 'Значение'
+                        text: 'Значения'
                     }
                 },
                     {
@@ -109,6 +111,7 @@ export default {
                         },
                         top: '85%',
                         height: '15%',
+                        gridLineWidth: 1,
                         offset: 0,
                         lineWidth: 2
                     }
@@ -121,7 +124,7 @@ export default {
                     },
                     series: {
                         marker: {
-                            fillColor: '#FFFFFF',
+                            // fillColor: '#FFFFFF',
                             lineWidth: 2,
                             lineColor: null,
                         },
@@ -166,7 +169,41 @@ export default {
             let offset = -1 * new Date().getTimezoneOffset() * 60
             let y = 1;
 
-            this.data.filter((graph) => graph.category.type == 'string').forEach((graph) => {
+            let medicines = {}
+            this.data.filter((graph) => graph.category.name == 'medicine').forEach((graph) => {
+                graph.values.forEach((medicine) => {
+                    if (medicine.value in medicines)
+                        medicines[medicine.value].push(medicine.timestamp)
+                    else
+                        medicines[medicine.value]= [medicine.timestamp]
+                    })
+            });
+
+            Object.entries(medicines).forEach(([key, value]) => {
+                this.options.series.push({
+                    yAxis: 1,
+                    name: key,
+                    data: value.map((val) => {
+                        return {
+                            dataLabels: {
+                                enabled: false,
+                            },
+                            x: (val + offset) * 1000,
+                            y: y,
+                            comment: 'Прием лекарства: ' + key,
+                        }
+                    }).reverse(),
+                    lineWidth: 0,
+                    marker: {
+                        enabled: true,
+                        radius: 3,
+                        symbol: 'square'
+                    }
+                })
+                y += 1;
+            })
+
+            this.data.filter((graph) => graph.category.name == 'symptom').forEach((graph) => {
                 this.options.series.push({
                     yAxis: 1,
                     name: graph.category.description,
@@ -205,9 +242,11 @@ export default {
                             }
                         }
                     }).reverse(),
-                    dashStyle: 'Dot',
+                    dashStyle: 'ShortDot',
+                    lineWidth: 3,
                     marker: {
                         enabled: true,
+                        radius: 4,
                         symbol: 'circle'
                     }
                 })
