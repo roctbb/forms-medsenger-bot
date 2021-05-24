@@ -37,7 +37,8 @@ export default {
             this.data = response.data
 
             this.options = {
-                rangeSelector: {
+                colors: ['#058DC7', '#50B432', '#ED561B', '#fcff00',
+                    '#24CBE5', '#64E572', '#FF9655', '#fce200', '#6AF9C4'],                rangeSelector: {
                     allButtonsEnabled: true,
                     buttons: [{
                         type: 'day',
