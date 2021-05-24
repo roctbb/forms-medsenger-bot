@@ -6,18 +6,18 @@
         <form-group48 v-for="(field, i) in form.fields" v-if="!field.show_if || answers[field.show_if]" :required="field.required"
                       :title="field.text" :key="i"
                       :description="field.description">
-            <input type="number" min="field.params.min" max="field.params.max" step="1" class="form-control"
+            <input type="number" min="field.params.min" max="field.params.max" step="1" class="form-control monitoring-input"
                    :class="save_clicked && field.required &&
                        (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
                    v-if="field.type == 'integer'" :required="field.required" v-model="answers[field.uid]"/>
-            <input type="number" min="field.params.min" max="field.params.max" step="0.01" class="form-control"
+            <input type="number" min="field.params.min" max="field.params.max" step="0.01" class="form-control monitoring-input"
                    :class="save_clicked && field.required &&
                        (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
                    v-if="field.type == 'float'" :required="field.required" v-model="answers[field.uid]"/>
-            <input type="text" class="form-control" v-if="field.type == 'text'" :required="field.required"
+            <input type="text" class="form-control monitoring-input" v-if="field.type == 'text'" :required="field.required"
                    :class="save_clicked && field.required && !answers[field.uid] && answers[field.uid] !== 0 ? 'is-invalid' : ''"
                    v-model="answers[field.uid]"/>
-            <textarea class="form-control" v-if="field.type == 'textarea'" :required="field.required"
+            <textarea class="form-control monitoring-input" v-if="field.type == 'textarea'" :required="field.required"
                       :class="save_clicked && field.required && !answers[field.uid] && answers[field.uid] !== 0 ? 'is-invalid' : ''"
                       v-model="answers[field.uid]"></textarea>
             <div v-if="field.type == 'checkbox'" style="width: 100%;"><input type="checkbox"
@@ -25,7 +25,7 @@
 
             <div v-if="field.type == 'radio'">
                 <div class="form-check" v-for="(variant, j) in field.params.variants">
-                    <input class="form-check-input" type="radio"
+                    <input class="form-check-input monitoring-input" type="radio"
                            :id="'radio_' + i + '_' + j" :name="'radio_' + i"
                            v-model="answers[field.uid]" :value="j">
                     <label class="form-check-label" :for="'radio_' + i + '_' + j">{{ variant.text }}</label>
@@ -117,6 +117,9 @@ export default {
     created() {
         this.form = this.data
         this.set_default()
+    },
+    mounted() {
+        window.document.querySelector('input.monitoring-input').focus()
     }
 }
 </script>

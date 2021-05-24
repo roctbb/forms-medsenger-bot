@@ -54,8 +54,6 @@ export default {
                 return !category.is_legacy && ['scatter', 'values'].includes(category.default_representation) && category.type != 'string'
             })
 
-            console.log("plottable", plottable)
-
             let custom = this.groups.filter((group) => {
                 return group.categories.some((category_name) => {
                     return plottable.filter((category) => category.name == category_name).length > 0
@@ -80,8 +78,17 @@ export default {
             return custom
         }
     },
-    created() {
-
+    mounted() {
+        if (window.OBJECT_ID) {
+            try {
+                   let name = this.data.filter(c => c.id == window.OBJECT_ID)[0].name;
+                   let params = this.plottable_categories.filter(c => c.categories.includes(name))[0];
+                   Event.fire('load-graph', params);
+            }
+            catch (e) {
+                console.log(e);
+            }
+        }
     }
 }
 </script>

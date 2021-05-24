@@ -96,14 +96,6 @@ class AlgorithmsManager(Manager):
     def get_templates(self):
         return Algorithm.query.filter_by(is_template=True).all()
 
-    def check_action(self, contract_id, form_id):
-        answer = self.medsenger_api.get_records(contract_id, "action", group=True)
-
-        if not answer or not answer['values']:
-            return False
-
-        return answer['values'][0] == 'Заполнение опросника ID {}'.format(form_id)
-
     def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1):
 
         if mode == 'value':

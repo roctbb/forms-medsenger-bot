@@ -186,6 +186,12 @@ def graph_page(args, form):
     contract = contract_manager.get(args.get('contract_id'))
     return get_ui('graph', contract)
 
+@app.route('/graph/<category_id>', methods=['GET'])
+@verify_args
+def graph_page_with_args(args, form, category_id):
+    contract = contract_manager.get(args.get('contract_id'))
+    return get_ui('graph', contract, object_id=category_id)
+
 
 @app.route('/medicine/<medicine_id>', methods=['GET'])
 @verify_args
