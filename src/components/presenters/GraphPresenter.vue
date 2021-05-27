@@ -35,10 +35,13 @@ export default {
         },
         process_load_answer: function (response) {
             this.data = response.data
+            var now = new Date()
+            now.setDate(now.getDate() + 1)
 
             this.options = {
                 colors: ['#058DC7', '#50B432', '#ED561B', '#fcff00',
-                    '#24CBE5', '#64E572', '#FF9655', '#fce200', '#6AF9C4'],                rangeSelector: {
+                    '#24CBE5', '#64E572', '#FF9655', '#fce200', '#6AF9C4'],
+                rangeSelector: {
                     allButtonsEnabled: true,
                     buttons: [{
                         type: 'day',
@@ -83,7 +86,7 @@ export default {
                     type: 'datetime',
                     gridLineWidth: 1,
                     plotLines: [],
-                    max: +new Date() + 60 * 60 * 1000,
+                    max: +now + 60 * 60 * 1000,
                     ordinal: false
                 },
                 zoom: 'x',
@@ -197,11 +200,11 @@ export default {
                     lineWidth: 0,
                     marker: {
                         enabled: true,
-                        radius: 3,
+                        radius: 4,
                         symbol: 'square'
                     }
                 })
-                y += 1;
+                y += 2;
             })
 
             this.data.filter((graph) => graph.category.name == 'symptom').forEach((graph) => {
@@ -238,6 +241,7 @@ export default {
                             y: value.value,
                             comment: this.get_comment(value, graph.category.description),
                             marker: {
+                                symbol: this.get_symbol(value),
                                 lineColor: this.get_color(value),
                                 radius: this.get_radius(value),
                             }
@@ -265,9 +269,15 @@ export default {
             }
             return undefined;
         },
+        get_symbol: function (point) {
+            if (point.additions) {
+                return 'url(' + this.images.warning + ')'
+            }
+            return undefined;
+        },
         get_radius: function (point) {
             if (point.additions) {
-                return 5;
+                return 6;
             }
             return undefined;
         },
