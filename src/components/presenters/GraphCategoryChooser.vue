@@ -9,6 +9,10 @@
 
                     <a @click="load_graph(category)" href="#" class="btn btn-primary">Открыть</a>
                 </card>
+            <card :image="images.graph" class="col-lg-3 col-md-4">
+                <h6> Лекарства и симптомы </h6>
+                <a @click="load_heatmap()" href="#" class="btn btn-primary">Открыть</a>
+            </card>
             </div>
 
         <div style="margin-top: 15px;" class="alert alert-info" role="alert">
@@ -46,6 +50,9 @@ export default {
     methods: {
         load_graph: function (params) {
             Event.fire('load-graph', params)
+        },
+        load_heatmap: function () {
+            Event.fire('load-heatmap')
         }
     },
     computed: {

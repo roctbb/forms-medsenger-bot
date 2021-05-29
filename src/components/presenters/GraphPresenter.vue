@@ -43,11 +43,12 @@ export default {
                     '#24CBE5', '#64E572', '#FF9655', '#fce200', '#6AF9C4'],
                 rangeSelector: {
                     allButtonsEnabled: true,
-                    buttons: [{
+                    buttons: [
+                        {
                         type: 'day',
                         count: 1,
                         text: 'День',
-                    },{
+                    }, {
                         type: 'day',
                         count: 3,
                         text: '3 дня',
@@ -86,11 +87,12 @@ export default {
                     type: 'datetime',
                     gridLineWidth: 1,
                     plotLines: [],
-                    max: +now + 60 * 60 * 1000,
+                    max: +now,
                     ordinal: false
                 },
                 zoom: 'x',
-                yAxis: [{
+                yAxis: [
+                    {
                     labels: {
                         align: 'right',
                         x: -3
@@ -128,7 +130,6 @@ export default {
                     },
                     series: {
                         marker: {
-                            // fillColor: '#FFFFFF',
                             lineWidth: 2,
                             lineColor: null,
                         },
@@ -179,8 +180,8 @@ export default {
                     if (medicine.value in medicines)
                         medicines[medicine.value].push(medicine.timestamp)
                     else
-                        medicines[medicine.value]= [medicine.timestamp]
-                    })
+                        medicines[medicine.value] = [medicine.timestamp]
+                })
             });
 
             Object.entries(medicines).forEach(([key, value]) => {
@@ -204,7 +205,7 @@ export default {
                         symbol: 'square'
                     }
                 })
-                y += 2;
+                y += 3;
             })
 
             this.data.filter((graph) => graph.category.name == 'symptom').forEach((graph) => {
