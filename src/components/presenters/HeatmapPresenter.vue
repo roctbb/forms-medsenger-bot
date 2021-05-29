@@ -39,6 +39,7 @@ export default {
         },
         process_load_answer: function (response) {
             this.data = response.data
+            let offset = -1 * new Date().getTimezoneOffset() * 60  * 1000
             var now = new Date()
             now.setHours(0)
             now.setMinutes(0)
@@ -82,7 +83,7 @@ export default {
                 xAxis: {
                     type: 'datetime',
                     gridLineWidth: 1,
-                    max: +now,
+                    max: +now + offset,
                     ordinal: false,
                     labels: {
                         align: 'left',
@@ -126,10 +127,8 @@ export default {
                 },
                 tooltip: {
                     formatter: function () {
-                        let point = this;
-                        return point.series.userOptions.data.filter(p => p.x == point.x).map(p => {
-                            return  p.comment
-                        }).join('<br>')
+                        let point = this.point;
+                        return point.comment
                     },
                     valueSuffix: ' cm',
                     shared: true
@@ -173,7 +172,7 @@ export default {
             this.data.filter((graph) => graph.category.name == 'symptom').forEach((graph) => {
                 graph.values.forEach((symptom) => {
                     let date = new Date(symptom.timestamp * 1000)
-                    date.setHours(15)
+                    date.setHours(12)
                     date.setMinutes(0)
                     date.setSeconds(0)
                     date.setMilliseconds(0)
@@ -183,7 +182,7 @@ export default {
                             time: new Date(symptom.timestamp * 1000),
                             description: symptom.value,
                         }],
-                        date: date.getTime(),
+                        date: +date + offset,
                         grade: symptom.params.grade ? symptom.params.grade : 0.7,
                         description: "",
                         count: 1
@@ -191,7 +190,7 @@ export default {
 
                     let gr = symptom.params.symptom_group ? symptom.params.symptom_group : symptom.value
 
-                    if (gr in symptoms){
+                    if (gr in symptoms) {
                         let old = symptoms[gr].find(ss => ss.date == s.date)
                         if (old) {
                             old.count++
@@ -210,11 +209,11 @@ export default {
 
             Object.entries(symptoms).forEach(([key, value]) => {
                 value.forEach(val => {
-                    val.points.sort((a,b) => {
+                    val.points.sort((a, b) => {
                         return a.time < b.time ? -1 : a.time > b.time ? 1 : 0
                     })
                     val.points.forEach(p => {
-                        value.description += "<strong>${p.time.getHours()}:${p.time.getMinutes}</strong> ${p.description}<br>"
+                        val.description += " • <strong>" + this.formatTime(p.time) + "</strong> - " + p.description + "<br>"
                     })
                 })
 
@@ -251,7 +250,7 @@ export default {
             this.data.filter((graph) => graph.category.name == 'medicine').forEach((graph) => {
                 graph.values.forEach((medicine) => {
                     let date = new Date(medicine.timestamp * 1000)
-                    date.setHours(15)
+                    date.setHours(12)
                     date.setMinutes(0)
                     date.setSeconds(0)
                     date.setMilliseconds(0)
@@ -260,12 +259,12 @@ export default {
                         points: [{
                             time: new Date(medicine.timestamp * 1000)
                         }],
-                        date: date.getTime(),
-                        description: "Прием лекарства <strong>${medicine.value}</strong> в ",
+                        date: +date + offset,
+                        description: "Прием лекарства <strong>" + medicine.value + "</strong> в ",
                         count: 1
                     }
 
-                    if (medicine.value in medicines){
+                    if (medicine.value in medicines) {
                         let old = medicines[medicine.value].find(mm => mm.date == m.date)
                         if (old) {
                             old.count++
@@ -283,11 +282,11 @@ export default {
 
             Object.entries(medicines).forEach(([key, value]) => {
                 value.forEach(val => {
-                    val.points.sort((a,b) => {
+                    val.points.sort((a, b) => {
                         return a.time < b.time ? -1 : a.time > b.time ? 1 : 0
                     })
                     val.points.forEach(p => {
-                        value.description += "<strong>${p.time.getHours()}:${p.time.getMinutes}</strong>,"
+                        val.description += "<br> • <strong>" + this.formatTime(p.time) + "</strong>"
                     })
                 })
 
@@ -305,7 +304,7 @@ export default {
                                     return val.count
                                 },
                             },
-                            x: val.date,
+                            x: +val.date,
                             y: y,
                             name: key,
                             color: '#d1f6f6',
@@ -322,6 +321,9 @@ export default {
         select_graph: function () {
             this.loaded = false;
             Event.fire('select-graph')
+        },
+        formatTime: function (date) {
+            return date.toTimeString().substr(0, 5)
         }
     },
     created() {
