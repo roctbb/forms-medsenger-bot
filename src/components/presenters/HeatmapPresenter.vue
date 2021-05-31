@@ -183,7 +183,7 @@ export default {
                             description: symptom.value,
                         }],
                         date: +date + offset,
-                        grade: symptom.params.grade ? symptom.params.grade : 0.7,
+                        grade: symptom.params.grade != null ? symptom.params.grade : 0.7,
                         description: "",
                         count: 1
                     }
