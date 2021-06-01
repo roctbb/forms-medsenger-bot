@@ -1,6 +1,6 @@
 import time
 import uuid
-from copy import copy
+from copy import copy, deepcopy
 from datetime import datetime, timedelta
 
 from sqlalchemy.orm.attributes import flag_modified
@@ -269,7 +269,7 @@ class AlgorithmsManager(Manager):
         if action['type'] == 'order':
             order = action['params'].get('order')
             agent_id = action['params'].get('agent_id')
-            params = action['params'].get('order_params', {})
+            params = deepcopy(action['params'].get('order_params', {}))
 
             if action['params'].get('send_report'):
                 params["message"] = params.get("message", "") + plain_report
