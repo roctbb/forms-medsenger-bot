@@ -30,6 +30,13 @@ Vue.mixin({
             if (!doc) return doc;
             return doc.replace(/([^>])\n/g, '$1<br/>')
         },
+        blur: function ()
+        {
+            if (window.activeElement)
+            {
+                window.activeElement.blur()
+            }
+        },
         getWindow: function () {
             return window;
         },
