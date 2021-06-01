@@ -288,6 +288,12 @@ export default {
                     if (category.type == 'integer') action.params.value = parseInt(action.params.value)
                     if (category.type == 'float') action.params.value = parseFloat(action.params.value)
                 }
+                if (action.type == 'order') {
+                    action.params.agent_id = parseInt(action.params.agent_id)
+                    if (action.params.order_params) {
+                        action.params.order_params = JSON.parse(action.params.order_params);
+                    }
+                }
                 return action;
             }
 

@@ -261,8 +261,21 @@ class AlgorithmsManager(Manager):
         if action['params'].get('send_report') and descriptions:
             report = '<br><br><strong>События:</strong><ul>' + ''.join(
                 ["<li>{}</li>".format(description) for description in descriptions]) + "</ul>"
+            plain_report = "\n\nСобытия: " + ' / '.join(descriptions)
+
         if action['type'] == 'change_step':
             self.change_step(algorithm, action['params']['target'])
+
+        if action['type'] == 'order':
+            order = action['params'].get('order')
+            agent_id = action['params'].get('agent_id')
+            params = action['params'].get('order_params', {})
+
+            if action['params'].get('send_report'):
+                params["message"] = params.get("message", "") + plain_report
+
+            self.medsenger_api.send_order(contract_id, order, agent_id, params)
+
 
         if action['type'] == 'patient_message':
             if action['params'].get('add_action'):
