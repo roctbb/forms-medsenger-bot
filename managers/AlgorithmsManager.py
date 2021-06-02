@@ -98,12 +98,12 @@ class AlgorithmsManager(Manager):
 
     def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1):
 
-        if mode == 'value':
+        if mode == 'value' or mode == 'category_value':
             offset = 0
         else:
             offset = 1
 
-        if mode == 'value':
+        if mode == 'value' or mode == 'category_value':
             answer = self.medsenger_api.get_records(contract_id, category_name, group=True, offset=offset)
         else:
             if dimension == 'hours':
