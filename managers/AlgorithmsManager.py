@@ -3,7 +3,7 @@ import uuid
 from copy import copy, deepcopy
 from datetime import datetime, timedelta
 
-from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy.orm.attributes import flag_modified, flag_dirty
 
 from helpers import log, generate_description
 from managers.ContractsManager import ContractManager
@@ -484,8 +484,11 @@ class AlgorithmsManager(Manager):
                 for action in condition.get('negative_actions', []):
                     self.run_action(action, contract_id, descriptions, algorithm)
         if fired:
-            flag_modified(algorithm, "steps")
-            self.__commit__()
+            try:
+                flag_modified(algorithm, "steps")
+                self.__commit__()
+            except Exception as e:
+                log(e, False)
         return fired
 
     def examine(self, contract, form):
