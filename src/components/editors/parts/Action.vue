@@ -5,6 +5,7 @@
                 <option value="change_step">перейти к ступени</option>
                 <option value="doctor_message">сообщение врачу</option>
                 <option value="patient_message">сообщение пациенту</option>
+                <option value="order">приказ ИА</option>
                 <option value="record">запись в карту</option>
                 <option value="medicine">прием лекарства</option>
                 <option value="form">отправка опросника</option>
@@ -73,7 +74,23 @@
             <small class="text-muted">ID шаблона</small>
         </div>
 
-        <div class="col-md-12" v-if="['doctor_message', 'patient_message'].includes(action.type)">
+        <div class="col-md-2" v-if="['order'].includes(action.type)">
+            <input type="number" v-model="action.params.agent_id">
+            <small class="text-muted">ID агента</small>
+        </div>
+
+        <div class="col-md-2" v-if="['order'].includes(action.type)">
+            <input type="text" v-model="action.params.order">
+            <small class="text-muted">order</small>
+        </div>
+
+        <div class="col-md-5" v-if="['order'].includes(action.type)">
+            <textarea class="form-control form-control-sm"
+                      v-model="action.params.order_params"></textarea>
+            <small class="text-muted">JSON параметры</small>
+        </div>
+
+        <div class="col-md-12" v-if="['doctor_message', 'patient_message', 'order'].includes(action.type)">
             <input type="checkbox" v-model="action.params.send_report">
             <small class="text-muted">Приложить показатели?</small>
         </div>
@@ -153,6 +170,11 @@ export default {
         if (this.data.type)
         {
             this.mode = this.action.type
+        }
+
+        if (this.action.type == 'order' && this.action.params.order_params)
+        {
+            this.action.params.order_params = JSON.stringify(this.action.params.order_params)
         }
     }
 }

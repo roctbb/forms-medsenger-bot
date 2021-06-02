@@ -1,6 +1,9 @@
 import time
 import uuid
+from copy import copy, deepcopy
 from datetime import datetime, timedelta
+
+from sqlalchemy.orm.attributes import flag_modified
 
 from helpers import log, generate_description
 from managers.ContractsManager import ContractManager
@@ -258,8 +261,21 @@ class AlgorithmsManager(Manager):
         if action['params'].get('send_report') and descriptions:
             report = '<br><br><strong>События:</strong><ul>' + ''.join(
                 ["<li>{}</li>".format(description) for description in descriptions]) + "</ul>"
+            plain_report = "\n\nСобытия: " + ' / '.join(descriptions)
+
         if action['type'] == 'change_step':
             self.change_step(algorithm, action['params']['target'])
+
+        if action['type'] == 'order':
+            order = action['params'].get('order')
+            agent_id = action['params'].get('agent_id')
+            params = deepcopy(action['params'].get('order_params', {}))
+
+            if action['params'].get('send_report'):
+                params["message"] = params.get("message", "") + plain_report
+
+            self.medsenger_api.send_order(contract_id, order, agent_id, params)
+
 
         if action['type'] == 'patient_message':
             if action['params'].get('add_action'):
@@ -433,11 +449,18 @@ class AlgorithmsManager(Manager):
 
     def run(self, algorithm):
         current_step = self.get_step(algorithm)
+        contract_id = algorithm.contract_id
         fired = False
 
         for condition in current_step['conditions']:
             criteria = condition['criteria']
-            contract_id = algorithm.contract_id
+
+            reset_minutes = int(condition.get('reset_minutes', 0))
+            last_fired = int(condition.get('last_fired', 0))
+            if reset_minutes and last_fired:
+                if time.time() - last_fired < reset_minutes * 60:
+                    continue
+
 
             additions = []
             descriptions = []
@@ -456,10 +479,13 @@ class AlgorithmsManager(Manager):
                 fired = True
                 for action in condition.get('positive_actions', []):
                     self.run_action(action, contract_id, descriptions, algorithm)
+                condition['last_fired'] = int(time.time())
             else:
                 for action in condition.get('negative_actions', []):
                     self.run_action(action, contract_id, descriptions, algorithm)
-
+        if fired:
+            flag_modified(algorithm, "steps")
+            self.__commit__()
         return fired
 
     def examine(self, contract, form):
