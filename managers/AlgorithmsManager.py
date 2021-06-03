@@ -261,7 +261,6 @@ class AlgorithmsManager(Manager):
         if action['params'].get('send_report') and descriptions:
             report = '<br><br><strong>События:</strong><ul>' + ''.join(
                 ["<li>{}</li>".format(description) for description in descriptions]) + "</ul>"
-            plain_report = "\n\nСобытия: " + ' / '.join(descriptions)
 
         if action['type'] == 'change_step':
             self.change_step(algorithm, action['params']['target'])
@@ -272,7 +271,7 @@ class AlgorithmsManager(Manager):
             params = deepcopy(action['params'].get('order_params', {}))
 
             if action['params'].get('send_report'):
-                params["message"] = params.get("message", "") + plain_report
+                params["message"] = params.get("message", "") + report
 
             self.medsenger_api.send_order(contract_id, order, agent_id, params)
 
