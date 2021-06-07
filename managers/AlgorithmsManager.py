@@ -413,6 +413,16 @@ class AlgorithmsManager(Manager):
         if not step:
             step = algorithm.current_step
 
+        if not step:
+            if algorithm.initial_step:
+                step = algorithm.initial_step
+                algorithm.current_step = step
+            else:
+                step = algorithm.steps[0]['uid']
+                algorithm.current_step = step
+                algorithm.initial_step = step
+            self.__commit__()
+
         return next(s for s in algorithm.steps if s['uid'] == step)
 
     def change_step(self, algorithm, step):
