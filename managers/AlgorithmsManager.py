@@ -538,6 +538,7 @@ class AlgorithmsManager(Manager):
             algorithm.categories = data.get('categories')
             algorithm.template_id = data.get('template_id')
             algorithm.initial_step = data.get('steps')[0].get('uid')
+            algorithm.current_step = data.get('steps')[0].get('uid')
 
             if data.get('is_template') and contract.is_admin:
                 algorithm.clinics = data.get('clinics')
