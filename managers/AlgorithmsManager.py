@@ -3,7 +3,7 @@ import uuid
 from copy import copy, deepcopy
 from datetime import datetime, timedelta
 
-from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy.orm.attributes import flag_modified, flag_dirty
 
 from helpers import log, generate_description
 from managers.ContractsManager import ContractManager
@@ -101,12 +101,12 @@ class AlgorithmsManager(Manager):
 
     def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1):
 
-        if mode == 'value':
+        if mode == 'value' or mode == 'category_value':
             offset = 0
         else:
             offset = 1
 
-        if mode == 'value':
+        if mode == 'value' or mode == 'category_value':
             answer = self.medsenger_api.get_records(contract_id, category_name, group=True, offset=offset)
         else:
             if dimension == 'hours':
@@ -261,7 +261,6 @@ class AlgorithmsManager(Manager):
         if action['params'].get('send_report') and descriptions:
             report = '<br><br><strong>События:</strong><ul>' + ''.join(
                 ["<li>{}</li>".format(description) for description in descriptions]) + "</ul>"
-            plain_report = "\n\nСобытия: " + ' / '.join(descriptions)
 
         if action['type'] == 'change_step':
             self.change_step(algorithm, action['params']['target'])
@@ -272,7 +271,7 @@ class AlgorithmsManager(Manager):
             params = deepcopy(action['params'].get('order_params', {}))
 
             if action['params'].get('send_report'):
-                params["message"] = params.get("message", "") + plain_report
+                params["message"] = params.get("message", "") + report
 
             self.medsenger_api.send_order(contract_id, order, agent_id, params)
 
@@ -484,8 +483,11 @@ class AlgorithmsManager(Manager):
                 for action in condition.get('negative_actions', []):
                     self.run_action(action, contract_id, descriptions, algorithm)
         if fired:
-            flag_modified(algorithm, "steps")
-            self.__commit__()
+            try:
+                flag_modified(algorithm, "steps")
+                self.__commit__()
+            except Exception as e:
+                log(e, False)
         return fired
 
     def examine(self, contract, form):
