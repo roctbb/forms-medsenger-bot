@@ -261,6 +261,7 @@ export default {
         },
         select_graph: function () {
             this.loaded = false;
+            window.OBJECT_ID = undefined;
             Event.fire('select-graph')
         },
         get_color: function (point) {

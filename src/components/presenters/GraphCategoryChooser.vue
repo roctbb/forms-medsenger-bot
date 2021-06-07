@@ -39,6 +39,10 @@ export default {
                 {
                     "title": "Обхват голеней",
                     "categories": ['leg_circumference_right', 'leg_circumference_left'],
+                },
+                {
+                    "title": "Глюкоза",
+                    "categories": ['glukose', 'glukose_fasting'],
                 }
             ]
         }
