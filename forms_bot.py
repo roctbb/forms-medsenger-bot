@@ -66,7 +66,7 @@ def init(data):
     print(params)
     if params:
         forms = params.get('forms')
-        exclude_algorithms = params.get('exclude_algorithms', [])
+        exclude_algorithms = params.get('exclude_algorithms', "").split(',')
 
         if forms:
             form_manager.clear(contract)
