@@ -75,7 +75,7 @@ def init(data):
 
             for template_id in forms.split(','):
                 form = form_manager.attach(template_id, contract, params.get('form_timetable_{}'.format(template_id)))
-                if form.algorithm_id and form.algorithm_id not in exclude_algorithms:
+                if form.algorithm_id and str(form.algorithm_id) not in exclude_algorithms:
                     algorithm_manager.attach(form.algorithm_id, contract, params)
 
         algorithms = params.get('algorithms')
@@ -97,7 +97,7 @@ def init(data):
 
                 form = form_manager.attach(form_id, contract, params.get('form_timetable_{}'.format(form_id)))
 
-                if form.algorithm_id and form.algorithm_id not in exclude_algorithms:
+                if form.algorithm_id and str(form.algorithm_id) not in exclude_algorithms:
                     algorithm_manager.attach(form.algorithm_id, contract, params)
             except:
                 pass
