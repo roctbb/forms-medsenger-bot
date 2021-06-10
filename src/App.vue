@@ -23,7 +23,7 @@
                 </div>
 
                 <graph-presenter v-show="state == 'graph-presenter'"/>
-                <heatmap-presenter v-show="state == 'heatmap-presenter'"/>
+                <heatmap-presenter v-show="state.startsWith('heatmap-presenter')" :heatmap_type="state.split('-')[2]"/>
             </div>
 
 
@@ -125,8 +125,8 @@ export default {
         Event.listen('load-graph', (form) => {
             this.state = 'graph-presenter'
         });
-        Event.listen('load-heatmap', (form) => {
-            this.state = 'heatmap-presenter'
+        Event.listen('load-heatmap', (heatmap_type) => {
+            this.state = 'heatmap-presenter-' + heatmap_type
         });
         Event.listen('select-graph', () => {
             this.state = 'graph-category-chooser'

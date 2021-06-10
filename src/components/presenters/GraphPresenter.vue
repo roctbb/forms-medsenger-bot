@@ -2,8 +2,16 @@
     <div>
         <highcharts :constructor-type="'stockChart'" v-if="loaded" :options="options"></highcharts>
 
-        <div class="container">
-            <a class="btn btn-danger" @click="select_graph()">Назад</a>
+        <div class="row">
+            <div class="container col-1" style="margin-left: 15px;">
+                <a class="btn btn-danger" @click="select_graph()">Назад</a>
+            </div>
+
+            <div class="container col">
+                <input type="checkbox" v-model="options.legend.enabled" id="show_legend"/>
+                <label for="show_legend">Показать легенду</label>
+            </div>
+
         </div>
 
     </div>
@@ -39,8 +47,8 @@ export default {
             now.setDate(now.getDate() + 1)
 
             this.options = {
-                colors: ['#058DC7', '#50B432', '#ED561B', '#fcff00',
-                    '#24CBE5', '#64E572', '#FF9655', '#fce200', '#6AF9C4'],
+                colors: ['#058DC7', '#50B432', '#aa27ce', '#fcff00',
+                    '#24CBE5', '#64E572', '#c355ff', '#fce200', '#6AF9C4'],
                 rangeSelector: {
                     allButtonsEnabled: true,
                     buttons: [
@@ -88,7 +96,10 @@ export default {
                     gridLineWidth: 1,
                     plotLines: [],
                     max: +now,
-                    ordinal: false
+                    ordinal: false,
+                    dateTimeLabelFormats: {
+                        day: '%d.%m'
+                    }
                 },
                 zoom: 'x',
                 yAxis: [
@@ -295,6 +306,12 @@ export default {
     },
     computed: {},
     created() {
+        this.options = {
+            legend: {
+                enabled: true
+            }
+        }
+
         Event.listen('load-graph', (group) => {
             this.group = group
             this.load_data()

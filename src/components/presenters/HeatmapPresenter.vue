@@ -2,9 +2,19 @@
     <div>
         <highcharts :constructor-type="'stockChart'" v-if="loaded" :options="options"></highcharts>
 
-        <div class="container">
-            <a class="btn btn-danger" @click="select_graph()">Назад</a>
+        <div class="row">
+            <div class="container col-1" style="margin-left: 15px;">
+                <a class="btn btn-danger" @click="select_graph()">Назад</a>
+            </div>
+
+            <div class="container col">
+                <input type="checkbox" id="show_medicines" v-if="heatmap_type == 'symptoms'"
+                       @change="showMedicines()" v-model="show_medicines"/>
+                <label for="show_medicines" v-if="heatmap_type == 'symptoms'">Показать лекарства</label>
+            </div>
+
         </div>
+
 
     </div>
 
@@ -24,13 +34,15 @@ heatmap(Highcharts);
 export default {
     name: "HeatmapPresenter",
     components: {highcharts: Chart},
-    props: {},
+    props: ['heatmap_type'],
     data() {
         return {
             group: {},
             data: [],
             options: {},
-            loaded: false
+            show_medicines: true,
+            loaded: false,
+            medicines_data: {}
         }
     },
     methods: {
@@ -39,7 +51,7 @@ export default {
         },
         process_load_answer: function (response) {
             this.data = response.data
-            let offset = -1 * new Date().getTimezoneOffset() * 60  * 1000
+            let offset = -1 * new Date().getTimezoneOffset() * 60 * 1000
             var now = new Date()
             now.setHours(0)
             now.setMinutes(0)
@@ -77,7 +89,7 @@ export default {
                     height: window.innerHeight - 70
                 },
                 title: {
-                    text: 'Симптомы и приемы лекарств'
+                    text: this.heatmap_type == 'symptoms' ? 'Симптомы' :'Приемы лекарств'
                 },
                 series: [],
                 xAxis: {
@@ -85,15 +97,14 @@ export default {
                     gridLineWidth: 1,
                     max: +now + offset,
                     ordinal: false,
-                    labels: {
-                        align: 'left',
-                        reserveSpace: true
-                    },
+                    dateTimeLabelFormats: {
+                        day: '%d.%m'
+                    }
                 },
                 zoom: 'x',
                 yAxis: [
                     {
-                        height: '48%',
+                        height: '70%',
                         gridLineWidth: 1,
                         lineWidth: 2,
                         resize: {
@@ -115,16 +126,13 @@ export default {
                             align: 'left',
                             reserveSpace: true
                         },
-                        top: '52%',
-                        height: '48%',
+                        top: this.heatmap_type == 'symptoms' ? '72%': '0%',
+                        height: this.heatmap_type == 'symptoms' ? '28%' : '100%',
                         gridLineWidth: 1,
                         offset: 0,
                         lineWidth: 2
                     }
                 ],
-                legend: {
-                    enabled: true
-                },
                 tooltip: {
                     formatter: function () {
                         let point = this.point;
@@ -135,8 +143,7 @@ export default {
                 },
                 colorAxis: {
                     stops: [
-                        [0, '#50B432'], [0.1, '#fcff00'],
-                        [0.9, '#ed341b'], [1, '#c20000']
+                        [0, '#50B432'], [0.1, '#fcff00'], [1, '#ed341b']
                     ],
                     min: 0,
                     max: 1,
@@ -167,85 +174,89 @@ export default {
                 }
             });
 
-            let symptoms = {}
-
-            this.data.filter((graph) => graph.category.name == 'symptom').forEach((graph) => {
-                graph.values.forEach((symptom) => {
-                    let date = new Date(symptom.timestamp * 1000)
-                    date.setHours(12)
-                    date.setMinutes(0)
-                    date.setSeconds(0)
-                    date.setMilliseconds(0)
-
-                    let s = {
-                        points: [{
-                            time: new Date(symptom.timestamp * 1000),
-                            description: symptom.value,
-                        }],
-                        date: +date + offset,
-                        grade: symptom.params.grade != null ? symptom.params.grade : 0.7,
-                        description: "",
-                        count: 1
-                    }
-
-                    let gr = symptom.params.symptom_group ? symptom.params.symptom_group : symptom.value
-
-                    if (gr in symptoms) {
-                        let old = symptoms[gr].find(ss => ss.date == s.date)
-                        if (old) {
-                            old.count++
-                            old.grade = old.grade > s.grade ? old.grade : s.grade
-                            old.points.push(s.points[0])
-                        } else {
-                            symptoms[gr].push(s)
-                        }
-                    } else {
-                        symptoms[gr] = [s]
-                    }
-                })
-            });
-
             let y = 0;
+            if (this.heatmap_type == 'symptoms') {
+                let symptoms = {}
+                this.data.filter((graph) => graph.category.name == 'symptom').forEach((graph) => {
+                    graph.values.forEach((symptom) => {
+                        let date = new Date(symptom.timestamp * 1000)
+                        date.setHours(12)
+                        date.setMinutes(0)
+                        date.setSeconds(0)
+                        date.setMilliseconds(0)
 
-            Object.entries(symptoms).forEach(([key, value]) => {
-                value.forEach(val => {
-                    val.points.sort((a, b) => {
-                        return a.time < b.time ? -1 : a.time > b.time ? 1 : 0
-                    })
-                    val.points.forEach(p => {
-                        val.description += " • <strong>" + this.formatTime(p.time) + "</strong> - " + p.description + "<br>"
-                    })
-                })
-
-                this.options.series.push({
-                    colsize: 24 * 36e5,
-                    connectNulls: true,
-                    nullColor: '#50B432',
-                    yAxis: 0,
-                    name: key,
-                    borderWidth: 1,
-                    borderColor: "#555555",
-                    data: value.map((val) => {
-                        return {
-                            dataLabels: {
-                                enabled: true,
-                                formatter: function () {
-                                    return val.count
-                                },
-                            },
-                            x: val.date,
-                            y: y,
-                            name: key,
-                            value: val.grade,
-                            comment: val.description,
+                        let s = {
+                            points: [{
+                                time: new Date(symptom.timestamp * 1000),
+                                description: symptom.value,
+                            }],
+                            date: +date + offset,
+                            grade: symptom.params.grade != null ? symptom.params.grade : 0.7,
+                            description: "",
+                            count: 1
                         }
-                    }).reverse()
+
+                        let gr = symptom.params.symptom_group ? symptom.params.symptom_group : symptom.value
+
+                        if (gr in symptoms) {
+                            let old = symptoms[gr].find(ss => ss.date == s.date)
+                            if (old) {
+                                old.count++
+                                old.grade = old.grade > s.grade ? old.grade : s.grade
+                                old.points.push(s.points[0])
+                            } else {
+                                symptoms[gr].push(s)
+                            }
+                        } else {
+                            symptoms[gr] = [s]
+                        }
+                    })
+                });
+
+                Object.entries(symptoms).forEach(([key, value]) => {
+                    value.forEach(val => {
+                        val.points.sort((a, b) => {
+                            return a.time < b.time ? -1 : a.time > b.time ? 1 : 0
+                        })
+                        val.points.forEach(p => {
+                            val.description += " • <strong>" + this.formatTime(p.time) + "</strong> - " + p.description + "<br>"
+                        })
+                    })
+
+                    this.options.series.push({
+                        colsize: 24 * 36e5,
+                        connectNulls: true,
+                        nullColor: '#50B432',
+                        yAxis: 0,
+                        name: key,
+                        borderWidth: 1,
+                        borderColor: "#555555",
+                        data: value.map((val) => {
+                            return {
+                                dataLabels: {
+                                    enabled: true,
+                                    formatter: function () {
+                                        return val.count
+                                    },
+                                },
+                                x: val.date,
+                                y: y,
+                                name: key,
+                                value: val.grade,
+                                comment: val.description,
+                            }
+                        }).reverse()
+                    })
+                    y += 1;
                 })
-                y += 1;
-            })
-            this.options.yAxis[0].categories = Object.keys(symptoms)
+                this.options.yAxis[0].categories = Object.keys(symptoms)
+            }
 
             let medicines = {}
+            this.medicines_data = {
+                series: [],
+                axis: this.options.yAxis[1]
+            }
 
             this.data.filter((graph) => graph.category.name == 'medicine').forEach((graph) => {
                 graph.values.forEach((medicine) => {
@@ -290,9 +301,9 @@ export default {
                     })
                 })
 
-                this.options.series.push({
+                this.medicines_data.series.push({
                     colsize: 24 * 36e5,
-                    yAxis: 1,
+                    yAxis: this.heatmap_type == 'symptoms' ? 1 : 0,
                     name: key,
                     borderWidth: 1,
                     borderColor: "#555555",
@@ -312,9 +323,15 @@ export default {
                         }
                     }).reverse()
                 })
+
                 y += 1;
             })
+            Array.prototype.push.apply(this.options.series, this.medicines_data.series);
             this.options.yAxis[1].categories = Object.keys(medicines)
+
+            if (this.heatmap_type == 'medicines') {
+                this.options.yAxis.splice(0,1)
+            }
 
             this.loaded = true
         },
@@ -324,6 +341,18 @@ export default {
         },
         formatTime: function (date) {
             return date.toTimeString().substr(0, 5)
+        },
+        showMedicines: function () {
+            if (this.show_medicines) {
+                this.medicines_data.series.forEach(s => {this.options.series.push(s)})
+                this.options.yAxis[0].height = "70%"
+                this.options.yAxis[1].title.text = 'Лекарства'
+            } else {
+                let index = this.options.series.length - this.medicines_data.series.length
+                this.options.series.splice(index, this.medicines_data.series.length)
+                this.options.yAxis[0].height = "100%"
+                this.options.yAxis[1].title.text = ''
+            }
         }
     },
     created() {
