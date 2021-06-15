@@ -2,8 +2,16 @@
     <div>
         <highcharts :constructor-type="'stockChart'" v-if="loaded" :options="options"></highcharts>
 
-        <div class="container">
-            <a class="btn btn-danger" @click="select_graph()">Назад</a>
+        <div class="row">
+            <div class="container col-1" style="margin-left: 15px;">
+                <a class="btn btn-danger" @click="select_graph()">Назад</a>
+            </div>
+
+            <div class="container col">
+                <input type="checkbox" v-model="options.legend.enabled" id="show_legend"/>
+                <label for="show_legend">Показать легенду</label>
+            </div>
+
         </div>
 
     </div>
@@ -39,15 +47,16 @@ export default {
             now.setDate(now.getDate() + 1)
 
             this.options = {
-                colors: ['#058DC7', '#50B432', '#ED561B', '#fcff00',
-                    '#24CBE5', '#64E572', '#FF9655', '#fce200', '#6AF9C4'],
+                colors: ['#058DC7', '#50B432', '#aa27ce', '#fcff00',
+                    '#24CBE5', '#64E572', '#c355ff', '#fce200', '#6AF9C4'],
                 rangeSelector: {
                     allButtonsEnabled: true,
-                    buttons: [{
+                    buttons: [
+                        {
                         type: 'day',
                         count: 1,
                         text: 'День',
-                    },{
+                    }, {
                         type: 'day',
                         count: 3,
                         text: '3 дня',
@@ -86,11 +95,15 @@ export default {
                     type: 'datetime',
                     gridLineWidth: 1,
                     plotLines: [],
-                    max: +now + 60 * 60 * 1000,
-                    ordinal: false
+                    max: +now,
+                    ordinal: false,
+                    dateTimeLabelFormats: {
+                        day: '%d.%m'
+                    }
                 },
                 zoom: 'x',
-                yAxis: [{
+                yAxis: [
+                    {
                     labels: {
                         align: 'right',
                         x: -3
@@ -128,7 +141,6 @@ export default {
                     },
                     series: {
                         marker: {
-                            // fillColor: '#FFFFFF',
                             lineWidth: 2,
                             lineColor: null,
                         },
@@ -179,8 +191,8 @@ export default {
                     if (medicine.value in medicines)
                         medicines[medicine.value].push(medicine.timestamp)
                     else
-                        medicines[medicine.value]= [medicine.timestamp]
-                    })
+                        medicines[medicine.value] = [medicine.timestamp]
+                })
             });
 
             Object.entries(medicines).forEach(([key, value]) => {
@@ -204,7 +216,7 @@ export default {
                         symbol: 'square'
                     }
                 })
-                y += 2;
+                y += 3;
             })
 
             this.data.filter((graph) => graph.category.name == 'symptom').forEach((graph) => {
@@ -295,6 +307,12 @@ export default {
     },
     computed: {},
     created() {
+        this.options = {
+            legend: {
+                enabled: true
+            }
+        }
+
         Event.listen('load-graph', (group) => {
             this.group = group
             this.load_data()

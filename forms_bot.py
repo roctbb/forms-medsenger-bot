@@ -401,7 +401,7 @@ def post_medicines(args, form):
         if contract.tasks and 'medicine-{}'.format(data['medicine']) in contract.tasks:
             medsenger_api.finish_task(contract.id, contract.tasks['medicine-{}'.format(data['medicine'])])
 
-        return get_ui('done', contract, [])
+    return get_ui('done', contract, [])
 
 
 with app.app_context():

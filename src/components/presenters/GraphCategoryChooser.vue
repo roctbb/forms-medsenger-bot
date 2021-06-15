@@ -3,16 +3,22 @@
         <h5>Доступные графики</h5>
 
         <div class="row">
-                <card v-for="(category, i) in plottable_categories" :key="i" :image="images.graph"
-                      class="col-lg-3 col-md-4">
-                    <h6>{{ category.title }}</h6>
+            <card v-for="(category, i) in plottable_categories" :key="i" :image="images.graph"
+                  class="col-lg-3 col-md-4">
+                <h6>{{ category.title }}</h6>
 
-                    <a @click="load_graph(category)" href="#" class="btn btn-primary">Открыть</a>
-                </card>
-            </div>
+                <a @click="load_graph(category)" href="#" class="btn btn-primary">Открыть</a>
+            </card>
+            <card :image="images.graph" class="col-lg-3 col-md-4" v-for="(gr,i) in ['symptoms','medicines']" :key="'heatmap-'+i">
+                <h6> {{gr == 'symptoms' ? 'Симптомы' :'Лекарства'}} </h6>
+                <a @click="load_heatmap(gr)" href="#" class="btn btn-primary">Открыть</a>
+            </card>
+        </div>
 
         <div style="margin-top: 15px;" class="alert alert-info" role="alert">
-            <p>В этой разделе можно посмотреть внесенные данные в виде графиков. Числовые данные отображаются в виде кривых, а текстовые (симптомы и лекарства) на линии в нижней части графика. Чтобы посмотреть подробную информацию, наведите мышку на нужную точку графика.</p>
+            <p>В этой разделе можно посмотреть внесенные данные в виде графиков. Числовые данные отображаются в виде кривых, а
+                текстовые (симптомы и лекарства) на линии в нижней части графика. Чтобы посмотреть подробную информацию, наведите
+                мышку на нужную точку графика.</p>
         </div>
 
     </div>
@@ -50,6 +56,9 @@ export default {
     methods: {
         load_graph: function (params) {
             Event.fire('load-graph', params)
+        },
+        load_heatmap: function (data_type) {
+            Event.fire('load-heatmap', data_type)
         }
     },
     computed: {
