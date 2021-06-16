@@ -155,6 +155,12 @@ def actions(data):
 
     return jsonify(actions)
 
+@app.route('/params', methods=['POST'])
+@verify_json
+def params(data):
+    contract = contract_manager.get(data.get('contract_id'))
+    return jsonify(algorithm_manager.search_params(contract))
+
 
 @app.route('/compliance', methods=['POST'])
 @verify_json

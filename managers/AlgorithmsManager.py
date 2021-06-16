@@ -490,6 +490,21 @@ class AlgorithmsManager(Manager):
                 log(e, False)
         return fired
 
+    def search_params(self, contract):
+        params = []
+
+        for algorithm in contract.algorithms:
+            for step in algorithm.steps:
+                for condition in step['conditions']:
+                    for block in condition['criteria']:
+                        for criteria in block:
+                            if criteria.get('ask_value'):
+                                params.append({
+                                    "name": criteria.get('value_name'),
+                                    "value": criteria.get('value')
+                                })
+        return params
+
     def examine(self, contract, form):
         categories = form.categories.split('|')
         patient = contract.patient
