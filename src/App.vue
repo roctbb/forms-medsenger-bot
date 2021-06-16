@@ -22,7 +22,8 @@
                     <load-error v-if="state == 'load-error'"></load-error>
                 </div>
 
-                <graph-presenter v-show="state == 'graph-presenter'" />
+                <graph-presenter v-show="state == 'graph-presenter'"/>
+                <heatmap-presenter v-show="state.startsWith('heatmap-presenter')" :heatmap_type="state.split('-')[2]"/>
             </div>
 
 
@@ -44,12 +45,14 @@ import GraphCategoryChooser from "./components/presenters/GraphCategoryChooser";
 import GraphPresenter from "./components/presenters/GraphPresenter";
 import LoadError from "./components/presenters/LoadError";
 import ConfirmMedicinePresenter from "./components/presenters/ConfirmMedicinePresenter";
+import HeatmapPresenter from "./components/presenters/HeatmapPresenter";
 
 
 
 export default {
     name: 'app',
     components: {
+        HeatmapPresenter,
         ConfirmMedicinePresenter,
         LoadError,
         GraphPresenter,
@@ -121,6 +124,9 @@ export default {
         });
         Event.listen('load-graph', (form) => {
             this.state = 'graph-presenter'
+        });
+        Event.listen('load-heatmap', (heatmap_type) => {
+            this.state = 'heatmap-presenter-' + heatmap_type
         });
         Event.listen('select-graph', () => {
             this.state = 'graph-category-chooser'

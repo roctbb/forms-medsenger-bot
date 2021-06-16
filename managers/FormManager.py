@@ -248,7 +248,7 @@ class FormManager(Manager):
             form.doctor_description = data.get('doctor_description')
             form.patient_description = data.get('patient_description')
             form.thanks_text = data.get('thanks_text')
-            form.show_button = data.get('show_button')
+            form.show_button = bool(data.get('show_button'))
             form.button_title = data.get('button_title')
             form.custom_title = data.get('custom_title')
             form.custom_text = data.get('custom_text')
@@ -257,7 +257,7 @@ class FormManager(Manager):
             form.categories = data.get('categories')
             form.template_id = data.get('template_id')
             form.warning_days = data.get('warning_days')
-            form.instant_report = data.get('instant_report')
+            form.instant_report = bool(data.get('instant_report'))
 
             if data.get('is_template') and contract.is_admin:
                 form.is_template = True

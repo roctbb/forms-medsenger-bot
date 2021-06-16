@@ -66,6 +66,8 @@ def init(data):
     print(params)
     if params:
         forms = params.get('forms')
+        exclude_algorithms = params.get('exclude_algorithms', "").split(',')
+
         if forms:
             form_manager.clear(contract)
             algorithm_manager.clear(contract)
@@ -73,7 +75,7 @@ def init(data):
 
             for template_id in forms.split(','):
                 form = form_manager.attach(template_id, contract, params.get('form_timetable_{}'.format(template_id)))
-                if form.algorithm_id:
+                if form.algorithm_id and str(form.algorithm_id) not in exclude_algorithms:
                     algorithm_manager.attach(form.algorithm_id, contract, params)
 
         algorithms = params.get('algorithms')
@@ -95,7 +97,7 @@ def init(data):
 
                 form = form_manager.attach(form_id, contract, params.get('form_timetable_{}'.format(form_id)))
 
-                if form.algorithm_id:
+                if form.algorithm_id and str(form.algorithm_id) not in exclude_algorithms:
                     algorithm_manager.attach(form.algorithm_id, contract, params)
             except:
                 pass
@@ -405,7 +407,7 @@ def post_medicines(args, form):
         if contract.tasks and 'medicine-{}'.format(data['medicine']) in contract.tasks:
             medsenger_api.finish_task(contract.id, contract.tasks['medicine-{}'.format(data['medicine'])])
 
-        return get_ui('done', contract, [])
+    return get_ui('done', contract, [])
 
 
 with app.app_context():

@@ -12,6 +12,7 @@
   "dependencies": {
     "axios": "^0.21.1",
     "highcharts": "^9.0.1",
+    "highcharts-heatmap": "^0.1.7",
     "highcharts-vue": "^1.3.5",
     "moment": "^2.29.1",
     "uglifyjs-webpack-plugin": "^1.3.0",
