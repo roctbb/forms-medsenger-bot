@@ -509,11 +509,8 @@ class AlgorithmsManager(Manager):
                     for block in condition['criteria']:
                         for criteria in block:
                             if criteria.get('ask_value'):
-                                params.add({
-                                    "name": criteria.get('value_name'),
-                                    "value": criteria.get('value')
-                                })
-        return list(params)
+                                params.add((criteria.get('value_name'),criteria.get('value')))
+        return [{"name": n, "value": v} for n, v in params]
 
     def examine(self, contract, form):
         categories = form.categories.split('|')
