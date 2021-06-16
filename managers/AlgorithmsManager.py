@@ -501,7 +501,7 @@ class AlgorithmsManager(Manager):
         return fired
 
     def search_params(self, contract):
-        params = []
+        params = set()
 
         for algorithm in contract.algorithms:
             for step in algorithm.steps:
@@ -509,11 +509,11 @@ class AlgorithmsManager(Manager):
                     for block in condition['criteria']:
                         for criteria in block:
                             if criteria.get('ask_value'):
-                                params.append({
+                                params.add({
                                     "name": criteria.get('value_name'),
                                     "value": criteria.get('value')
                                 })
-        return params
+        return list(params)
 
     def examine(self, contract, form):
         categories = form.categories.split('|')
