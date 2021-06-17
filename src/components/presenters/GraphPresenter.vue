@@ -1,19 +1,16 @@
 <template>
     <div>
-        <highcharts :constructor-type="'stockChart'" v-if="loaded" :options="options"></highcharts>
-
-        <div class="row">
-            <div class="container col-1" style="margin-left: 15px;">
-                <a class="btn btn-danger" @click="select_graph()">Назад</a>
-            </div>
-
-            <div class="container col">
-                <input type="checkbox" v-model="options.legend.enabled" id="show_legend"/>
-                <label for="show_legend">Показать легенду</label>
-            </div>
-
+        <div class="container">
+            <a class="btn btn-danger" @click="select_graph()">Назад</a>
         </div>
 
+        <div class="container">
+            <input type="checkbox" v-model="options.legend.enabled" id="show_legend"/>
+            <label for="show_legend">Показать легенду</label>
+        </div>
+
+
+        <highcharts :constructor-type="'stockChart'" v-if="loaded" :options="options"></highcharts>
     </div>
 </template>
 
@@ -53,29 +50,29 @@ export default {
                     allButtonsEnabled: true,
                     buttons: [
                         {
-                        type: 'day',
-                        count: 1,
-                        text: 'День',
-                    }, {
-                        type: 'day',
-                        count: 3,
-                        text: '3 дня',
-                    }, {
-                        type: 'week',
-                        count: 1,
-                        text: 'Неделя',
-                    }, {
-                        type: 'week',
-                        count: 2,
-                        text: '2 недели',
-                    }, {
-                        type: 'month',
-                        count: 1,
-                        text: 'Месяц',
-                    }, {
-                        type: 'all',
-                        text: 'Все'
-                    }],
+                            type: 'day',
+                            count: 1,
+                            text: 'День',
+                        }, {
+                            type: 'day',
+                            count: 3,
+                            text: '3 дня',
+                        }, {
+                            type: 'week',
+                            count: 1,
+                            text: 'Неделя',
+                        }, {
+                            type: 'week',
+                            count: 2,
+                            text: '2 недели',
+                        }, {
+                            type: 'month',
+                            count: 1,
+                            text: 'Месяц',
+                        }, {
+                            type: 'all',
+                            text: 'Все'
+                        }],
                     buttonTheme: {
                         width: 60
                     },
@@ -85,7 +82,9 @@ export default {
                 chart: {
                     type: 'line',
                     zoomType: 'x',
-                    height: window.innerHeight - 70
+                    backgroundColor: "#f8f8fb",
+                    height: window.innerHeight,
+                    width: window.innerWidth
                 },
                 title: {
                     text: this.group.title
@@ -104,20 +103,20 @@ export default {
                 zoom: 'x',
                 yAxis: [
                     {
-                    labels: {
-                        align: 'right',
-                        x: -3
+                        labels: {
+                            align: 'right',
+                            x: -3
+                        },
+                        height: '80%',
+                        gridLineWidth: 1,
+                        lineWidth: 2,
+                        resize: {
+                            enabled: true
+                        },
+                        title: {
+                            text: 'Значения'
+                        }
                     },
-                    height: '80%',
-                    gridLineWidth: 1,
-                    lineWidth: 2,
-                    resize: {
-                        enabled: true
-                    },
-                    title: {
-                        text: 'Значения'
-                    }
-                },
                     {
                         labels: {
                             align: 'right',
@@ -216,7 +215,7 @@ export default {
                         symbol: 'square'
                     }
                 })
-                y += 3;
+                y += 4;
             })
 
             this.data.filter((graph) => graph.category.name == 'symptom').forEach((graph) => {
@@ -268,6 +267,11 @@ export default {
                     }
                 })
             })
+
+            let count = this.options.series.length
+            if (count > 5) {
+                this.options.chart.height += count * 5
+            }
 
             this.loaded = true
         },

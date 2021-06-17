@@ -1,20 +1,18 @@
 <template>
     <div>
-        <highcharts :constructor-type="'stockChart'" v-if="loaded" :options="options"></highcharts>
 
-        <div class="row">
-            <div class="container col-1" style="margin-left: 15px;">
+            <div class="container">
                 <a class="btn btn-danger" @click="select_graph()">Назад</a>
             </div>
 
-            <div class="container col">
+            <div class="container">
                 <input type="checkbox" id="show_medicines" v-if="heatmap_type == 'symptoms'"
                        @change="showMedicines()" v-model="show_medicines"/>
                 <label for="show_medicines" v-if="heatmap_type == 'symptoms'">Показать лекарства</label>
             </div>
 
-        </div>
 
+        <highcharts :constructor-type="'stockChart'" v-if="loaded" :options="options"></highcharts>
 
     </div>
 
@@ -86,7 +84,8 @@ export default {
                 chart: {
                     type: 'heatmap',
                     zoomType: 'x',
-                    height: window.innerHeight - 70
+                    backgroundColor: "#f8f8fb",
+                    height: window.innerHeight
                 },
                 title: {
                     text: this.heatmap_type == 'symptoms' ? 'Симптомы' :'Приемы лекарств'
@@ -95,6 +94,9 @@ export default {
                 xAxis: {
                     type: 'datetime',
                     gridLineWidth: 1,
+                    minorGridLineWidth: 2,
+                    minorTickLength: 0,
+                    minorTickInterval: 24 * 3600 * 1000,
                     max: +now + offset,
                     ordinal: false,
                     dateTimeLabelFormats: {
@@ -175,8 +177,8 @@ export default {
             });
 
             let y = 0;
+            let symptoms = {}
             if (this.heatmap_type == 'symptoms') {
-                let symptoms = {}
                 this.data.filter((graph) => graph.category.name == 'symptom').forEach((graph) => {
                     graph.values.forEach((symptom) => {
                         let date = new Date(symptom.timestamp * 1000)
@@ -332,6 +334,18 @@ export default {
             if (this.heatmap_type == 'medicines') {
                 this.options.yAxis.splice(0,1)
             }
+
+            let count = Object.keys(medicines).length + Object.keys(symptoms).length
+            if (count > 20) {
+                this.options.chart.height = count * this.options.chart.height / 20 + 100
+                if (this.heatmap_type == 'symptoms' && this.show_medicines) {
+                    this.options.yAxis[0].height = Math.round(100*Object.keys(symptoms).length/count) + "%"
+                    this.options.yAxis[1].height = (100 - Math.round(100*Object.keys(symptoms).length/count) - 1) + "%"
+                    this.options.yAxis[1].top = Math.round(100*Object.keys(symptoms).length/count) + 1 + "%"
+                }
+            }
+
+
 
             this.loaded = true
         },
