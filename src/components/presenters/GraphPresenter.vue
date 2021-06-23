@@ -81,22 +81,37 @@ export default {
                     selected: 2
                 },
 
+                navigator: {
+                  enabled: !this.narrowScreen
+                },
+
                 chart: {
                     type: 'line',
                     zoomType: 'x',
                     backgroundColor: "#f8f8fb",
                     height: this.height,
-                    width: this.width
+                    width: this.width,
+                    events: {
+                        render: function(event) {
+                            console.log(event.target)
+                            // console.log('min', Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', event.target.axes[0].min))
+                            // console.log('max', Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', event.target.axes[0].max));
+                        }
+                    }
                 },
                 title: {
                     text: this.group.title
                 },
                 series: [],
+                scrollbar: {
+                    step: 1
+                },
                 xAxis: {
                     type: 'datetime',
                     gridLineWidth: 1,
                     plotLines: [],
                     max: +now,
+                    range: 30 * 24 * 3600 * 1000,
                     ordinal: false,
                     dateTimeLabelFormats: {
                         day: '%d.%m'
@@ -184,6 +199,7 @@ export default {
                 }
             });
 
+
             let offset = -1 * new Date().getTimezoneOffset() * 60
             let y = 1;
 
@@ -249,6 +265,7 @@ export default {
             this.data.filter((graph) => graph.category.type != 'string').forEach((graph) => {
                 this.options.series.push({
                     name: graph.category.description,
+                    showInNavigator: true,
                     data: graph.values.map((value) => {
                         return {
                             x: (value.timestamp + offset) * 1000,

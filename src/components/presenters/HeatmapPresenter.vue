@@ -84,6 +84,12 @@ export default {
                     },
                     selected: 1
                 },
+                navigator: {
+                    enabled: !this.narrowScreen
+                },
+                scrollbar: {
+                    step: 1
+                },
                 chart: {
                     type: 'heatmap',
                     zoomType: 'x',
@@ -235,6 +241,7 @@ export default {
                         nullColor: '#50B432',
                         yAxis: 0,
                         name: key,
+                        showInNavigator: true,
                         borderWidth: 1,
                         borderColor: "#555555",
                         data: value.map((val) => {
@@ -312,6 +319,7 @@ export default {
                     name: key,
                     borderWidth: 1,
                     borderColor: "#555555",
+                    showInNavigator: true,
                     data: value.map((val) => {
                         return {
                             dataLabels: {
