@@ -1,21 +1,22 @@
 <template>
-    <div>
+    <div :style="rotation">
+        <br v-if="narrowScreen">
 
-            <div class="container">
-                <a class="btn btn-danger" @click="select_graph()">Назад</a>
-            </div>
+        <div class="container">
+            <a class="btn btn-danger" @click="select_graph()">Назад</a>
+        </div>
 
-            <div class="container">
-                <input type="checkbox" id="show_medicines" v-if="heatmap_type == 'symptoms'"
-                       @change="showMedicines()" v-model="show_medicines"/>
-                <label for="show_medicines" v-if="heatmap_type == 'symptoms'">Показать лекарства</label>
-            </div>
+        <div class="container">
+            <input type="checkbox" id="show_medicines" v-if="heatmap_type == 'symptoms'"
+                   @change="showMedicines()" v-model="show_medicines"/>
+            <label for="show_medicines" v-if="heatmap_type == 'symptoms'">Показать лекарства</label>
+        </div>
 
 
         <highcharts :constructor-type="'stockChart'" v-if="loaded" :options="options"></highcharts>
 
+        <br>
     </div>
-
 </template>
 
 <script>
@@ -40,7 +41,8 @@ export default {
             options: {},
             show_medicines: true,
             loaded: false,
-            medicines_data: {}
+            medicines_data: {},
+            axis_height: "70%"
         }
     },
     methods: {
@@ -49,6 +51,7 @@ export default {
         },
         process_load_answer: function (response) {
             this.data = response.data
+
             let offset = -1 * new Date().getTimezoneOffset() * 60 * 1000
             var now = new Date()
             now.setHours(0)
@@ -85,10 +88,11 @@ export default {
                     type: 'heatmap',
                     zoomType: 'x',
                     backgroundColor: "#f8f8fb",
-                    height: window.innerHeight
+                    height: this.height,
+                    width: this.width
                 },
                 title: {
-                    text: this.heatmap_type == 'symptoms' ? 'Симптомы' :'Приемы лекарств'
+                    text: this.heatmap_type == 'symptoms' ? 'Симптомы' : 'Приемы лекарств'
                 },
                 series: [],
                 xAxis: {
@@ -128,7 +132,7 @@ export default {
                             align: 'left',
                             reserveSpace: true
                         },
-                        top: this.heatmap_type == 'symptoms' ? '72%': '0%',
+                        top: this.heatmap_type == 'symptoms' ? '72%' : '0%',
                         height: this.heatmap_type == 'symptoms' ? '28%' : '100%',
                         gridLineWidth: 1,
                         offset: 0,
@@ -256,8 +260,7 @@ export default {
 
             let medicines = {}
             this.medicines_data = {
-                series: [],
-                axis: this.options.yAxis[1]
+                series: []
             }
 
             this.data.filter((graph) => graph.category.name == 'medicine').forEach((graph) => {
@@ -332,20 +335,23 @@ export default {
             this.options.yAxis[1].categories = Object.keys(medicines)
 
             if (this.heatmap_type == 'medicines') {
-                this.options.yAxis.splice(0,1)
+                this.options.yAxis.splice(0, 1)
             }
 
             let count = Object.keys(medicines).length + Object.keys(symptoms).length
             if (count > 20) {
-                this.options.chart.height = count * this.options.chart.height / 20 + 100
-                if (this.heatmap_type == 'symptoms' && this.show_medicines) {
-                    this.options.yAxis[0].height = Math.round(100*Object.keys(symptoms).length/count) + "%"
-                    this.options.yAxis[1].height = (100 - Math.round(100*Object.keys(symptoms).length/count) - 1) + "%"
-                    this.options.yAxis[1].top = Math.round(100*Object.keys(symptoms).length/count) + 1 + "%"
+                this.options.chart.height = count * 20 + 250
+                if (this.heatmap_type == 'symptoms') {
+                    this.options.yAxis[0].height = 20 * Object.keys(symptoms).length
+                    this.options.yAxis[1].top = 20 * Object.keys(symptoms).length + 100
+                    this.options.yAxis[1].height = 20 * Object.keys(medicines).length
+                    this.axis_height = this.options.yAxis[0].height
                 }
             }
 
-
+            if (this.heatmap_type == 'symptoms' && !this.show_medicines) {
+                this.showMedicines()
+            }
 
             this.loaded = true
         },
@@ -358,8 +364,10 @@ export default {
         },
         showMedicines: function () {
             if (this.show_medicines) {
-                this.medicines_data.series.forEach(s => {this.options.series.push(s)})
-                this.options.yAxis[0].height = "70%"
+                this.medicines_data.series.forEach(s => {
+                    this.options.series.push(s)
+                })
+                this.options.yAxis[0].height = this.axis_height
                 this.options.yAxis[1].title.text = 'Лекарства'
             } else {
                 let index = this.options.series.length - this.medicines_data.series.length
@@ -367,6 +375,25 @@ export default {
                 this.options.yAxis[0].height = "100%"
                 this.options.yAxis[1].title.text = ''
             }
+        }
+    },
+    computed: {
+        rotation() {
+            return this.narrowScreen ? {
+                height: this.width + "px",
+                width: this.width + "px",
+                'transform-origin': '50% 50%',
+                transform: 'rotate(-90deg)'
+            } : {}
+        },
+        width() {
+            return (this.narrowScreen ? (window.innerHeight - 50) : window.innerWidth)
+        },
+        height() {
+            return this.narrowScreen ? (window.innerWidth + Math.round(window.innerWidth/10)) : window.innerHeight
+        },
+        narrowScreen() {
+            return window.innerWidth < window.innerHeight
         }
     },
     created() {

@@ -1,5 +1,7 @@
 <template>
-    <div>
+    <div :style="style">
+        <br v-if="narrowScreen">
+
         <div class="container">
             <a class="btn btn-danger" @click="select_graph()">Назад</a>
         </div>
@@ -9,8 +11,8 @@
             <label for="show_legend">Показать легенду</label>
         </div>
 
-
         <highcharts :constructor-type="'stockChart'" v-if="loaded" :options="options"></highcharts>
+        <br>
     </div>
 </template>
 
@@ -83,8 +85,8 @@ export default {
                     type: 'line',
                     zoomType: 'x',
                     backgroundColor: "#f8f8fb",
-                    height: window.innerHeight,
-                    width: window.innerWidth
+                    height: this.height,
+                    width: this.width
                 },
                 title: {
                     text: this.group.title
@@ -107,7 +109,7 @@ export default {
                             align: 'right',
                             x: -3
                         },
-                        height: '80%',
+                        height: "80%",
                         gridLineWidth: 1,
                         lineWidth: 2,
                         resize: {
@@ -125,8 +127,8 @@ export default {
                         title: {
                             text: 'События'
                         },
-                        top: '85%',
-                        height: '15%',
+                        top: "85%",
+                        height: "15%",
                         gridLineWidth: 1,
                         offset: 0,
                         lineWidth: 2
@@ -147,7 +149,8 @@ export default {
                     }
                 },
                 legend: {
-                    enabled: true
+                    enabled: true,
+                    maxHeight: 100
                 },
                 tooltip: {
                     pointFormatter: function () {
@@ -268,11 +271,6 @@ export default {
                 })
             })
 
-            let count = this.options.series.length
-            if (count > 5) {
-                this.options.chart.height += count * 5
-            }
-
             this.loaded = true
         },
         select_graph: function () {
@@ -308,11 +306,30 @@ export default {
             return comment
         },
     },
-    computed: {},
+    computed: {
+        style() {
+            return this.narrowScreen ? {
+                height: this.width + "px",
+                width: this.width + "px",
+                'transform-origin': '50% 50%',
+                transform: 'rotate(-90deg)'
+            } : {}
+        },
+        width() {
+            return (this.narrowScreen ? (window.innerHeight - 50) : window.innerWidth)
+        },
+        height() {
+            return this.narrowScreen ? (window.innerWidth + Math.round(window.innerWidth/10)) : window.innerHeight
+        },
+        narrowScreen() {
+            return window.innerWidth < window.innerHeight
+        }
+    },
     created() {
         this.options = {
             legend: {
-                enabled: true
+                enabled: true,
+                maxHeight: 100
             }
         }
 
