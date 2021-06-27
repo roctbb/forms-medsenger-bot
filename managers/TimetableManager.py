@@ -33,7 +33,9 @@ class TimetableManager(Manager):
         if timetable['mode'] == 'monthly':
             points = list(filter(lambda x: x['day'] == now.weekday(), points))
         if timetable['mode'] == 'daily':
-            points = list(map(lambda p: datetime(minute=int(p['minute']), hour=int(p['hour']), day=now.day, month=now.month, year=now.year), points))
+            points = list(
+                map(lambda p: datetime(minute=int(p['minute']), hour=int(p['hour']), day=now.day, month=now.month, year=now.year),
+                    points))
         else:
             points = []
 
@@ -63,16 +65,18 @@ class TimetableManager(Manager):
                     tasks = {}
 
                     for form in daily_forms:
-                        task_id = self.medsenger_api.add_task(contract.id, form.title,
-                                                              target_number=len(form.timetable['points']),
-                                                              action_link='form/{}'.format(form.id))['task_id']
-                        tasks.update({'form-{}'.format(form.id): task_id})
+                        task = self.medsenger_api.add_task(contract.id, form.title,
+                                                           target_number=len(form.timetable['points']),
+                                                           action_link='form/{}'.format(form.id))
+                        if task is not None:
+                            tasks.update({'form-{}'.format(form.id): task['task_id']})
 
                     for medicine in daily_medicines:
-                        task_id = self.medsenger_api.add_task(contract.id, medicine.title,
-                                                              target_number=len(medicine.timetable['points']),
-                                                              action_link='medicine/{}'.format(medicine.id))['task_id']
-                        tasks.update({'medicine-{}'.format(medicine.id): task_id})
+                        task = self.medsenger_api.add_task(contract.id, medicine.title,
+                                                           target_number=len(medicine.timetable['points']),
+                                                           action_link='medicine/{}'.format(medicine.id))
+                        if task is not None:
+                            tasks.update({'medicine-{}'.format(medicine.id): task['task_id']})
 
                     contract.tasks = tasks
                     self.__commit__()
