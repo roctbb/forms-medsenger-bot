@@ -6,12 +6,34 @@
             <a class="btn btn-danger" @click="select_graph()">Назад</a>
         </div>
 
+        <highcharts :constructor-type="'stockChart'" v-if="loaded" :options="options"></highcharts>
+
         <div class="container">
             <input type="checkbox" v-model="options.legend.enabled" id="show_legend"/>
             <label for="show_legend">Показать легенду</label>
         </div>
 
-        <highcharts :constructor-type="'stockChart'" v-if="loaded" :options="options"></highcharts>
+        <div class="container center" v-if="this.statistics.length">
+            <h5>Значения за отображенный период</h5>
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th scope="col" class="bg-info text-light">Парметр</th>
+                    <th scope="col" class="bg-info text-light">В среднем</th>
+                    <th scope="col" class="bg-info text-light">Минимум</th>
+                    <th scope="col" class="bg-info text-light">Максимум</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="stat in this.statistics">
+                    <th scope="row">{{ stat.name }}</th>
+                    <td>{{ stat.avg }}</td>
+                    <td>{{ stat.min }}</td>
+                    <td>{{ stat.max }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
         <br>
     </div>
 </template>
@@ -33,7 +55,8 @@ export default {
             group: {},
             data: [],
             options: {},
-            loaded: false
+            statistics: [],
+            loaded: false,
         }
     },
     methods: {
@@ -82,7 +105,7 @@ export default {
                 },
 
                 navigator: {
-                  enabled: !this.narrowScreen
+                    enabled: !this.narrowScreen
                 },
 
                 chart: {
@@ -92,10 +115,59 @@ export default {
                     height: this.height,
                     width: this.width,
                     events: {
-                        render: function(event) {
-                            console.log(event.target)
-                            // console.log('min', Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', event.target.axes[0].min))
-                            // console.log('max', Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', event.target.axes[0].max));
+                        render: function (event) {
+                            Event.fire('clear-table')
+
+                            let isInside = (point) => {
+                                const min = event.target.axes[0].min
+                                const max = event.target.axes[0].max
+                                console.log(min, max)
+                                return point.x >= min && point.x <= max
+                            }
+
+
+                            this.series.filter(series => series.userOptions.yAxis == 0).forEach(series => {
+                                let data = series.data.filter(point => isInside(point)).map(point => point.y);
+
+                                // calculate statistics for visible points
+                                const max = Math.max.apply(null, data)
+                                const min = Math.min.apply(null, data)
+                                const average = (data.reduce((a, b) => a + b, 0) / data.length).toFixed(1)
+
+                                const legendItem = series.legendItem;
+
+                                // construct the legend string
+                                const text = series.name + '<br><strong style="color: dimgrey">min: ' + min +
+                                    ' max: ' + max +
+                                    '<br>avg: ' + average + '</strong>';
+
+                                // set the constructed text for the legend
+                                legendItem.attr({
+                                    text: data.length > 0  ? text : (series.name + '<br><strong style="color: dimgrey">Нет данных</strong>')
+                                });
+                                if (data.length > 0) {
+                                    Event.fire('add-stat', {
+                                        name: series.name,
+                                        avg: average,
+                                        min: min,
+                                        max: max
+                                    })
+                                }
+                            });
+
+                            this.series.filter(series => series.userOptions.yAxis == 1).forEach(series => {
+                                let data = series.data.filter(point => isInside(point));
+
+                                const legendItem = series.legendItem;
+                                // construct the legend string
+                                const text = series.name + '<br><strong style="color: dimgrey">' +
+                                    (data.length > 0  ? ('Количество: ' + data.length) : 'Нет данных')+ '</strong>';
+
+                                // set the constructed text for the legend
+                                legendItem.attr({
+                                    text: text
+                                });
+                            });
                         }
                     }
                 },
@@ -165,7 +237,10 @@ export default {
                 },
                 legend: {
                     enabled: true,
-                    maxHeight: 100
+                    maxHeight: 100,
+                    labelFormatter: function () {
+                        return this.name + '<br>.<br>.'
+                    }
                 },
                 tooltip: {
                     pointFormatter: function () {
@@ -174,9 +249,8 @@ export default {
                             return p.comment
                         }).join('<br>')
                     },
-                    valueSuffix: ' cm',
                     shared: true
-                },
+                }
             }
 
             Highcharts.setOptions({
@@ -199,8 +273,33 @@ export default {
                 }
             });
 
+            this.data.filter((graph) => graph.category.type != 'string').forEach((graph) => {
+                this.options.series.push({
+                    name: graph.category.description,
+                    yAxis: 0,
+                    showInNavigator: true,
+                    data: graph.values.map((value) => {
+                        return {
+                            x: (value.timestamp + this.offset) * 1000,
+                            y: value.value,
+                            comment: this.get_comment(value, graph.category.description),
+                            marker: {
+                                symbol: this.get_symbol(value),
+                                lineColor: this.get_color(value),
+                                radius: this.get_radius(value),
+                            }
+                        }
+                    }).reverse(),
+                    dashStyle: 'ShortDot',
+                    lineWidth: 3,
+                    marker: {
+                        enabled: true,
+                        radius: 4,
+                        symbol: 'circle'
+                    }
+                })
+            })
 
-            let offset = -1 * new Date().getTimezoneOffset() * 60
             let y = 1;
 
             let medicines = {}
@@ -222,7 +321,7 @@ export default {
                             dataLabels: {
                                 enabled: false,
                             },
-                            x: (val + offset) * 1000,
+                            x: (val + this.offset) * 1000,
                             y: y,
                             comment: 'Прием лекарства: ' + key,
                         }
@@ -246,7 +345,7 @@ export default {
                             dataLabels: {
                                 enabled: false,
                             },
-                            x: (value.timestamp + offset) * 1000,
+                            x: (value.timestamp + this.offset) * 1000,
                             y: y,
                             comment: this.get_comment(value, graph.category.description),
                         }
@@ -262,31 +361,6 @@ export default {
                 y += 1;
             });
 
-            this.data.filter((graph) => graph.category.type != 'string').forEach((graph) => {
-                this.options.series.push({
-                    name: graph.category.description,
-                    showInNavigator: true,
-                    data: graph.values.map((value) => {
-                        return {
-                            x: (value.timestamp + offset) * 1000,
-                            y: value.value,
-                            comment: this.get_comment(value, graph.category.description),
-                            marker: {
-                                symbol: this.get_symbol(value),
-                                lineColor: this.get_color(value),
-                                radius: this.get_radius(value),
-                            }
-                        }
-                    }).reverse(),
-                    dashStyle: 'ShortDot',
-                    lineWidth: 3,
-                    marker: {
-                        enabled: true,
-                        radius: 4,
-                        symbol: 'circle'
-                    }
-                })
-            })
 
             this.loaded = true
         },
@@ -336,17 +410,19 @@ export default {
             return (this.narrowScreen ? (window.innerHeight - 50) : window.innerWidth)
         },
         height() {
-            return this.narrowScreen ? (window.innerWidth + Math.round(window.innerWidth/10)) : window.innerHeight
+            return this.narrowScreen ? (window.innerWidth + Math.round(window.innerWidth / 10)) : window.innerHeight
         },
         narrowScreen() {
             return window.innerWidth < window.innerHeight
+        },
+        offset() {
+            return -1 * new Date().getTimezoneOffset() * 60
         }
     },
     created() {
         this.options = {
             legend: {
-                enabled: true,
-                maxHeight: 100
+                enabled: true
             }
         }
 
@@ -354,10 +430,20 @@ export default {
             this.group = group
             this.load_data()
         });
+
+        Event.listen('clear-table',() => {
+            this.statistics = []
+        })
+
+        Event.listen('add-stat', (stat) => {
+            this.statistics.push(stat)
+        })
     }
 }
 </script>
 
 <style scoped>
-
+.table {
+    font-size: small;
+}
 </style>
