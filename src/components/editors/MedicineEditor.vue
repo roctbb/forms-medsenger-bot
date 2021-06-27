@@ -136,7 +136,10 @@ export default {
                 this.medicine.contract_id = response.data.contract_id
             }
 
-            if (is_new) Event.fire('medicine-created', this.medicine)
+            if (is_new) Event.fire('medicine-created', {
+                medicine: this.medicine,
+                close_window: !this.show_button
+            })
             else Event.fire('back-to-dashboard', this.medicine)
 
             this.medicine = undefined

@@ -10,6 +10,7 @@
                     <form-editor v-show="state == 'form-manager'"/>
                     <medicine-editor v-show="state == 'medicine-manager'"/>
                     <algorithm-editor v-show="state == 'algorithm-manager'"/>
+                    <action-done v-if="state == 'done'"></action-done>
                 </div>
             </div>
             <div v-if="mode == 'form' || mode == 'done' || mode == 'graph' || mode == 'confirm-medicine'">
@@ -91,14 +92,15 @@ export default {
             }
 
         });
-        Event.listen('medicine-created', (medicine) => {
+        Event.listen('medicine-created', (data) => {
             this.state = 'dashboard'
-            if (!medicine.is_template) {
+            if (!data.medicine.is_template) {
                 Event.fire('dashboard-to-main');
-                this.patient.medicines.push(medicine)
+                this.patient.medicines.push(data.medicine)
             } else {
-                this.templates.medicines.push(medicine)
+                this.templates.medicines.push(data.medicine)
             }
+            if (data.close_window) this.state = 'done'
         });
         Event.listen('algorithm-created', (algorithm) => {
             this.state = 'dashboard'
