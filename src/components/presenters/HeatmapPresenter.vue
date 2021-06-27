@@ -241,7 +241,6 @@ export default {
                         nullColor: '#50B432',
                         yAxis: 0,
                         name: key,
-                        showInNavigator: true,
                         borderWidth: 1,
                         borderColor: "#555555",
                         data: value.map((val) => {
@@ -319,7 +318,6 @@ export default {
                     name: key,
                     borderWidth: 1,
                     borderColor: "#555555",
-                    showInNavigator: true,
                     data: value.map((val) => {
                         return {
                             dataLabels: {
@@ -347,15 +345,14 @@ export default {
             }
 
             let count = Object.keys(medicines).length + Object.keys(symptoms).length
-            if (count > 20) {
-                this.options.chart.height = count * 20 + 250
-                if (this.heatmap_type == 'symptoms') {
-                    this.options.yAxis[0].height = 20 * Object.keys(symptoms).length
-                    this.options.yAxis[1].top = 20 * Object.keys(symptoms).length + 100
-                    this.options.yAxis[1].height = 20 * Object.keys(medicines).length
-                    this.axis_height = this.options.yAxis[0].height
-                }
+            this.options.chart.height = count * 20 + 250
+            if (this.heatmap_type == 'symptoms') {
+                this.options.yAxis[0].height = 20 * Object.keys(symptoms).length
+                this.options.yAxis[1].top = 20 * Object.keys(symptoms).length + 100
+                this.options.yAxis[1].height = 20 * Object.keys(medicines).length
+                this.axis_height = this.options.yAxis[0].height
             }
+
 
             if (this.heatmap_type == 'symptoms' && !this.show_medicines) {
                 this.showMedicines()
@@ -398,7 +395,7 @@ export default {
             return (this.narrowScreen ? (window.innerHeight - 50) : window.innerWidth)
         },
         height() {
-            return this.narrowScreen ? (window.innerWidth + Math.round(window.innerWidth/10)) : window.innerHeight
+            return this.narrowScreen ? (window.innerWidth + Math.round(window.innerWidth / 10)) : window.innerHeight
         },
         narrowScreen() {
             return window.innerWidth < window.innerHeight
