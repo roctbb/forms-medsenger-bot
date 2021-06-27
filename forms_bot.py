@@ -385,6 +385,13 @@ def post_form(args, form, form_id):
         abort(404)
 
 
+@app.route('/medicine-manager', methods=['GET'])
+@verify_args
+def medicine_editor_page(args, form):
+    contract = contract_manager.get(args.get('contract_id'))
+    return get_ui('medicine-manager', contract, medsenger_api.get_categories())
+
+
 @app.route('/confirm-medicine', methods=['GET'])
 @verify_args
 def medicines_page(args, form):

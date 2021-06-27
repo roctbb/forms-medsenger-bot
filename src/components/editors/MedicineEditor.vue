@@ -31,7 +31,7 @@
             <timetable-editor v-bind:data="medicine.timetable" :timetable_save_clicked="timetable_save_clicked"/>
         </div>
 
-        <button class="btn btn-danger" @click="go_back()">Назад</button>
+        <button v-if="show_button" class="btn btn-danger" @click="go_back()">Назад</button>
         <button class="btn btn-success" @click="save()">Сохранить <span
             v-if="medicine.is_template"> шаблон</span></button>
         <button v-if="!medicine.id && is_admin" class="btn btn-primary" @click="save(true)">Сохранить как
@@ -164,8 +164,13 @@ export default {
             medicine: undefined,
             backup: "",
             save_clicked: false,
-            timetable_save_clicked: [false]
+            timetable_save_clicked: [false],
+            show_button: false
         }
+    },
+    created() {
+        this.medicine = this.create_empty_medicine()
+        this.backup = JSON.stringify(this.medicine)
     },
     mounted() {
         Event.listen('attach-medicine', (medicine) => {
@@ -184,11 +189,13 @@ export default {
         });
 
         Event.listen('navigate-to-create-medicine-page', () => {
+            this.show_button = true
             this.medicine = this.create_empty_medicine()
             this.backup = JSON.stringify(this.medicine)
         });
 
         Event.listen('navigate-to-edit-medicine-page', medicine => {
+            this.show_button = true
             this.medicine = medicine
 
             if (this.medicine.warning_days > 0)

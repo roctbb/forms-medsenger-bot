@@ -3,9 +3,8 @@
         <vue-confirm-dialog></vue-confirm-dialog>
         <loading v-if="state == 'loading'"/>
         <div v-else>
-            <div v-if="mode == 'settings'">
+            <div v-if="mode == 'settings' || mode == 'medicine-manager'">
                 <dashboard-header :patient="patient"/>
-
                 <div class="container" style="margin-top: 15px;">
                     <dashboard :patient="patient" :templates="templates" v-show="state == 'dashboard'"/>
                     <form-editor v-show="state == 'form-manager'"/>
@@ -151,6 +150,9 @@ export default {
             if (this.mode == 'confirm-medicine') {
                 this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
             }
+            if (this.mode == 'medicine-manager') {
+                this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
+            }
             if (this.mode == 'graph') {
                 this.axios.get(this.url('/api/graph/categories')).then(this.process_load_answer);
             }
@@ -169,6 +171,11 @@ export default {
             if (this.mode == 'confirm-medicine') {
                 this.patient = response.data;
                 this.state = 'confirm-medicine'
+            }
+
+            if (this.mode == 'medicine-manager') {
+                this.patient = response.data;
+                Event.fire('navigate-to-create-medicine-page')
             }
 
             if (this.mode == 'graph') {
