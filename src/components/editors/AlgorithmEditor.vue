@@ -32,7 +32,8 @@
                     <input class="form-control form-control-sm" type="number" v-model="step.reset_minutes"/>
                 </form-group48>
 
-                <card v-for="(condition, condition_index) in step.conditions" additional_class="border-primary" :key="condition.uid">
+                <card v-for="(condition, condition_index) in step.conditions" additional_class="border-primary"
+                      :key="condition.uid">
 
                     <form-group48 title="Таймаут (минуты)">
                         <input class="form-control form-control-sm" type="number" v-model="condition.reset_minutes"/>
@@ -42,7 +43,8 @@
 
                     <div v-for="(or_block, i) in condition.criteria">
                         <div v-for="(criteria, j) in or_block">
-                            <criteria class="alert alert-primary" :data="criteria" :rkey="i" :pkey="j" :condition="condition" :key="criteria.uid"/>
+                            <criteria class="alert alert-primary" :data="criteria" :rkey="i" :pkey="j" :condition="condition"
+                                      :key="criteria.uid"/>
                         </div>
                         <p class="text-center">
                             <button class="btn btn-sm btn-default" @click="add_criteria(or_block, i)">и</button>
@@ -55,7 +57,8 @@
 
                     <h6 style="margin-top: 10px;">Действия если условие выполняется</h6>
 
-                    <action class="alert alert-success" v-for="(action, i) in condition.positive_actions" :algorithm="algorithm" :data="action" :pkey="i" :parent="condition.positive_actions"
+                    <action class="alert alert-success" v-for="(action, i) in condition.positive_actions" :algorithm="algorithm"
+                            :data="action" :pkey="i" :parent="condition.positive_actions"
                             :key="action.uid"></action>
                     <p class="text-center">
                         <button class="btn btn-sm btn-default" @click="add_action(condition.positive_actions)">Добавить</button>
@@ -63,7 +66,8 @@
 
                     <h6 style="margin-top: 10px;">Действия если условие не выполняется</h6>
 
-                    <action class="alert alert-danger" v-for="(action, i) in condition.negative_actions" :algorithm="algorithm" :data="action" :pkey="i" :parent="condition.negative_actions"
+                    <action class="alert alert-danger" v-for="(action, i) in condition.negative_actions" :algorithm="algorithm"
+                            :data="action" :pkey="i" :parent="condition.negative_actions"
                             :key="action.uid"></action>
                     <p class="text-center">
                         <button class="btn btn-sm btn-default" @click="add_action(condition.negative_actions)">Добавить</button>
@@ -71,7 +75,8 @@
 
                     <hr>
 
-                    <button class="btn btn-sm btn-danger" @click="remove_condition(step, condition_index)">Удалить условие</button>
+                    <button class="btn btn-sm btn-danger" @click="remove_condition(step, condition_index)">Удалить условие
+                    </button>
                 </card>
 
                 <button class="btn btn-sm btn-primary" @click="add_condition(step)">Добавить условие</button>
@@ -80,7 +85,8 @@
 
                 <h6>Действие по таймауту</h6>
 
-                <action class="alert alert-warning" v-for="(action, i) in step.timeout_actions" :algorithm="algorithm" :data="action" :pkey="i" :parent="step.timeout_actions" :key="action.uid"></action>
+                <action class="alert alert-warning" v-for="(action, i) in step.timeout_actions" :algorithm="algorithm"
+                        :data="action" :pkey="i" :parent="step.timeout_actions" :key="action.uid"></action>
                 <button class="btn btn-sm btn-primary" @click="add_action(step.timeout_actions)">Добавить</button>
 
 
@@ -90,11 +96,15 @@
             <button class="btn btn-sm btn-primary" @click="add_step()">Добавить ступень</button>
 
         </div>
-        <button class="btn btn-danger" @click="go_back()">Назад</button>
-        <button class="btn btn-success" @click="save()">Сохранить <span v-if="algorithm.is_template"> шаблон</span>
-        </button>
-        <button class="btn btn-primary" v-if="!algorithm.id && is_admin" @click="save(true)">Сохранить как шаблон
-        </button>
+        <div style="margin-top: 5px;">
+            <button class="btn btn-danger" @click="go_back()">Назад</button>
+
+            <button class="btn btn-success" @click="save()">Сохранить <span v-if="algorithm.is_template"> шаблон</span>
+            </button>
+            <button class="btn btn-primary" v-if="!algorithm.id && is_admin" @click="save(true)">Сохранить как шаблон
+            </button>
+        </div>
+        <br>
     </div>
 </template>
 
@@ -230,8 +240,7 @@ export default {
                         criteria.category = 'time'
                     }
                 }
-                if (criteria.left_mode == 'init')
-                {
+                if (criteria.left_mode == 'init') {
                     criteria.category = 'init'
                 }
 
@@ -307,11 +316,9 @@ export default {
             }
 
             this.algorithm.steps.forEach(step => {
-                if (step.timeout_actions)
-                {
+                if (step.timeout_actions) {
                     step.timeout_actions = step.timeout_actions.map(prepare_action)
-                }
-                else {
+                } else {
                     step.timeout_actions = []
                 }
 
