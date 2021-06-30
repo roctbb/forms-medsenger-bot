@@ -38,13 +38,15 @@
 
         <div class="col-md-5" v-if="['doctor_message', 'patient_message'].includes(action.type)">
             <textarea class="form-control form-control-sm"
-                      :class="this.save_clicked && !action.params.text ? 'is-invalid' : ''"
+                      :class="action.need_validation && empty(action.params.text) ? 'is-invalid' : ''"
                       v-model="action.params.text"></textarea>
             <small class="text-muted">Текст сообщения</small>
         </div>
 
         <div class="col-md-4" v-if="action.type == 'record'">
-            <select class="form-control form-control-sm" v-model="action.params.category">
+            <select class="form-control form-control-sm"
+                    :class="action.need_validation && empty(action.params.category) ? 'is-invalid' : ''"
+                    v-model="action.params.category">
                 <option
                     v-for="category in category_list"
                     :value="category.name">{{ category.description }}
@@ -55,17 +57,21 @@
 
         <div class="col-md-3" v-if="action.type == 'record'">
             <input type="text" class="form-control form-control-sm"
-                   :class="this.save_clicked && !action.params.value ? 'is-invalid' : ''"
+                   :class="action.need_validation && empty(action.params.value) ? 'is-invalid' : ''"
                    v-model="action.params.value">
             <small class="text-muted">Значение</small>
         </div>
         <div class="col-md-4" v-if="action.type == 'medicine'">
-            <textarea class="form-control form-control-sm" v-model="action.params.medicine_rules"></textarea>
+            <textarea class="form-control form-control-sm"
+                      :class="action.need_validation && empty(action.params.medicine_rules) ? 'is-invalid' : ''"
+                      v-model="action.params.medicine_rules"></textarea>
             <small class="text-muted">Комментарий, доза, количество</small>
         </div>
 
         <div class="col-md-3" v-if="action.type == 'medicine'">
-            <input type="text" class="form-control form-control-sm" v-model="action.params.medicine_name">
+            <input type="text" class="form-control form-control-sm"
+                   :class="action.need_validation && empty(action.params.medicine_name) ? 'is-invalid' : ''"
+                   v-model="action.params.medicine_name">
             <small class="text-muted">Название препарата</small>
         </div>
 
@@ -75,17 +81,22 @@
         </div>
 
         <div class="col-md-2" v-if="['order'].includes(action.type)">
-            <input type="number" v-model="action.params.agent_id">
+            <input type="number"
+                   :class="action.need_validation && empty(action.params.agent_id) ? 'is-invalid' : ''"
+                   v-model="action.params.agent_id">
             <small class="text-muted">ID агента</small>
         </div>
 
         <div class="col-md-2" v-if="['order'].includes(action.type)">
-            <input type="text" v-model="action.params.order">
+            <input type="text"
+                   :class="action.need_validation && empty(action.params.order) ? 'is-invalid' : ''"
+                   v-model="action.params.order">
             <small class="text-muted">order</small>
         </div>
 
         <div class="col-md-5" v-if="['order'].includes(action.type)">
             <textarea class="form-control form-control-sm"
+                      :class="action.need_validation && empty(action.params.order_params) ? 'is-invalid' : ''"
                       v-model="action.params.order_params"></textarea>
             <small class="text-muted">JSON параметры</small>
         </div>
@@ -102,14 +113,14 @@
             <div class="row" v-if="action.params.add_action">
                 <div class="col-md-4">
                     <input type="text" class="form-control form-control-sm"
-                           :class="this.save_clicked && empty(action.params.action_link) ? 'is-invalid' : ''"
+                           :class="action.need_validation && empty(action.params.action_link) ? 'is-invalid' : ''"
                            v-model="action.params.action_link">
                     <small class="text-muted">Имя действия</small>
                 </div>
 
                 <div class="col-md-4">
                     <input type="text" class="form-control form-control-sm"
-                           :class="this.save_clicked && empty(action.params.action_name) ? 'is-invalid' : ''"
+                           :class="action.need_validation && empty(action.params.action_name) ? 'is-invalid' : ''"
                            v-model="action.params.action_name">
                     <small class="text-muted">Текст для кнопки</small>
                 </div>
@@ -123,7 +134,7 @@
             <div class="row" v-if="action.params.add_deadline">
                 <div class="col-md-4">
                     <input type="number" class="form-control form-control-sm"
-                           :class="this.save_clicked && !action.params.action_deadline ? 'is-invalid' : ''"
+                           :class="action.need_validation && empty(action.params.action_deadline) ? 'is-invalid' : ''"
                            v-model="action.params.action_deadline">
                     <small class="text-muted">Время жизни сообщения в часах</small>
                 </div>
@@ -141,7 +152,7 @@ import FormGroup48 from "../../common/FormGroup-4-8";
 export default {
     name: "Action",
     components: {FormGroup48, Card},
-    props: ['data', 'pkey', 'save_clicked', 'parent', 'algorithm'],
+    props: ['data', 'pkey', 'parent', 'algorithm'],
     data() {
         return {
             action: {},
@@ -167,13 +178,11 @@ export default {
     },
     created() {
         this.action = this.data;
-        if (this.data.type)
-        {
+        if (this.data.type) {
             this.mode = this.action.type
         }
 
-        if (this.action.type == 'order' && this.action.params.order_params)
-        {
+        if (this.action.type == 'order' && this.action.params.order_params) {
             this.action.params.order_params = JSON.stringify(this.action.params.order_params)
         }
     }

@@ -1,16 +1,17 @@
 <template>
     <div v-if="algorithm">
-        <error-block :errors="errors"/>
         <div class="form">
             <card title="Описание алгоритма">
                 <form-group48 title="Название">
                     <input class="form-control form-control-sm"
-                           :class="this.save_clicked && !algorithm.title ? 'is-invalid' : ''"
+                           :class="this.algorithm.need_validation && empty(algorithm.title) ? 'is-invalid' : ''"
                            v-model="algorithm.title"/>
                 </form-group48>
 
                 <form-group48 title="Описание">
-                    <textarea class="form-control form-control-sm" v-model="algorithm.description"></textarea>
+                    <textarea class="form-control form-control-sm"
+                              :class="this.algorithm.need_validation && empty(algorithm.description) ? 'is-invalid' : ''"
+                              v-model="algorithm.description"></textarea>
                 </form-group48>
 
                 <form-group48 v-if="is_admin && (empty(algorithm.id) || algorithm.is_template)"
@@ -25,18 +26,24 @@
 
             <card v-for="(step, step_index) in algorithm.steps" :title="step.title" :key="step.uid">
                 <form-group48 title="Название ступени">
-                    <input class="form-control form-control-sm" v-model="step.title"/>
+                    <input class="form-control form-control-sm"
+                           :class="step.need_validation && empty(step.title) ? 'is-invalid' : ''"
+                           v-model="step.title"/>
                 </form-group48>
 
                 <form-group48 title="Таймаут (минуты)">
-                    <input class="form-control form-control-sm" type="number" v-model="step.reset_minutes"/>
+                    <input class="form-control form-control-sm" type="number"
+                           :class="step.need_validation && (empty(step.reset_minutes) || step.reset_minutes < 0) ? 'is-invalid' : ''"
+                           v-model="step.reset_minutes"/>
                 </form-group48>
 
                 <card v-for="(condition, condition_index) in step.conditions" additional_class="border-primary"
                       :key="condition.uid">
 
                     <form-group48 title="Таймаут (минуты)">
-                        <input class="form-control form-control-sm" type="number" v-model="condition.reset_minutes"/>
+                        <input class="form-control form-control-sm" type="number"
+                               :class="condition.need_validation && (empty(condition.reset_minutes) || condition.reset_minutes < 0) ? 'is-invalid' : ''"
+                               v-model="condition.reset_minutes"/>
                     </form-group48>
 
                     <h6>Критерии срабатывания</h6>
@@ -104,6 +111,7 @@
             <button class="btn btn-primary" v-if="!algorithm.id && is_admin" @click="save(true)">Сохранить как шаблон
             </button>
         </div>
+        <error-block :errors="errors"/>
         <br>
     </div>
 </template>
@@ -147,14 +155,14 @@ export default {
         },
         create_empty_algorithm: function () {
             return {
+                need_validation: false,
                 steps: [this.create_step()],
             };
         },
         add_or_block: function (condition) {
             condition.criteria.push([this.create_empty_criteria()])
-            this.criteria_save_clicked.push([false]);
         },
-        add_criteria: function (block, i) {
+        add_criteria: function (block) {
             block.push(this.create_empty_criteria())
         },
         add_condition: function (step) {
@@ -166,6 +174,7 @@ export default {
 
         create_step: function () {
             return {
+                need_validation: false,
                 title: 'ступень',
                 reset_minutes: 60,
                 conditions: [this.create_condition()],
@@ -176,6 +185,7 @@ export default {
 
         create_condition: function () {
             return {
+                need_validation: false,
                 criteria: [[this.create_empty_criteria()]],
                 positive_actions: [this.create_empty_action()],
                 negative_actions: [],
@@ -184,6 +194,7 @@ export default {
         },
         create_empty_criteria: function () {
             return {
+                need_validation: false,
                 category: this.category_list[0].name,
                 left_mode: 'value',
                 right_mode: 'value',
@@ -196,6 +207,7 @@ export default {
         },
         create_empty_action: function () {
             return {
+                need_validation: false,
                 type: 'patient_message',
                 params: {},
                 uid: this.uuidv4()
@@ -205,6 +217,9 @@ export default {
             this.errors = [];
             if (!this.algorithm.title) {
                 this.errors.push('Укажите название алгоритма')
+            }
+            if (!this.algorithm.description) {
+                this.errors.push('Укажите описание алгоритма')
             }
 
             let prepare_criteria = (criteria) => {
@@ -339,26 +354,33 @@ export default {
                 this.errors.push('Проверьте правильность действий.')
             }
 
-            if (this.errors.length != 0) {
-                return false;
-            } else {
-                return true;
-            }
+            return this.errors.length == 0;
         },
-        show_validation: function () {
-            this.save_clicked = true
-            /*
-            for (let i = 0; i < this.actions_save_clicked.length; i++) {
-                this.$set(this.actions_save_clicked, i, true)
-            }
-            for (let i = 0; i < this.criteria_save_clicked.length; i++) {
-                for (let j = 0; j < this.criteria_save_clicked[i].length; j++) {
-                    this.$set(this.criteria_save_clicked[i], j, true)
-                }
-            } */
+        show_validation: function (value) {
+            this.algorithm.need_validation = value
+            this.algorithm.steps.forEach(step => {
+                step.need_validation = value
+                step.conditions.forEach(condition => {
+                    condition.need_validation = value
+                    condition.positive_actions.forEach(action => {
+                        action.need_validation = value
+                    })
+                    condition.negative_actions.forEach(action => {
+                        action.need_validation = value
+                    })
+                    condition.criteria.forEach(or_block => {
+                        or_block.forEach(criteria => {
+                            criteria.need_validation = value
+                        })
+                    })
+                })
+                step.timeout_actions.forEach(action => {
+                    action.need_validation = value
+                })
+            })
         },
         save: function (is_template) {
-            this.show_validation()
+            this.show_validation(true)
             if (this.check()) {
                 this.errors = []
 
@@ -408,10 +430,7 @@ export default {
         return {
             errors: [],
             algorithm: undefined,
-            backup: "",
-            save_clicked: false,
-            actions_save_clicked: [],
-            criteria_save_clicked: []
+            backup: ""
         }
     },
     mounted() {
@@ -453,6 +472,7 @@ export default {
 
         Event.listen('navigate-to-edit-algorithm-page', algorithm => {
             this.algorithm = algorithm
+            this.show_validation(false)
 
             this.backup = JSON.stringify(algorithm)
             this.$forceUpdate()

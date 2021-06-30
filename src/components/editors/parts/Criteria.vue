@@ -19,11 +19,11 @@
                 <div class="col-md-2" v-if="criteria.left_mode != 'value' && !['time', 'init'].includes(criteria.left_mode)">
                     <input class="form-control form-control-sm"
                            v-if="criteria.left_dimension == 'hours'"
-                           :class="this.save_clicked && empty(criteria.left_hours) ? 'is-invalid' : ''"
+                           :class="criteria.need_validation && empty(criteria.left_hours) ? 'is-invalid' : ''"
                            v-model="criteria.left_hours">
                     <input class="form-control form-control-sm"
                            v-if="criteria.left_dimension == 'times'"
-                           :class="this.save_clicked && empty(criteria.left_times) ? 'is-invalid' : ''"
+                           :class="criteria.need_validation && empty(criteria.left_times) ? 'is-invalid' : ''"
                            v-model="criteria.left_times">
                     <select class="form-control form-control-sm" v-model="criteria.left_dimension">
                         <option value="hours">часов</option>
@@ -82,11 +82,11 @@
                      v-if="!['value', 'category_value'].includes(criteria.right_mode) && !['time', 'init'].includes(criteria.left_mode)">
                     <input class="form-control form-control-sm"
                            v-if="criteria.right_dimension == 'hours'"
-                           :class="this.save_clicked && empty(criteria.right_hours) ? 'is-invalid' : ''"
+                           :class="criteria.need_validation && empty(criteria.right_hours) ? 'is-invalid' : ''"
                            v-model="criteria.right_hours">
                     <input class="form-control form-control-sm"
                            v-if="criteria.right_dimension == 'times'"
-                           :class="this.save_clicked && empty(criteria.right_times) ? 'is-invalid' : ''"
+                           :class="criteria.need_validation && empty(criteria.right_hours) ? 'is-invalid' : ''"
                            v-model="criteria.right_times">
                     <select class="form-control form-control-sm" v-model="criteria.right_dimension">
                         <option value="hours">часов</option>
@@ -95,7 +95,7 @@
                 </div>
                 <div class="col-md-1" v-if="!['time', 'init'].includes(criteria.left_mode)">
                     <input class="form-control form-control-sm"
-                           :class="this.save_clicked && empty(criteria.value) ? 'is-invalid' : ''"
+                           :class="criteria.need_validation && empty(criteria.value) ? 'is-invalid' : ''"
                            v-model="criteria.value">
                     <small class="text-muted" v-if="criteria.right_mode == 'value'">значение для сравнения</small>
                     <small class="text-muted" v-else>модификатор</small>
@@ -113,7 +113,7 @@
 
                 <div class="col-md-2" v-if="criteria.left_mode == 'time'">
                     <input class="form-control form-control-sm"
-                           :class="this.save_clicked && empty(criteria.value) ? 'is-invalid' : ''"
+                           :class="criteria.need_validation && empty(criteria.value) ? 'is-invalid' : ''"
                            v-model="criteria.value">
                 </div>
 
@@ -123,7 +123,7 @@
 
                 <div class="col-md-1" v-if="criteria.left_mode == 'time'">
                     <input class="form-control form-control-sm"
-                           :class="this.save_clicked && empty(criteria.right_hours) ? 'is-invalid' : ''"
+                           :class="criteria.need_validation && empty(criteria.right_hours) ? 'is-invalid' : ''"
                            v-model="criteria.right_hours">
                     <small class="text-muted">часов</small>
                 </div>
@@ -143,13 +143,13 @@
                 </div>
                 <div class="col-md-5" v-if="criteria.ask_value">
                     <input class="form-control form-control-sm"
-                           :class="this.save_clicked && empty(criteria.value_name) ? 'is-invalid' : ''"
+                           :class="criteria.need_validation && empty(criteria.value_name) ? 'is-invalid' : ''"
                            v-model="criteria.value_name">
                     <small class="text-muted">Имя поля</small>
                 </div>
                 <div class="col-md-3" v-if="criteria.ask_value">
                     <input class="form-control form-control-sm"
-                           :class="this.save_clicked && empty(criteria.value_code) ? 'is-invalid' : ''"
+                           :class="criteria.need_validation && empty(criteria.value_code) ? 'is-invalid' : ''"
                            v-model="criteria.value_code">
                     <small class="text-muted">Код (для сценариев)</small>
                 </div>
@@ -167,7 +167,7 @@ import FormGroup48 from "../../common/FormGroup-4-8";
 export default {
     name: "Criteria",
     components: {FormGroup48, Card},
-    props: ['data', 'rkey', 'pkey', 'save_clicked', 'condition'],
+    props: ['data', 'rkey', 'pkey', 'condition'],
     data() {
         return {
             mode: 'integer',
