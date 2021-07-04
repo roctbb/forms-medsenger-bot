@@ -75,6 +75,11 @@ export default {
                     allButtonsEnabled: true,
                     buttons: [
                         {
+                            type: 'hour',
+                            count: 1,
+                            text: 'Час',
+                        },
+                        {
                             type: 'day',
                             count: 1,
                             text: 'День',
@@ -101,7 +106,8 @@ export default {
                     buttonTheme: {
                         width: 60
                     },
-                    selected: 2
+                    selected: 3,
+                    inputDateFormat: "%b %e, %Y %H:%M"
                 },
 
                 navigator: {
