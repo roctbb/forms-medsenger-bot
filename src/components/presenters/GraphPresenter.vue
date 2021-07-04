@@ -65,8 +65,7 @@ export default {
         },
         process_load_answer: function (response) {
             this.data = response.data
-            var now = new Date()
-            now.setDate(now.getDate() + 1)
+            let now = +new Date() + this.offset
 
             this.options = {
                 colors: ['#058DC7', '#50B432', '#aa27ce', '#fcff00',
@@ -188,8 +187,7 @@ export default {
                     type: 'datetime',
                     gridLineWidth: 1,
                     plotLines: [],
-                    max: +now,
-                    range: 30 * 24 * 3600 * 1000,
+                    max: now + 1000 * 3600 * 3,
                     ordinal: false,
                     dateTimeLabelFormats: {
                         day: '%d.%m'
@@ -279,12 +277,14 @@ export default {
                 }
             });
 
+            let n = 0; // Количество значений за последние 5 часа
             this.data.filter((graph) => graph.category.type != 'string').forEach((graph) => {
                 this.options.series.push({
                     name: graph.category.description,
                     yAxis: 0,
                     showInNavigator: true,
                     data: graph.values.map((value) => {
+                        if ((value.timestamp + this.offset) * 1000 >= now - 5 * 24 * 3600 * 1000) n++
                         return {
                             x: (value.timestamp + this.offset) * 1000,
                             y: value.value,
@@ -323,6 +323,7 @@ export default {
                     yAxis: 1,
                     name: key,
                     data: value.map((val) => {
+                        if ((value.timestamp + this.offset) * 1000 >= now - 5 * 24 * 3600 * 1000) n++
                         return {
                             dataLabels: {
                                 enabled: false,
@@ -347,6 +348,7 @@ export default {
                     yAxis: 1,
                     name: graph.category.description,
                     data: graph.values.map((value) => {
+                        if ((value.timestamp + this.offset) * 1000 >= now - 5 * 24 * 3600 * 1000) n++
                         return {
                             dataLabels: {
                                 enabled: false,
@@ -367,6 +369,7 @@ export default {
                 y += 1;
             });
 
+            if (n > 5) this.options.rangeSelector.selected = 0
 
             this.loaded = true
         },
