@@ -223,7 +223,7 @@ Vue.mixin({
             },
             images: {
                 form: window.LOCAL_HOST + '/static/images/icons8-fill-in-form-48.png',
-                warning: window.LOCAL_HOST + '/static/images/icons8-error-24.png',
+                warning: window.LOCAL_HOST + '/static/images/icons8-error-18.png',
                 medicine: window.LOCAL_HOST + '/static/images/icons8-pill-96.png',
                 algorithm: window.LOCAL_HOST + '/static/images/icons8-artificial-intelligence-96.png',
                 ok: window.LOCAL_HOST + '/static/images/icons8-ok-128.png',
