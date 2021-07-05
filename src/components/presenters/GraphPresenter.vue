@@ -409,12 +409,13 @@ export default {
     },
     computed: {
         style() {
-            return this.narrowScreen ? {
-                height: this.width + "px",
-                width: this.width + "px",
-                'transform-origin': '50% 50%',
-                transform: 'rotate(-90deg)'
-            } : {}
+            return {}
+            // return this.narrowScreen ? {
+            //     height: this.width + "px",
+            //     width: this.width + "px",
+            //     'transform-origin': '50% 50%',
+            //     transform: 'rotate(-90deg)'
+            // } : {}
         },
         width() {
             return (this.narrowScreen ? (window.innerHeight - 50) : window.innerWidth)
