@@ -409,12 +409,13 @@ export default {
     },
     computed: {
         style() {
-            return this.narrowScreen ? {
-                height: this.width + "px",
-                width: this.width + "px",
-                'transform-origin': '50% 50%',
-                transform: 'rotate(-90deg)'
-            } : {}
+            return {}
+            // return this.narrowScreen ? {
+            //     height: this.width + "px",
+            //     width: this.width + "px",
+            //     'transform-origin': '50% 50%',
+            //     transform: 'rotate(-90deg)'
+            // } : {}
         },
         width() {
             return (this.narrowScreen ? (window.innerHeight - 50) : window.innerWidth)
@@ -423,7 +424,8 @@ export default {
             return this.narrowScreen ? (window.innerWidth + Math.round(window.innerWidth / 10)) : window.innerHeight
         },
         narrowScreen() {
-            return window.innerWidth < window.innerHeight
+            return false;
+            //return window.innerWidth < window.innerHeight
         },
         offset() {
             return -1 * new Date().getTimezoneOffset() * 60
