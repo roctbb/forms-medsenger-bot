@@ -1,6 +1,9 @@
 import time
 import uuid
+from copy import copy, deepcopy
 from datetime import datetime, timedelta
+
+from sqlalchemy.orm.attributes import flag_modified, flag_dirty
 
 from helpers import log, generate_description
 from managers.ContractsManager import ContractManager
@@ -96,22 +99,14 @@ class AlgorithmsManager(Manager):
     def get_templates(self):
         return Algorithm.query.filter_by(is_template=True).all()
 
-    def check_action(self, contract_id, form_id):
-        answer = self.medsenger_api.get_records(contract_id, "action", group=True)
-
-        if not answer or not answer['values']:
-            return False
-
-        return answer['values'][0] == 'Заполнение опросника ID {}'.format(form_id)
-
     def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1):
 
-        if mode == 'value':
+        if mode == 'value' or mode == 'category_value':
             offset = 0
         else:
             offset = 1
 
-        if mode == 'value':
+        if mode == 'value' or mode == 'category_value':
             answer = self.medsenger_api.get_records(contract_id, category_name, group=True, offset=offset)
         else:
             if dimension == 'hours':
@@ -266,8 +261,20 @@ class AlgorithmsManager(Manager):
         if action['params'].get('send_report') and descriptions:
             report = '<br><br><strong>События:</strong><ul>' + ''.join(
                 ["<li>{}</li>".format(description) for description in descriptions]) + "</ul>"
+
         if action['type'] == 'change_step':
             self.change_step(algorithm, action['params']['target'])
+
+        if action['type'] == 'order':
+            order = action['params'].get('order')
+            agent_id = action['params'].get('agent_id')
+            params = deepcopy(action['params'].get('order_params', {}))
+
+            if action['params'].get('send_report'):
+                params["message"] = params.get("message", "") + report
+
+            self.medsenger_api.send_order(contract_id, order, agent_id, params)
+
 
         if action['type'] == 'patient_message':
             if action['params'].get('add_action'):
@@ -406,6 +413,16 @@ class AlgorithmsManager(Manager):
         if not step:
             step = algorithm.current_step
 
+        if not step:
+            if algorithm.initial_step:
+                step = algorithm.initial_step
+                algorithm.current_step = step
+            else:
+                step = algorithm.steps[0]['uid']
+                algorithm.current_step = step
+                algorithm.initial_step = step
+            self.__commit__()
+
         return next(s for s in algorithm.steps if s['uid'] == step)
 
     def change_step(self, algorithm, step):
@@ -441,11 +458,18 @@ class AlgorithmsManager(Manager):
 
     def run(self, algorithm):
         current_step = self.get_step(algorithm)
+        contract_id = algorithm.contract_id
         fired = False
 
         for condition in current_step['conditions']:
             criteria = condition['criteria']
-            contract_id = algorithm.contract_id
+
+            reset_minutes = int(condition.get('reset_minutes', 0))
+            last_fired = int(condition.get('last_fired', 0))
+            if reset_minutes and last_fired:
+                if time.time() - last_fired < reset_minutes * 60:
+                    continue
+
 
             additions = []
             descriptions = []
@@ -464,11 +488,29 @@ class AlgorithmsManager(Manager):
                 fired = True
                 for action in condition.get('positive_actions', []):
                     self.run_action(action, contract_id, descriptions, algorithm)
+                condition['last_fired'] = int(time.time())
             else:
                 for action in condition.get('negative_actions', []):
                     self.run_action(action, contract_id, descriptions, algorithm)
-
+        if fired:
+            try:
+                flag_modified(algorithm, "steps")
+                self.__commit__()
+            except Exception as e:
+                log(e, False)
         return fired
+
+    def search_params(self, contract):
+        params = set()
+
+        for algorithm in contract.algorithms:
+            for step in algorithm.steps:
+                for condition in step['conditions']:
+                    for block in condition['criteria']:
+                        for criteria in block:
+                            if criteria.get('ask_value'):
+                                params.add((criteria.get('value_name'),criteria.get('value')))
+        return [{"name": n, "value": v} for n, v in params]
 
     def examine(self, contract, form):
         categories = form.categories.split('|')
@@ -520,6 +562,7 @@ class AlgorithmsManager(Manager):
             algorithm.categories = data.get('categories')
             algorithm.template_id = data.get('template_id')
             algorithm.initial_step = data.get('steps')[0].get('uid')
+            algorithm.current_step = data.get('steps')[0].get('uid')
 
             if data.get('is_template') and contract.is_admin:
                 algorithm.clinics = data.get('clinics')

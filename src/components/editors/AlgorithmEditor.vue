@@ -33,6 +33,11 @@
                 </form-group48>
 
                 <card v-for="(condition, condition_index) in step.conditions" additional_class="border-primary" :key="condition.uid">
+
+                    <form-group48 title="Таймаут (минуты)">
+                        <input class="form-control form-control-sm" type="number" v-model="condition.reset_minutes"/>
+                    </form-group48>
+
                     <h6>Критерии срабатывания</h6>
 
                     <div v-for="(or_block, i) in condition.criteria">
@@ -282,6 +287,12 @@ export default {
 
                     if (category.type == 'integer') action.params.value = parseInt(action.params.value)
                     if (category.type == 'float') action.params.value = parseFloat(action.params.value)
+                }
+                if (action.type == 'order') {
+                    action.params.agent_id = parseInt(action.params.agent_id)
+                    if (action.params.order_params) {
+                        action.params.order_params = JSON.parse(action.params.order_params);
+                    }
                 }
                 return action;
             }

@@ -11,7 +11,7 @@ db = SQLAlchemy()
 
 class Compliance:
     def current_month_compliance(self, action=None):
-        return self.count_compliance(action, start_date=datetime.today().replace(day=1))
+        return self.count_compliance(action, start_date=datetime.now().replace(day=1, minute=0, hour=0, second=0))
 
     def count_compliance(self, action=None, start_date=None, end_date=None):
         if not action:

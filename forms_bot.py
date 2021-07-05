@@ -66,6 +66,8 @@ def init(data):
     print(params)
     if params:
         forms = params.get('forms')
+        exclude_algorithms = params.get('exclude_algorithms', "").split(',')
+
         if forms:
             form_manager.clear(contract)
             algorithm_manager.clear(contract)
@@ -73,7 +75,7 @@ def init(data):
 
             for template_id in forms.split(','):
                 form = form_manager.attach(template_id, contract, params.get('form_timetable_{}'.format(template_id)))
-                if form.algorithm_id:
+                if form.algorithm_id and str(form.algorithm_id) not in exclude_algorithms:
                     algorithm_manager.attach(form.algorithm_id, contract, params)
 
         algorithms = params.get('algorithms')
@@ -95,7 +97,7 @@ def init(data):
 
                 form = form_manager.attach(form_id, contract, params.get('form_timetable_{}'.format(form_id)))
 
-                if form.algorithm_id:
+                if form.algorithm_id and str(form.algorithm_id) not in exclude_algorithms:
                     algorithm_manager.attach(form.algorithm_id, contract, params)
             except:
                 pass
@@ -155,6 +157,12 @@ def actions(data):
 
     return jsonify(actions)
 
+@app.route('/params', methods=['POST'])
+@verify_json
+def params(data):
+    contract = contract_manager.get(data.get('contract_id'))
+    return jsonify(algorithm_manager.search_params(contract))
+
 
 @app.route('/compliance', methods=['POST'])
 @verify_json
@@ -185,6 +193,12 @@ def form_page(args, form, form_id):
 def graph_page(args, form):
     contract = contract_manager.get(args.get('contract_id'))
     return get_ui('graph', contract)
+
+@app.route('/graph/<category_id>', methods=['GET'])
+@verify_args
+def graph_page_with_args(args, form, category_id):
+    contract = contract_manager.get(args.get('contract_id'))
+    return get_ui('graph', contract, object_id=category_id)
 
 
 @app.route('/medicine/<medicine_id>', methods=['GET'])

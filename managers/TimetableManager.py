@@ -75,7 +75,6 @@ class TimetableManager(Manager):
                         tasks.update({'medicine-{}'.format(medicine.id): task_id})
 
                     contract.tasks = tasks
-                    print(tasks)
                     self.__commit__()
                 except Exception as e:
                     log(e, True)

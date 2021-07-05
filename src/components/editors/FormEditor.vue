@@ -151,8 +151,8 @@ export default {
 
             let prepare_field = (field) => {
                 if (['integer', 'float'].includes(field.type)) {
-                    field.max = parseFloat(field.max)
-                    field.min = parseFloat(field.min)
+                    field.params.max = parseFloat(field.params.max)
+                    field.params.min = parseFloat(field.params.min)
                 }
                 if (field.type == 'radio') {
                     if (field.params.variants) {
