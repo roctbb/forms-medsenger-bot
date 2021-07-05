@@ -424,7 +424,8 @@ export default {
             return this.narrowScreen ? (window.innerWidth + Math.round(window.innerWidth / 10)) : window.innerHeight
         },
         narrowScreen() {
-            return window.innerWidth < window.innerHeight
+            return false;
+            //return window.innerWidth < window.innerHeight
         },
         offset() {
             return -1 * new Date().getTimezoneOffset() * 60
