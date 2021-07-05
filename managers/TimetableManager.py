@@ -15,7 +15,7 @@ class TimetableManager(Manager):
         self.medicine_manager = medicine_manager
         self.form_manager = form_manager
 
-    def should_run(self, object):
+    def should_run(self, object, today=False):
         now = datetime.now()
         timetable = object.timetable
 
@@ -31,11 +31,14 @@ class TimetableManager(Manager):
         if timetable['mode'] == 'weekly':
             points = list(filter(lambda x: x['day'] == now.weekday(), points))
         if timetable['mode'] == 'monthly':
-            points = list(filter(lambda x: x['day'] == now.weekday(), points))
-        if timetable['mode'] == 'daily':
-            points = list(map(lambda p: datetime(minute=int(p['minute']), hour=int(p['hour']), day=now.day, month=now.month, year=now.year), points))
-        else:
-            points = []
+            points = list(filter(lambda x: x['day'] == now.day, points))
+
+        if today:
+            return bool(points)
+
+        points = list(
+            map(lambda p: datetime(minute=int(p['minute']), hour=int(p['hour']), day=now.day, month=now.month, year=now.year),
+                points))
 
         return bool(list(filter(lambda p: p <= now and p > last_sent, points)))
 
@@ -53,8 +56,8 @@ class TimetableManager(Manager):
 
             for contract in contracts:
                 try:
-                    daily_forms = list(filter(lambda f: f.timetable['mode'] == 'daily', contract.forms))
-                    daily_medicines = list(filter(lambda m: m.timetable['mode'] == 'daily', contract.medicines))
+                    daily_forms = list(filter(lambda f: self.should_run(f, True), contract.forms))
+                    daily_medicines = list(filter(lambda m: self.should_run(m, True), contract.medicines))
 
                     if contract.tasks is not None:
                         for task_id in contract.tasks.values():
@@ -63,21 +66,35 @@ class TimetableManager(Manager):
                     tasks = {}
 
                     for form in daily_forms:
-                        task_id = self.medsenger_api.add_task(contract.id, form.title,
-                                                              target_number=len(form.timetable['points']),
-                                                              action_link='form/{}'.format(form.id))['task_id']
-                        tasks.update({'form-{}'.format(form.id): task_id})
+                        task = self.medsenger_api.add_task(contract.id, form.title,
+                                                           target_number=self.count_times(form),
+                                                           action_link='form/{}'.format(form.id))
+                        if task is not None:
+                            tasks.update({'form-{}'.format(form.id): task['task_id']})
 
                     for medicine in daily_medicines:
-                        task_id = self.medsenger_api.add_task(contract.id, medicine.title,
-                                                              target_number=len(medicine.timetable['points']),
-                                                              action_link='medicine/{}'.format(medicine.id))['task_id']
-                        tasks.update({'medicine-{}'.format(medicine.id): task_id})
+                        task = self.medsenger_api.add_task(contract.id, medicine.title,
+                                                           target_number=self.count_times(medicine),
+                                                           action_link='medicine/{}'.format(medicine.id))
+                        if task is not None:
+                            tasks.update({'medicine-{}'.format(medicine.id): task['task_id']})
 
                     contract.tasks = tasks
                     self.__commit__()
                 except Exception as e:
                     log(e, True)
+
+    def count_times(self, obj):
+        now = datetime.now()
+        timetable = obj.timetable
+        points = timetable['points']
+
+        if timetable['mode'] == 'weekly':
+            return len(list(filter(lambda x: x['day'] == now.weekday(), points)))
+        if timetable['mode'] == 'monthly':
+            return len(list(filter(lambda x: x['day'] == now.day, points)))
+
+        return len(points)
 
     def check_hours(self, app):
         with app.app_context():
