@@ -13,9 +13,9 @@
             <label for="show_legend">Показать легенду</label>
         </div>
 
-        <div class="container center" v-if="this.statistics.length">
+        <div class="container center" v-if="this.statistics.length && !this.narrowScreen">
             <h5>Значения за отображенный период</h5>
-            <table class="table table-hover">
+            <table class="table table-hover table-responsive">
                 <thead>
                 <tr>
                     <th scope="col" class="bg-info text-light">Парметр</th>
@@ -418,14 +418,16 @@ export default {
             // } : {}
         },
         width() {
-            return (this.narrowScreen ? (window.innerHeight - 50) : window.innerWidth)
+            return window.innerWidth
+            // return (this.narrowScreen ? (window.innerHeight - 50) : window.innerWidth)
         },
         height() {
-            return this.narrowScreen ? (window.innerWidth + Math.round(window.innerWidth / 10)) : window.innerHeight
+            return window.innerHeight
+            // return this.narrowScreen ? (window.innerWidth + Math.round(window.innerWidth / 10)) : window.innerHeight
         },
         narrowScreen() {
-            return false;
-            //return window.innerWidth < window.innerHeight
+            // return false;
+            return window.innerWidth < window.innerHeight
         },
         offset() {
             return -1 * new Date().getTimezoneOffset() * 60
