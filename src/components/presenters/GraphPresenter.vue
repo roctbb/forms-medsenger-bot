@@ -18,7 +18,7 @@
             <table class="table table-hover table-responsive">
                 <thead>
                 <tr>
-                    <th scope="col" class="bg-info text-light">Парметр</th>
+                    <th scope="col" class="bg-info text-light">Параметр</th>
                     <th scope="col" class="bg-info text-light">В среднем</th>
                     <th scope="col" class="bg-info text-light">Минимум</th>
                     <th scope="col" class="bg-info text-light">Максимум</th>
