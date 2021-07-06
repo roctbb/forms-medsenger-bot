@@ -203,7 +203,7 @@ export default {
                                 description: symptom.value,
                             }],
                             date: +date + offset,
-                            grade: symptom.params.grade != null ? symptom.params.grade : 0.7,
+                            color: symptom.params.color != null ? symptom.params.color : 0.7,
                             description: "",
                             count: 1
                         }
@@ -214,7 +214,7 @@ export default {
                             let old = symptoms[gr].find(ss => ss.date == s.date)
                             if (old) {
                                 old.count++
-                                old.grade = old.grade > s.grade ? old.grade : s.grade
+                                old.color = old.color > s.color ? old.color : s.color
                                 old.points.push(s.points[0])
                             } else {
                                 symptoms[gr].push(s)
@@ -254,7 +254,7 @@ export default {
                                 x: val.date,
                                 y: y,
                                 name: key,
-                                value: val.grade,
+                                value: val.color,
                                 comment: val.description,
                             }
                         }).reverse()
