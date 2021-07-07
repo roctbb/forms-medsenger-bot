@@ -78,6 +78,7 @@ def init(data):
                 form = form_manager.attach(template_id, contract, {
                     "timetable": params.get('form_timetable_{}'.format(template_id)),
                     "message": params.get('form_message_{}'.format(template_id)),
+                    "times": params.get('form_times_{}'.format(template_id)),
                 })
 
                 if form.algorithm_id and str(form.algorithm_id) not in exclude_algorithms:
