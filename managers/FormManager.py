@@ -5,6 +5,7 @@ from datetime import datetime
 from helpers import log
 from managers.Manager import Manager
 from models import Patient, Contract, Form, ActionRequest
+from helpers import generate_timetable
 
 
 class FormManager(Manager):
@@ -45,7 +46,7 @@ class FormManager(Manager):
 
         self.__commit__()
 
-    def attach(self, template_id, contract, custom_timetable=None):
+    def attach(self, template_id, contract, custom_params=dict()):
         form = self.get(template_id)
 
         if form:
@@ -56,9 +57,21 @@ class FormManager(Manager):
             if new_form.categories:
                 self.medsenger_api.add_hooks(contract.id, new_form.categories.split('|'))
 
-            if custom_timetable:
+            if "times" in custom_params and custom_params.get('times'):
                 try:
-                    new_form.timetable = custom_timetable
+                    new_form.timetable = generate_timetable(9, 21, int(custom_params.get('times')))
+                except Exception as e:
+                    log(e, False)
+            else:
+                if "timetable" in custom_params and custom_params.get('timetable'):
+                    try:
+                        new_form.timetable = custom_params.get('timetable')
+                    except Exception as e:
+                        log(e, False)
+
+            if "message" in custom_params and custom_params.get('message'):
+                try:
+                    new_form.custom_text = custom_params.get('message')
                 except Exception as e:
                     log(e, False)
 
@@ -214,7 +227,6 @@ class FormManager(Manager):
             packet.append(('action', 'Заполнение опросника ID {} "{}"'.format(form.template_id, form.title)))
         else:
             packet.append(('action', 'Заполнение опросника ID {} "{}"'.format(form_id, form.title)))
-
 
         params = {
             "form_id": form.id

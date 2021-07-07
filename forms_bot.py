@@ -74,7 +74,12 @@ def init(data):
             medicine_manager.clear(contract)
 
             for template_id in forms.split(','):
-                form = form_manager.attach(template_id, contract, params.get('form_timetable_{}'.format(template_id)))
+
+                form = form_manager.attach(template_id, contract, {
+                    "timetable": params.get('form_timetable_{}'.format(template_id)),
+                    "message": params.get('form_message_{}'.format(template_id)),
+                })
+
                 if form.algorithm_id and str(form.algorithm_id) not in exclude_algorithms:
                     algorithm_manager.attach(form.algorithm_id, contract, params)
 
@@ -95,7 +100,11 @@ def init(data):
             try:
                 form_id = int(custom_form.split('_')[1])
 
-                form = form_manager.attach(form_id, contract, params.get('form_timetable_{}'.format(form_id)))
+                form = form_manager.attach(form_id, contract, {
+                    "timetable": params.get('form_timetable_{}'.format(form_id)),
+                    "message": params.get('form_message_{}'.format(form_id)),
+                    "times": params.get('form_times_{}'.format(form_id)),
+                })
 
                 if form.algorithm_id and str(form.algorithm_id) not in exclude_algorithms:
                     algorithm_manager.attach(form.algorithm_id, contract, params)
@@ -157,6 +166,7 @@ def actions(data):
 
     return jsonify(actions)
 
+
 @app.route('/params', methods=['POST'])
 @verify_json
 def params(data):
@@ -193,6 +203,7 @@ def form_page(args, form, form_id):
 def graph_page(args, form):
     contract = contract_manager.get(args.get('contract_id'))
     return get_ui('graph', contract)
+
 
 @app.route('/graph/<category_id>', methods=['GET'])
 @verify_args
@@ -379,8 +390,8 @@ def post_form(args, form, form_id):
             medsenger_api.finish_task(contract.id, contract.tasks['form-{}'.format(form_id)])
 
         return jsonify({
-                "result": "ok",
-            })
+            "result": "ok",
+        })
     else:
         abort(404)
 

@@ -48,7 +48,7 @@ def only_doctor_args(func):
             abort(422)
         if request.args.get('api_key') != API_KEY:
             abort(401)
-        #if request.args.get('source') == 'patient':
+        # if request.args.get('source') == 'patient':
         #    abort(401)
         try:
             return func(request.args, request.form, *args, **kargs)
@@ -66,7 +66,7 @@ def verify_json(func):
             abort(422)
         if request.json.get('api_key') != API_KEY:
             abort(401)
-        #return func(request.json, *args, **kargs)
+        # return func(request.json, *args, **kargs)
         try:
             return func(request.json, *args, **kargs)
         except Exception as e:
@@ -76,17 +76,22 @@ def verify_json(func):
     wrapper.__name__ = func.__name__
     return wrapper
 
-def get_ui(page, contract, categories='[]', object_id = None):
-    return render_template('index.html', page=page, object_id=object_id, contract_id=contract.id, api_host=MAIN_HOST.replace('8001', '8000'), local_host=LOCALHOST, agent_token=contract.agent_token, agent_id=AGENT_ID, categories=json.dumps(categories), is_admin=str(bool(contract.is_admin)).lower(), lc=dir_last_updated('static'), clinic_id=contract.clinic_id)
+
+def get_ui(page, contract, categories='[]', object_id=None):
+    return render_template('index.html', page=page, object_id=object_id, contract_id=contract.id, api_host=MAIN_HOST.replace('8001', '8000'), local_host=LOCALHOST, agent_token=contract.agent_token,
+                           agent_id=AGENT_ID, categories=json.dumps(categories), is_admin=str(bool(contract.is_admin)).lower(), lc=dir_last_updated('static'), clinic_id=contract.clinic_id)
+
 
 def delayed(delay, f, args):
     timer = threading.Timer(delay, f, args=args)
     timer.start()
 
+
 def dir_last_updated(folder):
     return str(max(os.path.getmtime(os.path.join(root_path, f))
                    for root_path, dirs, files in os.walk(folder)
                    for f in files))
+
 
 def generate_description(criteria, l_value, r_value, category_names, current_answer):
     if criteria.get('left_mode') == 'value' and criteria.get('right_mode') == 'value' and criteria.get('sign') in ['equal', 'contains'] and current_answer:
@@ -116,18 +121,17 @@ def generate_description(criteria, l_value, r_value, category_names, current_ans
     }
 
     right_modes = {
-         "sum": "сумме",
-         "difference": "разности крайних значений",
-         "delta": "разбросу",
-         "average": "среднему значению",
-         "max": "максимальному значению",
-         "min": "минимальному значению"
+        "sum": "сумме",
+        "difference": "разности крайних значений",
+        "delta": "разбросу",
+        "average": "среднему значению",
+        "max": "максимальному значению",
+        "min": "минимальному значению"
     }
 
     LEFT_MODE = left_modes.get(criteria.get('left_mode'))
     LEFT_CATEGORY = category_names.get(criteria.get('category'))
     SIGN = signs[criteria.get('sign')]
-
 
     if criteria.get('sign') not in ['equal', 'contains'] or criteria.get('left_mode') != 'value':
         comment = "{} '{}' (<strong>{}</strong>) {} ".format(LEFT_MODE, LEFT_CATEGORY, l_value, SIGN)
@@ -144,8 +148,35 @@ def generate_description(criteria, l_value, r_value, category_names, current_ans
 
     return comment
 
+
 def get_step(algorithm, step=None):
     if not step:
         step = algorithm.current_step
 
     return next(s for s in algorithm.steps if s['uid'] == step)
+
+
+def generate_timetable(start, end, times):
+    timetable = {
+        "mode": "daily",
+        "points": []
+    }
+
+    try:
+        step = (end - start) / (times - 1)
+
+        pos = start
+        while pos <= end:
+            timetable['points'].append({
+                "hour": int(pos),
+                "minute": int((pos - int(pos)) * 60)
+            })
+
+            pos += step
+    except:
+        timetable['points'].append({
+            "hour": start,
+            "minute": 0
+        })
+
+    return timetable
