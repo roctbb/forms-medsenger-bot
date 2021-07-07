@@ -112,6 +112,8 @@ class MedicineManager(Manager):
 
         result = self.medsenger_api.send_message(medicine.contract_id, text, action, action_name, True, False, True,
                                                  deadline)
+        # telepat speaker
+        self.medsenger_api.send_order(medicine.contract_id, "medicine", 26, medicine.as_dict())
 
         if result:
             medicine.last_sent = datetime.now()

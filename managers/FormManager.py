@@ -113,6 +113,8 @@ class FormManager(Manager):
             deadline = None
 
         result = self.medsenger_api.send_message(contract_id, text, action, action_name, True, False, True, deadline)
+        # telepat speaker
+        self.medsenger_api.send_order(contract_id, "form", 26, form.as_dict())
 
         if result:
             form.last_sent = datetime.now()
