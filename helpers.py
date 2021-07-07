@@ -157,6 +157,12 @@ def get_step(algorithm, step=None):
 
 
 def generate_timetable(start, end, times):
+
+    if times < 1:
+        return {
+            "mode": "manual"
+        }
+
     timetable = {
         "mode": "daily",
         "points": []
