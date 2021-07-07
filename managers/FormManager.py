@@ -71,7 +71,7 @@ class FormManager(Manager):
 
             if "message" in custom_params and custom_params.get('message'):
                 try:
-                    new_form.custom_text = custom_params.get('message')
+                    new_form.custom_text = new_form.custom_text + "\n\n" + custom_params.get('message')
                 except Exception as e:
                     log(e, False)
 
