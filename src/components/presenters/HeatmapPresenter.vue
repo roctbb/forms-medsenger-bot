@@ -1,7 +1,5 @@
 <template>
-    <div :style="rotation">
-        <br v-if="narrowScreen">
-
+    <div>
         <div class="container">
             <a class="btn btn-danger" @click="select_graph()">Назад</a>
         </div>
@@ -84,9 +82,6 @@ export default {
                     },
                     selected: 1
                 },
-                navigator: {
-                    enabled: !this.narrowScreen
-                },
                 scrollbar: {
                     step: 1
                 },
@@ -94,8 +89,8 @@ export default {
                     type: 'heatmap',
                     zoomType: 'x',
                     backgroundColor: "#f8f8fb",
-                    height: this.height,
-                    width: this.width
+                    height: 0,
+                    width: window.innerWidth
                 },
                 title: {
                     text: this.heatmap_type == 'symptoms' ? 'Симптомы' : 'Приемы лекарств'
@@ -138,8 +133,8 @@ export default {
                             align: 'left',
                             reserveSpace: true
                         },
-                        top: this.heatmap_type == 'symptoms' ? '72%' : '0%',
-                        height: this.heatmap_type == 'symptoms' ? '28%' : '100%',
+                        top: '0%',
+                        height: '100%',
                         gridLineWidth: 1,
                         offset: 0,
                         lineWidth: 2
@@ -382,30 +377,16 @@ export default {
             }
         }
     },
-    computed: {
-        rotation() {
-            return this.narrowScreen ? {
-                height: this.width + "px",
-                width: this.width + "px",
-                'transform-origin': '50% 50%',
-                transform: 'rotate(-90deg)'
-            } : {}
-        },
-        width() {
-            return (this.narrowScreen ? (window.innerHeight - 50) : window.innerWidth)
-        },
-        height() {
-            return this.narrowScreen ? (window.innerWidth + Math.round(window.innerWidth / 10)) : window.innerHeight
-        },
-        narrowScreen() {
-            return window.innerWidth < window.innerHeight
-        }
-    },
     created() {
         Event.listen('load-heatmap', (group) => {
             this.group = {"categories": []}
             this.load_data()
         });
+
+        Event.listen('window-resized', () => {
+            if (this.options)
+                this.options.chart.width = window.innerWidth
+        })
     }
 }
 </script>

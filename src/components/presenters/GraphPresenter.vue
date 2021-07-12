@@ -429,8 +429,10 @@ export default {
         })
 
         Event.listen('window-resized', () => {
-            this.options.chart.height = window.innerHeight
-            this.options.chart.width = window.innerWidth
+            if (this.options) {
+                this.options.chart.height = window.innerHeight
+                this.options.chart.width = window.innerWidth
+            }
         })
     }
 }
