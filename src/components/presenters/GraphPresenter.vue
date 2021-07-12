@@ -1,7 +1,5 @@
 <template>
-    <div :style="style">
-        <br v-if="narrowScreen">
-
+    <div>
         <div class="container">
             <a class="btn btn-danger" @click="select_graph()">Назад</a>
         </div>
@@ -13,12 +11,12 @@
             <label for="show_legend">Показать легенду</label>
         </div>
 
-        <div class="container center" v-if="this.statistics.length && !this.narrowScreen">
+        <div class="container center" v-if="this.statistics.length && this.show_table()">
             <h5>Значения за отображенный период</h5>
-            <table class="table table-hover table-responsive">
+            <table class="table table-hover">
                 <thead>
                 <tr>
-                    <th scope="col" class="bg-info text-light">Парметр</th>
+                    <th scope="col" class="bg-info text-light">Параметр</th>
                     <th scope="col" class="bg-info text-light">В среднем</th>
                     <th scope="col" class="bg-info text-light">Минимум</th>
                     <th scope="col" class="bg-info text-light">Максимум</th>
@@ -60,6 +58,9 @@ export default {
         }
     },
     methods: {
+        show_table: function () {
+            return window.innerWidth >= window.innerHeight
+        },
         load_data: function () {
             this.axios.post(this.url('/api/graph/group'), this.group).then(this.process_load_answer);
         },
@@ -109,16 +110,12 @@ export default {
                     inputDateFormat: "%b %e, %Y %H:%M"
                 },
 
-                navigator: {
-                    enabled: !this.narrowScreen
-                },
-
                 chart: {
                     type: 'line',
                     zoomType: 'x',
                     backgroundColor: "#f8f8fb",
-                    height: this.height,
-                    width: this.width,
+                    height: window.innerHeight,
+                    width: window.innerWidth,
                     events: {
                         render: function (event) {
                             Event.fire('clear-table')
@@ -126,7 +123,6 @@ export default {
                             let isInside = (point) => {
                                 const min = event.target.axes[0].min
                                 const max = event.target.axes[0].max
-                                console.log(min, max)
                                 return point.x >= min && point.x <= max
                             }
 
@@ -408,27 +404,6 @@ export default {
         },
     },
     computed: {
-        style() {
-            return {}
-            // return this.narrowScreen ? {
-            //     height: this.width + "px",
-            //     width: this.width + "px",
-            //     'transform-origin': '50% 50%',
-            //     transform: 'rotate(-90deg)'
-            // } : {}
-        },
-        width() {
-            return window.innerWidth
-            // return (this.narrowScreen ? (window.innerHeight - 50) : window.innerWidth)
-        },
-        height() {
-            return window.innerHeight
-            // return this.narrowScreen ? (window.innerWidth + Math.round(window.innerWidth / 10)) : window.innerHeight
-        },
-        narrowScreen() {
-            // return false;
-            return window.innerWidth < window.innerHeight
-        },
         offset() {
             return -1 * new Date().getTimezoneOffset() * 60
         }
@@ -451,6 +426,11 @@ export default {
 
         Event.listen('add-stat', (stat) => {
             this.statistics.push(stat)
+        })
+
+        Event.listen('window-resized', () => {
+            this.options.chart.height = window.innerHeight
+            this.options.chart.width = window.innerWidth
         })
     }
 }
