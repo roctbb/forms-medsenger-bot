@@ -107,7 +107,13 @@ def generate_description(criteria, l_value, r_value, category_names, current_ans
         "less": "меньше",
         "greater_or_equal": "больше или равно",
         "less_or_equal": "меньше или равно",
-        "contains": "содержит"
+        "contains": "содержит",
+        "date_equal": "равно",
+        "date_not_equal": "не равно",
+        "date_greater": "больше",
+        "date_less": "меньше",
+        "date_greater_or_equal": "больше или равно",
+        "date_less_or_equal": "меньше или равно",
     }
 
     left_modes = {
@@ -138,7 +144,7 @@ def generate_description(criteria, l_value, r_value, category_names, current_ans
     else:
         comment = "{} '{}' {} ".format(LEFT_MODE, LEFT_CATEGORY, SIGN)
 
-    if criteria.get('right_mode') == 'value':
+    if criteria.get('right_mode') in ['value', 'category_value']:
         comment += "<strong>{}</strong>".format(criteria.get('value'))
     else:
         comment += "{} за {} часа (ов) (<strong>{}</strong>)".format(right_modes[criteria.get('right_mode')], criteria.get('right_hours'), r_value)

@@ -100,6 +100,8 @@ class AlgorithmsManager(Manager):
         return Algorithm.query.filter_by(is_template=True).all()
 
     def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1):
+        if category_name == "exact_time":
+            return [datetime.now().strftime("%Y-%m-%d")], None
 
         if mode == 'value' or mode == 'category_value':
             offset = 0
@@ -127,7 +129,7 @@ class AlgorithmsManager(Manager):
             return None, None
         if mode == 'value' and time.time() - int(answer['values'][0].get('timestamp')) > 10:
             return None, None
-        if mode == 'value':
+        if mode == 'value' or mode == 'category_value':
             return values, objects
         if mode == 'sum':
             return [sum(values)], None
@@ -145,25 +147,34 @@ class AlgorithmsManager(Manager):
         return None, None
 
     def check_values(self, left, right, sign, modifier=0):
+
         try:
             modifier = float(modifier)
         except:
             modifier = 0
 
+        if "date_" in sign:
+            left = datetime.strptime(left, '%Y-%m-%d').date()
+            right = (datetime.strptime(right, '%Y-%m-%d') + timedelta(days=modifier)).date()
+            sign = sign.lstrip('date_')
+        else:
+            right = right + modifier
+
         if sign == 'greater':
-            return left > right + modifier
+            return left > right
         if sign == 'less':
             return left < right + modifier
         if sign == 'greater_or_equal':
-            return left >= right + modifier
+            return left >= right
         if sign == 'less_or_equal':
-            return left <= right + modifier
+            return left <= right
         if sign == 'equal':
             return left == right
         if sign == 'not_equal':
             return left != right
         if sign == 'contains':
             return right in left
+
 
         return False
 

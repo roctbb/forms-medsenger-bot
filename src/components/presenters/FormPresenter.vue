@@ -31,6 +31,12 @@
                     <label class="form-check-label" :for="'radio_' + i + '_' + j">{{ variant.text }}</label>
                 </div>
             </div>
+
+            <div v-if="field.type == 'date'">
+                <date-picker :required="field.required" v-model="answers[field.uid]" value-type="YYYY-MM-DD"></date-picker>
+            </div>
+
+
         </form-group48>
 
         <button @click="save()" class="btn btn-success" :disabled="submitted">Отправить ответ</button>
@@ -43,10 +49,13 @@
 import FormGroup48 from "../common/FormGroup-4-8";
 import ErrorBlock from "../common/ErrorBlock";
 import ActionDone from "./ActionDone";
+import DatePicker from 'vue2-datepicker';
+import 'vue2-datepicker/index.css';
+import 'vue2-datepicker/locale/ru';
 
 export default {
     name: "FormPresenter",
-    components: {ActionDone, FormGroup48, ErrorBlock},
+    components: {ActionDone, FormGroup48, ErrorBlock, DatePicker},
     props: {
         data: {
             required: false,

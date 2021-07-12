@@ -4,6 +4,7 @@ import axios from "axios";
 import VueConfirmDialog from 'vue-confirm-dialog'
 import vmodal from 'vue-js-modal'
 
+
 window.Event = new class {
     constructor() {
         this.vue = new Vue();
@@ -216,6 +217,7 @@ Vue.mixin({
                 checkbox: "Галочка",
                 radio: "Выбор варианта",
                 scale: "Шкала",
+                date: "Дата",
             },
             current_contract_id: window.CONTRACT_ID,
             weekdays: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
@@ -226,7 +228,8 @@ Vue.mixin({
                 float: ['float'],
                 textarea: ['string'],
                 text: ['string'],
-                checkbox: ['string']
+                checkbox: ['string'],
+                date: ['date']
             },
             images: {
                 form: window.LOCAL_HOST + '/static/images/icons8-fill-in-form-48.png',

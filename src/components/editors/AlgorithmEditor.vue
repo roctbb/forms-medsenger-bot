@@ -372,8 +372,8 @@ export default {
                 this.algorithm.contract_id = response.data.contract_id
             }
 
-            if (is_new) Event.fire('algorithm-created', this.algorithm)
-            else Event.fire('back-to-dashboard', this.algorithm)
+            if (is_new) Event.fire('algorithm-created', response.data)
+            else Event.fire('back-to-dashboard', response.data)
 
             this.algorithm = undefined
         },
