@@ -216,6 +216,10 @@ export default {
         },
         add_common_condition: function (algorithm)
         {
+            if (!algorithm.common_conditions)
+            {
+                algorithm.common_conditions = [];
+            }
             algorithm.common_conditions.push(this.create_condition());
         },
         add_condition: function (step, type) {
