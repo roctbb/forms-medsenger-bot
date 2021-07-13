@@ -18,7 +18,7 @@
 
                 <!-- not time -->
 
-                <div class="col-md-2" v-if="!['value', 'category_value'].includes(criteria.left_mode) && !['time', 'init'].includes(criteria.left_mode)">
+                <div class="col-md-2" v-if="!['value', 'category_value'].includes(criteria.left_mode) && !['time', 'init', 'step_init'].includes(criteria.left_mode)">
                     <input class="form-control form-control-sm"
                            v-if="criteria.left_dimension == 'hours'"
                            :class="this.save_clicked && empty(criteria.left_hours) ? 'is-invalid' : ''"
@@ -32,7 +32,7 @@
                         <option value="times">раз</option>
                     </select>
                 </div>
-                <div class="col-md-3" v-if="!['time', 'init'].includes(criteria.left_mode)">
+                <div class="col-md-3" v-if="!['time', 'init', 'step_init'].includes(criteria.left_mode)">
                     <select @change="category_changed()" class="form-control form-control-sm"
                             v-model="criteria.category">
                         <optgroup label="Авто">
@@ -47,7 +47,7 @@
                     </select>
                     <small class="text-muted">Код категории</small>
                 </div>
-                <div class="col-md-1" v-if="!['time', 'init'].includes(criteria.left_mode)">
+                <div class="col-md-1" v-if="!['time', 'init', 'step_init'].includes(criteria.left_mode)">
                     <select class="form-control form-control-sm" v-model="criteria.sign">
                         <option value="equal" v-if="!is_date()">=</option>
                         <option value="contains" v-if="!is_int() && !is_date()">содержит</option>
@@ -66,7 +66,7 @@
                     </select>
                 </div>
 
-                <div class="col-md-2" v-if="!['time', 'init'].includes(criteria.left_mode)">
+                <div class="col-md-2" v-if="!['time', 'init', 'step_init'].includes(criteria.left_mode)">
                     <select class="form-control form-control-sm" v-model="criteria.right_mode">
                         <option value="value">фиксированное значение</option>
                         <option value="category_value">значение</option>
@@ -76,7 +76,7 @@
                     </select>
                 </div>
 
-                <div class="col-md-2" v-if="criteria.right_mode != 'value' && !['time', 'init'].includes(criteria.left_mode)">
+                <div class="col-md-2" v-if="criteria.right_mode != 'value' && !['time', 'init', 'step_init'].includes(criteria.left_mode)">
                     <select class="form-control form-control-sm"
                             v-model="criteria.right_category">
                         <optgroup
@@ -91,7 +91,7 @@
                 </div>
 
                 <div class="col-md-2"
-                     v-if="!['value', 'category_value'].includes(criteria.right_mode) && !['time', 'init'].includes(criteria.left_mode)">
+                     v-if="!['value', 'category_value'].includes(criteria.right_mode) && !['time', 'init', 'step_init'].includes(criteria.left_mode)">
                     <input class="form-control form-control-sm"
                            v-if="criteria.right_dimension == 'hours'"
                            :class="this.save_clicked && empty(criteria.right_hours) ? 'is-invalid' : ''"
@@ -105,7 +105,7 @@
                         <option value="times">раз</option>
                     </select>
                 </div>
-                <div class="col-md-1" v-if="!['time', 'init'].includes(criteria.left_mode)">
+                <div class="col-md-1" v-if="!['time', 'init', 'step_init'].includes(criteria.left_mode)">
 
                     <input v-if="category.type != 'date' || criteria.right_mode != 'value'" class="form-control form-control-sm"
                            :class="this.save_clicked && empty(criteria.value) ? 'is-invalid' : ''"
