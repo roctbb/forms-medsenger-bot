@@ -258,6 +258,7 @@ class Algorithm(db.Model):
 
     # actual
     steps = db.Column(db.JSON, nullable=True)
+    common_conditions = db.Column(db.JSON, nullable=True)
     initial_step = db.Column(db.String(128), nullable=True)
     current_step = db.Column(db.String(128), nullable=True)
     timeout_at = db.Column(db.Integer, server_default="0")
@@ -278,6 +279,7 @@ class Algorithm(db.Model):
             "title": self.title,
             "description": self.description,
             "steps": self.steps,
+            "common_conditions": self.common_conditions,
             "categories": self.categories,
             "is_template": self.is_template,
             "template_id": self.template_id,
@@ -291,6 +293,7 @@ class Algorithm(db.Model):
         new_algorithm.title = self.title
         new_algorithm.description = self.description
         new_algorithm.steps = self.steps
+        new_algorithm.common_conditions = self.common_conditions
         new_algorithm.categories = self.categories
         new_algorithm.attached_form = self.attached_form
         new_algorithm.initial_step = self.initial_step

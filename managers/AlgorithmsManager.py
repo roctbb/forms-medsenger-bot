@@ -480,8 +480,8 @@ class AlgorithmsManager(Manager):
         fired = False
 
         additional_conditions = []
-        if current_step.get('common_conditions'):
-            additional_conditions = current_step.get('common_conditions')
+        if algorithm.common_conditions:
+            additional_conditions = algorithm.common_conditions
 
         for condition in additional_conditions + current_step['conditions']:
             criteria = condition['criteria']
