@@ -73,7 +73,7 @@ class AlgorithmsManager(Manager):
             self.__commit__()
             self.db.session.refresh(new_algorithm)
 
-            self.check_inits(new_algorithm)
+            self.check_inits(new_algorithm, contract)
 
             return True
         else:
@@ -555,13 +555,13 @@ class AlgorithmsManager(Manager):
 
         return True
 
-    def check_inits(self, algorithm):
+    def check_inits(self, algorithm, contract):
         if 'init' in algorithm.categories.split('|') and algorithm.contract_id:
             for step in algorithm.steps:
                 for condition in step['conditions']:
                     if any(any(criteria['category'] == 'init' for criteria in block) for block in condition['criteria']):
                         for action in condition['positive_actions']:
-                            self.run_action(action, algorithm.contract.id, [], algorithm)
+                            self.run_action(action, contract.id, [], algorithm)
 
     def create_or_edit(self, data, contract):
         try:
@@ -593,7 +593,7 @@ class AlgorithmsManager(Manager):
             if not algorithm_id:
                 self.db.session.add(algorithm)
 
-            self.check_inits(algorithm)
+            self.check_inits(algorithm, contract)
             self.change_step(algorithm, algorithm.initial_step)
 
             return algorithm
