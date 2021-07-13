@@ -457,8 +457,6 @@ class AlgorithmsManager(Manager):
                     self.run_action(action, algorithm.contract.id, [], algorithm)
         self.__commit__()
 
-        self.run(algorithm)
-
     def check_timeouts(self, app):
         with app.app_context():
             algorithms = list(Algorithm.query.filter((Algorithm.contract_id != None) & (Algorithm.timeout_at != 0) & (Algorithm.timeout_at < time.time())).all())
