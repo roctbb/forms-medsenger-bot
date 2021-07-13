@@ -166,7 +166,7 @@ class AlgorithmsManager(Manager):
         if sign == 'greater':
             return left > right
         if sign == 'less':
-            return left < right + modifier
+            return left < right
         if sign == 'greater_or_equal':
             return left >= right
         if sign == 'less_or_equal':
