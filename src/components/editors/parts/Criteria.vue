@@ -11,6 +11,7 @@
                         <option value="difference" v-if="is_int() && !is_date()">разброс за</option>
                         <option value="time">текущая дата</option>
                         <option value="init">активация контракта</option>
+                        <option value="step_init">переход к ступени</option>
                     </select>
                     <span class="text-muted"><button class="btn btn-sm btn-default" @click="remove()">Удалить</button></span>
                 </div>
