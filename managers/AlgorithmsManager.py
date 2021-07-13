@@ -450,6 +450,8 @@ class AlgorithmsManager(Manager):
             algorithm.timeout_at = 0
 
         algorithm.categories = '|'.join(map(lambda c: '|'.join(['|'.join(k['category'] for k in block) for block in c['criteria']]), new_step['conditions']))
+        if algorithm.common_conditions:
+            algorithm.categories = '|'.join([algorithm.categories, '|'.join(map(lambda c: '|'.join(['|'.join(k['category'] for k in block) for block in c['criteria']]), algorithm.common_conditions))])
 
         for condition in new_step['conditions']:
             if any(any(criteria['category'] == 'step_init' for criteria in block) for block in condition['criteria']):
@@ -580,6 +582,7 @@ class AlgorithmsManager(Manager):
 
             algorithm.title = data.get('title')
             algorithm.steps = data.get('steps')
+            algorithm.common_conditions = data.get('common_conditions')
             algorithm.description = data.get('description')
             algorithm.categories = data.get('categories')
             algorithm.template_id = data.get('template_id')

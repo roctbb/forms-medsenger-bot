@@ -24,7 +24,8 @@
             </card>
 
             <card :title="'Общие условия'">
-                <card v-for="(condition, condition_index) in algorithm.common_conditions" additional_class="border-primary"
+                <card v-for="(condition, condition_index) in algorithm.common_conditions"
+                      additional_class="border-primary"
                       :key="condition.uid">
 
                     <form-group48 title="Таймаут (минуты)">
@@ -75,7 +76,8 @@
                         условие
                     </button>
                 </card>
-                <button class="btn btn-sm btn-primary" @click="add_common_condition(algorithm)">Добавить условие</button>
+                <button class="btn btn-sm btn-primary" @click="add_common_condition(algorithm)">Добавить условие
+                </button>
             </card>
 
             <card v-for="(step, step_index) in algorithm.steps" :title="step.title" :key="step.uid">
@@ -214,10 +216,8 @@ export default {
         add_criteria: function (block, i) {
             block.push(this.create_empty_criteria())
         },
-        add_common_condition: function (algorithm)
-        {
-            if (!algorithm.common_conditions)
-            {
+        add_common_condition: function (algorithm) {
+            if (!algorithm.common_conditions) {
                 algorithm.common_conditions = [];
             }
             algorithm.common_conditions.push(this.create_condition());
@@ -336,6 +336,10 @@ export default {
 
                 return false;
             }
+
+            this.algorithm.conditions.forEach(condition => {
+                condition.criteria = condition.criteria.map((L) => L.map(prepare_criteria))
+            })
 
             this.algorithm.steps.forEach(step => {
                 step.conditions.forEach(condition => {
