@@ -204,6 +204,7 @@ export default {
         create_empty_algorithm: function () {
             return {
                 steps: [this.create_step()],
+                common_conditions: [],
             };
         },
         add_or_block: function (condition) {
@@ -228,7 +229,6 @@ export default {
             return {
                 title: 'ступень',
                 reset_minutes: 60,
-                common_conditions: [],
                 conditions: [this.create_condition()],
                 timeout_actions: [],
                 uid: this.uuidv4()
