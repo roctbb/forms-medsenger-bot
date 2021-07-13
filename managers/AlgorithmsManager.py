@@ -158,7 +158,10 @@ class AlgorithmsManager(Manager):
             right = (datetime.strptime(right, '%Y-%m-%d') + timedelta(days=modifier)).date()
             sign = sign.lstrip('date_')
         else:
-            right = right + modifier
+            try:
+                right = right + modifier
+            except:
+                pass
 
         if sign == 'greater':
             return left > right
