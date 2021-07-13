@@ -479,7 +479,11 @@ class AlgorithmsManager(Manager):
         contract_id = algorithm.contract_id
         fired = False
 
-        for condition in current_step['conditions']:
+        additional_conditions = []
+        if current_step.get('common_conditions'):
+            additional_conditions = current_step.get('common_conditions')
+
+        for condition in additional_conditions + current_step['conditions']:
             criteria = condition['criteria']
 
             reset_minutes = int(condition.get('reset_minutes', 0))
