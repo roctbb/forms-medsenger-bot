@@ -455,8 +455,9 @@ class AlgorithmsManager(Manager):
             if any(any(criteria['category'] == 'step_init' for criteria in block) for block in condition['criteria']):
                 for action in condition['positive_actions']:
                     self.run_action(action, algorithm.contract.id, [], algorithm)
-
         self.__commit__()
+
+        self.run(algorithm)
 
     def check_timeouts(self, app):
         with app.app_context():
