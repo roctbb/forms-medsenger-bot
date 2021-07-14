@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="container">
+        <div style="margin-left: 10px;">
             <a class="btn btn-danger" @click="select_graph()">Назад</a>
         </div>
 
@@ -106,7 +106,7 @@ export default {
                     buttonTheme: {
                         width: 60
                     },
-                    selected: 3,
+                    selected: 4,
                     inputDateFormat: "%b %e, %Y %H:%M"
                 },
 
@@ -118,14 +118,13 @@ export default {
                     width: window.innerWidth,
                     events: {
                         render: function (event) {
-                            Event.fire('clear-table')
-
                             let isInside = (point) => {
                                 const min = event.target.axes[0].min
                                 const max = event.target.axes[0].max
                                 return point.x >= min && point.x <= max
                             }
 
+                            let stats = []
 
                             this.series.filter(series => series.userOptions.yAxis == 0).forEach(series => {
                                 let data = series.data.filter(point => isInside(point)).map(point => point.y);
@@ -147,7 +146,7 @@ export default {
                                     text: data.length > 0  ? text : (series.name + '<br><strong style="color: dimgrey">Нет данных</strong>')
                                 });
                                 if (data.length > 0) {
-                                    Event.fire('add-stat', {
+                                    stats.push({
                                         name: series.name,
                                         avg: average,
                                         min: min,
@@ -155,6 +154,8 @@ export default {
                                     })
                                 }
                             });
+
+                            Event.fire('refresh-stats', stats)
 
                             this.series.filter(series => series.userOptions.yAxis == 1).forEach(series => {
                                 let data = series.data.filter(point => isInside(point));
@@ -183,7 +184,7 @@ export default {
                     type: 'datetime',
                     gridLineWidth: 1,
                     plotLines: [],
-                    max: now + 1000 * 3600 * 3,
+                    max: now + 1000 * 3600 * 10,
                     ordinal: false,
                     dateTimeLabelFormats: {
                         day: '%d.%m'
@@ -192,6 +193,7 @@ export default {
                 zoom: 'x',
                 yAxis: [
                     {
+                        plotBands: [],
                         labels: {
                             align: 'right',
                             x: -3
@@ -365,7 +367,10 @@ export default {
                 y += 1;
             });
 
-            if (n > 5) this.options.rangeSelector.selected = 0
+            // if (n > 5) this.options.rangeSelector.selected = 0
+            if (this.group.categories.includes('glukose')) {
+                this.set_bands()
+            }
 
             this.loaded = true
         },
@@ -402,6 +407,29 @@ export default {
             }
             return comment
         },
+        set_bands: function () {
+            this.options.yAxis[0].plotBands = [{
+                from: 0,
+                to: 3,
+                color: "rgba(255,117,117,0.25)"
+            }, {
+                from: 18,
+                to: 100,
+                color: "rgba(255,117,117,0.25)"
+            }, {
+                from: 3,
+                to: 4,
+                color: "rgba(255,209,117,0.25)"
+            }, {
+                from: 12,
+                to: 18,
+                color: "rgba(255,209,117,0.25)"
+            }, {
+                from: 4,
+                to: 12,
+                color: "rgba(186,255,117,0.25)"
+            }]
+        }
     },
     computed: {
         offset() {
@@ -420,12 +448,8 @@ export default {
             this.load_data()
         });
 
-        Event.listen('clear-table',() => {
-            this.statistics = []
-        })
-
-        Event.listen('add-stat', (stat) => {
-            this.statistics.push(stat)
+        Event.listen('refresh-stats', (stats) => {
+            this.statistics = stats
         })
 
         Event.listen('window-resized', () => {
