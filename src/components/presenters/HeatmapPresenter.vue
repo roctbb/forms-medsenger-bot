@@ -1,10 +1,10 @@
 <template>
     <div>
-        <div class="container">
+        <div style="margin-left: 10px;">
             <a class="btn btn-danger" @click="select_graph()">Назад</a>
         </div>
 
-        <div class="container">
+        <div style="margin-left: 10px;">
             <input type="checkbox" id="show_medicines" v-if="heatmap_type == 'symptoms'"
                    @change="showMedicines()" v-model="show_medicines"/>
             <label for="show_medicines" v-if="heatmap_type == 'symptoms'">Показать лекарства</label>
@@ -233,11 +233,17 @@ export default {
                     this.options.series.push({
                         colsize: 24 * 36e5,
                         connectNulls: true,
+                        showInNavigator: false,
                         nullColor: '#50B432',
                         yAxis: 0,
                         name: key,
                         borderWidth: 1,
                         borderColor: "#555555",
+                        states: {
+                            inactive: {
+                                opacity: 1,
+                            }
+                        },
                         data: value.map((val) => {
                             return {
                                 dataLabels: {
@@ -313,6 +319,11 @@ export default {
                     name: key,
                     borderWidth: 1,
                     borderColor: "#555555",
+                    states: {
+                        inactive: {
+                            opacity: 1,
+                        }
+                    },
                     data: value.map((val) => {
                         return {
                             dataLabels: {
