@@ -29,8 +29,10 @@ class AlgorithmsManager(Manager):
                         {
                             "uid": str(uuid.uuid4()),
                             "criteria": algorithm.criteria,
-                            "positive_actions": [action for action in algorithm.actions if not action['params'].get('is_negative')],
-                            "negative_actions": [action for action in algorithm.actions if action['params'].get('is_negative')]
+                            "positive_actions": [action for action in algorithm.actions if
+                                                 not action['params'].get('is_negative')],
+                            "negative_actions": [action for action in algorithm.actions if
+                                                 action['params'].get('is_negative')]
                         }
                     ],
                     "timeout_actions": [],
@@ -178,7 +180,6 @@ class AlgorithmsManager(Manager):
         if sign == 'contains':
             return right in left
 
-
         return False
 
     def check_criteria(self, criteria, contract_id, buffer, descriptions, category_names):
@@ -288,7 +289,6 @@ class AlgorithmsManager(Manager):
                 params["message"] = params.get("message", "") + report
 
             self.medsenger_api.send_order(contract_id, order, agent_id, params)
-
 
         if action['type'] == 'patient_message':
             if action['params'].get('add_action'):
@@ -423,6 +423,9 @@ class AlgorithmsManager(Manager):
                                                         medicine.timetable_description()),
                                                     only_doctor=True)
             if action['type'] == 'script':
+                form_manager = FormManager(self.medsenger_api, self.db)
+                contract_manager = ContractManager(self.medsenger_api, self.db)
+                medicine_manager = MedicineManager(self.medsenger_api, self.db)
                 try:
                     exec(action['params']['code'])
                 except Exception as e:
@@ -454,9 +457,13 @@ class AlgorithmsManager(Manager):
         else:
             algorithm.timeout_at = 0
 
-        algorithm.categories = '|'.join(map(lambda c: '|'.join(['|'.join(k['category'] for k in block) for block in c['criteria']]), new_step['conditions']))
+        algorithm.categories = '|'.join(
+            map(lambda c: '|'.join(['|'.join(k['category'] for k in block) for block in c['criteria']]),
+                new_step['conditions']))
         if algorithm.common_conditions:
-            algorithm.categories = '|'.join([algorithm.categories, '|'.join(map(lambda c: '|'.join(['|'.join(k['category'] for k in block) for block in c['criteria']]), algorithm.common_conditions))])
+            algorithm.categories = '|'.join([algorithm.categories, '|'.join(
+                map(lambda c: '|'.join(['|'.join(k['category'] for k in block) for block in c['criteria']]),
+                    algorithm.common_conditions))])
 
         for condition in new_step['conditions']:
             if any(any(criteria['category'] == 'step_init' for criteria in block) for block in condition['criteria']):
@@ -466,7 +473,8 @@ class AlgorithmsManager(Manager):
 
     def check_timeouts(self, app):
         with app.app_context():
-            algorithms = list(Algorithm.query.filter((Algorithm.contract_id != None) & (Algorithm.timeout_at != 0) & (Algorithm.timeout_at < time.time())).all())
+            algorithms = list(Algorithm.query.filter((Algorithm.contract_id != None) & (Algorithm.timeout_at != 0) & (
+                    Algorithm.timeout_at < time.time())).all())
 
             for algorithm in algorithms:
                 self.timeout(algorithm)
@@ -499,13 +507,14 @@ class AlgorithmsManager(Manager):
                 if time.time() - last_fired < reset_minutes * 60:
                     continue
 
-
             additions = []
             descriptions = []
-            category_names = {category['name']: category['description'] for category in self.medsenger_api.get_categories()}
+            category_names = {category['name']: category['description'] for category in
+                              self.medsenger_api.get_categories()}
 
             result = any([all(
-                list(map(lambda x: self.check_criteria(x, contract_id, additions, descriptions, category_names), block)))
+                list(
+                    map(lambda x: self.check_criteria(x, contract_id, additions, descriptions, category_names), block)))
                 for block in criteria])
 
             if result:
@@ -538,7 +547,7 @@ class AlgorithmsManager(Manager):
                     for block in condition['criteria']:
                         for criteria in block:
                             if criteria.get('ask_value'):
-                                params.add((criteria.get('value_name'),criteria.get('value')))
+                                params.add((criteria.get('value_name'), criteria.get('value')))
         return [{"name": n, "value": v} for n, v in params]
 
     def examine(self, contract, form):
@@ -553,7 +562,8 @@ class AlgorithmsManager(Manager):
             fired = fired or self.run(algorithm)
 
         if not fired and form.thanks_text:
-            self.medsenger_api.send_message(contract.id, text=form.thanks_text, only_patient=True, action_deadline=time.time() + 60 * 60)
+            self.medsenger_api.send_message(contract.id, text=form.thanks_text, only_patient=True,
+                                            action_deadline=time.time() + 60 * 60)
 
     def hook(self, contract, category_name):
         patient = contract.patient
@@ -570,7 +580,8 @@ class AlgorithmsManager(Manager):
         if 'init' in algorithm.categories.split('|') and algorithm.contract_id:
             for step in algorithm.steps:
                 for condition in step['conditions']:
-                    if any(any(criteria['category'] == 'init' for criteria in block) for block in condition['criteria']):
+                    if any(
+                        any(criteria['category'] == 'init' for criteria in block) for block in condition['criteria']):
                         for action in condition['positive_actions']:
                             self.run_action(action, contract.id, [], algorithm)
 
@@ -608,7 +619,6 @@ class AlgorithmsManager(Manager):
                 self.db.session.add(algorithm)
 
             self.check_inits(algorithm, contract)
-
 
             return algorithm
         except Exception as e:

@@ -1,3 +1,4 @@
-A = 5
 
-exec("print(A)")
+from managers.AlgorithmsManager import *
+
+med
