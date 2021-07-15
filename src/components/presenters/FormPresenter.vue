@@ -37,7 +37,7 @@
             </div>
 
             <div v-if="field.type == 'time'">
-                <date-picker :required="field.required" v-model="answers[field.uid]" type="time"></date-picker>
+                <date-picker :required="field.required" v-model="answers[field.uid]" value-type="H:m" type="time"></date-picker>
             </div>
 
 
