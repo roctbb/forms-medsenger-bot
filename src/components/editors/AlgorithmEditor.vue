@@ -32,6 +32,11 @@
                         <input class="form-control form-control-sm" type="number" v-model="condition.reset_minutes"/>
                     </form-group48>
 
+                    <div class="col-md-2" v-if="is_admin" >
+                        <input type="checkbox" v-model="condition.skip_additions">
+                        <small class="text-muted">Не помечать точки</small>
+                    </div>
+
                     <h6>Критерии срабатывания</h6>
 
                     <div v-for="(or_block, i) in condition.criteria">
@@ -95,6 +100,11 @@
                     <form-group48 title="Таймаут (минуты)">
                         <input class="form-control form-control-sm" type="number" v-model="condition.reset_minutes"/>
                     </form-group48>
+
+                    <div class="col-md-2" v-if="is_admin" >
+                        <input type="checkbox" v-model="condition.skip_additions">
+                        <small class="text-muted">Не помечать точки</small>
+                    </div>
 
                     <h6>Критерии срабатывания</h6>
 

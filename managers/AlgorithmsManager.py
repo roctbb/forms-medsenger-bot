@@ -518,11 +518,12 @@ class AlgorithmsManager(Manager):
                 for block in criteria])
 
             if result:
-                for addition in additions:
-                    self.medsenger_api.send_addition(contract_id, addition['id'], {
-                        "algorithm_id": algorithm.id,
-                        "comment": addition["comment"]
-                    })
+                if not condition.get('skip_additions'):
+                    for addition in additions:
+                        self.medsenger_api.send_addition(contract_id, addition['id'], {
+                            "algorithm_id": algorithm.id,
+                            "comment": addition["comment"]
+                        })
                 fired = True
                 for action in condition.get('positive_actions', []):
                     self.run_action(action, contract_id, descriptions, algorithm)
