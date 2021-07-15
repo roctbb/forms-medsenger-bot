@@ -620,6 +620,7 @@ class AlgorithmsManager(Manager):
 
             self.check_inits(algorithm, contract)
 
+            self.__commit__()
             return algorithm
         except Exception as e:
             log(e)
