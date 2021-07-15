@@ -337,9 +337,11 @@ export default {
                 return false;
             }
 
-            this.algorithm.common_conditions.forEach(condition => {
-                condition.criteria = condition.criteria.map((L) => L.map(prepare_criteria))
-            })
+            if (this.algorithm.common_conditions) {
+                this.algorithm.common_conditions.forEach(condition => {
+                    condition.criteria = condition.criteria.map((L) => L.map(prepare_criteria))
+                })
+            }
 
             this.algorithm.steps.forEach(step => {
                 step.conditions.forEach(condition => {
