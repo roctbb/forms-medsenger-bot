@@ -1,5 +1,5 @@
 import re
-
+contract = contract_manager.get(contract_id)
 custom_params = {}
 medicine_titles = self.medsenger_api.get_records(contract.id, "hormonal_contraception_medicine", limit=1)
 if medicine_titles:
