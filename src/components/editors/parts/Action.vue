@@ -15,7 +15,7 @@
                 <option value="detach_algorithm">отключение алгоритма</option>
                 <option value="attach_medicine">назначение лекарства</option>
                 <option value="detach_medicine">отмена лекарства</option>
-                <option v-if="IS_ADMIN" value="script">выполнить скрипт</option>
+                <option value="script">выполнить скрипт</option>
                 <!-- назначение/отключения мониторинга/лекарства/алгоритма / order -->
             </select>
             <small class="text-muted"><button class="btn btn-sm btn-default" @click="remove()">Удалить</button></small>
