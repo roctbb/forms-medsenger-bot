@@ -40,8 +40,8 @@ class MedicineManager(Manager):
                     "mode": "daily",
                     "points": [
                         {
-                            "hour": h,
-                            "minute": m
+                            "hour": int(h),
+                            "minute": int(m)
                         } for h, m in map(lambda x:x.split(':'), custom_params.get('times'))
                     ]
                 }
