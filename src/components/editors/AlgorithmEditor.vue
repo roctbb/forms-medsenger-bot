@@ -32,10 +32,9 @@
                         <input class="form-control form-control-sm" type="number" v-model="condition.reset_minutes"/>
                     </form-group48>
 
-                    <div class="col-md-2" v-if="is_admin" >
+                    <form-group48 title="Не помечать точки">
                         <input type="checkbox" v-model="condition.skip_additions">
-                        <small class="text-muted">Не помечать точки</small>
-                    </div>
+                    </form-group48>
 
                     <h6>Критерии срабатывания</h6>
 
@@ -101,10 +100,9 @@
                         <input class="form-control form-control-sm" type="number" v-model="condition.reset_minutes"/>
                     </form-group48>
 
-                    <div class="col-md-2" v-if="is_admin" >
+                    <form-group48 title="Не помечать точки">
                         <input type="checkbox" v-model="condition.skip_additions">
-                        <small class="text-muted">Не помечать точки</small>
-                    </div>
+                    </form-group48>
 
                     <h6>Критерии срабатывания</h6>
 

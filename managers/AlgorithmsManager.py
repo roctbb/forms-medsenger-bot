@@ -422,14 +422,14 @@ class AlgorithmsManager(Manager):
                                                         medicine.title, medicine.rules,
                                                         medicine.timetable_description()),
                                                     only_doctor=True)
-            if action['type'] == 'script':
-                form_manager = FormManager(self.medsenger_api, self.db)
-                contract_manager = ContractManager(self.medsenger_api, self.db)
-                medicine_manager = MedicineManager(self.medsenger_api, self.db)
-                try:
-                    exec(action['params']['code'])
-                except Exception as e:
-                    log(e)
+        if action['type'] == 'script':
+            form_manager = FormManager(self.medsenger_api, self.db)
+            contract_manager = ContractManager(self.medsenger_api, self.db)
+            medicine_manager = MedicineManager(self.medsenger_api, self.db)
+            try:
+                exec(action['params']['code'])
+            except Exception as e:
+                log(e)
 
     def get_step(self, algorithm, step=None):
         if not step:
