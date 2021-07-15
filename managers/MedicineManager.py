@@ -18,7 +18,7 @@ class MedicineManager(Manager):
 
         self.__commit__()
 
-    def attach(self, template_id, contract, custom_timetable=None):
+    def attach(self, template_id, contract, custom_timetable=None, custom_params={}):
         medicine = self.get(template_id)
 
         if medicine:
@@ -31,6 +31,20 @@ class MedicineManager(Manager):
                     new_medicine.timetable = custom_timetable
                 except Exception as e:
                     log(e, False)
+
+            if 'title' in custom_params:
+                new_medicine.title = custom_params.get('title')
+
+            if 'times' in custom_params:
+                new_medicine.timetable = {
+                    "mode": "daily",
+                    "points": [
+                        {
+                            "hour": h,
+                            "minute": m
+                        } for h, m in map(lambda x:x.split(':'), custom_params.get('times'))
+                    ]
+                }
 
             self.db.session.add(new_medicine)
             self.__commit__()
