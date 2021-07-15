@@ -122,16 +122,6 @@ export default {
                 if (field.type == 'radio') {
                     this.answers[field.uid] = 0
                 }
-
-                if (field.type == 'time')
-                {
-                    this.answers[field.uid] = new Date().getHours() + ":" + new Date().getMinutes()
-                }
-
-                if (field.type == 'date')
-                {
-                    this.answers[field.uid] = new Date().getFullYear() + "-" + new Date().getMonth() + '-' + new Date().getDay()
-                }
             }
 
             this.form.fields.map(prepare_field)
