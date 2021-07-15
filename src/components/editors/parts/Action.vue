@@ -15,6 +15,7 @@
                 <option value="detach_algorithm">отключение алгоритма</option>
                 <option value="attach_medicine">назначение лекарства</option>
                 <option value="detach_medicine">отмена лекарства</option>
+                <option v-if="IS_ADMIN" value="script">выполнить скрипт</option>
                 <!-- назначение/отключения мониторинга/лекарства/алгоритма / order -->
             </select>
             <small class="text-muted"><button class="btn btn-sm btn-default" @click="remove()">Удалить</button></small>
@@ -24,6 +25,10 @@
             <select class="form-control form-control-sm" v-model="action.params.target">
                 <option v-for="step in algorithm.steps" :value="step.uid">{{ step.title }}</option>
             </select>
+        </div>
+
+         <div class="col-md-9" v-if="['script'].includes(action.type)">
+            <textarea class="form-control form-control-sm" v-model="action.params.code"></textarea>
         </div>
 
         <div class="col-md-2" v-if="['doctor_message', 'patient_message'].includes(action.type)">

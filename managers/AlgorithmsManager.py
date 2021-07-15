@@ -422,6 +422,11 @@ class AlgorithmsManager(Manager):
                                                         medicine.title, medicine.rules,
                                                         medicine.timetable_description()),
                                                     only_doctor=True)
+            if action['type'] == 'script':
+                try:
+                    exec(action['params']['code'])
+                except Exception as e:
+                    log(e)
 
     def get_step(self, algorithm, step=None):
         if not step:
@@ -587,7 +592,9 @@ class AlgorithmsManager(Manager):
             algorithm.categories = data.get('categories')
             algorithm.template_id = data.get('template_id')
             algorithm.initial_step = data.get('steps')[0].get('uid')
-            algorithm.current_step = data.get('steps')[0].get('uid')
+            if not algorithm.current_step:
+                algorithm.current_step = data.get('steps')[0].get('uid')
+                self.change_step(algorithm, algorithm.initial_step)
 
             if data.get('is_template') and contract.is_admin:
                 algorithm.clinics = data.get('clinics')
@@ -601,7 +608,7 @@ class AlgorithmsManager(Manager):
                 self.db.session.add(algorithm)
 
             self.check_inits(algorithm, contract)
-            self.change_step(algorithm, algorithm.initial_step)
+
 
             return algorithm
         except Exception as e:

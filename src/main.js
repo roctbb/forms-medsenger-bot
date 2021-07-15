@@ -218,6 +218,7 @@ Vue.mixin({
                 radio: "Выбор варианта",
                 scale: "Шкала",
                 date: "Дата",
+                time: "Время",
             },
             current_contract_id: window.CONTRACT_ID,
             weekdays: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
@@ -229,7 +230,8 @@ Vue.mixin({
                 textarea: ['string'],
                 text: ['string'],
                 checkbox: ['string'],
-                date: ['date']
+                date: ['date'],
+                time: ['string']
             },
             images: {
                 form: window.LOCAL_HOST + '/static/images/icons8-fill-in-form-48.png',

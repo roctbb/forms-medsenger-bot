@@ -36,6 +36,10 @@
                 <date-picker :required="field.required" v-model="answers[field.uid]" value-type="YYYY-MM-DD"></date-picker>
             </div>
 
+            <div v-if="field.type == 'time'">
+                <date-picker :required="field.required" v-model="answers[field.uid]" type="time"></date-picker>
+            </div>
+
 
         </form-group48>
 
