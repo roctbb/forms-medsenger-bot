@@ -47,7 +47,7 @@ stockInit(Highcharts)
 export default {
     name: "GraphPresenter",
     components: {highcharts: Chart},
-    props: {},
+    props: ['patient'],
     data() {
         return {
             group: {},
@@ -143,7 +143,7 @@ export default {
 
                                 // set the constructed text for the legend
                                 legendItem.attr({
-                                    text: data.length > 0  ? text : (series.name + '<br><strong style="color: dimgrey">Нет данных</strong>')
+                                    text: data.length > 0 ? text : (series.name + '<br><strong style="color: dimgrey">Нет данных</strong>')
                                 });
                                 if (data.length > 0) {
                                     stats.push({
@@ -163,7 +163,7 @@ export default {
                                 const legendItem = series.legendItem;
                                 // construct the legend string
                                 const text = series.name + '<br><strong style="color: dimgrey">' +
-                                    (data.length > 0  ? ('Количество: ' + data.length) : 'Нет данных')+ '</strong>';
+                                    (data.length > 0 ? ('Количество: ' + data.length) : 'Нет данных') + '</strong>';
 
                                 // set the constructed text for the legend
                                 legendItem.attr({
@@ -429,6 +429,35 @@ export default {
                 to: 12,
                 color: "rgba(186,255,117,0.25)"
             }]
+
+            let min = null, max = null
+
+            this.patient.algorithms.forEach(algorithm => {
+                if (algorithm.categories.includes('glukose')) {
+                    algorithm.steps.forEach(step => {
+                        step.conditions.forEach(condition => {
+                            condition.criteria.forEach(cr => {
+                                cr.forEach(c => {
+                                    if (c.value_code == 'min_glukose' && (min == null || min > c.value))
+                                        min = c.value
+                                    if (c.value_code == 'max_glukose' && (max == null || max < c.value))
+                                        max = c.value
+                                })
+                            })
+                        })
+                    })
+                }
+            })
+
+            if (min != null) {
+                this.options.yAxis[0].plotBands[2].to = min
+                this.options.yAxis[0].plotBands[4].from = min
+            }
+            if (max != null) {
+                this.options.yAxis[0].plotBands[3].from = max
+                this.options.yAxis[0].plotBands[4].to = max
+            }
+            console.log(this.options.yAxis[0].plotBands)
         }
     },
     computed: {

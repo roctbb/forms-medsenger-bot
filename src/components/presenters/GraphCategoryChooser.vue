@@ -94,9 +94,12 @@ export default {
     mounted() {
         if (window.OBJECT_ID) {
             try {
-                   let name = this.data.filter(c => c.id == window.OBJECT_ID)[0].name;
-                   let params = this.plottable_categories.filter(c => c.categories.includes(name))[0];
-                   Event.fire('load-graph', params);
+                let data = this.data.filter(c => c.id == window.OBJECT_ID)
+                if (data.length) {
+                    let name = data[0].name;
+                    let params = this.plottable_categories.filter(c => c.categories.includes(name))[0];
+                    Event.fire('load-graph', params);
+                }
             }
             catch (e) {
                 console.log(e);
