@@ -256,6 +256,9 @@ Vue.mixin({
     }
 })
 
+window.onresize = function () {
+    Event.fire('window-resized')
+}
 
 Vue.use(vmodal, {componentName: 'Modal'})
 Vue.use(VueConfirmDialog)

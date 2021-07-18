@@ -1,8 +1,6 @@
 <template>
-    <div :style="style">
-        <br v-if="narrowScreen">
-
-        <div class="container">
+    <div>
+        <div style="margin-left: 10px;">
             <a class="btn btn-danger" @click="select_graph()">Назад</a>
         </div>
 
@@ -13,9 +11,9 @@
             <label for="show_legend">Показать легенду</label>
         </div>
 
-        <div class="container center" v-if="this.statistics.length && !this.narrowScreen">
+        <div class="container center" v-if="this.statistics.length && this.show_table()">
             <h5>Значения за отображенный период</h5>
-            <table class="table table-hover table-responsive">
+            <table class="table table-hover">
                 <thead>
                 <tr>
                     <th scope="col" class="bg-info text-light">Параметр</th>
@@ -49,7 +47,7 @@ stockInit(Highcharts)
 export default {
     name: "GraphPresenter",
     components: {highcharts: Chart},
-    props: {},
+    props: ['patient'],
     data() {
         return {
             group: {},
@@ -60,6 +58,9 @@ export default {
         }
     },
     methods: {
+        show_table: function () {
+            return window.innerWidth >= window.innerHeight
+        },
         load_data: function () {
             this.axios.post(this.url('/api/graph/group'), this.group).then(this.process_load_answer);
         },
@@ -105,31 +106,25 @@ export default {
                     buttonTheme: {
                         width: 60
                     },
-                    selected: 3,
+                    selected: 4,
                     inputDateFormat: "%b %e, %Y %H:%M"
-                },
-
-                navigator: {
-                    enabled: !this.narrowScreen
                 },
 
                 chart: {
                     type: 'line',
                     zoomType: 'x',
                     backgroundColor: "#f8f8fb",
-                    height: this.height,
-                    width: this.width,
+                    height: window.innerHeight,
+                    width: window.innerWidth,
                     events: {
                         render: function (event) {
-                            Event.fire('clear-table')
-
                             let isInside = (point) => {
                                 const min = event.target.axes[0].min
                                 const max = event.target.axes[0].max
-                                console.log(min, max)
                                 return point.x >= min && point.x <= max
                             }
 
+                            let stats = []
 
                             this.series.filter(series => series.userOptions.yAxis == 0).forEach(series => {
                                 let data = series.data.filter(point => isInside(point)).map(point => point.y);
@@ -148,10 +143,10 @@ export default {
 
                                 // set the constructed text for the legend
                                 legendItem.attr({
-                                    text: data.length > 0  ? text : (series.name + '<br><strong style="color: dimgrey">Нет данных</strong>')
+                                    text: data.length > 0 ? text : (series.name + '<br><strong style="color: dimgrey">Нет данных</strong>')
                                 });
                                 if (data.length > 0) {
-                                    Event.fire('add-stat', {
+                                    stats.push({
                                         name: series.name,
                                         avg: average,
                                         min: min,
@@ -160,13 +155,15 @@ export default {
                                 }
                             });
 
+                            Event.fire('refresh-stats', stats)
+
                             this.series.filter(series => series.userOptions.yAxis == 1).forEach(series => {
                                 let data = series.data.filter(point => isInside(point));
 
                                 const legendItem = series.legendItem;
                                 // construct the legend string
                                 const text = series.name + '<br><strong style="color: dimgrey">' +
-                                    (data.length > 0  ? ('Количество: ' + data.length) : 'Нет данных')+ '</strong>';
+                                    (data.length > 0 ? ('Количество: ' + data.length) : 'Нет данных') + '</strong>';
 
                                 // set the constructed text for the legend
                                 legendItem.attr({
@@ -187,7 +184,7 @@ export default {
                     type: 'datetime',
                     gridLineWidth: 1,
                     plotLines: [],
-                    max: now + 1000 * 3600 * 3,
+                    max: now + 1000 * 3600 * 10,
                     ordinal: false,
                     dateTimeLabelFormats: {
                         day: '%d.%m'
@@ -196,6 +193,7 @@ export default {
                 zoom: 'x',
                 yAxis: [
                     {
+                        plotBands: [],
                         labels: {
                             align: 'right',
                             x: -3
@@ -369,7 +367,10 @@ export default {
                 y += 1;
             });
 
-            if (n > 5) this.options.rangeSelector.selected = 0
+            // if (n > 5) this.options.rangeSelector.selected = 0
+            if (this.group.categories.includes('glukose')) {
+                this.set_bands()
+            }
 
             this.loaded = true
         },
@@ -406,29 +407,60 @@ export default {
             }
             return comment
         },
+        set_bands: function () {
+            this.options.yAxis[0].plotBands = [{
+                from: 0,
+                to: 3,
+                color: "rgba(255,117,117,0.25)"
+            }, {
+                from: 18,
+                to: 100,
+                color: "rgba(255,117,117,0.25)"
+            }, {
+                from: 3,
+                to: 4,
+                color: "rgba(255,209,117,0.25)"
+            }, {
+                from: 12,
+                to: 18,
+                color: "rgba(255,209,117,0.25)"
+            }, {
+                from: 4,
+                to: 12,
+                color: "rgba(186,255,117,0.25)"
+            }]
+
+            let min = null, max = null
+
+            this.patient.algorithms.forEach(algorithm => {
+                if (algorithm.categories.includes('glukose')) {
+                    algorithm.steps.forEach(step => {
+                        step.conditions.forEach(condition => {
+                            condition.criteria.forEach(cr => {
+                                cr.forEach(c => {
+                                    if (c.value_code == 'min_glukose' && (min == null || min > c.value))
+                                        min = c.value
+                                    if (c.value_code == 'max_glukose' && (max == null || max < c.value))
+                                        max = c.value
+                                })
+                            })
+                        })
+                    })
+                }
+            })
+
+            if (min != null) {
+                this.options.yAxis[0].plotBands[2].to = min
+                this.options.yAxis[0].plotBands[4].from = min
+            }
+            if (max != null) {
+                this.options.yAxis[0].plotBands[3].from = max
+                this.options.yAxis[0].plotBands[4].to = max
+            }
+            console.log(this.options.yAxis[0].plotBands)
+        }
     },
     computed: {
-        style() {
-            return {}
-            // return this.narrowScreen ? {
-            //     height: this.width + "px",
-            //     width: this.width + "px",
-            //     'transform-origin': '50% 50%',
-            //     transform: 'rotate(-90deg)'
-            // } : {}
-        },
-        width() {
-            return window.innerWidth
-            // return (this.narrowScreen ? (window.innerHeight - 50) : window.innerWidth)
-        },
-        height() {
-            return window.innerHeight
-            // return this.narrowScreen ? (window.innerWidth + Math.round(window.innerWidth / 10)) : window.innerHeight
-        },
-        narrowScreen() {
-            // return false;
-            return window.innerWidth < window.innerHeight
-        },
         offset() {
             return -1 * new Date().getTimezoneOffset() * 60
         }
@@ -445,12 +477,15 @@ export default {
             this.load_data()
         });
 
-        Event.listen('clear-table',() => {
-            this.statistics = []
+        Event.listen('refresh-stats', (stats) => {
+            this.statistics = stats
         })
 
-        Event.listen('add-stat', (stat) => {
-            this.statistics.push(stat)
+        Event.listen('window-resized', () => {
+            if (this.options) {
+                this.options.chart.height = window.innerHeight
+                this.options.chart.width = window.innerWidth
+            }
         })
     }
 }
