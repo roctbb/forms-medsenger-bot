@@ -122,7 +122,7 @@ class AlgorithmsManager(Manager):
         return None
 
     def save_to_cache(self, A, value):
-        for k, v in DATACACHE:
+        for k, v in DATACACHE.items():
             if time.time() - v[0] > 30:
                 del DATACACHE[k]
 
