@@ -3,18 +3,22 @@
         <error-block :errors="errors"/>
         <h3>{{ this.form.title }}</h3>
         <p v-html="br(form.patient_description)"></p>
-        <form-group48 v-for="(field, i) in form.fields" v-if="!field.show_if || answers[field.show_if]" :required="field.required"
+        <form-group48 v-for="(field, i) in form.fields" v-if="!field.show_if || answers[field.show_if]"
+                      :required="field.required"
                       :title="field.text" :key="i"
                       :description="field.description">
-            <input type="number" min="field.params.min" max="field.params.max" step="1" class="form-control monitoring-input"
+            <input type="number" min="field.params.min" max="field.params.max" step="1"
+                   class="form-control monitoring-input"
                    :class="save_clicked && field.required &&
                        (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
                    v-if="field.type == 'integer'" :required="field.required" v-model="answers[field.uid]"/>
-            <input type="number" min="field.params.min" max="field.params.max" step="0.01" class="form-control monitoring-input"
+            <input type="number" min="field.params.min" max="field.params.max" step="0.01"
+                   class="form-control monitoring-input"
                    :class="save_clicked && field.required &&
                        (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
                    v-if="field.type == 'float'" :required="field.required" v-model="answers[field.uid]"/>
-            <input type="text" class="form-control monitoring-input" v-if="field.type == 'text'" :required="field.required"
+            <input type="text" class="form-control monitoring-input" v-if="field.type == 'text'"
+                   :required="field.required"
                    :class="save_clicked && field.required && !answers[field.uid] && answers[field.uid] !== 0 ? 'is-invalid' : ''"
                    v-model="answers[field.uid]"/>
             <textarea class="form-control monitoring-input" v-if="field.type == 'textarea'" :required="field.required"
@@ -33,11 +37,13 @@
             </div>
 
             <div v-if="field.type == 'date'">
-                <date-picker :required="field.required" v-model="answers[field.uid]" value-type="YYYY-MM-DD"></date-picker>
+                <date-picker :required="field.required" v-model="answers[field.uid]"
+                             value-type="YYYY-MM-DD"></date-picker>
             </div>
 
             <div v-if="field.type == 'time'">
-                <date-picker :required="field.required" v-model="answers[field.uid]" format="HH:mm" value-type="HH:mm" type="time"></date-picker>
+                <date-picker :required="field.required" v-model="answers[field.uid]" format="HH:mm" value-type="HH:mm"
+                             type="time"></date-picker>
             </div>
 
 
@@ -132,7 +138,10 @@ export default {
         this.set_default()
     },
     mounted() {
-        window.document.querySelector('input.monitoring-input').focus()
+        setTimeout(() => {
+            window.document.querySelector('input.monitoring-input').focus()
+        }, 300)
+
     }
 }
 </script>
