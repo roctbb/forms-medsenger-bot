@@ -70,6 +70,16 @@ class AlgorithmsManager(Manager):
                             for criteria in block:
                                 if criteria.get('ask_value') and setup.get(criteria['value_code']):
                                     criteria['value'] = setup.get(criteria['value_code'])
+                if setup.get('algorithm_{}_attach_date'.format(template_id)):
+                    try:
+                        algorithm.attach_date = datetime.strptime(setup.get('algorithm_{}_attach_date'.format(template_id)), '%Y-%m-%d')
+                    except:
+                        pass
+                if setup.get('algorithm_{}_detach_date'.format(template_id)):
+                    try:
+                        algorithm.detach_date = datetime.strptime(setup.get('algorithm_{}_detach_date'.format(template_id)), '%Y-%m-%d')
+                    except:
+                        pass
 
             self.db.session.add(new_algorithm)
             self.__commit__()
