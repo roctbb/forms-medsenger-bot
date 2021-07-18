@@ -102,7 +102,7 @@ class AlgorithmsManager(Manager):
         return Algorithm.query.filter_by(is_template=True).all()
 
     def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1):
-        if category_name == "exact_time":
+        if category_name == "exact_date":
             return [datetime.now().strftime("%Y-%m-%d")], None
 
         if mode == 'value' or mode == 'category_value':
@@ -158,7 +158,7 @@ class AlgorithmsManager(Manager):
         if "date_" in sign:
             left = datetime.strptime(left, '%Y-%m-%d').date()
             right = (datetime.strptime(right, '%Y-%m-%d') + timedelta(days=modifier)).date()
-            sign = sign.lstrip('date_')
+            sign = sign.replace('date_', '')
         else:
             try:
                 right = right + modifier
@@ -447,6 +447,18 @@ class AlgorithmsManager(Manager):
 
         return next(s for s in algorithm.steps if s['uid'] == step)
 
+    def update_categories(self, algorithm):
+        step = self.get_step(algorithm)
+
+        algorithm.categories = '|'.join(
+            map(lambda c: '|'.join(['|'.join(k['category'] for k in block) for block in c['criteria']]),
+                step['conditions']))
+
+        if algorithm.common_conditions:
+            algorithm.categories = '|'.join([algorithm.categories, '|'.join(
+                map(lambda c: '|'.join(['|'.join(k['category'] for k in block) for block in c['criteria']]),
+                    algorithm.common_conditions))])
+
     def change_step(self, algorithm, step):
         new_step = self.get_step(algorithm, step)
 
@@ -457,13 +469,7 @@ class AlgorithmsManager(Manager):
         else:
             algorithm.timeout_at = 0
 
-        algorithm.categories = '|'.join(
-            map(lambda c: '|'.join(['|'.join(k['category'] for k in block) for block in c['criteria']]),
-                new_step['conditions']))
-        if algorithm.common_conditions:
-            algorithm.categories = '|'.join([algorithm.categories, '|'.join(
-                map(lambda c: '|'.join(['|'.join(k['category'] for k in block) for block in c['criteria']]),
-                    algorithm.common_conditions))])
+        self.update_categories(algorithm)
 
         for condition in new_step['conditions']:
             if any(any(criteria['category'] == 'step_init' for criteria in block) for block in condition['criteria']):
@@ -607,6 +613,8 @@ class AlgorithmsManager(Manager):
             if not algorithm.current_step:
                 algorithm.current_step = data.get('steps')[0].get('uid')
                 self.change_step(algorithm, algorithm.initial_step)
+            else:
+                self.update_categories(algorithm)
 
             if data.get('is_template') and contract.is_admin:
                 algorithm.clinics = data.get('clinics')

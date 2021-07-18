@@ -108,6 +108,18 @@ class TimetableManager(Manager):
                     if "exact_time" in alg.categories:
                         algorithm_manager.run(alg)
 
+    def check_days(self, app):
+        with app.app_context():
+            contracts = list(Contract.query.filter_by(is_active=True).all())
+            algorithm_groups = list(map(lambda x: x.algorithms, contracts))
+
+            algorithm_manager = AlgorithmsManager(self.medsenger_api, self.db)
+
+            for group in algorithm_groups:
+                for alg in group:
+                    if "exact_date" in alg.categories:
+                        algorithm_manager.run(alg)
+
     def iterate(self, app):
         with app.app_context():
             contracts = list(Contract.query.filter_by(is_active=True).all())

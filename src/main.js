@@ -115,7 +115,15 @@ Vue.mixin({
         get_category: function (category_name) {
             if (category_name == 'time' || category_name == "exact_time") {
                 return {
-                    description: 'время'
+                    description: 'время',
+                    type: "date"
+                }
+            }
+
+            if (category_name == "exact_date") {
+                return {
+                    description: 'дата',
+                    type: "date",
                 }
             }
 

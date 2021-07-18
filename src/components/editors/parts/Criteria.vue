@@ -36,7 +36,7 @@
                     <select @change="category_changed()" class="form-control form-control-sm"
                             v-model="criteria.category">
                         <optgroup label="Авто">
-                            <option value="exact_time">Текущая дата</option>
+                            <option value="exact_date">Текущая дата</option>
                         </optgroup>
                         <optgroup
                             v-for="(group, name) in group_by(category_list, 'subcategory')"
@@ -187,7 +187,6 @@ export default {
     props: ['data', 'rkey', 'pkey', 'save_clicked', 'condition'],
     data() {
         return {
-            mode: 'integer',
             criteria: {},
             category: undefined
         }
@@ -204,7 +203,7 @@ export default {
             return this.category.type != 'string' && this.category.type != 'date'
         },
         category_changed: function () {
-            if (this.criteria.category == 'exact_time') {
+            if (this.criteria.category == 'exact_date') {
                 this.category = {
                     type: "date",
                     description: "Текущая дата"
@@ -226,12 +225,14 @@ export default {
 
     },
     created() {
-        this.mode = this.data.type;
         this.criteria = this.data;
         if (this.empty(this.criteria.left_dimension)) this.criteria.left_dimension = 'hours';
         if (this.empty(this.criteria.right_dimension)) this.criteria.right_dimension = 'hours';
         this.category = this.get_category(this.criteria.category)
 
+    },
+    mounted() {
+        this.category = this.get_category(this.criteria.category)
     }
 }
 </script>
