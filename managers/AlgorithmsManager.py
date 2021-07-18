@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 from sqlalchemy.orm.attributes import flag_modified, flag_dirty
 
-from helpers import log, generate_description
+from helpers import log, generate_description, DATACACHE
 from managers.ContractsManager import ContractManager
 from managers.FormManager import FormManager
 from managers.Manager import Manager
@@ -101,13 +101,48 @@ class AlgorithmsManager(Manager):
     def get_templates(self):
         return Algorithm.query.filter_by(is_template=True).all()
 
-    def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1):
+    def get_from_cache(self, A):
+        if A in DATACACHE:
+            t, answer = DATACACHE[A]
+
+            if time.time() - t < 30:
+                return answer
+            else:
+                del DATACACHE[A]
+        return None
+
+    def save_to_cache(self, A, value):
+        for k, v in DATACACHE:
+            if time.time() - v[0] > 30:
+                del DATACACHE[k]
+
+        DATACACHE[A] = (int(time.time()), value)
+
+        return value
+
+    def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1, algorithm=None):
+        k = (category_name, mode, contract_id, dimension, hours, times)
+        cached = self.get_from_cache(k)
+        if cached != None:
+            return cached
+
         if category_name == "exact_date":
             return [datetime.now().strftime("%Y-%m-%d")], None
-        if category_name == "start_date":
-            return [self.medsenger_api.get_patient_info(contract_id).get('start_date')], None
-        if category_name == "end_date":
-            return [self.medsenger_api.get_patient_info(contract_id).get('end_date')], None
+        if category_name == "contract_start_date":
+            return self.save_to_cache(k, ([self.medsenger_api.get_patient_info(contract_id).get('start_date')], None))
+        if category_name == "contract_end_date":
+            return self.save_to_cache(k, ([self.medsenger_api.get_patient_info(contract_id).get('end_date')], None))
+
+        if category_name == "algorithm_attach_date" and algorithm:
+            if algorithm.attach_date:
+                return [algorithm.attach_date.strftime("%Y-%m-%d")], None
+            else:
+                return None, None
+        if category_name == "algorithm_detach_date" and algorithm:
+            if algorithm.detach_date:
+                return [algorithm.detach_date.strftime("%Y-%m-%d")], None
+            else:
+                return None, None
 
         if mode == 'value' or mode == 'category_value':
             offset = 0
@@ -126,31 +161,34 @@ class AlgorithmsManager(Manager):
                 answer = self.medsenger_api.get_records(contract_id, category_name, limit=times, offset=offset)
 
         if not answer:
+            self.save_to_cache(k, (None, None))
             return None, None
 
         values = list(map(lambda x: x['value'], answer['values']))
         objects = answer['values']
 
         if not values:
-            return None, None
-        if mode == 'value' and time.time() - int(answer['values'][0].get('timestamp')) > 10:
-            return None, None
-        if mode == 'value' or mode == 'category_value':
-            return values, objects
-        if mode == 'sum':
-            return [sum(values)], None
-        if mode == 'difference':
-            return [max(values) - min(values)], None
-        if mode == 'delta':
-            return [values[-1] - values[0]], None
-        if mode == 'average':
-            return [sum(values) / len(values)], None
-        if mode == 'max':
-            return [max(values)], None
-        if mode == 'min':
-            return [min(values)], None
+            answer = None, None
+        elif mode == 'value' and time.time() - int(answer['values'][0].get('timestamp')) > 10:
+            answer = None, None
+        elif mode == 'value' or mode == 'category_value':
+            answer = values, objects
+        elif mode == 'sum':
+            answer = [sum(values)], None
+        elif mode == 'difference':
+            answer = [max(values) - min(values)], None
+        elif mode == 'delta':
+            answer = [values[-1] - values[0]], None
+        elif mode == 'average':
+            answer = [sum(values) / len(values)], None
+        elif mode == 'max':
+            answer = [max(values)], None
+        elif mode == 'min':
+            answer = [min(values)], None
+        else:
+            answer = None, None
 
-        return None, None
+        return self.save_to_cache(k, answer)
 
     def check_values(self, left, right, sign, modifier=0):
 
@@ -186,7 +224,7 @@ class AlgorithmsManager(Manager):
 
         return False
 
-    def check_criteria(self, criteria, contract_id, buffer, descriptions, category_names):
+    def check_criteria(self, criteria, contract_id, buffer, descriptions, category_names, algorithm=None):
         category_name = criteria.get('category')
         mode = criteria.get('left_mode')
 
@@ -198,10 +236,10 @@ class AlgorithmsManager(Manager):
             dimension = criteria.get('left_dimension')
             if dimension == 'hours':
                 left_values, objects = self.get_values(category_name, criteria['left_mode'], contract_id, dimension,
-                                                       hours=criteria.get('left_hours'))
+                                                       hours=criteria.get('left_hours'), algorithm=algorithm)
             else:
                 left_values, objects = self.get_values(category_name, criteria['left_mode'], contract_id, dimension,
-                                                       times=criteria.get('left_times'))
+                                                       times=criteria.get('left_times'), algorithm=algorithm)
 
             if criteria['right_mode'] == 'value':
                 right_values = [criteria.get('value')]
@@ -212,17 +250,17 @@ class AlgorithmsManager(Manager):
                     if dimension == 'hours':
                         right_values, _ = self.get_values(right_category, criteria['right_mode'], contract_id,
                                                           dimension,
-                                                          hours=criteria.get('right_hours'))
+                                                          hours=criteria.get('right_hours'), algorithm=algorithm)
                     else:
                         right_values, _ = self.get_values(right_category, criteria['right_mode'], contract_id,
-                                                          dimension=dimension, times=criteria.get('right_times'))
+                                                          dimension=dimension, times=criteria.get('right_times'), algorithm=algorithm)
                 else:
                     if dimension == 'hours':
                         right_values, _ = self.get_values(category_name, criteria['right_mode'], contract_id,
-                                                          dimension=dimension, hours=criteria.get('right_hours'))
+                                                          dimension=dimension, hours=criteria.get('right_hours'), algorithm=algorithm)
                     else:
                         right_values, _ = self.get_values(category_name, criteria['right_mode'], contract_id,
-                                                          dimension=dimension, times=criteria.get('right_times'))
+                                                          dimension=dimension, times=criteria.get('right_times'), algorithm=algorithm)
 
             if not right_values or not left_values:
                 return False
@@ -484,10 +522,19 @@ class AlgorithmsManager(Manager):
     def check_timeouts(self, app):
         with app.app_context():
             algorithms = list(Algorithm.query.filter((Algorithm.contract_id != None) & (Algorithm.timeout_at != 0) & (
-                    Algorithm.timeout_at < time.time())).all())
+                Algorithm.timeout_at < time.time())).all())
 
             for algorithm in algorithms:
                 self.timeout(algorithm)
+
+    def check_detach_dates(self, app):
+        with app.app_context():
+            algorithms = list(Algorithm.query.filter(
+                (Algorithm.detach_date == datetime.now().date()) & (Algorithm.is_template == False)).all())
+
+            for algorithm in algorithms:
+                self.db.session.delete(algorithm)
+            self.__commit__()
 
     def timeout(self, algorithm):
         current_step = self.get_step(algorithm)
@@ -524,7 +571,7 @@ class AlgorithmsManager(Manager):
 
             result = any([all(
                 list(
-                    map(lambda x: self.check_criteria(x, contract_id, additions, descriptions, category_names), block)))
+                    map(lambda x: self.check_criteria(x, contract_id, additions, descriptions, category_names, algorithm=algorithm), block)))
                 for block in criteria])
 
             if result:
@@ -614,6 +661,23 @@ class AlgorithmsManager(Manager):
             algorithm.categories = data.get('categories')
             algorithm.template_id = data.get('template_id')
             algorithm.initial_step = data.get('steps')[0].get('uid')
+
+            if data.get('attach_date'):
+                try:
+                    algorithm.attach_date = datetime.strptime(data.get('attach_date'), "%Y-%m-%d")
+                except:
+                    pass
+            else:
+                algorithm.attach_date = None
+
+            if data.get('detach_date'):
+                try:
+                    algorithm.detach_date = datetime.strptime(data.get('detach_date'), "%Y-%m-%d")
+                except:
+                    pass
+            else:
+                algorithm.detach_date = None
+
             if not algorithm.current_step:
                 algorithm.current_step = data.get('steps')[0].get('uid')
                 self.change_step(algorithm, algorithm.initial_step)

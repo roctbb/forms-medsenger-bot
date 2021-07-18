@@ -37,8 +37,10 @@
                             v-model="criteria.category">
                         <optgroup label="Авто">
                             <option value="exact_date">Текущая дата</option>
-                            <option value="start_date">Дата начала консультирования</option>
-                            <option value="end_date">Дата завершения консультирования</option>
+                            <option value="contract_start_date">Дата начала консультирования</option>
+                            <option value="contract_end_date">Дата завершения консультирования</option>
+                            <option value="algorithm_attach_date">Дата отсчета алгоритма</option>
+                            <option value="algorithm_detach_date">Дата завершения алгоритма</option>
                         </optgroup>
                         <optgroup
                             v-for="(group, name) in group_by(category_list, 'subcategory')"
@@ -83,8 +85,10 @@
                             v-model="criteria.right_category">
                         <optgroup label="Авто">
                             <option value="exact_date">Текущая дата</option>
-                            <option value="start_date">Дата начала консультирования</option>
-                            <option value="end_date">Дата завершения консультирования</option>
+                            <option value="contract_start_date">Дата начала консультирования</option>
+                            <option value="contract_end_date">Дата завершения консультирования</option>
+                            <option value="algorithm_attach_date">Дата отсчета алгоритма</option>
+                            <option value="algorithm_detach_date">Дата завершения алгоритма</option>
                         </optgroup>
                         <optgroup
                             v-for="(group, name) in group_by(category_list, 'subcategory')"

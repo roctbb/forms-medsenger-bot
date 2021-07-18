@@ -21,6 +21,14 @@
                 <form-group48 v-if="is_admin" title="Показывать шаблон клиникам (JSON)">
                     <input class="form-control form-control-sm" type="text" v-model="algorithm.clinics"/>
                 </form-group48>
+
+                <form-group48 title="Дата отсчета">
+                    <date-picker v-model="algorithm.attach_date" value-type="YYYY-MM-DD"></date-picker>
+                </form-group48>
+
+                <form-group48 title="Дата завершения">
+                    <date-picker v-model="algorithm.detach_date" value-type="YYYY-MM-DD"></date-picker>
+                </form-group48>
             </card>
 
             <card :title="'Общие условия'">
@@ -182,10 +190,13 @@ import ErrorBlock from "../common/ErrorBlock";
 import Criteria from "./parts/Criteria";
 import Action from "./parts/Action";
 import * as moment from "moment/moment";
+import DatePicker from 'vue2-datepicker';
+import 'vue2-datepicker/index.css';
+import 'vue2-datepicker/locale/ru';
 
 export default {
     name: "AlgorithmEditor",
-    components: {Action, FormGroup48, Card, ErrorBlock, Criteria},
+    components: {Action, FormGroup48, Card, ErrorBlock, Criteria, DatePicker},
     props: {
         data: {
             required: false,
@@ -497,6 +508,17 @@ export default {
         Event.listen('attach-algorithm', (algorithm) => {
             this.algorithm = {}
             this.copy(this.algorithm, algorithm)
+
+            this.algorithm.attach_date = moment().format('YYYY-MM-DD')
+            if (algorithm.attach_date && algorithm.detach_date)
+            {
+                let attach = moment(algorithm.attach_date, "YYYY-MM-DD")
+                let detach = moment(algorithm.detach_date, "YYYY-MM-DD")
+                let len = moment.duration(detach.diff(attach)).asDays()
+
+                this.algorithm.detach_date = moment().add(len, 'days').format('YYYY-MM-DD')
+            }
+
             this.algorithm.id = undefined
             this.algorithm.is_template = false;
             this.algorithm.template_id = algorithm.id;

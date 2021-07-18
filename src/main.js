@@ -127,16 +127,30 @@ Vue.mixin({
                 }
             }
 
-            if (category_name == "start_date" ) {
+            if (category_name == "contract_start_date" ) {
                 return {
                     description: 'дата начала контракта',
                     type: "date",
                 }
             }
 
-            if (category_name == "end_date" ) {
+            if (category_name == "contract_end_date" ) {
                 return {
                     description: 'дата завершения контракта',
+                    type: "date",
+                }
+            }
+
+            if (category_name == "algorithm_attach_date" ) {
+                return {
+                    description: 'дата отсчета алгоритма',
+                    type: "date",
+                }
+            }
+
+            if (category_name == "algorithm_detach_date" ) {
+                return {
+                    description: 'дата завершения алгоритма',
                     type: "date",
                 }
             }

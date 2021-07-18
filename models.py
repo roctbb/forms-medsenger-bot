@@ -1,5 +1,5 @@
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import reduce
 
 from flask_sqlalchemy import SQLAlchemy
@@ -271,6 +271,9 @@ class Algorithm(db.Model):
     template_category = db.Column(db.String(512), default="Общее", nullable=True)
     clinics = db.Column(db.JSON, nullable=True)
 
+    attach_date = db.Column(db.Date, nullable=True)
+    detach_date = db.Column(db.Date, nullable=True)
+
     def as_dict(self, native=False):
         return {
             "id": self.id,
@@ -285,10 +288,20 @@ class Algorithm(db.Model):
             "template_id": self.template_id,
             "template_category": self.template_category,
             "attached_form": self.attached_form,
-            "clinics": self.clinics
+            "clinics": self.clinics,
+            "attach_date": self.attach_date.strftime('%Y-%m-%d') if self.attach_date else None,
+            "detach_date": self.detach_date.strftime('%Y-%m-%d') if self.detach_date else None
         }
 
     def clone(self):
+
+        attach = datetime.now().date()
+        detach = None
+
+        if self.attach_date and self.detach_date:
+            length = abs((self.detach_date - self.attach_date).days)
+            detach = attach + timedelta(days=length)
+
         new_algorithm = Algorithm()
         new_algorithm.title = self.title
         new_algorithm.description = self.description
@@ -298,6 +311,8 @@ class Algorithm(db.Model):
         new_algorithm.attached_form = self.attached_form
         new_algorithm.initial_step = self.initial_step
         new_algorithm.current_step = self.current_step
+        new_algorithm.attach_date = attach
+        new_algorithm.detach_date = detach
 
         step = get_step(self)
         if not step.get('reset_minutes') or int(step['reset_minutes']) == 0:

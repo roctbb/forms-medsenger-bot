@@ -6,6 +6,7 @@ from config import *
 from sentry_sdk import capture_exception
 import sys, os
 
+DATACACHE = {}
 
 def gts():
     now = datetime.now()
