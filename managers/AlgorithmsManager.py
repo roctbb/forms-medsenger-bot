@@ -104,6 +104,10 @@ class AlgorithmsManager(Manager):
     def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1):
         if category_name == "exact_date":
             return [datetime.now().strftime("%Y-%m-%d")], None
+        if category_name == "start_date":
+            return [self.medsenger_api.get_patient_info(contract_id).get('start_date')], None
+        if category_name == "end_date":
+            return [self.medsenger_api.get_patient_info(contract_id).get('end_date')], None
 
         if mode == 'value' or mode == 'category_value':
             offset = 0

@@ -120,9 +120,23 @@ Vue.mixin({
                 }
             }
 
-            if (category_name == "exact_date") {
+            if (category_name == "exact_date" ) {
                 return {
                     description: 'дата',
+                    type: "date",
+                }
+            }
+
+            if (category_name == "start_date" ) {
+                return {
+                    description: 'дата начала контракта',
+                    type: "date",
+                }
+            }
+
+            if (category_name == "end_date" ) {
+                return {
+                    description: 'дата завершения контракта',
                     type: "date",
                 }
             }

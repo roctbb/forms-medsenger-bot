@@ -37,6 +37,8 @@
                             v-model="criteria.category">
                         <optgroup label="Авто">
                             <option value="exact_date">Текущая дата</option>
+                            <option value="start_date">Дата начала консультирования</option>
+                            <option value="end_date">Дата завершения консультирования</option>
                         </optgroup>
                         <optgroup
                             v-for="(group, name) in group_by(category_list, 'subcategory')"
@@ -79,6 +81,11 @@
                 <div class="col-md-2" v-if="criteria.right_mode != 'value' && !['time', 'init', 'step_init'].includes(criteria.left_mode)">
                     <select class="form-control form-control-sm"
                             v-model="criteria.right_category">
+                        <optgroup label="Авто">
+                            <option value="exact_date">Текущая дата</option>
+                            <option value="start_date">Дата начала консультирования</option>
+                            <option value="end_date">Дата завершения консультирования</option>
+                        </optgroup>
                         <optgroup
                             v-for="(group, name) in group_by(category_list, 'subcategory')"
                             v-bind:label="name">
