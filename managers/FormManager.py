@@ -298,7 +298,7 @@ class FormManager(Manager):
                 self.db.session.add(form)
             self.__commit__()
 
-            if form.timetable.get('send_on_init') and form.contract_id:
+            if not form_id and form.timetable.get('send_on_init') and form.contract_id:
                 self.db.session.refresh(form)
                 self.run(form)
 
