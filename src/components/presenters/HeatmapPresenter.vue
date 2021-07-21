@@ -119,6 +119,7 @@ export default {
                         },
                         labels: {
                             align: 'left',
+                            y: 5,
                             reserveSpace: true
                         },
                         title: {
@@ -131,6 +132,7 @@ export default {
                         },
                         labels: {
                             align: 'left',
+                            y: 5,
                             reserveSpace: true
                         },
                         top: '0%',
