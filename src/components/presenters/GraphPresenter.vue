@@ -300,6 +300,11 @@ export default {
                         enabled: true,
                         radius: 4,
                         symbol: 'circle'
+                    },
+                    states: {
+                        inactive: {
+                            opacity: 1,
+                        }
                     }
                 })
             })
@@ -336,6 +341,11 @@ export default {
                         enabled: true,
                         radius: 4,
                         symbol: 'square'
+                    },
+                    states: {
+                        inactive: {
+                            opacity: 1,
+                        }
                     }
                 })
                 y += 4;
@@ -362,6 +372,11 @@ export default {
                         lineColor: '#ad0eca',
                         radius: 3,
                         symbol: 'triangle'
+                    },
+                    states: {
+                        inactive: {
+                            opacity: 1,
+                        }
                     }
                 })
                 y += 1;
