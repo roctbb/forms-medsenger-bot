@@ -183,6 +183,9 @@ export default {
                 xAxis: {
                     type: 'datetime',
                     gridLineWidth: 1,
+                    minorGridLineWidth: 2,
+                    minorTickLength: 0,
+                    minorTickInterval: 24 * 3600 * 1000,
                     plotLines: [],
                     max: now + 1000 * 3600 * 10,
                     ordinal: false,
@@ -309,7 +312,7 @@ export default {
                 })
             })
 
-            let y = 1;
+            let y = -5;
 
             let medicines = {}
             this.data.filter((graph) => graph.category.name == 'medicine').forEach((graph) => {
@@ -348,20 +351,24 @@ export default {
                         }
                     }
                 })
-                y += 4;
+                y -= 4;
             })
 
+            y = -3
             this.data.filter((graph) => graph.category.name == 'symptom').forEach((graph) => {
                 this.options.series.push({
                     yAxis: 1,
+                    color: '#ad0eca',
                     name: graph.category.description,
                     data: graph.values.map((value) => {
                         if ((value.timestamp + this.offset) * 1000 >= now - 5 * 24 * 3600 * 1000) n++
+                        let x = new Date((value.timestamp + this.offset) * 1000)
+                        x.setHours(0, 0, 0)
                         return {
                             dataLabels: {
                                 enabled: false,
                             },
-                            x: (value.timestamp + this.offset) * 1000,
+                            x: +x + this.offset * 1000,
                             y: y,
                             comment: this.get_comment(value, graph.category.description),
                         }
@@ -369,8 +376,7 @@ export default {
                     lineWidth: 0,
                     marker: {
                         enabled: true,
-                        lineColor: '#ad0eca',
-                        radius: 3,
+                        radius: 5,
                         symbol: 'triangle'
                     },
                     states: {
@@ -379,7 +385,6 @@ export default {
                         }
                     }
                 })
-                y += 1;
             });
 
             // if (n > 5) this.options.rangeSelector.selected = 0
