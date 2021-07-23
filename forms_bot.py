@@ -154,6 +154,7 @@ def remove(data):
         abort(422)
 
     contract_manager.remove(contract_id)
+
     return "ok"
 
 
