@@ -131,7 +131,7 @@ class AlgorithmsManager(Manager):
         return value
 
     def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1, algorithm=None, offset_dim='times', offset_count=0):
-        k = (category_name, mode, contract_id, dimension, hours, times)
+        k = (category_name, mode, contract_id, dimension, hours, times, offset_dim, offset_count)
         cached = self.get_from_cache(k)
         if cached != None:
             return cached
