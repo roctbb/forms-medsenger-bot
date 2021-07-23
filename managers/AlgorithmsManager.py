@@ -176,7 +176,7 @@ class AlgorithmsManager(Manager):
                                                             (datetime.now() - timedelta(hours=hours)).timestamp()),
                                                         offset=offset)
             else:
-                answer = self.medsenger_api.get_records(contract_id, category_name, limit=times + times_offset,
+                answer = self.medsenger_api.get_records(contract_id, category_name, limit=times,
                                                         time_to=int(time_to.timestamp()),
                                                         offset=offset)
         if not answer:
