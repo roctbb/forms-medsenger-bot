@@ -155,22 +155,20 @@ class AlgorithmsManager(Manager):
                 return None, None
 
         if mode == 'value' or mode == 'category_value':
-            offset = 0
-        else:
-            offset = 1
-
-        if mode == 'value' or mode == 'category_value':
-            answer = self.medsenger_api.get_records(contract_id, category_name, group=True, offset=offset)
+            answer = self.medsenger_api.get_records(contract_id, category_name, group=True)
         else:
             time_from = datetime.now() - timedelta(hours=hours)
             time_to = datetime.now()
+            offset = 1
 
             if offset_dim == 'hours':
                 time_from -= timedelta(hours=offset_count)
                 time_to -= timedelta(hours=offset_count)
-            if offset_dim == 'days':
+            elif offset_dim == 'days':
                 time_from -= timedelta(days=offset_count)
                 time_to -= timedelta(days=offset_count)
+            elif offset_dim == 'times':
+                offset = offset_count
 
             if dimension == 'hours':
                 answer = self.medsenger_api.get_records(contract_id, category_name,
@@ -178,8 +176,9 @@ class AlgorithmsManager(Manager):
                                                             (datetime.now() - timedelta(hours=hours)).timestamp()),
                                                         offset=offset)
             else:
-                answer = self.medsenger_api.get_records(contract_id, category_name, limit=times, offset=offset)
-
+                answer = self.medsenger_api.get_records(contract_id, category_name, limit=times + times_offset,
+                                                        time_to=int(time_to.timestamp()),
+                                                        offset=offset)
         if not answer:
             self.save_to_cache(k, (None, None))
             return None, None
@@ -270,9 +269,8 @@ class AlgorithmsManager(Manager):
             else:
                 right_category = criteria.get('right_category')
                 dimension = criteria.get('right_dimension')
-                offset_dim = criteria.get('right_offset_dimension') if criteria.get('right_offset_dimension') is not None else 'times'
-                offset_count = criteria.get('right_offset') if criteria.get('right_offset') is not None else 0
-
+                offset_dim = criteria.get('right_offset_dimension', 'times')
+                offset_count = criteria.get('right_offset', 0)
                 if right_category:
                     if dimension == 'hours':
                         right_values, _ = self.get_values(right_category, criteria['right_mode'], contract_id,
