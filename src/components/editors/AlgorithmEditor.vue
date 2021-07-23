@@ -292,6 +292,9 @@ export default {
             }
 
             let prepare_criteria = (criteria) => {
+                criteria.left_offset = parseInt(criteria.left_offset)
+                criteria.right_offset = parseInt(criteria.right_offset)
+
                 if (criteria.left_mode != 'time' && criteria.left_mode != 'init') {
                     if (criteria.left_dimension == 'hours') {
                         if (!this.empty(criteria.left_hours)) criteria.left_hours = parseInt(criteria.left_hours)

@@ -130,7 +130,7 @@ class AlgorithmsManager(Manager):
 
         return value
 
-    def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1, algorithm=None):
+    def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1, algorithm=None, offset_dim='times', offset_count=0):
         k = (category_name, mode, contract_id, dimension, hours, times)
         cached = self.get_from_cache(k)
         if cached != None:
@@ -162,6 +162,16 @@ class AlgorithmsManager(Manager):
         if mode == 'value' or mode == 'category_value':
             answer = self.medsenger_api.get_records(contract_id, category_name, group=True, offset=offset)
         else:
+            time_from = datetime.now() - timedelta(hours=hours)
+            time_to = datetime.now()
+
+            if offset_dim == 'hours':
+                time_from -= timedelta(hours=offset_count)
+                time_to -= timedelta(hours=offset_count)
+            if offset_dim == 'days':
+                time_from -= timedelta(days=offset_count)
+                time_to -= timedelta(days=offset_count)
+
             if dimension == 'hours':
                 answer = self.medsenger_api.get_records(contract_id, category_name,
                                                         time_from=int(
@@ -244,37 +254,47 @@ class AlgorithmsManager(Manager):
         if mode != 'time':
             objects = None
             dimension = criteria.get('left_dimension')
+            offset_dim = criteria.get('left_offset_dimension', 'times')
+            offset_count = criteria.get('left_offset', 0)
+
             if dimension == 'hours':
                 left_values, objects = self.get_values(category_name, criteria['left_mode'], contract_id, dimension,
-                                                       hours=criteria.get('left_hours'), algorithm=algorithm)
+                                                       hours=criteria.get('left_hours'),
+                                                       offset_dim=offset_dim, offset_count=offset_count, algorithm=algorithm)
             else:
                 left_values, objects = self.get_values(category_name, criteria['left_mode'], contract_id, dimension,
-                                                       times=criteria.get('left_times'), algorithm=algorithm)
+                                                       times=criteria.get('left_times'), offset_dim=offset_dim, offset_count=offset_count, algorithm=algorithm)
 
             if criteria['right_mode'] == 'value':
                 right_values = [criteria.get('value')]
             else:
                 right_category = criteria.get('right_category')
                 dimension = criteria.get('right_dimension')
+                offset_dim = criteria.get('right_offset_dimension') if criteria.get('right_offset_dimension') is not None else 'times'
+                offset_count = criteria.get('right_offset') if criteria.get('right_offset') is not None else 0
+
                 if right_category:
                     if dimension == 'hours':
                         right_values, _ = self.get_values(right_category, criteria['right_mode'], contract_id,
                                                           dimension,
-                                                          hours=criteria.get('right_hours'), algorithm=algorithm)
+                                                          hours=criteria.get('right_hours'),
+                                                          offset_dim=offset_dim, offset_count=offset_count, algorithm=algorithm)
                     else:
                         right_values, _ = self.get_values(right_category, criteria['right_mode'], contract_id,
-                                                          dimension=dimension, times=criteria.get('right_times'), algorithm=algorithm)
+                                                          dimension=dimension, times=criteria.get('right_times'),
+                                                          offset_dim=offset_dim, offset_count=offset_count, algorithm=algorithm)
                 else:
                     if dimension == 'hours':
                         right_values, _ = self.get_values(category_name, criteria['right_mode'], contract_id,
-                                                          dimension=dimension, hours=criteria.get('right_hours'), algorithm=algorithm)
+                                                          dimension=dimension, hours=criteria.get('right_hours'),
+                                                          offset_dim=offset_dim, offset_count=offset_count, algorithm=algorithm)
                     else:
                         right_values, _ = self.get_values(category_name, criteria['right_mode'], contract_id,
-                                                          dimension=dimension, times=criteria.get('right_times'), algorithm=algorithm)
+                                                          dimension=dimension, times=criteria.get('right_times'),
+                                                          offset_dim=offset_dim, offset_count=offset_count, algorithm=algorithm)
 
             if not right_values or not left_values:
                 return False
-
             found = False
 
             for i in range(len(left_values)):
