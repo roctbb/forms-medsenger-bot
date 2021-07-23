@@ -159,7 +159,7 @@ class AlgorithmsManager(Manager):
         else:
             time_from = datetime.now() - timedelta(hours=hours)
             time_to = datetime.now()
-            offset = 1
+            offset = 0
 
             if offset_dim == 'hours':
                 time_from -= timedelta(hours=offset_count)
