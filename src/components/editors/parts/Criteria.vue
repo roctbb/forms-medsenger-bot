@@ -29,6 +29,15 @@
                         <option value="hours">часов</option>
                         <option value="times">раз</option>
                     </select>
+                    <small class="text-muted">с отступом</small>
+                    <input class="form-control form-control-sm"
+                           :class="this.save_clicked && empty(criteria.left_offset) ? 'is-invalid' : ''"
+                           v-model="criteria.left_offset">
+                    <select class="form-control form-control-sm" v-model="criteria.left_offset_dimension">
+                        <option value="days">дней</option>
+                        <option value="hours">часов</option>
+                        <option value="times">раз</option>
+                    </select>
                 </div>
                 <div class="col-md-3" v-if="!['time', 'init'].includes(criteria.left_mode)">
                     <select @change="category_changed()" class="form-control form-control-sm"
@@ -89,6 +98,15 @@
                            :class="this.save_clicked && empty(criteria.right_times) ? 'is-invalid' : ''"
                            v-model="criteria.right_times">
                     <select class="form-control form-control-sm" v-model="criteria.right_dimension">
+                        <option value="hours">часов</option>
+                        <option value="times">раз</option>
+                    </select>
+                    <small class="text-muted">с отступом</small>
+                    <input class="form-control form-control-sm"
+                           :class="this.save_clicked && empty(criteria.right_offset) ? 'is-invalid' : ''"
+                           v-model="criteria.right_offset">
+                    <select class="form-control form-control-sm" v-model="criteria.right_offset_dimension">
+                        <option value="days">дней</option>
                         <option value="hours">часов</option>
                         <option value="times">раз</option>
                     </select>
@@ -176,7 +194,6 @@ export default {
         }
     },
     methods: {
-
         remove: function () {
             Event.fire('remove-criteria', [this.rkey, this.pkey, this.condition])
         },
@@ -202,6 +219,14 @@ export default {
         this.criteria = this.data;
         if (this.empty(this.criteria.left_dimension)) this.criteria.left_dimension = 'hours';
         if (this.empty(this.criteria.right_dimension)) this.criteria.right_dimension = 'hours';
+        if (this.empty(this.criteria.left_offset_dimension)) {
+            this.criteria.left_offset_dimension = 'hours';
+            this.criteria.left_offset = 0
+        }
+        if (this.empty(this.criteria.right_offset_dimension)) {
+            this.criteria.right_offset_dimension = 'hours';
+            this.criteria.right_offset = 0
+        }
         this.category = this.get_category(this.criteria.category)
 
     }
