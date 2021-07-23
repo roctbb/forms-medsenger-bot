@@ -271,6 +271,7 @@ class AlgorithmsManager(Manager):
                 dimension = criteria.get('right_dimension')
                 offset_dim = criteria.get('right_offset_dimension', 'times')
                 offset_count = criteria.get('right_offset', 0)
+
                 if right_category:
                     if dimension == 'hours':
                         right_values, _ = self.get_values(right_category, criteria['right_mode'], contract_id,
