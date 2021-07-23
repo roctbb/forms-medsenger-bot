@@ -29,7 +29,8 @@ class AlgorithmsManager(Manager):
                         {
                             "uid": str(uuid.uuid4()),
                             "criteria": algorithm.criteria,
-                            "positive_actions": [action for action in algorithm.actions if not action['params'].get('is_negative')],
+                            "positive_actions": [action for action in algorithm.actions if
+                                                 not action['params'].get('is_negative')],
                             "negative_actions": [action for action in algorithm.actions if action['params'].get('is_negative')]
                         }
                     ],
@@ -99,7 +100,8 @@ class AlgorithmsManager(Manager):
     def get_templates(self):
         return Algorithm.query.filter_by(is_template=True).all()
 
-    def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1, offset_dim='times', offset_count=0):
+    def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1, offset_dim='times',
+                   offset_count=0):
 
         if mode == 'value' or mode == 'category_value':
             offset = 0
@@ -111,20 +113,27 @@ class AlgorithmsManager(Manager):
         else:
             time_from = datetime.now() - timedelta(hours=hours)
             time_to = datetime.now()
+            times_offset = 0
 
             if offset_dim == 'hours':
                 time_from -= timedelta(hours=offset_count)
                 time_to -= timedelta(hours=offset_count)
-            if offset_dim == 'days':
+            elif offset_dim == 'days':
                 time_from -= timedelta(days=offset_count)
                 time_to -= timedelta(days=offset_count)
+            elif offset_dim == 'times':
+                times_offset = offset_count
 
             if dimension == 'hours':
                 answer = self.medsenger_api.get_records(contract_id, category_name,
                                                         time_from=int(time_from.timestamp()), time_to=int(time_to.timestamp()),
                                                         offset=offset)
             else:
-                answer = self.medsenger_api.get_records(contract_id, category_name, limit=times, offset=offset)
+                answer = self.medsenger_api.get_records(contract_id, category_name, limit=times + times_offset,
+                                                        time_to=int(time_to.timestamp()),
+                                                        offset=offset)
+        if offset_dim == 'times':
+            answer['values'] = answer['values'][offset_count:]
 
         if not answer:
             return None, None
@@ -177,7 +186,6 @@ class AlgorithmsManager(Manager):
         return False
 
     def check_criteria(self, criteria, contract_id, buffer, descriptions, category_names):
-        print(criteria)
         category_name = criteria.get('category')
         mode = criteria.get('left_mode')
 
@@ -205,7 +213,8 @@ class AlgorithmsManager(Manager):
             else:
                 right_category = criteria.get('right_category')
                 dimension = criteria.get('right_dimension')
-                offset_dim = criteria.get('right_offset_dimension') if criteria.get('right_offset_dimension') is not None else 'times'
+                offset_dim = criteria.get('right_offset_dimension') if criteria.get(
+                    'right_offset_dimension') is not None else 'times'
                 offset_count = criteria.get('right_offset') if criteria.get('right_offset') is not None else 0
 
                 if right_category:
@@ -296,7 +305,6 @@ class AlgorithmsManager(Manager):
                 params["message"] = params.get("message", "") + report
 
             self.medsenger_api.send_order(contract_id, order, agent_id, params)
-
 
         if action['type'] == 'patient_message':
             if action['params'].get('add_action'):
@@ -457,13 +465,15 @@ class AlgorithmsManager(Manager):
         else:
             algorithm.timeout_at = 0
 
-        algorithm.categories = '|'.join(map(lambda c: '|'.join(['|'.join(k['category'] for k in block) for block in c['criteria']]), new_step['conditions']))
+        algorithm.categories = '|'.join(
+            map(lambda c: '|'.join(['|'.join(k['category'] for k in block) for block in c['criteria']]), new_step['conditions']))
 
         self.__commit__()
 
     def check_timeouts(self, app):
         with app.app_context():
-            algorithms = list(Algorithm.query.filter((Algorithm.contract_id != None) & (Algorithm.timeout_at != 0) & (Algorithm.timeout_at < time.time())).all())
+            algorithms = list(Algorithm.query.filter(
+                (Algorithm.contract_id != None) & (Algorithm.timeout_at != 0) & (Algorithm.timeout_at < time.time())).all())
 
             for algorithm in algorithms:
                 self.timeout(algorithm)
@@ -491,7 +501,6 @@ class AlgorithmsManager(Manager):
             if reset_minutes and last_fired:
                 if time.time() - last_fired < reset_minutes * 60:
                     continue
-
 
             additions = []
             descriptions = []
@@ -531,7 +540,7 @@ class AlgorithmsManager(Manager):
                     for block in condition['criteria']:
                         for criteria in block:
                             if criteria.get('ask_value'):
-                                params.add((criteria.get('value_name'),criteria.get('value')))
+                                params.add((criteria.get('value_name'), criteria.get('value')))
         return [{"name": n, "value": v} for n, v in params]
 
     def examine(self, contract, form):
@@ -546,7 +555,8 @@ class AlgorithmsManager(Manager):
             fired = fired or self.run(algorithm)
 
         if not fired and form.thanks_text:
-            self.medsenger_api.send_message(contract.id, text=form.thanks_text, only_patient=True, action_deadline=time.time() + 60 * 60)
+            self.medsenger_api.send_message(contract.id, text=form.thanks_text, only_patient=True,
+                                            action_deadline=time.time() + 60 * 60)
 
     def hook(self, contract, category_name):
         patient = contract.patient
