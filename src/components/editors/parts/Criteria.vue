@@ -143,6 +143,13 @@
                     <small class="text-muted" v-if="criteria.right_mode == 'value'">значение для сравнения</small>
                     <small class="text-muted" v-else>модификатор</small>
                 </div>
+                <div class="col-md-1" v-if="!['time', 'init', 'step_init'].includes(criteria.left_mode) && criteria.right_mode != 'value'">
+
+                    <input class="form-control form-control-sm"
+                           :class="this.save_clicked && empty(criteria.multiplier) ? 'is-invalid' : ''"
+                           v-model="criteria.multiplier">
+                    <small class="text-muted">мультипликатор</small>
+                </div>
 
                 <!-- time -->
 
@@ -264,6 +271,8 @@ export default {
             this.criteria.right_offset_dimension = 'hours';
             this.criteria.right_offset = 0
         }
+        if (this.empty(this.criteria.multiplier))
+            this.criteria.multiplier = '1'
         this.category = this.get_category(this.criteria.category)
 
     },

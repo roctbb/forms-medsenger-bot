@@ -313,6 +313,10 @@ export default {
                         if (category.type == 'integer') criteria.value = parseInt(criteria.value)
                         if (category.type == 'float') criteria.value = parseFloat(criteria.value)
                     }
+
+                    if (!this.empty(criteria.value)) {
+                        criteria.multiplier = parseFloat(criteria.multiplier)
+                    }
                 }
                 if (criteria.left_mode == 'time') {
                     if (criteria.right_dimension == 'hours') {

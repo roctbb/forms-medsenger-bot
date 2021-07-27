@@ -209,7 +209,7 @@ class AlgorithmsManager(Manager):
 
         return self.save_to_cache(k, answer)
 
-    def check_values(self, left, right, sign, modifier=0):
+    def check_values(self, left, right, sign, modifier=0, multiplier=1):
 
         try:
             modifier = float(modifier)
@@ -222,7 +222,7 @@ class AlgorithmsManager(Manager):
             sign = sign.replace('date_', '')
         else:
             try:
-                right = right + modifier
+                right = right * multiplier + modifier
             except:
                 pass
 
@@ -302,8 +302,9 @@ class AlgorithmsManager(Manager):
                 for rvalue in right_values:
                     modifier = 0
                     if criteria.get('right_mode') != 'value':
-                        modifier = criteria.get('value')
-                    result = self.check_values(lvalue, rvalue, criteria['sign'], modifier)
+                        modifier = criteria.get('value', 0)
+                        multiplier = criteria.get('multiplier', 1)
+                    result = self.check_values(lvalue, rvalue, criteria['sign'], modifier, multiplier)
 
                     if result:
                         current_answer = None
