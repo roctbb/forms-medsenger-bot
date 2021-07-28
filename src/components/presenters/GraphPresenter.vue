@@ -66,7 +66,9 @@ export default {
         },
         process_load_answer: function (response) {
             this.data = response.data
-            let now = +new Date() + this.offset
+            let today = new Date()
+            today.setHours(23,59,59)
+            let now = +today + this.offset
 
             this.options = {
                 colors: ['#058DC7', '#50B432', '#aa27ce', '#fcff00',
@@ -278,14 +280,12 @@ export default {
                 }
             });
 
-            let n = 0; // Количество значений за последние 5 часа
             this.data.filter((graph) => graph.category.type != 'string').forEach((graph) => {
                 this.options.series.push({
                     name: graph.category.description,
                     yAxis: 0,
                     showInNavigator: true,
                     data: graph.values.map((value) => {
-                        if ((value.timestamp + this.offset) * 1000 >= now - 5 * 24 * 3600 * 1000) n++
                         return {
                             x: (value.timestamp + this.offset) * 1000,
                             y: value.value,
@@ -361,9 +361,8 @@ export default {
                     color: '#ad0eca',
                     name: graph.category.description,
                     data: graph.values.map((value) => {
-                        if ((value.timestamp + this.offset) * 1000 >= now - 5 * 24 * 3600 * 1000) n++
                         let x = new Date((value.timestamp + this.offset) * 1000)
-                        x.setHours(0, 0, 0)
+                        x.setHours(12, 0, 0)
                         return {
                             dataLabels: {
                                 enabled: false,
@@ -387,7 +386,6 @@ export default {
                 })
             });
 
-            // if (n > 5) this.options.rangeSelector.selected = 0
             if (this.group.categories.includes('glukose')) {
                 this.set_bands()
             }
