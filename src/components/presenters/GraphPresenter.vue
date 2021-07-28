@@ -1,36 +1,38 @@
 <template>
     <div>
         <div style="margin-left: 10px;">
-            <a class="btn btn-danger" @click="select_graph()">Назад</a>
+            <a class="btn btn-outline-info btn-sm" @click="select_graph()">Назад</a>
         </div>
 
-        <highcharts :constructor-type="'stockChart'" v-if="loaded" :options="options"></highcharts>
+        <div v-if="loaded">
+            <highcharts :constructor-type="'stockChart'" :options="options"></highcharts>
 
-        <div class="container">
-            <input type="checkbox" v-model="options.legend.enabled" id="show_legend"/>
-            <label for="show_legend">Показать легенду</label>
-        </div>
+            <div class="container">
+                <input type="checkbox" v-model="options.legend.enabled" id="show_legend"/>
+                <label for="show_legend">Показать легенду</label>
+            </div>
 
-        <div class="container center" v-if="this.statistics.length && this.show_table()">
-            <h5>Значения за отображенный период</h5>
-            <table class="table table-hover">
-                <thead>
-                <tr>
-                    <th scope="col" class="bg-info text-light">Параметр</th>
-                    <th scope="col" class="bg-info text-light">В среднем</th>
-                    <th scope="col" class="bg-info text-light">Минимум</th>
-                    <th scope="col" class="bg-info text-light">Максимум</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr v-for="stat in this.statistics">
-                    <th scope="row">{{ stat.name }}</th>
-                    <td>{{ stat.avg }}</td>
-                    <td>{{ stat.min }}</td>
-                    <td>{{ stat.max }}</td>
-                </tr>
-                </tbody>
-            </table>
+            <div class="container center" v-if="this.statistics.length && this.show_table()">
+                <h5>Значения за отображенный период</h5>
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="col" class="bg-info text-light">Параметр</th>
+                        <th scope="col" class="bg-info text-light">В среднем</th>
+                        <th scope="col" class="bg-info text-light">Минимум</th>
+                        <th scope="col" class="bg-info text-light">Максимум</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="stat in this.statistics">
+                        <th scope="row">{{ stat.name }}</th>
+                        <td>{{ stat.avg }}</td>
+                        <td>{{ stat.min }}</td>
+                        <td>{{ stat.max }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <br>
     </div>
@@ -244,6 +246,7 @@ export default {
                 },
                 legend: {
                     enabled: true,
+                    itemDistance: 70,
                     maxHeight: 100,
                     labelFormatter: function () {
                         return this.name + '<br>.<br>.'
@@ -359,34 +362,36 @@ export default {
 
             y = -3
             this.data.filter((graph) => graph.category.name == 'symptom').forEach((graph) => {
-                this.options.series.push({
-                    yAxis: 1,
-                    color: '#ad0eca',
-                    name: graph.category.description,
-                    data: graph.values.map((value) => {
-                        let x = new Date((value.timestamp + this.offset) * 1000)
-                        x.setHours(12, 0, 0)
-                        return {
-                            dataLabels: {
-                                enabled: false,
-                            },
-                            x: +x + this.offset * 1000,
-                            y: y,
-                            comment: this.get_comment(value, graph.category.description),
+                if (graph.values.length > 0) {
+                    this.options.series.push({
+                        yAxis: 1,
+                        color: '#ad0eca',
+                        name: graph.category.description,
+                        data: graph.values.map((value) => {
+                            let x = new Date((value.timestamp + this.offset) * 1000)
+                            x.setHours(12, 0, 0)
+                            return {
+                                dataLabels: {
+                                    enabled: false,
+                                },
+                                x: +x + this.offset * 1000,
+                                y: y,
+                                comment: this.get_comment(value, graph.category.description),
+                            }
+                        }).reverse(),
+                        lineWidth: 0,
+                        marker: {
+                            enabled: true,
+                            radius: 5,
+                            symbol: 'triangle'
+                        },
+                        states: {
+                            inactive: {
+                                opacity: 1,
+                            }
                         }
-                    }).reverse(),
-                    lineWidth: 0,
-                    marker: {
-                        enabled: true,
-                        radius: 5,
-                        symbol: 'triangle'
-                    },
-                    states: {
-                        inactive: {
-                            opacity: 1,
-                        }
-                    }
-                })
+                    })
+                }
             });
 
             if (this.group.categories.includes('glukose')) {
@@ -507,7 +512,8 @@ export default {
         })
 
         Event.listen('window-resized', () => {
-            if (this.options) {
+            if (this.options.chart != null) {
+                console.log(this.options.chart)
                 this.options.chart.height = window.innerHeight
                 this.options.chart.width = window.innerWidth
             }
