@@ -256,7 +256,8 @@ export default {
                             return p.comment
                         }).join('<br>')
                     },
-                    shared: true
+                    shared: true,
+                    headerFormat: null
                 }
             }
 
@@ -324,19 +325,21 @@ export default {
                 })
             });
 
-            Object.entries(medicines).forEach(([key, value]) => {
+            Object.entries(medicines).forEach(([medicine, values]) => {
                 this.options.series.push({
                     yAxis: 1,
-                    name: key,
-                    data: value.map((val) => {
-                        if ((value.timestamp + this.offset) * 1000 >= now - 5 * 24 * 3600 * 1000) n++
+                    name: medicine,
+                    data: values.map((timestamp) => {
                         return {
                             dataLabels: {
                                 enabled: false,
                             },
-                            x: (val + this.offset) * 1000,
+                            x: (timestamp + this.offset) * 1000,
                             y: y,
-                            comment: 'Прием лекарства: ' + key,
+                            comment: this.get_comment({
+                                value: medicine,
+                                timestamp: timestamp
+                            },  'Прием лекарства'),
                         }
                     }).reverse(),
                     lineWidth: 0,
@@ -417,13 +420,17 @@ export default {
         },
         get_comment: function (point, category) {
 
-            let comment = category + ': ' + point.value
+            let comment =  "<strong>" + this.formatTime(new Date((point.timestamp + this.offset) * 1000))+ " </strong>"
+                + category + ': ' + point.value
             if (point.additions) {
                 point.additions.forEach((value) => {
                     comment += '<br/><strong style="color: red;">' + value['addition']['comment'] + '</strong>'
                 })
             }
             return comment
+        },
+        formatTime: function (date) {
+            return date.toTimeString().substr(0, 5)
         },
         set_bands: function () {
             this.options.yAxis[0].plotBands = [{
