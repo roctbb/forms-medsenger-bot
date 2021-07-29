@@ -646,7 +646,8 @@ class AlgorithmsManager(Manager):
 
         fired = False
         for algorithm in algorithms:
-            fired = fired or self.run(algorithm)
+            result = self.run(algorithm)
+            fired = fired or result
 
         if not fired and form.thanks_text:
             self.medsenger_api.send_message(contract.id, text=form.thanks_text, only_patient=True,
