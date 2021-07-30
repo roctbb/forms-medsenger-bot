@@ -72,12 +72,14 @@ class AlgorithmsManager(Manager):
                                     criteria['value'] = setup.get(criteria['value_code'])
                 if setup.get('algorithm_{}_attach_date'.format(template_id)):
                     try:
-                        new_algorithm.attach_date = datetime.strptime(setup.get('algorithm_{}_attach_date'.format(template_id)), '%Y-%m-%d')
+                        new_algorithm.attach_date = datetime.strptime(setup.get('algorithm_{}_attach_date'.format(template_id)),
+                                                                      '%Y-%m-%d')
                     except:
                         pass
                 if setup.get('algorithm_{}_detach_date'.format(template_id)):
                     try:
-                        new_algorithm.detach_date = datetime.strptime(setup.get('algorithm_{}_detach_date'.format(template_id)), '%Y-%m-%d')
+                        new_algorithm.detach_date = datetime.strptime(setup.get('algorithm_{}_detach_date'.format(template_id)),
+                                                                      '%Y-%m-%d')
                     except:
                         pass
 
@@ -130,7 +132,8 @@ class AlgorithmsManager(Manager):
 
         return value
 
-    def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1, algorithm=None, offset_dim='times', offset_count=0):
+    def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1, algorithm=None,
+                   offset_dim='times', offset_count=0):
         k = (category_name, mode, contract_id, dimension, hours, times, offset_dim, offset_count)
         cached = self.get_from_cache(k)
         if cached != None:
@@ -209,12 +212,13 @@ class AlgorithmsManager(Manager):
 
         return self.save_to_cache(k, answer)
 
-    def check_values(self, left, right, sign, modifier=0):
+    def check_values(self, left, right, sign, modifier=0, multiplier=1):
 
         try:
             modifier = float(modifier)
         except:
             modifier = 0
+
 
         if "date_" in sign:
             left = datetime.strptime(left, '%Y-%m-%d').date()
@@ -222,7 +226,7 @@ class AlgorithmsManager(Manager):
             sign = sign.replace('date_', '')
         else:
             try:
-                right = right + modifier
+                right = right * multiplier + modifier
             except:
                 pass
 
@@ -262,7 +266,8 @@ class AlgorithmsManager(Manager):
                                                        offset_dim=offset_dim, offset_count=offset_count, algorithm=algorithm)
             else:
                 left_values, objects = self.get_values(category_name, criteria['left_mode'], contract_id, dimension,
-                                                       times=criteria.get('left_times'), offset_dim=offset_dim, offset_count=offset_count, algorithm=algorithm)
+                                                       times=criteria.get('left_times'), offset_dim=offset_dim,
+                                                       offset_count=offset_count, algorithm=algorithm)
 
             if criteria['right_mode'] == 'value':
                 right_values = [criteria.get('value')]
@@ -301,9 +306,11 @@ class AlgorithmsManager(Manager):
 
                 for rvalue in right_values:
                     modifier = 0
+                    multiplier = 1
                     if criteria.get('right_mode') != 'value':
-                        modifier = criteria.get('value')
-                    result = self.check_values(lvalue, rvalue, criteria['sign'], modifier)
+                        modifier = criteria.get('value', 0)
+                        multiplier = criteria.get('multiplier', 1)
+                    result = self.check_values(lvalue, rvalue, criteria['sign'], modifier, multiplier)
 
                     if result:
                         current_answer = None
@@ -600,7 +607,8 @@ class AlgorithmsManager(Manager):
 
             result = any([all(
                 list(
-                    map(lambda x: self.check_criteria(x, contract_id, additions, descriptions, category_names, algorithm=algorithm), block)))
+                    map(lambda x: self.check_criteria(x, contract_id, additions, descriptions, category_names,
+                                                      algorithm=algorithm), block)))
                 for block in criteria])
 
             if result:
