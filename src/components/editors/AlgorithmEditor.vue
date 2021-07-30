@@ -314,9 +314,12 @@ export default {
                         if (category.type == 'float') criteria.value = parseFloat(criteria.value)
                     }
 
-                    if (!this.empty(criteria.value)) {
+                    if (!this.empty(criteria.multiplier)) {
                         criteria.multiplier = parseFloat(criteria.multiplier)
+                    } else {
+                        criteria.multiplier = 1
                     }
+
                 }
                 if (criteria.left_mode == 'time') {
                     if (criteria.right_dimension == 'hours') {
