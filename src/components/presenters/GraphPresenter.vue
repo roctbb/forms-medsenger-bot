@@ -1,36 +1,38 @@
 <template>
     <div>
         <div style="margin-left: 10px;">
-            <a class="btn btn-danger" @click="select_graph()">Назад</a>
+            <a class="btn btn-outline-info btn-sm" @click="select_graph()">Назад</a>
         </div>
 
-        <highcharts :constructor-type="'stockChart'" v-if="loaded" :options="options"></highcharts>
+        <div v-if="loaded">
+            <highcharts :constructor-type="'stockChart'" :options="options"></highcharts>
 
-        <div class="container">
-            <input type="checkbox" v-model="options.legend.enabled" id="show_legend"/>
-            <label for="show_legend">Показать легенду</label>
-        </div>
+            <div class="container">
+                <input type="checkbox" v-model="options.legend.enabled" id="show_legend"/>
+                <label for="show_legend">Показать легенду</label>
+            </div>
 
-        <div class="container center" v-if="this.statistics.length && this.show_table()">
-            <h5>Значения за отображенный период</h5>
-            <table class="table table-hover">
-                <thead>
-                <tr>
-                    <th scope="col" class="bg-info text-light">Параметр</th>
-                    <th scope="col" class="bg-info text-light">В среднем</th>
-                    <th scope="col" class="bg-info text-light">Минимум</th>
-                    <th scope="col" class="bg-info text-light">Максимум</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr v-for="stat in this.statistics">
-                    <th scope="row">{{ stat.name }}</th>
-                    <td>{{ stat.avg }}</td>
-                    <td>{{ stat.min }}</td>
-                    <td>{{ stat.max }}</td>
-                </tr>
-                </tbody>
-            </table>
+            <div class="container center" v-if="this.statistics.length && this.show_table()">
+                <h5>Значения за отображенный период</h5>
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="col" class="bg-info text-light">Параметр</th>
+                        <th scope="col" class="bg-info text-light">В среднем</th>
+                        <th scope="col" class="bg-info text-light">Минимум</th>
+                        <th scope="col" class="bg-info text-light">Максимум</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="stat in this.statistics">
+                        <th scope="row">{{ stat.name }}</th>
+                        <td>{{ stat.avg }}</td>
+                        <td>{{ stat.min }}</td>
+                        <td>{{ stat.max }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <br>
     </div>
@@ -66,7 +68,9 @@ export default {
         },
         process_load_answer: function (response) {
             this.data = response.data
-            let now = +new Date() + this.offset
+            let today = new Date()
+            today.setHours(23,59,59)
+            let now = +today + this.offset
 
             this.options = {
                 colors: ['#058DC7', '#50B432', '#aa27ce', '#fcff00',
@@ -242,6 +246,7 @@ export default {
                 },
                 legend: {
                     enabled: true,
+                    itemDistance: 70,
                     maxHeight: 100,
                     labelFormatter: function () {
                         return this.name + '<br>.<br>.'
@@ -254,7 +259,8 @@ export default {
                             return p.comment
                         }).join('<br>')
                     },
-                    shared: true
+                    shared: true,
+                    headerFormat: null
                 }
             }
 
@@ -278,14 +284,12 @@ export default {
                 }
             });
 
-            let n = 0; // Количество значений за последние 5 часа
             this.data.filter((graph) => graph.category.type != 'string').forEach((graph) => {
                 this.options.series.push({
                     name: graph.category.description,
                     yAxis: 0,
                     showInNavigator: true,
                     data: graph.values.map((value) => {
-                        if ((value.timestamp + this.offset) * 1000 >= now - 5 * 24 * 3600 * 1000) n++
                         return {
                             x: (value.timestamp + this.offset) * 1000,
                             y: value.value,
@@ -324,19 +328,21 @@ export default {
                 })
             });
 
-            Object.entries(medicines).forEach(([key, value]) => {
+            Object.entries(medicines).forEach(([medicine, values]) => {
                 this.options.series.push({
                     yAxis: 1,
-                    name: key,
-                    data: value.map((val) => {
-                        if ((value.timestamp + this.offset) * 1000 >= now - 5 * 24 * 3600 * 1000) n++
+                    name: medicine,
+                    data: values.map((timestamp) => {
                         return {
                             dataLabels: {
                                 enabled: false,
                             },
-                            x: (val + this.offset) * 1000,
+                            x: (timestamp + this.offset) * 1000,
                             y: y,
-                            comment: 'Прием лекарства: ' + key,
+                            comment: this.get_comment({
+                                value: medicine,
+                                timestamp: timestamp
+                            },  'Прием лекарства'),
                         }
                     }).reverse(),
                     lineWidth: 0,
@@ -356,38 +362,38 @@ export default {
 
             y = -3
             this.data.filter((graph) => graph.category.name == 'symptom').forEach((graph) => {
-                this.options.series.push({
-                    yAxis: 1,
-                    color: '#ad0eca',
-                    name: graph.category.description,
-                    data: graph.values.map((value) => {
-                        if ((value.timestamp + this.offset) * 1000 >= now - 5 * 24 * 3600 * 1000) n++
-                        let x = new Date((value.timestamp + this.offset) * 1000)
-                        x.setHours(0, 0, 0)
-                        return {
-                            dataLabels: {
-                                enabled: false,
-                            },
-                            x: +x + this.offset * 1000,
-                            y: y,
-                            comment: this.get_comment(value, graph.category.description),
+                if (graph.values.length > 0) {
+                    this.options.series.push({
+                        yAxis: 1,
+                        color: '#ad0eca',
+                        name: graph.category.description,
+                        data: graph.values.map((value) => {
+                            let x = new Date((value.timestamp + this.offset) * 1000)
+                            x.setHours(12, 0, 0)
+                            return {
+                                dataLabels: {
+                                    enabled: false,
+                                },
+                                x: +x + this.offset * 1000,
+                                y: y,
+                                comment: this.get_comment(value, graph.category.description),
+                            }
+                        }).reverse(),
+                        lineWidth: 0,
+                        marker: {
+                            enabled: true,
+                            radius: 5,
+                            symbol: 'triangle'
+                        },
+                        states: {
+                            inactive: {
+                                opacity: 1,
+                            }
                         }
-                    }).reverse(),
-                    lineWidth: 0,
-                    marker: {
-                        enabled: true,
-                        radius: 5,
-                        symbol: 'triangle'
-                    },
-                    states: {
-                        inactive: {
-                            opacity: 1,
-                        }
-                    }
-                })
+                    })
+                }
             });
 
-            // if (n > 5) this.options.rangeSelector.selected = 0
             if (this.group.categories.includes('glukose')) {
                 this.set_bands()
             }
@@ -419,13 +425,17 @@ export default {
         },
         get_comment: function (point, category) {
 
-            let comment = category + ': ' + point.value
+            let comment =  "<strong>" + this.formatTime(new Date((point.timestamp + this.offset) * 1000))+ " </strong>"
+                + category + ': ' + point.value
             if (point.additions) {
                 point.additions.forEach((value) => {
                     comment += '<br/><strong style="color: red;">' + value['addition']['comment'] + '</strong>'
                 })
             }
             return comment
+        },
+        formatTime: function (date) {
+            return date.toTimeString().substr(0, 5)
         },
         set_bands: function () {
             this.options.yAxis[0].plotBands = [{
@@ -502,7 +512,8 @@ export default {
         })
 
         Event.listen('window-resized', () => {
-            if (this.options) {
+            if (this.options.chart != null) {
+                console.log(this.options.chart)
                 this.options.chart.height = window.innerHeight
                 this.options.chart.width = window.innerWidth
             }

@@ -1,17 +1,26 @@
 <template>
     <div>
         <div style="margin-left: 10px;">
-            <a class="btn btn-danger" @click="select_graph()">Назад</a>
+            <a class="btn btn-outline-info btn-sm" @click="select_graph()">Назад</a>
         </div>
 
-        <div style="margin-left: 10px;">
-            <input type="checkbox" id="show_medicines" v-if="heatmap_type == 'symptoms'"
-                   @change="showMedicines()" v-model="show_medicines"/>
-            <label for="show_medicines" v-if="heatmap_type == 'symptoms'">Показать лекарства</label>
+        <div v-if="loaded">
+            <div style="margin-left: 10px;"
+                 v-if="heatmap_type == 'symptoms' && heatmap_data.medicine_series.length">
+                <input type="checkbox" id="show_medicines" @change="showMedicines()" v-model="show_medicines"/>
+                <label for="show_medicines">Показать лекарства</label>
+            </div>
+
+
+            <highcharts :constructor-type="'stockChart'" :options="options"
+                        v-if="heatmap_data.medicine_series.length || heatmap_data.has_symptoms"></highcharts>
+
+            <div class="text-center text-muted"
+                 v-if="heatmap_type == 'symptoms' && !heatmap_data.has_symptoms ||
+                       heatmap_type == 'medicines' && !heatmap_data.medicine_series.length">
+                Нет данных
+            </div>
         </div>
-
-
-        <highcharts :constructor-type="'stockChart'" v-if="loaded" :options="options"></highcharts>
 
         <br>
     </div>
@@ -39,7 +48,7 @@ export default {
             options: {},
             show_medicines: true,
             loaded: false,
-            medicines_data: {},
+            heatmap_data: {},
             axis_height: "70%"
         }
     },
@@ -268,8 +277,8 @@ export default {
             }
 
             let medicines = {}
-            this.medicines_data = {
-                series: []
+            this.heatmap_data = {
+                medicine_series: []
             }
 
             this.data.filter((graph) => graph.category.name == 'medicine').forEach((graph) => {
@@ -315,7 +324,7 @@ export default {
                     })
                 })
 
-                this.medicines_data.series.push({
+                this.heatmap_data.medicine_series.push({
                     colsize: 24 * 36e5,
                     yAxis: this.heatmap_type == 'symptoms' ? 1 : 0,
                     name: key,
@@ -345,7 +354,7 @@ export default {
 
                 y += 1;
             })
-            Array.prototype.push.apply(this.options.series, this.medicines_data.series);
+            Array.prototype.push.apply(this.options.series, this.heatmap_data.medicine_series);
             this.options.yAxis[1].categories = Object.keys(medicines)
 
             if (this.heatmap_type == 'medicines') {
@@ -362,6 +371,11 @@ export default {
             }
 
 
+            if (this.heatmap_type == 'symptoms' && Object.entries(symptoms).length > 0) {
+                this.heatmap_data.has_symptoms = true
+                this.show_medicines = false
+            }
+
             if (this.heatmap_type == 'symptoms' && !this.show_medicines) {
                 this.showMedicines()
             }
@@ -377,27 +391,32 @@ export default {
         },
         showMedicines: function () {
             if (this.show_medicines) {
-                this.medicines_data.series.forEach(s => {
+                this.heatmap_data.medicine_series.forEach(s => {
                     this.options.series.push(s)
                 })
                 this.options.yAxis[0].height = this.axis_height
                 this.options.yAxis[1].title.text = 'Лекарства'
             } else {
-                let index = this.options.series.length - this.medicines_data.series.length
-                this.options.series.splice(index, this.medicines_data.series.length)
+                let index = this.options.series.length - this.heatmap_data.medicine_series.length
+                this.options.series.splice(index, this.heatmap_data.medicine_series.length)
                 this.options.yAxis[0].height = "100%"
                 this.options.yAxis[1].title.text = ''
             }
         }
     },
     created() {
+        this.heatmap_data = {
+            medicine_series: [],
+            has_symptoms: false
+        }
+
         Event.listen('load-heatmap', (group) => {
             this.group = {"categories": []}
             this.load_data()
         });
 
         Event.listen('window-resized', () => {
-            if (this.options)
+            if (this.options.chart != null)
                 this.options.chart.width = window.innerWidth
         })
     }
