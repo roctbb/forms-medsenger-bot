@@ -62,6 +62,9 @@ Vue.mixin({
             }
             return true;
         },
+        to_float: function (val) {
+            return parseFloat(val.toString().replace(',', '.'))
+        },
         verify_timetable: function (timetable) {
             if (timetable.mode == 'manual') return true;
             let prepare_point = (point) => {

@@ -5,6 +5,30 @@
 
             <h6 v-if="patient.month_compliance[0]" class="badge badge-info">Общая комплаентность за месяц: {{ Math.round(100 * patient.month_compliance[1] / patient.month_compliance[0]) }}%</h6>
 
+            <div style="margin-right: -15px;">
+                <input class="btn btn-block btn-outline-info" type="button" data-toggle="collapse" aria-expanded="false"
+                       value="Ограничения показателей" data-target="#collapse" aria-controls="collapse">
+                <div class="collapse" id="collapse" style="font-size: 14px">
+                    <div class="card card-body">
+                        <div v-if="loaded">
+                            <div v-for="(param, i) in params.backup">
+                                <form-group-4-8 :title="param.name">
+                                    <input class="form-control form-control-sm"
+                                           :class="errors.length && isNaN(to_float(params.edited[i])) ? 'is-invalid' : ''"
+                                           v-model="params.edited[i]">
+                                </form-group-4-8>
+                            </div>
+                            <div>
+                                <button class="btn btn-outline-info btn-sm" @click="save_params()">Сохранить</button>
+                            </div>
+                            <div class="alert alert-success" v-if="errors.length && errors[0] == 'Сохранено'" style="margin-top: 15px">Данные успешно сохранены.</div>
+                            <error-block v-else :errors="errors"></error-block>
+                        </div>
+                        <span v-else class="text-center text-muted">Загрузка...</span>
+                    </div>
+                </div>
+            </div>
+
             <h5>Опросники</h5>
 
             <div class="row">
@@ -236,10 +260,12 @@
 
 import Card from "../common/Card";
 import AlgorithmSettings from "./AlgorithmSettings";
+import FormGroup48 from "../common/FormGroup-4-8";
+import ErrorBlock from "../common/ErrorBlock";
 
 export default {
     name: "Dashboard",
-    components: {AlgorithmSettings, Card},
+    components: {ErrorBlock, FormGroup48, AlgorithmSettings, Card},
     props: {
         patient: {
             required: true
@@ -250,10 +276,70 @@ export default {
     },
     data: function () {
         return {
-            state: 'main'
+            state: 'main',
+            loaded: false,
+            errors: [],
+            lock_btn: false,
+            params: {}
         }
     },
     methods: {
+        update_params: function () {
+            this.loaded = false
+            this.params = {
+                backup: [],
+                edited: []
+            }
+            this.axios.get(this.url('/params')).then(response => {
+                response.data.forEach(param => {
+                    if (param.name && param.value != null) {
+                        this.params.backup.push(param)
+                        this.params.edited.push(param.value)
+                    }
+                })
+                this.loaded = true
+            });
+        },
+        save_params: function () {
+            this.errors = []
+            this.lock_btn = true
+
+            // check values
+            this.params.edited.map((param, i) => {
+                let val = this.to_float(param)
+                if (!isNaN(val)) {
+                    return val
+                } else {
+                    this.errors.push(`Пожалуйста, проверьте поле "${this.params.backup[i].name}"`)
+                    return param
+                }
+            })
+
+            // change values
+            let changed_algorithms = new Set()
+            if (!this.errors.length) {
+                this.params.backup.forEach((param, i) => {
+                    if (this.to_float(param.value) != this.params.edited[i]) {
+                        param.locations.forEach(loc => {
+                            let alg = this.patient.algorithms.filter(a => a.id == loc.algorithm)[0]
+                            alg.steps[loc.step].conditions[loc.condition]
+                                .criteria[loc.block][loc.criteria].value = this.params.edited[i]
+                            changed_algorithms.add(alg)
+                        })
+                    }
+                })
+            }
+
+            // save values
+            if (changed_algorithms.size) {
+                this.axios.post(this.url('/api/settings/algorithms'), [...changed_algorithms])
+                    .then(response => this.errors = ['Сохранено'])
+                    .catch(err => this.errors = ['Ошибка сохранения']);
+
+            }
+
+            this.lock_btn = false
+        },
         find_algorithm: function (id) {
             return this.templates.algorithms.filter(t => t.id == id)[0]
         },
@@ -407,8 +493,19 @@ export default {
         },
     },
     mounted() {
-        Event.listen('dashboard-to-main', () => this.state = 'main');
-        Event.listen('home', () => this.state = 'main');
+        Event.listen('dashboard-to-main', () => {
+            this.state = 'main'
+            this.update_params()
+        });
+
+        Event.listen('home', () => {
+            this.state = 'main'
+            this.update_params()
+        });
+
+        Event.listen('back-to-dashboard', () => this.update_params())
+
+        this.update_params()
     }
 }
 </script>

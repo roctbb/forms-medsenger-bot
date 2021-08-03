@@ -176,6 +176,13 @@ def params(data):
     return jsonify(algorithm_manager.search_params(contract))
 
 
+@app.route('/params', methods=['GET'])
+@verify_args
+def get_params(args, data):
+    contract = contract_manager.get(args.get('contract_id'))
+    return jsonify(algorithm_manager.search_params(contract))
+
+
 @app.route('/compliance', methods=['POST'])
 @verify_json
 def compliance(data):
@@ -319,6 +326,18 @@ def create_algorithm(args, form):
         return jsonify(form.as_dict())
     else:
         abort(422)
+
+
+@app.route('/api/settings/algorithms', methods=['POST'])
+@only_doctor_args
+def save_algorithms(args, form):
+    contract_id = args.get('contract_id')
+    contract = contract_manager.get(contract_id)
+    for alg in request.json:
+        form = algorithm_manager.create_or_edit(alg, contract)
+        if not form:
+            abort(422)
+    return 'ok'
 
 
 @app.route('/api/settings/delete_algorithm', methods=['POST'])

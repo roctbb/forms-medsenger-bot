@@ -634,16 +634,35 @@ class AlgorithmsManager(Manager):
         return fired
 
     def search_params(self, contract):
-        params = set()
+        params = {}
 
         for algorithm in contract.algorithms:
-            for step in algorithm.steps:
-                for condition in step['conditions']:
-                    for block in condition['criteria']:
-                        for criteria in block:
+            for step_index, step in enumerate(algorithm.steps):
+                for condition_index, condition in enumerate(step['conditions']):
+                    for block_index, block in enumerate(condition['criteria']):
+                        for criteria_index, criteria in enumerate(block):
                             if criteria.get('ask_value'):
-                                params.add((criteria.get('value_name'), criteria.get('value')))
-        return [{"name": n, "value": v} for n, v in params]
+                                pair = (criteria.get('value_name'), criteria.get('value'))
+                                loc = {
+                                    'algorithm': algorithm.id,
+                                    'step': step_index,
+                                    'condition': condition_index,
+                                    'block': block_index,
+                                    'criteria': criteria_index
+                                }
+
+                                if pair in params:
+                                    params[pair]['locations'].append(loc)
+                                else:
+                                    params.update({
+                                        pair: {
+                                            'name': pair[0],
+                                            'value': pair[1],
+                                            'locations': [loc]
+                                        }
+                                    })
+
+        return [value for key, value in params.items()]
 
     def examine(self, contract, form):
         categories = form.categories.split('|')
