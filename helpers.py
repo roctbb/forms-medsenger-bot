@@ -149,7 +149,7 @@ def generate_description(criteria, l_value, r_value, category_names, current_ans
     SIGN = signs[criteria.get('sign')]
 
     RIGHT_MODE = right_modes[criteria.get('right_mode')]
-    MULTIPLIER = float(criteria.get('multiplier')) * 100
+    MULTIPLIER = 100 if not criteria.get('multiplier') else float(criteria.get('multiplier')) * 100
     RIGHT_DIM = right_dimensions[criteria.get('right_dimension')]
 
     if criteria.get('right_dimension') == 'hours':
