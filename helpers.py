@@ -119,6 +119,7 @@ def generate_description(criteria, l_value, r_value, category_names, current_ans
 
     left_modes = {
         "value": "Значение ",
+        "category_value": "Последнее значение начение ",
         "sum": "Сумма ",
         "difference": "Разность крайних значений ",
         "delta": "Разброс ",
@@ -133,7 +134,9 @@ def generate_description(criteria, l_value, r_value, category_names, current_ans
         "delta": "разброса",
         "average": "среднего",
         "max": "максимального",
-        "min": "минимального"
+        "min": "минимального",
+        "value": "значения",
+        "category_value": "значения"
     }
 
     right_dimensions = {
