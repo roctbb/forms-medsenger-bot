@@ -247,7 +247,6 @@ export default {
                 legend: {
                     enabled: true,
                     itemDistance: 70,
-                    maxHeight: 100,
                     labelFormatter: function () {
                         return this.name + '<br>.<br>.'
                     }
@@ -394,6 +393,10 @@ export default {
                 }
             });
 
+            if (this.options.chart.height > this.options.chart.width && this.options.series.length > 2) {
+                this.options.chart.height += 50 * (this.options.series.length - 2)
+            }
+
             if (this.group.categories.includes('glukose')) {
                 this.set_bands()
             }
@@ -487,7 +490,6 @@ export default {
                 this.options.yAxis[0].plotBands[3].from = max
                 this.options.yAxis[0].plotBands[4].to = max
             }
-            console.log(this.options.yAxis[0].plotBands)
         }
     },
     computed: {
@@ -513,9 +515,12 @@ export default {
 
         Event.listen('window-resized', () => {
             if (this.options.chart != null) {
-                console.log(this.options.chart)
                 this.options.chart.height = window.innerHeight
                 this.options.chart.width = window.innerWidth
+
+                if (this.options.chart.height > this.options.chart.width && this.options.series.length > 2) {
+                    this.options.chart.height += 50 * (this.options.series.length - 2)
+                }
             }
         })
     }
