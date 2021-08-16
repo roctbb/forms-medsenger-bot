@@ -104,15 +104,15 @@ def generate_description(criteria, l_value, r_value, category_names, current_ans
     signs = {
         "equal": "равно значению",
         "not_equal": "не равно значению",
-        "greater": "больше чем",
-        "less": "меньше чем",
+        "greater": "больше, чем",
+        "less": "меньше, чем",
         "greater_or_equal": "больше или равно значению",
         "less_or_equal": "меньше или равно значению",
         "contains": "содержит значение",
         "date_equal": "равно значению",
         "date_not_equal": "не равно значению",
-        "date_greater": "больше чем",
-        "date_less": "меньше чем",
+        "date_greater": "больше, чем",
+        "date_less": "меньше, чем",
         "date_greater_or_equal": "больше или равно значению",
         "date_less_or_equal": "меньше или равно значению",
     }
@@ -128,27 +128,47 @@ def generate_description(criteria, l_value, r_value, category_names, current_ans
     }
 
     right_modes = {
-        "sum": "сумма",
-        "difference": "разность крайних значений",
-        "delta": "разброс",
-        "average": "среднее",
-        "max": "максимальное",
-        "min": "минимальное"
+        "sum": "суммы",
+        "difference": "разности крайних значений",
+        "delta": "разброса",
+        "average": "среднего",
+        "max": "максимального",
+        "min": "минимального"
+    }
+
+    right_dimensions = {
+        'hours': 'часов',
+        'times': 'раз'
     }
 
     LEFT_MODE = left_modes.get(criteria.get('left_mode'))
     LEFT_CATEGORY = category_names.get(criteria.get('category'))
     SIGN = signs[criteria.get('sign')]
 
+    RIGHT_MODE = right_modes[criteria.get('right_mode')]
+    MULTIPLIER = float(criteria.get('multiplier')) * 100
+    RIGHT_DIM = right_dimensions[criteria.get('right_dimension')]
+
+    if criteria.get('right_dimension') == 'hours':
+        RIGHT_CNT = int(criteria.get('right_hours'))
+        if RIGHT_CNT % 10 == 1 and RIGHT_CNT % 100 // 10 != 1:
+            RIGHT_DIM = 'час'
+        elif RIGHT_CNT % 10 in range(2, 5) and RIGHT_CNT % 100 // 10 != 1:
+            RIGHT_DIM = 'часа'
+    else:
+        RIGHT_CNT = int(criteria.get('right_times'))
+        if RIGHT_CNT % 10 in range(2, 5) and RIGHT_CNT % 100 // 10 != 1:
+            RIGHT_DIM = 'раза'
+
     if criteria.get('sign') not in ['equal', 'contains'] or criteria.get('left_mode') != 'value':
-        comment = "{} '{}' (<strong>{}</strong>) {} ".format(LEFT_MODE, LEFT_CATEGORY, l_value, SIGN)
+        comment = "{} '{}' (<strong>{:.2f}</strong>) {} ".format(LEFT_MODE, LEFT_CATEGORY, l_value, SIGN)
     else:
         comment = "{} '{}' {} ".format(LEFT_MODE, LEFT_CATEGORY, SIGN)
 
     if criteria.get('right_mode') in ['value', 'category_value']:
-        comment += "<strong>{}</strong>".format(criteria.get('value'))
+        comment += "<strong>{:.2f}</strong>".format(criteria.get('value'))
     else:
-        comment += "{} за {} часа (ов) (<strong>{}</strong>)".format(right_modes[criteria.get('right_mode')], criteria.get('right_hours'), r_value)
+        comment += "{}% от {} за {} {} (<strong>{:.2f}</strong>)".format(MULTIPLIER, RIGHT_MODE, RIGHT_CNT, RIGHT_DIM, r_value)
 
         if criteria.get('right_category'):
             comment += " '{}'".format(category_names.get(criteria.get('right_category')))
