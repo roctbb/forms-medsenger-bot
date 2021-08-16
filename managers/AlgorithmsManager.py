@@ -225,6 +225,9 @@ class AlgorithmsManager(Manager):
             right = (datetime.strptime(right, '%Y-%m-%d') + timedelta(days=modifier)).date()
             sign = sign.replace('date_', '')
         else:
+            left = float(left)
+            right = float(right)
+
             try:
                 right = right * multiplier + modifier
             except:
