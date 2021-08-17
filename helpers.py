@@ -115,19 +115,6 @@ def generate_description(criteria, l_value, r_value, category_names, current_ans
         "date_less": "меньше",
         "date_greater_or_equal": "больше или равно",
         "date_less_or_equal": "меньше или равно",
-        "equal": "равно значению",
-        "not_equal": "не равно значению",
-        "greater": "больше чем",
-        "less": "меньше чем",
-        "greater_or_equal": "больше или равно значению",
-        "less_or_equal": "меньше или равно значению",
-        "contains": "содержит значение",
-        "date_equal": "равно значению",
-        "date_not_equal": "не равно значению",
-        "date_greater": "больше чем",
-        "date_less": "меньше чем",
-        "date_greater_or_equal": "больше или равно значению",
-        "date_less_or_equal": "меньше или равно значению",
     }
 
     left_modes = {
@@ -147,12 +134,6 @@ def generate_description(criteria, l_value, r_value, category_names, current_ans
         "average": "среднему значению",
         "max": "максимальному значению",
         "min": "минимальному значению"
-        "sum": "сумма",
-        "difference": "разность крайних значений",
-        "delta": "разброс",
-        "average": "среднее",
-        "max": "максимальное",
-        "min": "минимальное"
     }
 
     LEFT_MODE = left_modes.get(criteria.get('left_mode'))
@@ -212,4 +193,3 @@ def generate_timetable(start, end, times):
         })
 
     return timetable
-
