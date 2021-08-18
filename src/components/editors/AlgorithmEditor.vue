@@ -315,7 +315,7 @@ export default {
                     }
 
                     if (!this.empty(criteria.multiplier)) {
-                        criteria.multiplier = parseFloat(criteria.multiplier.replace(',', '.'))
+                        criteria.multiplier = parseFloat(criteria.multiplier.toString().replace(',', '.'))
                     } else {
                         criteria.multiplier = 1
                     }
