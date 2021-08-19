@@ -272,7 +272,6 @@ class FormManager(Manager):
             form.template_id = data.get('template_id')
             form.warning_days = data.get('warning_days')
             form.instant_report = bool(data.get('instant_report'))
-            form.algorithm_id = int(data.get('algorithm_id')) if data.get('algorithm_id') else None
 
             if data.get('is_template') and contract.is_admin:
                 form.is_template = True
@@ -291,9 +290,11 @@ class FormManager(Manager):
                 to_add = list(filter(lambda c: c not in old_names, names))
                 if to_add:
                     self.medsenger_api.add_hooks(contract.id, to_add)
-
-            if data.get('algorithm_id') and contract.is_admin:
-                form.algorithm_id = data.get('algorithm_id')
+            if contract.is_admin:
+                if data.get('algorithm_id'):
+                    form.algorithm_id = data.get('algorithm_id')
+                else:
+                    form.algorithm_id = None
 
             if not form_id:
                 self.db.session.add(form)
