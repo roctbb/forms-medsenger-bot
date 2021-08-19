@@ -272,6 +272,7 @@ class FormManager(Manager):
             form.template_id = data.get('template_id')
             form.warning_days = data.get('warning_days')
             form.instant_report = bool(data.get('instant_report'))
+            form.algorithm_id = int(data.get('algorithm_id')) if data.get('algorithm_id') else None
 
             if data.get('is_template') and contract.is_admin:
                 form.is_template = True
