@@ -84,7 +84,7 @@
 
                     <hr>
 
-                    <button class="btn btn-sm btn-danger" @click="remove_condition(step, condition_index)">Удалить
+                    <button class="btn btn-sm btn-danger" @click="remove_common_condition(algorithm, condition_index)">Удалить
                         условие
                     </button>
                 </card>
@@ -240,6 +240,9 @@ export default {
                 algorithm.common_conditions = [];
             }
             algorithm.common_conditions.push(this.create_condition());
+        },
+        remove_common_condition: function (algorithm, index) {
+            algorithm.common_conditions.splice(index, 1);
         },
         add_condition: function (step, type) {
             step.conditions.push(this.create_condition());
