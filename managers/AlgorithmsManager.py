@@ -714,9 +714,10 @@ class AlgorithmsManager(Manager):
                             self.run_action(action, contract.id, [], algorithm)
 
     def check_init_timeouts(self, algorithm, contract):
-        for condition in algorithm.common_conditions:
-            if condition.get('timeout_on_init'):
-                condition['last_fired'] = int(time.time())
+        if algorithm.common_conditions:
+            for condition in algorithm.common_conditions:
+                if condition.get('timeout_on_init'):
+                    condition['last_fired'] = int(time.time())
 
     def create_or_edit(self, data, contract):
         try:
