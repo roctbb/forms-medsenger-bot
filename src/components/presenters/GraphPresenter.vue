@@ -12,9 +12,9 @@
                 <label for="show_legend">Показать легенду</label>
             </div>
 
-            <div class="container center" v-if="this.statistics.length && this.show_table()">
+            <div class="container center" v-if="this.statistics.length">
                 <h5>Значения за отображенный период</h5>
-                <table class="table table-hover">
+                <table class="table table-hover" style="table-layout: fixed; width: 100%; text-align:center; font-size: 0.8rem">
                     <thead>
                     <tr>
                         <th scope="col" class="bg-info text-light">Параметр</th>
@@ -25,10 +25,10 @@
                     </thead>
                     <tbody>
                     <tr v-for="stat in this.statistics">
-                        <th scope="row">{{ stat.name }}</th>
-                        <td>{{ stat.avg }}</td>
-                        <td>{{ stat.min }}</td>
-                        <td>{{ stat.max }}</td>
+                        <th scope="row" style="text-align: left;">{{ stat.name }}</th>
+                        <td>{{ stat.avg.toFixed(2) * 1 }}</td>
+                        <td>{{ stat.min.toFixed(2) * 1 }}</td>
+                        <td>{{ stat.max.toFixed(2) * 1 }}</td>
                     </tr>
                     </tbody>
                 </table>
@@ -69,7 +69,7 @@ export default {
         process_load_answer: function (response) {
             this.data = response.data
             let today = new Date()
-            today.setHours(23,59,59)
+            today.setHours(23, 59, 59)
             let now = +today + this.offset
 
             this.options = {
@@ -136,7 +136,7 @@ export default {
                                 // calculate statistics for visible points
                                 const max = Math.max.apply(null, data)
                                 const min = Math.min.apply(null, data)
-                                const average = (data.reduce((a, b) => a + b, 0) / data.length).toFixed(1)
+                                const average = (data.reduce((a, b) => a + b, 0) / data.length).toFixed(2) * 1
 
                                 const legendItem = series.legendItem;
 
@@ -152,12 +152,43 @@ export default {
                                 if (data.length > 0) {
                                     stats.push({
                                         name: series.name,
+                                        code: series.options.graph_code,
+                                        data: data,
                                         avg: average,
                                         min: min,
                                         max: max
                                     })
                                 }
                             });
+
+                            let systolic_pressure = stats.find(st => st.code == 'systolic_pressure')
+                            let diastolic_pressure = stats.find(st => st.code == 'diastolic_pressure')
+
+                            if (systolic_pressure != null && diastolic_pressure != null) {
+                                let pp_data = []
+                                let map_data = []
+                                systolic_pressure.data.forEach((s, index) => {
+                                    let d = diastolic_pressure.data[index]
+                                    map_data.push((s - d) / 3 + d)
+                                    pp_data.push(s - d)
+                                })
+
+                                stats.push({
+                                    name: 'Среднее давление (MAP)',
+                                    code: 'map',
+                                    avg: map_data.reduce((a, b) => a + b, 0) / map_data.length,
+                                    min: Math.min.apply(null, map_data),
+                                    max: Math.max.apply(null, map_data)
+                                })
+
+                                stats.push({
+                                    name: 'Пульсовое давление',
+                                    code: 'pulse_pressure',
+                                    avg: pp_data.reduce((a, b) => a + b, 0) / pp_data.length,
+                                    min: Math.min.apply(null, pp_data),
+                                    max: Math.max.apply(null, pp_data)
+                                })
+                            }
 
                             Event.fire('refresh-stats', stats)
 
@@ -247,7 +278,6 @@ export default {
                 legend: {
                     enabled: true,
                     itemDistance: 70,
-                    maxHeight: 100,
                     labelFormatter: function () {
                         return this.name + '<br>.<br>.'
                     }
@@ -287,6 +317,7 @@ export default {
             this.data.filter((graph) => graph.category.type != 'string').forEach((graph) => {
                 this.options.series.push({
                     name: graph.category.description,
+                    graph_code: graph.category.name,
                     yAxis: 0,
                     showInNavigator: true,
                     data: graph.values.map((value) => {
@@ -342,7 +373,7 @@ export default {
                             comment: this.get_comment({
                                 value: medicine,
                                 timestamp: timestamp
-                            },  'Прием лекарства'),
+                            }, 'Прием лекарства'),
                         }
                     }).reverse(),
                     lineWidth: 0,
@@ -394,6 +425,10 @@ export default {
                 }
             });
 
+            if (this.options.chart.height > this.options.chart.width && this.options.series.length > 2) {
+                this.options.chart.height += 50 * (this.options.series.length - 2)
+            }
+
             if (this.group.categories.includes('glukose')) {
                 this.set_bands()
             }
@@ -425,7 +460,7 @@ export default {
         },
         get_comment: function (point, category) {
 
-            let comment =  "<strong>" + this.formatTime(new Date((point.timestamp + this.offset) * 1000))+ " </strong>"
+            let comment = "<strong>" + this.formatTime(new Date((point.timestamp + this.offset) * 1000)) + " </strong>"
                 + category + ': ' + point.value
             if (point.additions) {
                 point.additions.forEach((value) => {
@@ -487,7 +522,6 @@ export default {
                 this.options.yAxis[0].plotBands[3].from = max
                 this.options.yAxis[0].plotBands[4].to = max
             }
-            console.log(this.options.yAxis[0].plotBands)
         }
     },
     computed: {
@@ -513,9 +547,12 @@ export default {
 
         Event.listen('window-resized', () => {
             if (this.options.chart != null) {
-                console.log(this.options.chart)
                 this.options.chart.height = window.innerHeight
                 this.options.chart.width = window.innerWidth
+
+                if (this.options.chart.height > this.options.chart.width && this.options.series.length > 2) {
+                    this.options.chart.height += 50 * (this.options.series.length - 2)
+                }
             }
         })
     }
