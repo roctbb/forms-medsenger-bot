@@ -219,7 +219,6 @@ class AlgorithmsManager(Manager):
         except:
             modifier = 0
 
-
         if "date_" in sign:
             left = datetime.strptime(left, '%Y-%m-%d').date()
             right = (datetime.strptime(right, '%Y-%m-%d') + timedelta(days=modifier)).date()
@@ -234,7 +233,6 @@ class AlgorithmsManager(Manager):
                 right = float(right)
             except:
                 pass
-
 
             try:
                 right = right * multiplier + modifier
@@ -561,6 +559,8 @@ class AlgorithmsManager(Manager):
         self.update_categories(algorithm)
 
         for condition in new_step['conditions']:
+            if condition.get('timeout_on_init'):
+                condition['last_fired'] = int(time.time())
             if any(any(criteria['category'] == 'step_init' for criteria in block) for block in condition['criteria']):
                 for action in condition['positive_actions']:
                     self.run_action(action, algorithm.contract.id, [], algorithm)
@@ -711,6 +711,11 @@ class AlgorithmsManager(Manager):
                         for action in condition['positive_actions']:
                             self.run_action(action, contract.id, [], algorithm)
 
+    def check_init_timeouts(self, algorithm, contract):
+        for condition in algorithm.common_conditions:
+            if condition.get('timeout_on_init'):
+                condition['last_fired'] = int(time.time())
+
     def create_or_edit(self, data, contract):
         try:
             algorithm_id = data.get('id')
@@ -764,6 +769,7 @@ class AlgorithmsManager(Manager):
                 self.db.session.add(algorithm)
 
             self.check_inits(algorithm, contract)
+            self.check_init_timeouts(algorithm, contract)
 
             self.__commit__()
             return algorithm

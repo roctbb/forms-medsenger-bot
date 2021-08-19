@@ -44,6 +44,10 @@
                         <input type="checkbox" v-model="condition.skip_additions">
                     </form-group48>
 
+                    <form-group48 title="таймаут при инициализации">
+                        <input type="checkbox" v-model="condition.timeout_on_init">
+                    </form-group48>
+
                     <h6>Критерии срабатывания</h6>
 
                     <div v-for="(or_block, i) in condition.criteria">
@@ -110,6 +114,10 @@
 
                     <form-group48 title="Не помечать точки">
                         <input type="checkbox" v-model="condition.skip_additions">
+                    </form-group48>
+
+                    <form-group48 title="таймаут при инициализации">
+                        <input type="checkbox" v-model="condition.timeout_on_init">
                     </form-group48>
 
                     <h6>Критерии срабатывания</h6>
