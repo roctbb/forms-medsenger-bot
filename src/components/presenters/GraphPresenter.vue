@@ -123,12 +123,9 @@ export default {
                     events: {
                         render: function (event) {
 
-                            console.log(event.target.axes[0].min, event.target.axes[0].max);
-
                             let isInside = (point) => {
                                 const min = event.target.axes[0].min
                                 const max = event.target.axes[0].max
-                                console.log(point.x)
                                 return point.x >= min && point.x <= max
                             }
 
@@ -325,6 +322,7 @@ export default {
                     yAxis: 0,
                     showInNavigator: true,
                     data: graph.values.map((value) => {
+                        console.log(value)
                         return {
                             x: (value.timestamp + this.offset) * 1000,
                             y: value.value,
