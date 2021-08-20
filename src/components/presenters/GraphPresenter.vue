@@ -315,9 +315,6 @@ export default {
                 }
             });
             this.data.filter((graph) => graph.category.type != 'string').forEach((graph) => {
-
-                console.log(graph.values);
-
                 this.options.series.push({
                     name: graph.category.description,
                     graph_code: graph.category.name,
@@ -350,6 +347,8 @@ export default {
                     }
                 })
             })
+
+            console.log(this.options.series);
 
             let y = -5;
 
