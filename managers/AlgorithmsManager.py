@@ -160,7 +160,7 @@ class AlgorithmsManager(Manager):
                 return None, None
 
         if mode == 'value' or mode == 'category_value':
-            answer = self.medsenger_api.get_records(contract_id, category_name, group=True)
+            answer = self.medsenger_api.get_records(contract_id, category_name, group=True, limit=1)
         else:
             time_from = datetime.now() - timedelta(hours=hours)
             time_to = datetime.now()
@@ -193,7 +193,7 @@ class AlgorithmsManager(Manager):
 
         if not values:
             answer = None, None
-        elif mode == 'value' and time.time() - int(answer['values'][0].get('timestamp')) > 10:
+        elif mode == 'value' and (time.time() - int(answer['values'][0].get('timestamp')) > 60 * 60 * 12 or time.time() - int(answer['values'][0].get('uploaded')) > 10):
             answer = None, None
         elif mode == 'value' or mode == 'category_value':
             answer = values, objects
