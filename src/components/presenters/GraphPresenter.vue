@@ -128,6 +128,7 @@ export default {
                             let isInside = (point) => {
                                 const min = event.target.axes[0].min
                                 const max = event.target.axes[0].max
+                                console.log(point.x)
                                 return point.x >= min && point.x <= max
                             }
 
