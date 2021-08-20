@@ -72,8 +72,6 @@ export default {
             today.setHours(23, 59, 59)
             let now = +today + this.offset
 
-            console.log("start", this.data)
-
             this.options = {
                 colors: ['#058DC7', '#50B432', '#aa27ce', '#fcff00',
                     '#24CBE5', '#64E572', '#c355ff', '#fce200', '#6AF9C4'],
@@ -317,6 +315,9 @@ export default {
                 }
             });
             this.data.filter((graph) => graph.category.type != 'string').forEach((graph) => {
+
+                console.log(graph.values);
+
                 this.options.series.push({
                     name: graph.category.description,
                     graph_code: graph.category.name,
