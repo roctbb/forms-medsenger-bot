@@ -122,6 +122,9 @@ export default {
                     width: window.innerWidth,
                     events: {
                         render: function (event) {
+
+                            console.log(event.target.axes[0].min, event.target.axes[0].max);
+
                             let isInside = (point) => {
                                 const min = event.target.axes[0].min
                                 const max = event.target.axes[0].max
