@@ -693,11 +693,11 @@ class AlgorithmsManager(Manager):
             self.medsenger_api.send_message(contract.id, text=form.thanks_text, only_patient=True,
                                             action_deadline=time.time() + 60 * 60)
 
-    def hook(self, contract, category_name):
+    def hook(self, contract, category_names):
         patient = contract.patient
 
         algorithms = list(
-            filter(lambda algorithm: category_name in algorithm.categories.split('|'), patient.algorithms))
+            filter(lambda algorithm: any(map(lambda cat: cat in algorithm.categories.split('|'), category_names.split('|'))), patient.algorithms))
 
         for algorithm in algorithms:
             self.run(algorithm)
