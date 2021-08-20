@@ -114,101 +114,6 @@ export default {
                     inputDateFormat: "%b %e, %Y %H:%M"
                 },
 
-                chart: {
-                    type: 'line',
-                    zoomType: 'x',
-                    backgroundColor: "#f8f8fb",
-                    height: window.innerHeight,
-                    width: window.innerWidth,
-                    events: {
-                        render: function (event) {
-
-                            let isInside = (point) => {
-                                const min = event.target.axes[0].min
-                                const max = event.target.axes[0].max
-                                return point.x >= min && point.x <= max
-                            }
-
-                            let stats = []
-
-                            this.series.filter(series => series.userOptions.yAxis == 0).forEach(series => {
-                                let data = series.data.filter(point => isInside(point)).map(point => point.y);
-
-                                // calculate statistics for visible points
-                                const max = Math.max.apply(null, data)
-                                const min = Math.min.apply(null, data)
-                                const average = (data.reduce((a, b) => a + b, 0) / data.length).toFixed(2) * 1
-
-                                const legendItem = series.legendItem;
-
-                                // construct the legend string
-                                const text = series.name + '<br><strong style="color: dimgrey">min: ' + min +
-                                    ' max: ' + max +
-                                    '<br>avg: ' + average + '</strong>';
-
-                                // set the constructed text for the legend
-                                legendItem.attr({
-                                    text: data.length > 0 ? text : (series.name + '<br><strong style="color: dimgrey">Нет данных</strong>')
-                                });
-                                if (data.length > 0) {
-                                    stats.push({
-                                        name: series.name,
-                                        code: series.options.graph_code,
-                                        data: data,
-                                        avg: average,
-                                        min: min,
-                                        max: max
-                                    })
-                                }
-                            });
-
-                            let systolic_pressure = stats.find(st => st.code == 'systolic_pressure')
-                            let diastolic_pressure = stats.find(st => st.code == 'diastolic_pressure')
-
-                            if (systolic_pressure != null && diastolic_pressure != null) {
-                                let pp_data = []
-                                let map_data = []
-                                systolic_pressure.data.forEach((s, index) => {
-                                    let d = diastolic_pressure.data[index]
-                                    map_data.push((s - d) / 3 + d)
-                                    pp_data.push(s - d)
-                                })
-
-                                stats.push({
-                                    name: 'Среднее давление (MAP)',
-                                    code: 'map',
-                                    avg: map_data.reduce((a, b) => a + b, 0) / map_data.length,
-                                    min: Math.min.apply(null, map_data),
-                                    max: Math.max.apply(null, map_data)
-                                })
-
-                                stats.push({
-                                    name: 'Пульсовое давление',
-                                    code: 'pulse_pressure',
-                                    avg: pp_data.reduce((a, b) => a + b, 0) / pp_data.length,
-                                    min: Math.min.apply(null, pp_data),
-                                    max: Math.max.apply(null, pp_data)
-                                })
-                            }
-
-                            Event.fire('refresh-stats', stats)
-
-                            this.series.filter(series => series.userOptions.yAxis == 1).forEach(series => {
-                                let data = series.data.filter(point => isInside(point));
-
-                                const legendItem = series.legendItem;
-                                // construct the legend string
-                                const text = series.name + '<br><strong style="color: dimgrey">' +
-                                    (data.length > 0 ? ('Количество: ' + data.length) : 'Нет данных') + '</strong>';
-
-                                // set the constructed text for the legend
-                                legendItem.attr({
-                                    text: text
-                                });
-                            });
-                        }
-                    }
-                },
                 title: {
                     text: this.group.title
                 },
@@ -348,7 +253,6 @@ export default {
                 })
             })
 
-            console.log(this.options.series);
 
             let y = -5;
 
