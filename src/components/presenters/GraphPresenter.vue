@@ -114,6 +114,14 @@ export default {
                     inputDateFormat: "%b %e, %Y %H:%M"
                 },
 
+                chart: {
+                    type: 'line',
+                    zoomType: 'x',
+                    backgroundColor: "#f8f8fb",
+                    height: window.innerHeight,
+                    width: window.innerWidth,
+
+                },
                 title: {
                     text: this.group.title
                 },
