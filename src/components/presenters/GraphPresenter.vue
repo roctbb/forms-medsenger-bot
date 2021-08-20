@@ -273,9 +273,9 @@ export default {
                             lineWidth: 2,
                             lineColor: null,
                         },
+                        turboThreshold: 1000000
 
-                    },
-                    turboThreshold: 1000000
+                    }
                 },
                 legend: {
                     enabled: true,
