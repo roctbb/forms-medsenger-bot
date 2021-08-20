@@ -314,7 +314,7 @@ export default {
                     resetZoom: 'Весь график'
                 }
             });
-
+            console.log(this.data)
             this.data.filter((graph) => graph.category.type != 'string').forEach((graph) => {
                 this.options.series.push({
                     name: graph.category.description,
@@ -322,7 +322,7 @@ export default {
                     yAxis: 0,
                     showInNavigator: true,
                     data: graph.values.map((value) => {
-                        console.log(value)
+
                         return {
                             x: (value.timestamp + this.offset) * 1000,
                             y: value.value,
