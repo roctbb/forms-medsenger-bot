@@ -141,7 +141,9 @@ class FormManager(Manager):
         deadline = time.time() + 1 * 60 * 60
 
         self.medsenger_api.send_message(contract_id, text, only_doctor=True)
-        self.medsenger_api.send_message(contract_id, 'Спасибо за заполнение опросника "{}". Ответы отправлены вашему лечащему врачу.'.format(form.title), only_patient=True, action_deadline=deadline)
+
+        if not form.thanks_text:
+            self.medsenger_api.send_message(contract_id, 'Спасибо за заполнение опросника "{}". Ответы отправлены вашему лечащему врачу.'.format(form.title), only_patient=True, action_deadline=deadline)
 
     def submit(self, answers, form_id, contract_id):
         form = Form.query.filter_by(id=form_id).first_or_404()
@@ -155,12 +157,12 @@ class FormManager(Manager):
             if field['uid'] in answers.keys():
                 if field['type'] == 'radio':
                     category = field['params']['variants'][answers[field['uid']]]['category']
+                    value = field['params']['variants'][answers[field['uid']]]['category_value']
+                    answer = field['params']['variants'][answers[field['uid']]].get('text')
+                    report.append((field.get('text'), answer))
 
                     if category == 'none':
                         continue
-
-                    value = field['params']['variants'][answers[field['uid']]]['category_value']
-                    answer = field['params']['variants'][answers[field['uid']]].get('text')
 
                     params = {
                         "question_uid": field['uid'],
@@ -168,8 +170,6 @@ class FormManager(Manager):
                         "answer": answer,
                         "type": field['type']
                     }
-
-                    report.append((field.get('text'), answer))
 
                     if field['params']['variants'][answers[field['uid']]].get('custom_params'):
                         try:
@@ -189,6 +189,9 @@ class FormManager(Manager):
                     else:
                         report.append((field.get('text'), "Да"))
 
+                    if category == 'none':
+                        continue
+
                     params = {
                         "question_iud": field['uid'],
                         "question_text": field.get('text'),
@@ -205,14 +208,17 @@ class FormManager(Manager):
                     packet.append((category, value, params))
                 else:
                     category = field['category']
+                    report.append((field.get('text'), answers[field['uid']]))
+
+                    if category == 'none':
+                        continue
+
                     params = {
                         "question_uid": field['uid'],
                         "question_text": field.get('text'),
                         "answer": answers[field['uid']],
                         "type": field['type']
                     }
-
-                    report.append((field.get('text'), answers[field['uid']]))
 
                     if field.get('params', {}).get('custom_params'):
                         try:

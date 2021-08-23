@@ -74,14 +74,17 @@ class MedicineManager(Manager):
                                                     medicine.title, medicine.warning_days))
                 self.__commit__()
 
-    def submit(self, medicine_id, contract_id):
+    def submit(self, medicine_id, contract_id, params=None):
         medicine = self.get(medicine_id)
         medicine.warning_timestamp = 0
         medicine.filled_timestamp = int(time.time())
 
-        self.medsenger_api.add_record(contract_id, 'medicine', medicine.title, params={
-            "medicine_id": medicine_id
-        })
+        if params is None:
+            params = {"medicine_id": medicine_id}
+        else:
+            params.update({"medicine_id": medicine_id})
+
+        self.medsenger_api.add_record(contract_id, 'medicine', medicine.title, params=params)
 
         self.log_done("form_{}".format(medicine_id), contract_id)
 
@@ -154,6 +157,7 @@ class MedicineManager(Manager):
             medicine.timetable = data.get('timetable')
             medicine.template_id = data.get('template_id')
             medicine.warning_days = data.get('warning_days')
+            medicine.verify_dose = data.get('verify_dose', False)
 
             if data.get('is_template'):
                 medicine.is_template = True
