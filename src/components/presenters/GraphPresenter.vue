@@ -318,6 +318,7 @@ export default {
             this.data.filter((graph) => graph.category.type != 'string').forEach((graph) => {
                 this.options.series.push({
                     name: graph.category.description,
+                    turboThreshold: 1000000,
                     graph_code: graph.category.name,
                     yAxis: 0,
                     showInNavigator: true,
@@ -365,6 +366,7 @@ export default {
             Object.entries(medicines).forEach(([medicine, values]) => {
                 this.options.series.push({
                     yAxis: 1,
+                    turboThreshold: 1000000,
                     name: medicine,
                     data: values.map((timestamp) => {
                         return {
@@ -398,6 +400,7 @@ export default {
             this.data.filter((graph) => graph.category.name == 'symptom').forEach((graph) => {
                 if (graph.values.length > 0) {
                     this.options.series.push({
+                        turboThreshold: 1000000,
                         yAxis: 1,
                         color: '#ad0eca',
                         name: graph.category.description,
