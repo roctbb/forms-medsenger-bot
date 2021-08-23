@@ -141,7 +141,9 @@ class FormManager(Manager):
         deadline = time.time() + 1 * 60 * 60
 
         self.medsenger_api.send_message(contract_id, text, only_doctor=True)
-        self.medsenger_api.send_message(contract_id, 'Спасибо за заполнение опросника "{}". Ответы отправлены вашему лечащему врачу.'.format(form.title), only_patient=True, action_deadline=deadline)
+
+        if not form.thanks_text:
+            self.medsenger_api.send_message(contract_id, 'Спасибо за заполнение опросника "{}". Ответы отправлены вашему лечащему врачу.'.format(form.title), only_patient=True, action_deadline=deadline)
 
     def submit(self, answers, form_id, contract_id):
         form = Form.query.filter_by(id=form_id).first_or_404()
