@@ -157,12 +157,13 @@ class FormManager(Manager):
             if field['uid'] in answers.keys():
                 if field['type'] == 'radio':
                     category = field['params']['variants'][answers[field['uid']]]['category']
-                    value = field['params']['variants'][answers[field['uid']]]['category_value']
                     answer = field['params']['variants'][answers[field['uid']]].get('text')
                     report.append((field.get('text'), answer))
 
                     if category == 'none':
                         continue
+
+                    value = field['params']['variants'][answers[field['uid']]]['category_value']
 
                     params = {
                         "question_uid": field['uid'],
