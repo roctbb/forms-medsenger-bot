@@ -356,10 +356,18 @@ export default {
             let medicines = {}
             this.data.filter((graph) => graph.category.name == 'medicine').forEach((graph) => {
                 graph.values.forEach((medicine) => {
-                    if (medicine.value in medicines)
-                        medicines[medicine.value].push(medicine.timestamp)
+
+                    if (medicine.value in medicines) {
+                        medicines[medicine.value].push({
+                            time: medicine.timestamp,
+                            dose: medicine.params.dose == null ? '' : ` (${medicine.params.dose})`
+                        })
+                    }
                     else
-                        medicines[medicine.value] = [medicine.timestamp]
+                        medicines[medicine.value] = [{
+                            timestamp: medicine.timestamp,
+                            dose: medicine.params.dose == null ? '' :  ` (${medicine.params.dose})`
+                        }]
                 })
             });
 
@@ -368,17 +376,17 @@ export default {
                     yAxis: 1,
                     turboThreshold: 1000000,
                     name: medicine,
-                    data: values.map((timestamp) => {
+                    data: values.map((value) => {
                         return {
                             dataLabels: {
                                 enabled: false,
                             },
-                            x: (timestamp + this.offset) * 1000,
+                            x: (value.timestamp + this.offset) * 1000,
                             y: y,
                             comment: this.get_comment({
-                                value: medicine,
-                                timestamp: timestamp
-                            }, 'Прием лекарства'),
+                                value: medicine + value.dose,
+                                timestamp: value.timestamp
+                            }, `Прием лекарства`),
                         }
                     }).reverse(),
                     lineWidth: 0,

@@ -291,7 +291,8 @@ export default {
 
                     let m = {
                         points: [{
-                            time: new Date(medicine.timestamp * 1000)
+                            time: new Date(medicine.timestamp * 1000),
+                            dose: medicine.params.dose
                         }],
                         date: +date + offset,
                         description: "Прием лекарства <strong>" + medicine.value + "</strong> в ",
@@ -320,7 +321,7 @@ export default {
                         return a.time < b.time ? -1 : a.time > b.time ? 1 : 0
                     })
                     val.points.forEach(p => {
-                        val.description += "<br> • <strong>" + this.formatTime(p.time) + "</strong>"
+                        val.description += `<br> • <strong> ${this.formatTime(p.time)} ${p.dose == null ? '' : `(${p.dose})`} </strong>`
                     })
                 })
 
