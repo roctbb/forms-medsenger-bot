@@ -16,6 +16,7 @@
             <div v-if="mode == 'form' || mode == 'done' || mode == 'graph' || mode == 'confirm-medicine'">
                 <div class="container" style="margin-top: 15px;">
                     <confirm-medicine-presenter :data="patient.medicines" v-if="state == 'confirm-medicine'"/>
+                    <dose-verifier :data="medicine" v-if="state == 'verify-dose'"/>
                     <form-presenter :data="form" v-if="state == 'form-presenter'"/>
                     <graph-category-chooser :data="available_categories" v-if="state == 'graph-category-chooser'"/>
                     <action-done v-if="state == 'done'"></action-done>
@@ -46,12 +47,14 @@ import GraphPresenter from "./components/presenters/GraphPresenter";
 import LoadError from "./components/presenters/LoadError";
 import ConfirmMedicinePresenter from "./components/presenters/ConfirmMedicinePresenter";
 import HeatmapPresenter from "./components/presenters/HeatmapPresenter";
+import DoseVerifier from "./components/presenters/DoseVerifier";
 
 
 
 export default {
     name: 'app',
     components: {
+        DoseVerifier,
         HeatmapPresenter,
         ConfirmMedicinePresenter,
         LoadError,
@@ -64,6 +67,7 @@ export default {
             state: "loading",
             patient: {},
             form: {},
+            medicine: {},
             mode: "",
             object_id: -1,
             templates: {
@@ -132,6 +136,10 @@ export default {
         Event.listen('select-graph', () => {
             this.state = 'graph-category-chooser'
         });
+        Event.listen('verify-dose', (medicine) => {
+            this.medicine = medicine
+            this.state = 'verify-dose'
+        })
     },
     methods: {
         load: function () {

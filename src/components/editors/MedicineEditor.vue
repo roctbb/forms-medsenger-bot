@@ -16,6 +16,10 @@
                               v-model="medicine.rules"></textarea>
                 </form-group48>
 
+                <form-group48 title="Разрешить пациенту регулировать дозу">
+                    <input class="form-check" type="checkbox" v-model="medicine.verify_dose"/>
+                </form-group48>
+
                 <form-group48 title="Уведомить, если пациент не заполнят опросник">
                     <input class="form-check" type="checkbox" @change="warning_change()" v-model="medicine.warning_enabled"/>
                 </form-group48>
@@ -102,11 +106,7 @@ export default {
                 this.errors.push('Проверьте корректность расписания')
             }
 
-            if (this.errors.length != 0) {
-                return false;
-            } else {
-                return true;
-            }
+            return this.errors.length == 0;
         },
         show_validation: function () {
             this.save_clicked = true
