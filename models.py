@@ -105,6 +105,7 @@ class Medicine(db.Model, Compliance):
     rules = db.Column(db.Text, nullable=True)
     timetable = db.Column(db.JSON, nullable=True)
     is_template = db.Column(db.Boolean, default=False)
+    verify_dose = db.Column(db.Boolean, default=False)
     template_id = db.Column(db.Integer, db.ForeignKey('medicine.id', ondelete="set null"), nullable=True)
 
     last_sent = db.Column(db.DateTime(), nullable=True)
@@ -127,6 +128,7 @@ class Medicine(db.Model, Compliance):
             "rules": self.rules,
             "timetable": self.timetable,
             "is_template": self.is_template,
+            "verify_dose": self.verify_dose,
             "template_id": self.template_id,
             "warning_days": self.warning_days,
             "sent": sent,
