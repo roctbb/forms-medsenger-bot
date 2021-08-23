@@ -44,6 +44,10 @@
                         <input type="checkbox" v-model="condition.skip_additions">
                     </form-group48>
 
+                    <form-group48 title="таймаут при инициализации">
+                        <input type="checkbox" v-model="condition.timeout_on_init">
+                    </form-group48>
+
                     <h6>Критерии срабатывания</h6>
 
                     <div v-for="(or_block, i) in condition.criteria">
@@ -84,7 +88,7 @@
 
                     <hr>
 
-                    <button class="btn btn-sm btn-danger" @click="remove_condition(step, condition_index)">Удалить
+                    <button class="btn btn-sm btn-danger" @click="remove_common_condition(algorithm, condition_index)">Удалить
                         условие
                     </button>
                 </card>
@@ -110,6 +114,10 @@
 
                     <form-group48 title="Не помечать точки">
                         <input type="checkbox" v-model="condition.skip_additions">
+                    </form-group48>
+
+                    <form-group48 title="таймаут при инициализации">
+                        <input type="checkbox" v-model="condition.timeout_on_init">
                     </form-group48>
 
                     <h6>Критерии срабатывания</h6>
@@ -241,6 +249,9 @@ export default {
             }
             algorithm.common_conditions.push(this.create_condition());
         },
+        remove_common_condition: function (algorithm, index) {
+            algorithm.common_conditions.splice(index, 1);
+        },
         add_condition: function (step, type) {
             step.conditions.push(this.create_condition());
         },
@@ -340,6 +351,21 @@ export default {
 
                 return criteria
             }
+            let prepare_action = (action) => {
+                if (action.type == 'record') {
+                    let category = this.get_category(action.params.category)
+
+                    if (category.type == 'integer') action.params.value = parseInt(action.params.value)
+                    if (category.type == 'float') action.params.value = parseFloat(action.params.value)
+                }
+                if (action.type == 'order') {
+                    action.params.agent_id = parseInt(action.params.agent_id)
+                    if (action.params.order_params) {
+                        action.params.order_params = JSON.parse(action.params.order_params);
+                    }
+                }
+                return action;
+            }
 
             let criteria_validator = (criteria) => {
                 let category = this.get_category(criteria.category)
@@ -369,6 +395,8 @@ export default {
             if (this.algorithm.common_conditions) {
                 this.algorithm.common_conditions.forEach(condition => {
                     condition.criteria = condition.criteria.map((L) => L.map(prepare_criteria))
+                    condition.positive_actions = condition.positive_actions.map(prepare_action)
+                    condition.negative_actions = condition.negative_actions.map(prepare_action)
                 })
             }
 
@@ -390,21 +418,7 @@ export default {
                 this.errors.push('Проверьте правильность условий.')
             }
 
-            let prepare_action = (action) => {
-                if (action.type == 'record') {
-                    let category = this.get_category(action.params.category)
 
-                    if (category.type == 'integer') action.params.value = parseInt(action.params.value)
-                    if (category.type == 'float') action.params.value = parseFloat(action.params.value)
-                }
-                if (action.type == 'order') {
-                    action.params.agent_id = parseInt(action.params.agent_id)
-                    if (action.params.order_params) {
-                        action.params.order_params = JSON.parse(action.params.order_params);
-                    }
-                }
-                return action;
-            }
 
             let action_validator = (action) => {
                 if (action.type == 'record' && this.empty(action.params.value)) return true;

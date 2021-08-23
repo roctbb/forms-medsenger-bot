@@ -122,6 +122,7 @@ export default {
                     width: window.innerWidth,
                     events: {
                         render: function (event) {
+
                             let isInside = (point) => {
                                 const min = event.target.axes[0].min
                                 const max = event.target.axes[0].max
@@ -272,6 +273,7 @@ export default {
                             lineWidth: 2,
                             lineColor: null,
                         },
+                        turboThreshold: 1000000
 
                     }
                 },
@@ -313,7 +315,6 @@ export default {
                     resetZoom: 'Весь график'
                 }
             });
-
             this.data.filter((graph) => graph.category.type != 'string').forEach((graph) => {
                 this.options.series.push({
                     name: graph.category.description,
@@ -321,6 +322,7 @@ export default {
                     yAxis: 0,
                     showInNavigator: true,
                     data: graph.values.map((value) => {
+
                         return {
                             x: (value.timestamp + this.offset) * 1000,
                             y: value.value,
@@ -346,6 +348,7 @@ export default {
                     }
                 })
             })
+
 
             let y = -5;
 

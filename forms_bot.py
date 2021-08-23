@@ -136,9 +136,9 @@ def init(data):
 def hook(data):
     contract_id = int(data.get('contract_id'))
     contract = contract_manager.get(contract_id)
-    category_name = data.get('category_name')
+    category_names = data.get('category_names')
 
-    if algorithm_manager.hook(contract, category_name):
+    if algorithm_manager.hook(contract, category_names):
         return jsonify({
             "result": "ok",
         })

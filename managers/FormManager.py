@@ -290,9 +290,11 @@ class FormManager(Manager):
                 to_add = list(filter(lambda c: c not in old_names, names))
                 if to_add:
                     self.medsenger_api.add_hooks(contract.id, to_add)
-
-            if data.get('algorithm_id') and contract.is_admin:
-                form.algorithm_id = data.get('algorithm_id')
+            if contract.is_admin:
+                if data.get('algorithm_id'):
+                    form.algorithm_id = data.get('algorithm_id')
+                else:
+                    form.algorithm_id = None
 
             if not form_id:
                 self.db.session.add(form)

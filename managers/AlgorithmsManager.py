@@ -84,10 +84,12 @@ class AlgorithmsManager(Manager):
                         pass
 
             self.db.session.add(new_algorithm)
-            self.__commit__()
-            self.db.session.refresh(new_algorithm)
 
             self.check_inits(new_algorithm, contract)
+            self.check_init_timeouts(new_algorithm, contract)
+
+            self.__commit__()
+            self.db.session.refresh(new_algorithm)
 
             return True
         else:
@@ -158,7 +160,7 @@ class AlgorithmsManager(Manager):
                 return None, None
 
         if mode == 'value' or mode == 'category_value':
-            answer = self.medsenger_api.get_records(contract_id, category_name, group=True)
+            answer = self.medsenger_api.get_records(contract_id, category_name, group=True, limit=1)
         else:
             time_from = datetime.now() - timedelta(hours=hours)
             time_to = datetime.now()
@@ -191,7 +193,7 @@ class AlgorithmsManager(Manager):
 
         if not values:
             answer = None, None
-        elif mode == 'value' and time.time() - int(answer['values'][0].get('timestamp')) > 10:
+        elif mode == 'value' and (time.time() - int(answer['values'][0].get('timestamp')) > 60 * 60 * 12 or time.time() - int(answer['values'][0].get('uploaded')) > 10):
             answer = None, None
         elif mode == 'value' or mode == 'category_value':
             answer = values, objects
@@ -219,12 +221,21 @@ class AlgorithmsManager(Manager):
         except:
             modifier = 0
 
-
         if "date_" in sign:
             left = datetime.strptime(left, '%Y-%m-%d').date()
             right = (datetime.strptime(right, '%Y-%m-%d') + timedelta(days=modifier)).date()
             sign = sign.replace('date_', '')
         else:
+            try:
+                left = float(left)
+            except:
+                pass
+
+            try:
+                right = float(right)
+            except:
+                pass
+
             try:
                 right = right * multiplier + modifier
             except:
@@ -550,6 +561,8 @@ class AlgorithmsManager(Manager):
         self.update_categories(algorithm)
 
         for condition in new_step['conditions']:
+            if condition.get('timeout_on_init'):
+                condition['last_fired'] = int(time.time())
             if any(any(criteria['category'] == 'step_init' for criteria in block) for block in condition['criteria']):
                 for action in condition['positive_actions']:
                     self.run_action(action, algorithm.contract.id, [], algorithm)
@@ -680,11 +693,11 @@ class AlgorithmsManager(Manager):
             self.medsenger_api.send_message(contract.id, text=form.thanks_text, only_patient=True,
                                             action_deadline=time.time() + 60 * 60)
 
-    def hook(self, contract, category_name):
+    def hook(self, contract, category_names):
         patient = contract.patient
 
         algorithms = list(
-            filter(lambda algorithm: category_name in algorithm.categories.split('|'), patient.algorithms))
+            filter(lambda algorithm: any(map(lambda cat: cat in algorithm.categories.split('|'), category_names.split('|'))), patient.algorithms))
 
         for algorithm in algorithms:
             self.run(algorithm)
@@ -699,6 +712,12 @@ class AlgorithmsManager(Manager):
                         any(criteria['category'] == 'init' for criteria in block) for block in condition['criteria']):
                         for action in condition['positive_actions']:
                             self.run_action(action, contract.id, [], algorithm)
+
+    def check_init_timeouts(self, algorithm, contract):
+        if algorithm.common_conditions:
+            for condition in algorithm.common_conditions:
+                if condition.get('timeout_on_init'):
+                    condition['last_fired'] = int(time.time())
 
     def create_or_edit(self, data, contract):
         try:
@@ -753,6 +772,7 @@ class AlgorithmsManager(Manager):
                 self.db.session.add(algorithm)
 
             self.check_inits(algorithm, contract)
+            self.check_init_timeouts(algorithm, contract)
 
             self.__commit__()
             return algorithm
