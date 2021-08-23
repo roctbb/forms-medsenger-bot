@@ -183,6 +183,9 @@ class FormManager(Manager):
                     category = field['category']
                     value = field.get('category_value')
 
+                    if category == 'none':
+                        continue
+
                     if not value:
                         report.append((field.get('text'), "Нет"))
                         continue
@@ -205,6 +208,10 @@ class FormManager(Manager):
                     packet.append((category, value, params))
                 else:
                     category = field['category']
+
+                    if category == 'none':
+                        continue
+
                     params = {
                         "question_uid": field['uid'],
                         "question_text": field.get('text'),
