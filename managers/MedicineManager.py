@@ -18,7 +18,7 @@ class MedicineManager(Manager):
 
         self.__commit__()
 
-    def attach(self, template_id, contract, custom_timetable=None):
+    def attach(self, template_id, contract, custom_timetable=None, custom_params={}):
         medicine = self.get(template_id)
 
         if medicine:
@@ -31,6 +31,20 @@ class MedicineManager(Manager):
                     new_medicine.timetable = custom_timetable
                 except Exception as e:
                     log(e, False)
+
+            if 'title' in custom_params:
+                new_medicine.title = custom_params.get('title')
+
+            if 'times' in custom_params:
+                new_medicine.timetable = {
+                    "mode": "daily",
+                    "points": [
+                        {
+                            "hour": int(h),
+                            "minute": int(m)
+                        } for h, m in map(lambda x:x.split(':'), custom_params.get('times'))
+                    ]
+                }
 
             self.db.session.add(new_medicine)
             self.__commit__()
@@ -112,6 +126,8 @@ class MedicineManager(Manager):
 
         result = self.medsenger_api.send_message(medicine.contract_id, text, action, action_name, True, False, True,
                                                  deadline)
+        # telepat speaker
+        self.medsenger_api.send_order(medicine.contract_id, "medicine", 26, medicine.as_dict())
 
         if result:
             medicine.last_sent = datetime.now()

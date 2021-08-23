@@ -5,6 +5,7 @@ from datetime import datetime
 from helpers import log
 from managers.Manager import Manager
 from models import Patient, Contract, Form, ActionRequest
+from helpers import generate_timetable
 
 
 class FormManager(Manager):
@@ -45,7 +46,7 @@ class FormManager(Manager):
 
         self.__commit__()
 
-    def attach(self, template_id, contract, custom_timetable=None):
+    def attach(self, template_id, contract, custom_params=dict()):
         form = self.get(template_id)
 
         if form:
@@ -56,9 +57,21 @@ class FormManager(Manager):
             if new_form.categories:
                 self.medsenger_api.add_hooks(contract.id, new_form.categories.split('|'))
 
-            if custom_timetable:
+            if "times" in custom_params and custom_params.get('times'):
                 try:
-                    new_form.timetable = custom_timetable
+                    new_form.timetable = generate_timetable(9, 21, int(custom_params.get('times')))
+                except Exception as e:
+                    log(e, False)
+            else:
+                if "timetable" in custom_params and custom_params.get('timetable'):
+                    try:
+                        new_form.timetable = custom_params.get('timetable')
+                    except Exception as e:
+                        log(e, False)
+
+            if "message" in custom_params and custom_params.get('message'):
+                try:
+                    new_form.custom_text = new_form.custom_text + "\n\n" + custom_params.get('message')
                 except Exception as e:
                     log(e, False)
 
@@ -100,6 +113,8 @@ class FormManager(Manager):
             deadline = None
 
         result = self.medsenger_api.send_message(contract_id, text, action, action_name, True, False, True, deadline)
+        # telepat speaker
+        self.medsenger_api.send_order(contract_id, "form", 26, form.as_dict())
 
         if result:
             form.last_sent = datetime.now()
@@ -215,7 +230,6 @@ class FormManager(Manager):
         else:
             packet.append(('action', 'Заполнение опросника ID {} "{}"'.format(form_id, form.title)))
 
-
         params = {
             "form_id": form.id
         }
@@ -276,15 +290,17 @@ class FormManager(Manager):
                 to_add = list(filter(lambda c: c not in old_names, names))
                 if to_add:
                     self.medsenger_api.add_hooks(contract.id, to_add)
-
-            if data.get('algorithm_id') and contract.is_admin:
-                form.algorithm_id = data.get('algorithm_id')
+            if contract.is_admin:
+                if data.get('algorithm_id'):
+                    form.algorithm_id = data.get('algorithm_id')
+                else:
+                    form.algorithm_id = None
 
             if not form_id:
                 self.db.session.add(form)
             self.__commit__()
 
-            if form.timetable.get('send_on_init') and form.contract_id:
+            if not form_id and form.timetable.get('send_on_init') and form.contract_id:
                 self.db.session.refresh(form)
                 self.run(form)
 

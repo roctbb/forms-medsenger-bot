@@ -74,7 +74,13 @@ def init(data):
             medicine_manager.clear(contract)
 
             for template_id in forms.split(','):
-                form = form_manager.attach(template_id, contract, params.get('form_timetable_{}'.format(template_id)))
+
+                form = form_manager.attach(template_id, contract, {
+                    "timetable": params.get('form_timetable_{}'.format(template_id)),
+                    "message": params.get('form_message_{}'.format(template_id)),
+                    "times": params.get('form_times_{}'.format(template_id)),
+                })
+
                 if form.algorithm_id and str(form.algorithm_id) not in exclude_algorithms:
                     algorithm_manager.attach(form.algorithm_id, contract, params)
 
@@ -95,7 +101,11 @@ def init(data):
             try:
                 form_id = int(custom_form.split('_')[1])
 
-                form = form_manager.attach(form_id, contract, params.get('form_timetable_{}'.format(form_id)))
+                form = form_manager.attach(form_id, contract, {
+                    "timetable": params.get('form_timetable_{}'.format(form_id)),
+                    "message": params.get('form_message_{}'.format(form_id)),
+                    "times": params.get('form_times_{}'.format(form_id)),
+                })
 
                 if form.algorithm_id and str(form.algorithm_id) not in exclude_algorithms:
                     algorithm_manager.attach(form.algorithm_id, contract, params)
@@ -126,9 +136,9 @@ def init(data):
 def hook(data):
     contract_id = int(data.get('contract_id'))
     contract = contract_manager.get(contract_id)
-    category_name = data.get('category_name')
+    category_names = data.get('category_names')
 
-    if algorithm_manager.hook(contract, category_name):
+    if algorithm_manager.hook(contract, category_names):
         return jsonify({
             "result": "ok",
         })
@@ -144,6 +154,7 @@ def remove(data):
         abort(422)
 
     contract_manager.remove(contract_id)
+
     return "ok"
 
 
@@ -157,10 +168,18 @@ def actions(data):
 
     return jsonify(actions)
 
+
 @app.route('/params', methods=['POST'])
 @verify_json
 def params(data):
     contract = contract_manager.get(data.get('contract_id'))
+    return jsonify(algorithm_manager.search_params(contract))
+
+
+@app.route('/params', methods=['GET'])
+@verify_args
+def get_params(args, data):
+    contract = contract_manager.get(args.get('contract_id'))
     return jsonify(algorithm_manager.search_params(contract))
 
 
@@ -193,6 +212,7 @@ def form_page(args, form, form_id):
 def graph_page(args, form):
     contract = contract_manager.get(args.get('contract_id'))
     return get_ui('graph', contract)
+
 
 @app.route('/graph/<category_id>', methods=['GET'])
 @verify_args
@@ -308,6 +328,18 @@ def create_algorithm(args, form):
         abort(422)
 
 
+@app.route('/api/settings/algorithms', methods=['POST'])
+@only_doctor_args
+def save_algorithms(args, form):
+    contract_id = args.get('contract_id')
+    contract = contract_manager.get(contract_id)
+    for alg in request.json:
+        form = algorithm_manager.create_or_edit(alg, contract)
+        if not form:
+            abort(422)
+    return 'ok'
+
+
 @app.route('/api/settings/delete_algorithm', methods=['POST'])
 @only_doctor_args
 def delete_algorithm(args, form):
@@ -379,8 +411,8 @@ def post_form(args, form, form_id):
             medsenger_api.finish_task(contract.id, contract.tasks['form-{}'.format(form_id)])
 
         return jsonify({
-                "result": "ok",
-            })
+            "result": "ok",
+        })
     else:
         abort(404)
 

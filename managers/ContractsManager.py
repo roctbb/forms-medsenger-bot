@@ -42,6 +42,11 @@ class ContractManager(Manager):
                 raise Exception("No contract_id = {} found".format(contract_id))
 
             contract.is_active = False
+
+            for object in contract.forms + contract.algorithms + contract.medicines:
+                self.db.session.delete(object)
+
+
             self.__commit__()
         except Exception as e:
             log(e)

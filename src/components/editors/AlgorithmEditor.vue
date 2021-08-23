@@ -21,28 +21,39 @@
                 <form-group48 v-if="is_admin" title="Показывать шаблон клиникам (JSON)">
                     <input class="form-control form-control-sm" type="text" v-model="algorithm.clinics"/>
                 </form-group48>
+
+                <form-group48 title="Дата отсчета">
+                    <date-picker v-model="algorithm.attach_date" value-type="YYYY-MM-DD"></date-picker>
+                </form-group48>
+
+                <form-group48 title="Дата завершения">
+                    <date-picker v-model="algorithm.detach_date" value-type="YYYY-MM-DD"></date-picker>
+                </form-group48>
             </card>
 
-            <card v-for="(step, step_index) in algorithm.steps" :title="step.title" :key="step.uid">
-                <form-group48 title="Название ступени">
-                    <input class="form-control form-control-sm" v-model="step.title"/>
-                </form-group48>
-
-                <form-group48 title="Таймаут (минуты)">
-                    <input class="form-control form-control-sm" type="number" v-model="step.reset_minutes"/>
-                </form-group48>
-
-                <card v-for="(condition, condition_index) in step.conditions" additional_class="border-primary" :key="condition.uid">
+            <card :title="'Общие условия'">
+                <card v-for="(condition, condition_index) in algorithm.common_conditions"
+                      additional_class="border-primary"
+                      :key="condition.uid">
 
                     <form-group48 title="Таймаут (минуты)">
                         <input class="form-control form-control-sm" type="number" v-model="condition.reset_minutes"/>
+                    </form-group48>
+
+                    <form-group48 title="Не помечать точки">
+                        <input type="checkbox" v-model="condition.skip_additions">
+                    </form-group48>
+
+                    <form-group48 title="таймаут при инициализации">
+                        <input type="checkbox" v-model="condition.timeout_on_init">
                     </form-group48>
 
                     <h6>Критерии срабатывания</h6>
 
                     <div v-for="(or_block, i) in condition.criteria">
                         <div v-for="(criteria, j) in or_block">
-                            <criteria class="alert alert-primary" :data="criteria" :rkey="i" :pkey="j" :condition="condition" :key="criteria.uid"/>
+                            <criteria class="alert alert-primary" :data="criteria" :rkey="i" :pkey="j"
+                                      :condition="condition" :key="criteria.uid"/>
                         </div>
                         <p class="text-center">
                             <button class="btn btn-sm btn-default" @click="add_criteria(or_block, i)">и</button>
@@ -55,23 +66,103 @@
 
                     <h6 style="margin-top: 10px;">Действия если условие выполняется</h6>
 
-                    <action class="alert alert-success" v-for="(action, i) in condition.positive_actions" :algorithm="algorithm" :data="action" :pkey="i" :parent="condition.positive_actions"
+                    <action class="alert alert-success" v-for="(action, i) in condition.positive_actions"
+                            :algorithm="algorithm" :data="action" :pkey="i" :parent="condition.positive_actions"
                             :key="action.uid"></action>
                     <p class="text-center">
-                        <button class="btn btn-sm btn-default" @click="add_action(condition.positive_actions)">Добавить</button>
+                        <button class="btn btn-sm btn-default" @click="add_action(condition.positive_actions)">
+                            Добавить
+                        </button>
                     </p>
 
                     <h6 style="margin-top: 10px;">Действия если условие не выполняется</h6>
 
-                    <action class="alert alert-danger" v-for="(action, i) in condition.negative_actions" :algorithm="algorithm" :data="action" :pkey="i" :parent="condition.negative_actions"
+                    <action class="alert alert-danger" v-for="(action, i) in condition.negative_actions"
+                            :algorithm="algorithm" :data="action" :pkey="i" :parent="condition.negative_actions"
                             :key="action.uid"></action>
                     <p class="text-center">
-                        <button class="btn btn-sm btn-default" @click="add_action(condition.negative_actions)">Добавить</button>
+                        <button class="btn btn-sm btn-default" @click="add_action(condition.negative_actions)">
+                            Добавить
+                        </button>
                     </p>
 
                     <hr>
 
-                    <button class="btn btn-sm btn-danger" @click="remove_condition(step, condition_index)">Удалить условие</button>
+                    <button class="btn btn-sm btn-danger" @click="remove_common_condition(algorithm, condition_index)">Удалить
+                        условие
+                    </button>
+                </card>
+                <button class="btn btn-sm btn-primary" @click="add_common_condition(algorithm)">Добавить условие
+                </button>
+            </card>
+
+            <card v-for="(step, step_index) in algorithm.steps" :title="step.title" :key="step.uid">
+                <form-group48 title="Название ступени">
+                    <input class="form-control form-control-sm" v-model="step.title"/>
+                </form-group48>
+
+                <form-group48 title="Таймаут (минуты)">
+                    <input class="form-control form-control-sm" type="number" v-model="step.reset_minutes"/>
+                </form-group48>
+
+                <card v-for="(condition, condition_index) in step.conditions" additional_class="border-primary"
+                      :key="condition.uid">
+
+                    <form-group48 title="Таймаут (минуты)">
+                        <input class="form-control form-control-sm" type="number" v-model="condition.reset_minutes"/>
+                    </form-group48>
+
+                    <form-group48 title="Не помечать точки">
+                        <input type="checkbox" v-model="condition.skip_additions">
+                    </form-group48>
+
+                    <form-group48 title="таймаут при инициализации">
+                        <input type="checkbox" v-model="condition.timeout_on_init">
+                    </form-group48>
+
+                    <h6>Критерии срабатывания</h6>
+
+                    <div v-for="(or_block, i) in condition.criteria">
+                        <div v-for="(criteria, j) in or_block">
+                            <criteria class="alert alert-primary" :data="criteria" :rkey="i" :pkey="j"
+                                      :condition="condition" :key="criteria.uid"/>
+                        </div>
+                        <p class="text-center">
+                            <button class="btn btn-sm btn-default" @click="add_criteria(or_block, i)">и</button>
+                        </p>
+                        <div class="separator">или</div>
+                    </div>
+                    <p class="text-center">
+                        <button class="btn btn-sm btn-default" @click="add_or_block(condition)">или</button>
+                    </p>
+
+                    <h6 style="margin-top: 10px;">Действия если условие выполняется</h6>
+
+                    <action class="alert alert-success" v-for="(action, i) in condition.positive_actions"
+                            :algorithm="algorithm" :data="action" :pkey="i" :parent="condition.positive_actions"
+                            :key="action.uid"></action>
+                    <p class="text-center">
+                        <button class="btn btn-sm btn-default" @click="add_action(condition.positive_actions)">
+                            Добавить
+                        </button>
+                    </p>
+
+                    <h6 style="margin-top: 10px;">Действия если условие не выполняется</h6>
+
+                    <action class="alert alert-danger" v-for="(action, i) in condition.negative_actions"
+                            :algorithm="algorithm" :data="action" :pkey="i" :parent="condition.negative_actions"
+                            :key="action.uid"></action>
+                    <p class="text-center">
+                        <button class="btn btn-sm btn-default" @click="add_action(condition.negative_actions)">
+                            Добавить
+                        </button>
+                    </p>
+
+                    <hr>
+
+                    <button class="btn btn-sm btn-danger" @click="remove_condition(step, condition_index)">Удалить
+                        условие
+                    </button>
                 </card>
 
                 <button class="btn btn-sm btn-primary" @click="add_condition(step)">Добавить условие</button>
@@ -80,7 +171,8 @@
 
                 <h6>Действие по таймауту</h6>
 
-                <action class="alert alert-warning" v-for="(action, i) in step.timeout_actions" :algorithm="algorithm" :data="action" :pkey="i" :parent="step.timeout_actions" :key="action.uid"></action>
+                <action class="alert alert-warning" v-for="(action, i) in step.timeout_actions" :algorithm="algorithm"
+                        :data="action" :pkey="i" :parent="step.timeout_actions" :key="action.uid"></action>
                 <button class="btn btn-sm btn-primary" @click="add_action(step.timeout_actions)">Добавить</button>
 
 
@@ -106,10 +198,13 @@ import ErrorBlock from "../common/ErrorBlock";
 import Criteria from "./parts/Criteria";
 import Action from "./parts/Action";
 import * as moment from "moment/moment";
+import DatePicker from 'vue2-datepicker';
+import 'vue2-datepicker/index.css';
+import 'vue2-datepicker/locale/ru';
 
 export default {
     name: "AlgorithmEditor",
-    components: {Action, FormGroup48, Card, ErrorBlock, Criteria},
+    components: {Action, FormGroup48, Card, ErrorBlock, Criteria, DatePicker},
     props: {
         data: {
             required: false,
@@ -138,6 +233,7 @@ export default {
         create_empty_algorithm: function () {
             return {
                 steps: [this.create_step()],
+                common_conditions: [],
             };
         },
         add_or_block: function (condition) {
@@ -147,7 +243,16 @@ export default {
         add_criteria: function (block, i) {
             block.push(this.create_empty_criteria())
         },
-        add_condition: function (step) {
+        add_common_condition: function (algorithm) {
+            if (!algorithm.common_conditions) {
+                algorithm.common_conditions = [];
+            }
+            algorithm.common_conditions.push(this.create_condition());
+        },
+        remove_common_condition: function (algorithm, index) {
+            algorithm.common_conditions.splice(index, 1);
+        },
+        add_condition: function (step, type) {
             step.conditions.push(this.create_condition());
         },
         add_step: function () {
@@ -198,6 +303,9 @@ export default {
             }
 
             let prepare_criteria = (criteria) => {
+                criteria.left_offset = parseInt(criteria.left_offset)
+                criteria.right_offset = parseInt(criteria.right_offset)
+
                 if (criteria.left_mode != 'time' && criteria.left_mode != 'init') {
                     if (criteria.left_dimension == 'hours') {
                         if (!this.empty(criteria.left_hours)) criteria.left_hours = parseInt(criteria.left_hours)
@@ -216,6 +324,13 @@ export default {
                         if (category.type == 'integer') criteria.value = parseInt(criteria.value)
                         if (category.type == 'float') criteria.value = parseFloat(criteria.value)
                     }
+
+                    if (!this.empty(criteria.multiplier)) {
+                        criteria.multiplier = parseFloat(criteria.multiplier.toString().replace(',', '.'))
+                    } else {
+                        criteria.multiplier = 1
+                    }
+
                 }
                 if (criteria.left_mode == 'time') {
                     if (criteria.right_dimension == 'hours') {
@@ -230,12 +345,26 @@ export default {
                         criteria.category = 'time'
                     }
                 }
-                if (criteria.left_mode == 'init')
-                {
+                if (criteria.left_mode == 'init') {
                     criteria.category = 'init'
                 }
 
                 return criteria
+            }
+            let prepare_action = (action) => {
+                if (action.type == 'record') {
+                    let category = this.get_category(action.params.category)
+
+                    if (category.type == 'integer') action.params.value = parseInt(action.params.value)
+                    if (category.type == 'float') action.params.value = parseFloat(action.params.value)
+                }
+                if (action.type == 'order') {
+                    action.params.agent_id = parseInt(action.params.agent_id)
+                    if (action.params.order_params) {
+                        action.params.order_params = JSON.parse(action.params.order_params);
+                    }
+                }
+                return action;
             }
 
             let criteria_validator = (criteria) => {
@@ -263,6 +392,14 @@ export default {
                 return false;
             }
 
+            if (this.algorithm.common_conditions) {
+                this.algorithm.common_conditions.forEach(condition => {
+                    condition.criteria = condition.criteria.map((L) => L.map(prepare_criteria))
+                    condition.positive_actions = condition.positive_actions.map(prepare_action)
+                    condition.negative_actions = condition.negative_actions.map(prepare_action)
+                })
+            }
+
             this.algorithm.steps.forEach(step => {
                 step.conditions.forEach(condition => {
                     condition.criteria = condition.criteria.map((L) => L.map(prepare_criteria))
@@ -281,21 +418,7 @@ export default {
                 this.errors.push('Проверьте правильность условий.')
             }
 
-            let prepare_action = (action) => {
-                if (action.type == 'record') {
-                    let category = this.get_category(action.params.category)
 
-                    if (category.type == 'integer') action.params.value = parseInt(action.params.value)
-                    if (category.type == 'float') action.params.value = parseFloat(action.params.value)
-                }
-                if (action.type == 'order') {
-                    action.params.agent_id = parseInt(action.params.agent_id)
-                    if (action.params.order_params) {
-                        action.params.order_params = JSON.parse(action.params.order_params);
-                    }
-                }
-                return action;
-            }
 
             let action_validator = (action) => {
                 if (action.type == 'record' && this.empty(action.params.value)) return true;
@@ -307,11 +430,9 @@ export default {
             }
 
             this.algorithm.steps.forEach(step => {
-                if (step.timeout_actions)
-                {
+                if (step.timeout_actions) {
                     step.timeout_actions = step.timeout_actions.map(prepare_action)
-                }
-                else {
+                } else {
                     step.timeout_actions = []
                 }
 
@@ -372,8 +493,8 @@ export default {
                 this.algorithm.contract_id = response.data.contract_id
             }
 
-            if (is_new) Event.fire('algorithm-created', this.algorithm)
-            else Event.fire('back-to-dashboard', this.algorithm)
+            if (is_new) Event.fire('algorithm-created', response.data)
+            else Event.fire('back-to-dashboard', response.data)
 
             this.algorithm = undefined
         },
@@ -411,6 +532,17 @@ export default {
         Event.listen('attach-algorithm', (algorithm) => {
             this.algorithm = {}
             this.copy(this.algorithm, algorithm)
+
+            this.algorithm.attach_date = moment().format('YYYY-MM-DD')
+            if (algorithm.attach_date && algorithm.detach_date)
+            {
+                let attach = moment(algorithm.attach_date, "YYYY-MM-DD")
+                let detach = moment(algorithm.detach_date, "YYYY-MM-DD")
+                let len = moment.duration(detach.diff(attach)).asDays()
+
+                this.algorithm.detach_date = moment().add(len, 'days').format('YYYY-MM-DD')
+            }
+
             this.algorithm.id = undefined
             this.algorithm.is_template = false;
             this.algorithm.template_id = algorithm.id;

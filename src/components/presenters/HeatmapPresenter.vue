@@ -1,21 +1,29 @@
 <template>
     <div>
+        <div style="margin-left: 10px;">
+            <a class="btn btn-outline-info btn-sm" @click="select_graph()">Назад</a>
+        </div>
 
-            <div class="container">
-                <a class="btn btn-danger" @click="select_graph()">Назад</a>
+        <div v-if="loaded">
+            <div style="margin-left: 10px;"
+                 v-if="heatmap_type == 'symptoms' && heatmap_data.medicine_series.length">
+                <input type="checkbox" id="show_medicines" @change="showMedicines()" v-model="show_medicines"/>
+                <label for="show_medicines">Показать лекарства</label>
             </div>
 
-            <div class="container">
-                <input type="checkbox" id="show_medicines" v-if="heatmap_type == 'symptoms'"
-                       @change="showMedicines()" v-model="show_medicines"/>
-                <label for="show_medicines" v-if="heatmap_type == 'symptoms'">Показать лекарства</label>
+
+            <highcharts :constructor-type="'stockChart'" :options="options"
+                        v-if="heatmap_data.medicine_series.length || heatmap_data.has_symptoms"></highcharts>
+
+            <div class="text-center text-muted"
+                 v-if="heatmap_type == 'symptoms' && !heatmap_data.has_symptoms ||
+                       heatmap_type == 'medicines' && !heatmap_data.medicine_series.length">
+                Нет данных
             </div>
+        </div>
 
-
-        <highcharts :constructor-type="'stockChart'" v-if="loaded" :options="options"></highcharts>
-
+        <br>
     </div>
-
 </template>
 
 <script>
@@ -40,7 +48,8 @@ export default {
             options: {},
             show_medicines: true,
             loaded: false,
-            medicines_data: {}
+            heatmap_data: {},
+            axis_height: "70%"
         }
     },
     methods: {
@@ -49,6 +58,7 @@ export default {
         },
         process_load_answer: function (response) {
             this.data = response.data
+
             let offset = -1 * new Date().getTimezoneOffset() * 60 * 1000
             var now = new Date()
             now.setHours(0)
@@ -81,14 +91,18 @@ export default {
                     },
                     selected: 1
                 },
+                scrollbar: {
+                    step: 1
+                },
                 chart: {
                     type: 'heatmap',
                     zoomType: 'x',
                     backgroundColor: "#f8f8fb",
-                    height: window.innerHeight
+                    height: 0,
+                    width: window.innerWidth
                 },
                 title: {
-                    text: this.heatmap_type == 'symptoms' ? 'Симптомы' :'Приемы лекарств'
+                    text: this.heatmap_type == 'symptoms' ? 'Симптомы' : 'Приемы лекарств'
                 },
                 series: [],
                 xAxis: {
@@ -114,6 +128,7 @@ export default {
                         },
                         labels: {
                             align: 'left',
+                            y: 5,
                             reserveSpace: true
                         },
                         title: {
@@ -126,10 +141,11 @@ export default {
                         },
                         labels: {
                             align: 'left',
+                            y: 5,
                             reserveSpace: true
                         },
-                        top: this.heatmap_type == 'symptoms' ? '72%': '0%',
-                        height: this.heatmap_type == 'symptoms' ? '28%' : '100%',
+                        top: '0%',
+                        height: '100%',
                         gridLineWidth: 1,
                         offset: 0,
                         lineWidth: 2
@@ -193,7 +209,7 @@ export default {
                                 description: symptom.value,
                             }],
                             date: +date + offset,
-                            grade: symptom.params.grade != null ? symptom.params.grade : 0.7,
+                            color: symptom.params.color != null ? symptom.params.color : 0.7,
                             description: "",
                             count: 1
                         }
@@ -204,7 +220,7 @@ export default {
                             let old = symptoms[gr].find(ss => ss.date == s.date)
                             if (old) {
                                 old.count++
-                                old.grade = old.grade > s.grade ? old.grade : s.grade
+                                old.color = old.color > s.color ? old.color : s.color
                                 old.points.push(s.points[0])
                             } else {
                                 symptoms[gr].push(s)
@@ -228,11 +244,17 @@ export default {
                     this.options.series.push({
                         colsize: 24 * 36e5,
                         connectNulls: true,
+                        showInNavigator: false,
                         nullColor: '#50B432',
                         yAxis: 0,
                         name: key,
                         borderWidth: 1,
                         borderColor: "#555555",
+                        states: {
+                            inactive: {
+                                opacity: 1,
+                            }
+                        },
                         data: value.map((val) => {
                             return {
                                 dataLabels: {
@@ -244,7 +266,7 @@ export default {
                                 x: val.date,
                                 y: y,
                                 name: key,
-                                value: val.grade,
+                                value: val.color,
                                 comment: val.description,
                             }
                         }).reverse()
@@ -255,9 +277,8 @@ export default {
             }
 
             let medicines = {}
-            this.medicines_data = {
-                series: [],
-                axis: this.options.yAxis[1]
+            this.heatmap_data = {
+                medicine_series: []
             }
 
             this.data.filter((graph) => graph.category.name == 'medicine').forEach((graph) => {
@@ -303,12 +324,17 @@ export default {
                     })
                 })
 
-                this.medicines_data.series.push({
+                this.heatmap_data.medicine_series.push({
                     colsize: 24 * 36e5,
                     yAxis: this.heatmap_type == 'symptoms' ? 1 : 0,
                     name: key,
                     borderWidth: 1,
                     borderColor: "#555555",
+                    states: {
+                        inactive: {
+                            opacity: 1,
+                        }
+                    },
                     data: value.map((val) => {
                         return {
                             dataLabels: {
@@ -328,24 +354,31 @@ export default {
 
                 y += 1;
             })
-            Array.prototype.push.apply(this.options.series, this.medicines_data.series);
+            Array.prototype.push.apply(this.options.series, this.heatmap_data.medicine_series);
             this.options.yAxis[1].categories = Object.keys(medicines)
 
             if (this.heatmap_type == 'medicines') {
-                this.options.yAxis.splice(0,1)
+                this.options.yAxis.splice(0, 1)
             }
 
             let count = Object.keys(medicines).length + Object.keys(symptoms).length
-            if (count > 20) {
-                this.options.chart.height = count * this.options.chart.height / 20 + 100
-                if (this.heatmap_type == 'symptoms' && this.show_medicines) {
-                    this.options.yAxis[0].height = Math.round(100*Object.keys(symptoms).length/count) + "%"
-                    this.options.yAxis[1].height = (100 - Math.round(100*Object.keys(symptoms).length/count) - 1) + "%"
-                    this.options.yAxis[1].top = Math.round(100*Object.keys(symptoms).length/count) + 1 + "%"
-                }
+            this.options.chart.height = count * 20 + 250
+            if (this.heatmap_type == 'symptoms') {
+                this.options.yAxis[0].height = 20 * Object.keys(symptoms).length
+                this.options.yAxis[1].top = 20 * Object.keys(symptoms).length + 100
+                this.options.yAxis[1].height = 20 * Object.keys(medicines).length
+                this.axis_height = this.options.yAxis[0].height
             }
 
 
+            if (this.heatmap_type == 'symptoms' && Object.entries(symptoms).length > 0) {
+                this.heatmap_data.has_symptoms = true
+                this.show_medicines = false
+            }
+
+            if (this.heatmap_type == 'symptoms' && !this.show_medicines) {
+                this.showMedicines()
+            }
 
             this.loaded = true
         },
@@ -358,22 +391,34 @@ export default {
         },
         showMedicines: function () {
             if (this.show_medicines) {
-                this.medicines_data.series.forEach(s => {this.options.series.push(s)})
-                this.options.yAxis[0].height = "70%"
+                this.heatmap_data.medicine_series.forEach(s => {
+                    this.options.series.push(s)
+                })
+                this.options.yAxis[0].height = this.axis_height
                 this.options.yAxis[1].title.text = 'Лекарства'
             } else {
-                let index = this.options.series.length - this.medicines_data.series.length
-                this.options.series.splice(index, this.medicines_data.series.length)
+                let index = this.options.series.length - this.heatmap_data.medicine_series.length
+                this.options.series.splice(index, this.heatmap_data.medicine_series.length)
                 this.options.yAxis[0].height = "100%"
                 this.options.yAxis[1].title.text = ''
             }
         }
     },
     created() {
+        this.heatmap_data = {
+            medicine_series: [],
+            has_symptoms: false
+        }
+
         Event.listen('load-heatmap', (group) => {
             this.group = {"categories": []}
             this.load_data()
         });
+
+        Event.listen('window-resized', () => {
+            if (this.options.chart != null)
+                this.options.chart.width = window.innerWidth
+        })
     }
 }
 </script>

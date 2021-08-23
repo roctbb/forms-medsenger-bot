@@ -22,7 +22,7 @@
                     <load-error v-if="state == 'load-error'"></load-error>
                 </div>
 
-                <graph-presenter v-show="state == 'graph-presenter'"/>
+                <graph-presenter v-show="state == 'graph-presenter'" :patient="patient"/>
                 <heatmap-presenter v-show="state.startsWith('heatmap-presenter')" :heatmap_type="state.split('-')[2]"/>
             </div>
 
@@ -156,7 +156,10 @@ export default {
                 this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
             }
             if (this.mode == 'graph') {
-                this.axios.get(this.url('/api/graph/categories')).then(this.process_load_answer);
+                this.axios.get(this.url('/api/settings/get_patient')).then(response => {
+                    this.patient = response.data
+                    this.axios.get(this.url('/api/graph/categories')).then(this.process_load_answer);
+                });
             }
         },
         process_load_answer: function (response) {

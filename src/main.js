@@ -4,6 +4,7 @@ import axios from "axios";
 import VueConfirmDialog from 'vue-confirm-dialog'
 import vmodal from 'vue-js-modal'
 
+
 window.Event = new class {
     constructor() {
         this.vue = new Vue();
@@ -61,6 +62,9 @@ Vue.mixin({
             }
             return true;
         },
+        to_float: function (val) {
+            return parseFloat(val.toString().replace(',', '.'))
+        },
         verify_timetable: function (timetable) {
             if (timetable.mode == 'manual') return true;
             let prepare_point = (point) => {
@@ -114,7 +118,43 @@ Vue.mixin({
         get_category: function (category_name) {
             if (category_name == 'time' || category_name == "exact_time") {
                 return {
-                    description: 'время'
+                    description: 'время',
+                    type: "date"
+                }
+            }
+
+            if (category_name == "exact_date" ) {
+                return {
+                    description: 'дата',
+                    type: "date",
+                }
+            }
+
+            if (category_name == "contract_start_date" ) {
+                return {
+                    description: 'дата начала контракта',
+                    type: "date",
+                }
+            }
+
+            if (category_name == "contract_end_date" ) {
+                return {
+                    description: 'дата завершения контракта',
+                    type: "date",
+                }
+            }
+
+            if (category_name == "algorithm_attach_date" ) {
+                return {
+                    description: 'дата отсчета алгоритма',
+                    type: "date",
+                }
+            }
+
+            if (category_name == "algorithm_detach_date" ) {
+                return {
+                    description: 'дата завершения алгоритма',
+                    type: "date",
                 }
             }
 
@@ -216,6 +256,8 @@ Vue.mixin({
                 checkbox: "Галочка",
                 radio: "Выбор варианта",
                 scale: "Шкала",
+                date: "Дата",
+                time: "Время",
             },
             current_contract_id: window.CONTRACT_ID,
             weekdays: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
@@ -226,11 +268,13 @@ Vue.mixin({
                 float: ['float'],
                 textarea: ['string'],
                 text: ['string'],
-                checkbox: ['string']
+                checkbox: ['string'],
+                date: ['date'],
+                time: ['string']
             },
             images: {
                 form: window.LOCAL_HOST + '/static/images/icons8-fill-in-form-48.png',
-                warning: window.LOCAL_HOST + '/static/images/icons8-error-24.png',
+                warning: window.LOCAL_HOST + '/static/images/icons8-error-18.png',
                 medicine: window.LOCAL_HOST + '/static/images/icons8-pill-96.png',
                 algorithm: window.LOCAL_HOST + '/static/images/icons8-artificial-intelligence-96.png',
                 ok: window.LOCAL_HOST + '/static/images/icons8-ok-128.png',
@@ -243,6 +287,9 @@ Vue.mixin({
     }
 })
 
+window.onresize = function () {
+    Event.fire('window-resized')
+}
 
 Vue.use(vmodal, {componentName: 'Modal'})
 Vue.use(VueConfirmDialog)
