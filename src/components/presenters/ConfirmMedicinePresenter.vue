@@ -1,24 +1,36 @@
 <template>
     <div>
         <h3>Записать прием лекарства</h3>
-        <error-block :errors="errors"/>
 
-        <div v-if="data.length">
+        <div v-if="data.length" style="margin-bottom: 15px;">
             <h5>Назначенные лекарства</h5>
             <p>Нажмите на название лекарства, прием которого Вы хотите записать.</p>
-            <div v-for="(medicine, i) in data" style="padding-bottom: 15px;">
-                <button class="btn btn-success" @click="save(medicine.id)">{{ medicine.title }}</button>
+            <div class="row">
+                <div class="col-4" v-for="(medicine, i) in data" style="padding-bottom: 10px;">
+                    <button class="btn btn-info btn-block" @click="save(medicine)">{{ medicine.title }}</button>
+                </div>
             </div>
         </div>
         <h5>Другое лекарство</h5>
         <div>
             <form-group48 title="Название лекарства">
                 <input class="form-control form-control-sm"
-                       :class="save_clicked && empty(custom_medicine) ? 'is-invalid' : ''"
-                       v-model="custom_medicine"/>
+                       :class="save_clicked && empty(custom_medicine.title) ? 'is-invalid' : ''"
+                       v-model="custom_medicine.title"/>
+            </form-group48>
+
+            <form-group48 title="Доза, которую Вы приняли">
+                <input class="form-control form-control-sm"
+                       :class="save_clicked && empty(custom_medicine.dose) ? 'is-invalid' : ''"
+                       v-model="custom_medicine.dose"/>
+            </form-group48>
+
+            <form-group48 title="Комментарии">
+                <input class="form-control form-control-sm" v-model="custom_medicine.comment"/>
             </form-group48>
         </div>
-        <button class="btn btn-primary" @click="custom_save()">Записать прием</button>
+        <button class="btn btn-outline-info" @click="custom_save()">Записать прием</button>
+        <error-block :errors="errors"/>
 
     </div>
 </template>
@@ -39,31 +51,51 @@ export default {
     data() {
         return {
             medicines: {},
-            custom_medicine: '',
+            custom_medicine: {},
             save_clicked: false,
             errors: []
         }
     },
     methods: {
-        save: function (medicine_id) {
+        save: function (medicine) {
             this.errors = []
-            let data = {'custom': false, 'medicine': medicine_id}
-            this.axios.post(this.url('/api/confirm-medicine'), data).then(r => Event.fire('confirm-medicine-done')).catch(r => this.errors.push('Ошибка сохранения'));
+            console.log(medicine)
+            if (medicine.verify_dose) {
+                Event.fire('verify-dose', medicine)
+            } else {
+                let data = {
+                    custom: false,
+                    medicine: medicine.id,
+                    params: null
+                }
+                this.axios.post(this.url('/api/confirm-medicine'), data).then(r => Event.fire('confirm-medicine-done')).catch(r => this.errors.push('Ошибка сохранения'));
+            }
         },
         custom_save: function () {
             this.errors = []
             this.save_clicked = true
-            if (this.empty(this.custom_medicine))
-                this.errors.push('Заполните поле')
+            if (this.empty(this.custom_medicine.title) || this.empty(this.custom_medicine.dose))
+                this.errors.push('Заполните пустые поля')
             else {
                 this.errors = []
-                let data = {'custom': true, 'medicine': this.custom_medicine}
+                let data = {
+                    custom: true,
+                    medicine: this.custom_medicine.title,
+                    params: {
+                        dose: this.custom_medicine.dose,
+                        comment: this.custom_medicine.comment
+                    }
+                }
                 this.axios.post(this.url('/api/confirm-medicine'), data).then(r => Event.fire('confirm-medicine-done')).catch(r => this.errors.push('Ошибка сохранения'));
-                console.log('save custom medicine')
             }
         },
         created() {
             this.medicines = this.data
+            this.custom_medicine = {
+                title: '',
+                dose: '',
+                comment: ''
+            }
         }
     }
 }

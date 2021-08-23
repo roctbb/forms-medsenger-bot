@@ -16,6 +16,10 @@
                               v-model="medicine.rules"></textarea>
                 </form-group48>
 
+                <form-group48 title="Разрешить пациенту регулировать дозу">
+                    <input class="form-check" type="checkbox" v-model="medicine.verify_dose"/>
+                </form-group48>
+
                 <form-group48 title="Уведомить, если пациент не заполнят опросник">
                     <input class="form-check" type="checkbox" @change="warning_change()" v-model="medicine.warning_enabled"/>
                 </form-group48>
@@ -31,7 +35,7 @@
             <timetable-editor v-bind:data="medicine.timetable" :timetable_save_clicked="timetable_save_clicked"/>
         </div>
 
-        <button class="btn btn-danger" @click="go_back()">Назад</button>
+        <button v-if="show_button" class="btn btn-danger" @click="go_back()">Назад</button>
         <button class="btn btn-success" @click="save()">Сохранить <span
             v-if="medicine.is_template"> шаблон</span></button>
         <button v-if="!medicine.id && is_admin" class="btn btn-primary" @click="save(true)">Сохранить как
@@ -102,11 +106,7 @@ export default {
                 this.errors.push('Проверьте корректность расписания')
             }
 
-            if (this.errors.length != 0) {
-                return false;
-            } else {
-                return true;
-            }
+            return this.errors.length == 0;
         },
         show_validation: function () {
             this.save_clicked = true
@@ -136,7 +136,10 @@ export default {
                 this.medicine.contract_id = response.data.contract_id
             }
 
-            if (is_new) Event.fire('medicine-created', this.medicine)
+            if (is_new) Event.fire('medicine-created', {
+                medicine: this.medicine,
+                close_window: !this.show_button
+            })
             else Event.fire('back-to-dashboard', this.medicine)
 
             this.medicine = undefined
@@ -164,8 +167,13 @@ export default {
             medicine: undefined,
             backup: "",
             save_clicked: false,
-            timetable_save_clicked: [false]
+            timetable_save_clicked: [false],
+            show_button: false
         }
+    },
+    created() {
+        this.medicine = this.create_empty_medicine()
+        this.backup = JSON.stringify(this.medicine)
     },
     mounted() {
         Event.listen('attach-medicine', (medicine) => {
@@ -184,11 +192,13 @@ export default {
         });
 
         Event.listen('navigate-to-create-medicine-page', () => {
+            this.show_button = true
             this.medicine = this.create_empty_medicine()
             this.backup = JSON.stringify(this.medicine)
         });
 
         Event.listen('navigate-to-edit-medicine-page', medicine => {
+            this.show_button = true
             this.medicine = medicine
 
             if (this.medicine.warning_days > 0)
