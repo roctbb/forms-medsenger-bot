@@ -649,17 +649,19 @@ class AlgorithmsManager(Manager):
     def search_params(self, contract):
         params = {}
 
-        def search_condition(condition, condition_index):
+        def search_condition(condition, step_index, condition_index, common=False):
             for block_index, block in enumerate(condition['criteria']):
                 for criteria_index, criteria in enumerate(block):
                     if criteria.get('ask_value'):
                         pair = (criteria.get('value_name'), criteria.get('value'))
+
                         loc = {
                             'algorithm': algorithm.id,
                             'step': step_index,
                             'condition': condition_index,
                             'block': block_index,
-                            'criteria': criteria_index
+                            'criteria': criteria_index,
+                            'common': common
                         }
 
                         if pair in params:
@@ -676,11 +678,11 @@ class AlgorithmsManager(Manager):
         for algorithm in contract.algorithms:
             for step_index, step in enumerate(algorithm.steps):
                 for condition_index, condition in enumerate(step['conditions']):
-                    search_condition(condition, condition_index)
+                    search_condition(condition, step_index, condition_index)
 
             if algorithm.common_conditions:
                 for condition_index, condition in enumerate(algorithm.common_conditions):
-                    search_condition(condition, condition_index)
+                    search_condition(condition, None, condition_index, True)
 
         return [value for key, value in params.items()]
 

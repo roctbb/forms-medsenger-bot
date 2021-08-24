@@ -322,6 +322,16 @@ export default {
                     if (this.to_float(param.value) != this.params.edited[i]) {
                         param.locations.forEach(loc => {
                             let alg = this.patient.algorithms.filter(a => a.id == loc.algorithm)[0]
+
+                            if (loc.common)
+                            {
+                                alg.common_conditions[loc.condition]
+                                .criteria[loc.block][loc.criteria].value = this.params.edited[i]
+                            }
+                            else {
+                                alg.steps[loc.step].conditions[loc.condition]
+                                .criteria[loc.block][loc.criteria].value = this.params.edited[i]
+                            }
                             alg.steps[loc.step].conditions[loc.condition]
                                 .criteria[loc.block][loc.criteria].value = this.params.edited[i]
                             changed_algorithms.add(alg)
