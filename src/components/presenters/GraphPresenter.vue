@@ -540,7 +540,8 @@ export default {
     },
     computed: {
         offset() {
-            return -1 * new Date().getTimezoneOffset() * 60
+            //return -1 * new Date().getTimezoneOffset() * 60
+            return 1
         }
     },
     created() {
