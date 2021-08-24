@@ -13,7 +13,7 @@
                     <action-done v-if="state == 'done'"></action-done>
                 </div>
             </div>
-            <div v-if="mode == 'form' || mode == 'done' || mode == 'graph' || mode == 'confirm-medicine'">
+            <div v-if="mode == 'form' || mode == 'done' || mode == 'graph' || mode == 'confirm-medicine' || mode == 'verify-dose'">
                 <div class="container" style="margin-top: 15px;">
                     <confirm-medicine-presenter :data="patient.medicines" v-if="state == 'confirm-medicine'"/>
                     <dose-verifier :data="medicine" v-if="state == 'verify-dose'"/>
@@ -160,6 +160,9 @@ export default {
             if (this.mode == 'confirm-medicine') {
                 this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
             }
+            if (this.mode == 'verify-dose') {
+                this.axios.get(this.url('/api/medicine/' + this.object_id)).then(this.process_load_answer);
+            }
             if (this.mode == 'medicine-manager') {
                 this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
             }
@@ -184,6 +187,11 @@ export default {
             if (this.mode == 'confirm-medicine') {
                 this.patient = response.data;
                 this.state = 'confirm-medicine'
+            }
+
+            if (this.mode == 'verify-dose') {
+                this.medicine = response.data
+                this.state = 'verify-dose'
             }
 
             if (this.mode == 'medicine-manager') {
