@@ -50,7 +50,7 @@
         </form-group48>
         <hr>
 
-        <div v-if="field.type == 'integer'">
+        <div v-if="field.type == 'integer' && is_admin">
             <div class="form-group row">
                 <div class="col-md-4">
                     <strong>Ограничения</strong>
