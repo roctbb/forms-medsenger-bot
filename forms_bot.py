@@ -225,6 +225,11 @@ def graph_page_with_args(args, form, category_id):
 @verify_args
 def medicine_page(args, form, medicine_id):
     contract = contract_manager.get(args.get('contract_id'))
+    medicine = medicine_manager.get(medicine_id)
+
+    if medicine.verify_dose:
+        return get_ui('verify-dose', contract, object_id=medicine_id)
+
     medicine_manager.submit(medicine_id, contract.id)
 
     if contract.tasks and 'medicine-{}'.format(medicine_id) in contract.tasks:
@@ -415,6 +420,17 @@ def post_form(args, form, form_id):
         })
     else:
         abort(404)
+
+
+@app.route('/api/medicine/<medicine_id>', methods=['GET'])
+@verify_args
+def get_medicine(args, form, medicine_id):
+    medicine = medicine_manager.get(medicine_id)
+
+    if medicine.contract_id != int(args.get('contract_id')) and not medicine.is_template:
+        abort(401)
+
+    return jsonify(medicine.as_dict())
 
 
 @app.route('/medicine-manager', methods=['GET'])
