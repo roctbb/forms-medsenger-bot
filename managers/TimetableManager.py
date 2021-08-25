@@ -5,7 +5,7 @@ from managers.AlgorithmsManager import AlgorithmsManager
 from managers.FormManager import FormManager
 from managers.Manager import Manager
 from managers.MedicineManager import MedicineManager
-from models import Contract, Patient
+from models import Contract, Patient, Medicine
 from threading import Thread
 
 
@@ -18,6 +18,9 @@ class TimetableManager(Manager):
     def should_run(self, object, today=False):
         now = datetime.now()
         timetable = object.timetable
+
+        if isinstance(object, Medicine) and object.canceled_at != None:
+            return False
 
         if timetable.get('mode') == 'manual':
             return False

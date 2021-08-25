@@ -47,7 +47,8 @@ class Patient(db.Model):
             "month_compliance": self.count_month_compliance(),
             "contracts": [contract.as_dict() for contract in self.contracts],
             "forms": [form.as_dict() for form in self.forms],
-            "medicines": [medicine.as_dict() for medicine in self.medicines],
+            "medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at == None],
+            "canceled_medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at != None],
             "algorithms": [algorithm.as_dict() for algorithm in self.algorithms]
         }
 
@@ -114,6 +115,9 @@ class Medicine(db.Model, Compliance):
     warning_timestamp = db.Column(db.Integer, default=0)
     filled_timestamp = db.Column(db.Integer, default=0)
 
+    prescribed_at = db.Column(db.DateTime, server_default=db.func.now())
+    canceled_at = db.Column(db.DateTime, nullable=True)
+
     def as_dict(self):
         if self.contract_id:
             sent, done = self.current_month_compliance()
@@ -131,6 +135,8 @@ class Medicine(db.Model, Compliance):
             "verify_dose": self.verify_dose,
             "template_id": self.template_id,
             "warning_days": self.warning_days,
+            "prescribed_at": self.prescribed_at.strftime("%d.%m.%Y"),
+            "canceled_at": self.canceled_at.strftime("%d.%m.%Y"),
             "sent": sent,
             "done": done
         }
@@ -150,6 +156,7 @@ class Medicine(db.Model, Compliance):
 
         new_medicine.timetable = self.timetable
         new_medicine.warning_days = self.warning_days
+        new_medicine.prescribed_at = datetime.now()
 
         if self.is_template:
             new_medicine.template_id = self.id
