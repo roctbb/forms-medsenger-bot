@@ -605,13 +605,16 @@ class AlgorithmsManager(Manager):
             additional_conditions = algorithm.common_conditions
 
         for condition in additional_conditions + current_step['conditions']:
+            bypass = False
+
             criteria = condition['criteria']
 
             reset_minutes = int(condition.get('reset_minutes', 0))
             last_fired = int(condition.get('last_fired', 0))
+
             if reset_minutes and last_fired:
                 if time.time() - last_fired < reset_minutes * 60:
-                    continue
+                    bypass = True
 
             additions = []
             descriptions = []
@@ -632,9 +635,11 @@ class AlgorithmsManager(Manager):
                             "comment": addition["comment"]
                         })
                 fired = True
-                for action in condition.get('positive_actions', []):
-                    self.run_action(action, contract_id, descriptions, algorithm)
-                condition['last_fired'] = int(time.time())
+
+                if not bypass:
+                    for action in condition.get('positive_actions', []):
+                        self.run_action(action, contract_id, descriptions, algorithm)
+                    condition['last_fired'] = int(time.time())
             else:
                 for action in condition.get('negative_actions', []):
                     self.run_action(action, contract_id, descriptions, algorithm)
