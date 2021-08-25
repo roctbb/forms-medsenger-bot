@@ -172,8 +172,8 @@ export default {
         }
     },
     created() {
-        this.medicine = this.create_empty_medicine()
-        this.backup = JSON.stringify(this.medicine)
+        /*this.medicine = undefined;
+        this.backup = JSON.stringify(this.medicine)*/
     },
     mounted() {
         Event.listen('attach-medicine', (medicine) => {
