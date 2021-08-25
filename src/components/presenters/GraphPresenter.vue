@@ -13,14 +13,15 @@
             </div>
 
             <div class="container center" v-if="this.statistics.length">
-                <h5>Значения за отображенный период</h5>
-                <table class="table table-hover" style="table-layout: fixed; width: 100%; text-align:center; font-size: 0.8rem">
+                <h5 class="text-center">Значения за отображенный период</h5>
+
+                <table class="table table-hover table-striped" v-if="!mobile">
                     <thead>
                     <tr>
                         <th scope="col" class="bg-info text-light">Параметр</th>
-                        <th scope="col" class="bg-info text-light">В среднем</th>
-                        <th scope="col" class="bg-info text-light">Минимум</th>
-                        <th scope="col" class="bg-info text-light">Максимум</th>
+                        <th scope="col" class="bg-info text-light">Среднее</th>
+                        <th scope="col" class="bg-info text-light">Мин</th>
+                        <th scope="col" class="bg-info text-light">Макс</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -32,6 +33,28 @@
                     </tr>
                     </tbody>
                 </table>
+
+                <div v-else v-for="stat in this.statistics">
+                    <hr>
+                    <h6 class="text-center">{{ stat.name }}</h6>
+                    <table class="table table-hover table-striped">
+                        <thead>
+                        <tr>
+                            <th scope="col" class="bg-info text-light">Среднее</th>
+                            <th scope="col" class="bg-info text-light">Мин</th>
+                            <th scope="col" class="bg-info text-light">Макс</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>{{ stat.avg.toFixed(2) * 1 }}</td>
+                            <td>{{ stat.min.toFixed(2) * 1 }}</td>
+                            <td>{{ stat.max.toFixed(2) * 1 }}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
         </div>
         <br>
@@ -542,6 +565,9 @@ export default {
         offset() {
             return -1 * new Date().getTimezoneOffset() * 60
             //return 1
+        },
+        mobile() {
+            return window.innerWidth < window.innerHeight
         }
     },
     created() {
@@ -576,6 +602,9 @@ export default {
 
 <style scoped>
 .table {
-    font-size: small;
+    table-layout: fixed;
+    width: 100%;
+    text-align: center;
+    font-size: 0.8rem;
 }
 </style>
