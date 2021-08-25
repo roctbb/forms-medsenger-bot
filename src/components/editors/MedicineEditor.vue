@@ -51,6 +51,7 @@ import Card from "../common/Card";
 import FormGroup48 from "../common/FormGroup-4-8";
 import TimetableEditor from "./parts/TimetableEditor";
 import ErrorBlock from "../common/ErrorBlock";
+import * as moment from "moment/moment";
 
 export default {
     name: "MedicineEditor",
@@ -132,6 +133,7 @@ export default {
             this.medicine.id = response.data.id
 
             if (!this.medicine.is_template) {
+                this.medicine.prescribed_at = moment(new Date()).format("DD.MM.YYYY")
                 this.medicine.patient_id = response.data.patient_id
                 this.medicine.contract_id = response.data.contract_id
             }

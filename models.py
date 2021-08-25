@@ -136,7 +136,7 @@ class Medicine(db.Model, Compliance):
             "template_id": self.template_id,
             "warning_days": self.warning_days,
             "prescribed_at": self.prescribed_at.strftime("%d.%m.%Y"),
-            "canceled_at": self.canceled_at.strftime("%d.%m.%Y"),
+            "canceled_at": self.canceled_at.strftime("%d.%m.%Y") if self.canceled_at else None,
             "sent": sent,
             "done": done
         }

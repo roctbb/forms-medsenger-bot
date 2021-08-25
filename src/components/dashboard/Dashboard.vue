@@ -81,6 +81,16 @@
                         }}</small>
 
                 </card>
+
+                <card v-for="(medicine, i) in patient.canceled_medicines" :key="medicine.id" :image="images.canceled_medicine"
+                      class="col-lg-3 col-md-4 text-muted">
+                    <h6>{{ medicine.title }}</h6>
+                    <small>{{ medicine.rules }}</small><br>
+                    <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
+                    <small>Назначено: {{ medicine.prescribed_at }}</small><br>
+                    <small>Отменено: {{ medicine.canceled_at }}</small><br>
+
+                </card>
             </div>
 
             <button class="btn btn-primary btn-sm" @click="create_medicine()">Назначить лекарство
@@ -262,6 +272,7 @@ import Card from "../common/Card";
 import AlgorithmSettings from "./AlgorithmSettings";
 import FormGroup48 from "../common/FormGroup-4-8";
 import ErrorBlock from "../common/ErrorBlock";
+import * as moment from "moment/moment";
 
 export default {
     name: "Dashboard",
@@ -323,14 +334,12 @@ export default {
                         param.locations.forEach(loc => {
                             let alg = this.patient.algorithms.filter(a => a.id == loc.algorithm)[0]
 
-                            if (loc.common)
-                            {
+                            if (loc.common) {
                                 alg.common_conditions[loc.condition]
-                                .criteria[loc.block][loc.criteria].value = this.params.edited[i]
-                            }
-                            else {
+                                    .criteria[loc.block][loc.criteria].value = this.params.edited[i]
+                            } else {
                                 alg.steps[loc.step].conditions[loc.condition]
-                                .criteria[loc.block][loc.criteria].value = this.params.edited[i]
+                                    .criteria[loc.block][loc.criteria].value = this.params.edited[i]
                             }
                             alg.steps[loc.step].conditions[loc.condition]
                                 .criteria[loc.block][loc.criteria].value = this.params.edited[i]
@@ -454,7 +463,7 @@ export default {
         delete_medicine: function (medicine) {
             this.$confirm(
                 {
-                    message: `Вы уверены, что хотите удалить препарат ` + medicine.title + `?`,
+                    message: `Вы уверены, что хотите отменить препарат ` + medicine.title + `?`,
                     button: {
                         no: 'Нет',
                         yes: 'Да, удалить'
@@ -491,6 +500,12 @@ export default {
         },
         process_delete_medicine_answer: function (response) {
             if (response.data.deleted_id) {
+                let medicine = this.patient.medicines.find(m => m.id == response.data.deleted_id)
+                if (medicine) {
+                    medicine.canceled_at = moment(new Date()).format("DD.MM.YYYY")
+                    this.patient.canceled_medicines.push(medicine);
+                }
+
                 this.patient.medicines = this.patient.medicines.filter(m => m.id != response.data.deleted_id)
                 this.templates.medicines = this.templates.medicines.filter(m => m.id != response.data.deleted_id)
             }
