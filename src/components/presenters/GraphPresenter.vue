@@ -369,6 +369,9 @@ export default {
                         inactive: {
                             opacity: 1,
                         }
+                    },
+                    dataGrouping: {
+                        enabled: false
                     }
                 })
             })
@@ -382,7 +385,7 @@ export default {
 
                     if (medicine.value in medicines) {
                         medicines[medicine.value].push({
-                            time: medicine.timestamp,
+                            timestamp: medicine.timestamp,
                             dose: medicine.params.dose == null ? '' : ` (${medicine.params.dose})`
                         })
                     }
