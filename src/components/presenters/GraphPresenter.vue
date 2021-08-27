@@ -153,7 +153,7 @@ export default {
                                 if (arr[mid] == value)
                                     return  mid;
                                 if (r - l == 0)
-                                    return r;
+                                    return r + (arr[r] < value ? 1 : 0);
                                 if (arr[mid] < value) {
                                     l = (mid + 1) > r ? r : (mid + 1)
                                     return binary_search(arr, value, l, r);
@@ -175,33 +175,33 @@ export default {
                             }
 
                             this.series.filter(series => series.userOptions.yAxis == 0).forEach(series => {
+                                const legendItem = series.legendItem;
                                 let data = find_visible_data(series.data)
 
-                                // calculate statistics for visible points
-                                const max = Math.max.apply(null, data)
-                                const min = Math.min.apply(null, data)
-                                const average = (data.reduce((a, b) => a + b, 0) / data.length).toFixed(2) * 1
+                                if  (!data.length) {
+                                    legendItem.attr({
+                                        text: series.name + '<br><strong style="color: dimgrey">Нет данных</strong>'
+                                    });
+                                } else {
+                                    // calculate statistics for visible points
+                                    const max = data.reduce((a,b) => Math.max(a,b))
+                                    const min = data.reduce((a,b) => Math.min(a,b))
+                                    const average = (data.reduce((a, b) => a + b, 0) / data.length).toFixed(2) * 1
 
-                                const legendItem = series.legendItem;
-
-                                // construct the legend string
-                                const text = series.name + '<br><strong style="color: dimgrey">min: ' + min +
-                                    ' max: ' + max +
-                                    '<br>avg: ' + average + '</strong>';
-
-                                // set the constructed text for the legend
-                                legendItem.attr({
-                                    text: data.length > 0 ? text : (series.name + '<br><strong style="color: dimgrey">Нет данных</strong>')
-                                });
-                                if (data.length > 0) {
-                                    stats.push({
-                                        name: series.name,
-                                        code: series.options.graph_code,
-                                        data: data,
-                                        avg: average,
-                                        min: min,
-                                        max: max
-                                    })
+                                    // set the constructed text for the legend
+                                    legendItem.attr({
+                                        text: `${series.name} <br><strong style="color: dimgrey">min: ${min} max: ${max}<br>avg: ${average}</strong>`
+                                    });
+                                    if (data.length > 0) {
+                                        stats.push({
+                                            name: series.name,
+                                            code: series.options.graph_code,
+                                            data: data,
+                                            avg: average,
+                                            min: min,
+                                            max: max
+                                        })
+                                    }
                                 }
                             });
 
@@ -221,16 +221,16 @@ export default {
                                     name: 'Среднее давление (MAP)',
                                     code: 'map',
                                     avg: map_data.reduce((a, b) => a + b, 0) / map_data.length,
-                                    min: Math.min.apply(null, map_data),
-                                    max: Math.max.apply(null, map_data)
+                                    min: map_data.reduce((a,b) => Math.min(a,b)),
+                                    max: map_data.reduce((a,b) => Math.max(a,b))
                                 })
 
                                 stats.push({
                                     name: 'Пульсовое давление',
                                     code: 'pulse_pressure',
                                     avg: pp_data.reduce((a, b) => a + b, 0) / pp_data.length,
-                                    min: Math.min.apply(null, pp_data),
-                                    max: Math.max.apply(null, pp_data)
+                                    min: pp_data.reduce((a,b) => Math.min(a,b)),
+                                    max: pp_data.reduce((a,b) => Math.max(a,b))
                                 })
                             }
 
