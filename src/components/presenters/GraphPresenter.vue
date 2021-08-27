@@ -13,7 +13,7 @@
             </div>
 
             <div class="container center" v-if="this.statistics.length">
-                <h5 class="text-center">Значения за отображенный период</h5>
+                <h5 class="text-center">Значения параметров за выбранный период</h5>
 
                 <table class="table table-hover table-striped" v-if="!mobile">
                     <thead>
@@ -145,17 +145,37 @@ export default {
                     width: window.innerWidth,
                     events: {
                         render: function (event) {
-
-                            let isInside = (point) => {
-                                const min = event.target.axes[0].min
-                                const max = event.target.axes[0].max
-                                return point.x >= min && point.x <= max
-                            }
-
                             let stats = []
 
+                            let binary_search = function (arr, value, l, r) {
+                                let mid = Math.floor((r - l) / 2) + l
+
+                                if (arr[mid] == value)
+                                    return  mid;
+                                if (r - l == 0)
+                                    return r;
+                                if (arr[mid] < value) {
+                                    l = (mid + 1) > r ? r : (mid + 1)
+                                    return binary_search(arr, value, l, r);
+                                }
+                                r = (mid - 1) < l ? l : (mid - 1)
+                                return binary_search(arr, value, l, r);
+                            }
+
+                            let find_visible_data = function (data) {
+                                const start = event.target.axes[0].min
+                                const end = event.target.axes[0].max
+
+                                let timestamps = data.map(point => point.x)
+
+                                let start_index = binary_search(timestamps, start, 0, data.length - 1)
+                                let end_index = binary_search(timestamps, end, 0, data.length - 1)
+
+                                return data.slice(start_index, end_index).map(point => point.y)
+                            }
+
                             this.series.filter(series => series.userOptions.yAxis == 0).forEach(series => {
-                                let data = series.data.filter(point => isInside(point)).map(point => point.y);
+                                let data = find_visible_data(series.data)
 
                                 // calculate statistics for visible points
                                 const max = Math.max.apply(null, data)
@@ -217,7 +237,7 @@ export default {
                             Event.fire('refresh-stats', stats)
 
                             this.series.filter(series => series.userOptions.yAxis == 1).forEach(series => {
-                                let data = series.data.filter(point => isInside(point));
+                                let data = find_visible_data(series.data);
 
                                 const legendItem = series.legendItem;
                                 // construct the legend string
