@@ -6,4 +6,4 @@ apscheduler
 psycopg2-binary
 requests
 sentry-sdk[flask]
-medsenger-api
+medsenger-api>=1.1.10

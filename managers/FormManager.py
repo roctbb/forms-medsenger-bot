@@ -155,7 +155,16 @@ class FormManager(Manager):
 
         for field in form.fields:
             if field['uid'] in answers.keys():
-                if field['type'] == 'radio':
+                if field['type'] == 'file':
+                    category = field['category']
+                    comment = field.get('category_value', answers[field['uid']].get('name'))
+
+                    packet.append({"category_name": category, "value": comment, "files": [answers[field['uid']]]})
+
+                    if field.get('params', {}).get('send_to_doctor'):
+                        self.medsenger_api.send_message(contract_id, '', send_from='patient', need_answer=False, attachments=[answers[field['uid']]])
+
+                elif field['type'] == 'radio':
                     category = field['params']['variants'][answers[field['uid']]]['category']
                     answer = field['params']['variants'][answers[field['uid']]].get('text')
                     report.append((field.get('text'), answer))
