@@ -538,7 +538,7 @@ export default {
         },
         get_comment: function (point, category) {
 
-            let comment = "<strong>" + this.formatTime(new Date((point.timestamp + this.offset) * 1000)) + " </strong>"
+            let comment = "<strong>" + this.formatTime(new Date((point.timestamp) * 1000)) + " </strong>"
                 + category + ': ' + point.value
             if (point.additions) {
                 point.additions.forEach((value) => {
@@ -604,8 +604,8 @@ export default {
     },
     computed: {
         offset() {
-            //return -1 * new Date().getTimezoneOffset() * 60
-            return 1
+            return -1 * new Date().getTimezoneOffset() * 60
+            //return 1
         },
         mobile() {
             return window.innerWidth < window.innerHeight

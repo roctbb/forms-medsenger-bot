@@ -14,7 +14,7 @@ class MedicineManager(Manager):
         medicines = list(filter(lambda x: x.template_id == template_id, contract.patient.medicines))
 
         for medicine in medicines:
-            medicine.delete()
+            medicine.canceled_at = datetime.now()
 
         self.__commit__()
 
@@ -107,7 +107,7 @@ class MedicineManager(Manager):
                                             "Врач отменил препарат «{}» ({} / {}).".format(
                                                 medicine.title, medicine.rules, medicine.timetable_description()))
 
-        Medicine.query.filter_by(id=id).delete()
+        medicine.canceled_at = datetime.now()
 
         self.__commit__()
         return id
@@ -158,6 +158,7 @@ class MedicineManager(Manager):
             medicine.template_id = data.get('template_id')
             medicine.warning_days = data.get('warning_days')
             medicine.verify_dose = data.get('verify_dose', False)
+            medicine.prescribed_at = datetime.now()
 
             if data.get('is_template'):
                 medicine.is_template = True

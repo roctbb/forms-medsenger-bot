@@ -284,6 +284,7 @@ class FormManager(Manager):
                 form.is_template = True
                 form.template_category = data.get('template_category')
                 form.clinics = data.get('clinics')
+                form.exclude_clinics = data.get('exclude_clinics')
             else:
                 form.patient_id = contract.patient_id
                 form.contract_id = contract.id

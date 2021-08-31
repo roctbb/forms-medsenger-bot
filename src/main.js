@@ -276,13 +276,15 @@ Vue.mixin({
                 form: window.LOCAL_HOST + '/static/images/icons8-fill-in-form-48.png',
                 warning: window.LOCAL_HOST + '/static/images/icons8-error-18.png',
                 medicine: window.LOCAL_HOST + '/static/images/icons8-pill-96.png',
+                canceled_medicine: window.LOCAL_HOST + '/static/images/icons8-gray-pill-96.png',
                 algorithm: window.LOCAL_HOST + '/static/images/icons8-artificial-intelligence-96.png',
                 ok: window.LOCAL_HOST + '/static/images/icons8-ok-128.png',
                 error: window.LOCAL_HOST + '/static/images/icons8-delete-128.png',
                 graph: window.LOCAL_HOST + '/static/images/icons8-play-graph-report-48.png',
             },
             is_admin: window.IS_ADMIN,
-            clinic_id: window.CLINIC_ID
+            clinic_id: window.CLINIC_ID,
+            is_preview: window.IS_PREVIEW
         }
     }
 })
