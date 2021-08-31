@@ -169,7 +169,9 @@
                     <h6>{{ form.title }}</h6>
                     <small>{{ form.doctor_description }}</small><br>
                     <small><i>{{ tt_description(form.timetable) }}</i></small><br>
-                    <a href="#" @click="attach_form(form)">Подключить</a>
+                    <a href="#" v-if="!is_attached(form)" @click="attach_form(form)">Подключить</a>
+                    <small v-else class="text-muted">Опросник подключен</small>
+
                     <a href="#" v-if="is_admin" @click="edit_form(form)">Редактировать</a>
                     <a href="#" v-if="is_admin" @click="delete_form(form)">Удалить</a>
                     <a target="_blank" :href="preview_form_url(form)">Просмотр</a>
@@ -364,6 +366,9 @@ export default {
         },
         find_algorithm: function (id) {
             return this.templates.algorithms.filter(t => t.id == id)[0]
+        },
+        is_attached: function (form) {
+            return this.patient.forms.filter(f => f.template_id == form.id).length != 0
         },
         attach_form: function (form) {
             let attach = () => {
