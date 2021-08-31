@@ -1,21 +1,10 @@
 <template>
     <div>
-        <div class="container row">
-            <div class="col-1">
-                <a class="btn btn-outline-info btn-sm" @click="select_graph()">Назад</a>
-            </div>
-            <div class="col-4">
-                <span>c </span>
-                <date-picker v-model="dates.start" value-type="YYYY-MM-DD"></date-picker>
-            </div>
-            <div class="col-4">
-                <span>по </span>
-                <date-picker v-model="dates.end" value-type="YYYY-MM-DD"></date-picker>
-            </div>
-            <div class="col-1">
+            <a class="btn btn-outline-info btn-sm" @click="select_graph()" style="margin: 10px">Назад</a>
+            <div :class="!mobile ? 'row' : ''" style="margin-left: 10px">
+                <date-picker range v-model="dates_range" style="margin-right: 10px" :style="mobile ? 'margin-bottom: 10px' : ''"></date-picker>
                 <a class="btn btn-success btn-sm" @click="load_data()">Загрузить</a>
             </div>
-        </div>
 
         <hr>
         <error-block :errors="errors" v-if="errors.length"></error-block>
@@ -106,7 +95,7 @@ export default {
             options: {},
             statistics: [],
             loaded: false,
-            dates: {}
+            dates_range: []
         }
     },
     methods: {
@@ -116,8 +105,8 @@ export default {
             let data = {
                 group: this.group,
                 dates: {
-                    start: Date.parse(this.dates.start) / 1000,
-                    end: Date.parse(this.dates.end) / 1000 + 24 * 60 * 60 - 1,
+                    start: this.dates_range[0].getTime() / 1000,
+                    end: this.dates_range[1].getTime() / 1000 + 24 * 60 * 60 - 1,
                 }
             }
 
@@ -130,8 +119,8 @@ export default {
         process_load_answer: function (response) {
             this.data = response.data
             console.log('data', this.data)
-            let start = Date.parse(this.dates.start)
-            let end = Date.parse(this.dates.end) + 24 * 60 * 60 * 1000 - 1
+            let start = this.dates_range[0].getTime()
+            let end = this.dates_range[1].getTime() + 24 * 60 * 60 * 1000 - 1
 
             this.options = {
                 colors: ['#058DC7', '#50B432', '#aa27ce', '#fcff00',
@@ -177,7 +166,7 @@ export default {
 
                 chart: {
                     type: 'line',
-                    boostThreshold: 1,
+                    boostThreshold: 1000,
                     turboThreshold: 0,
                     animation: false,
                     zoomType: 'x',
@@ -623,10 +612,7 @@ export default {
         }
 
         Event.listen('load-graph', (group) => {
-            this.dates = {
-                start: moment().add(-14, 'days').format('YYYY-MM-DD'),
-                end: moment().format('YYYY-MM-DD')
-            }
+            this.dates_range = [new Date(moment().add(-14, 'days').format('YYYY-MM-DD')), new Date(moment().format('YYYY-MM-DD'))]
             this.group = group
             this.load_data()
         });
