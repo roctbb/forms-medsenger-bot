@@ -89,8 +89,10 @@ import 'vue2-datepicker/locale/ru';
 import * as moment from "moment/moment";
 import ErrorBlock from "../common/ErrorBlock";
 import Loading from "../Loading";
+import boost from "highcharts/modules/boost";
 
 stockInit(Highcharts)
+boost(Highcharts)
 
 export default {
     name: "GraphPresenter",
@@ -175,6 +177,9 @@ export default {
 
                 chart: {
                     type: 'line',
+                    boostThreshold: 1,
+                    turboThreshold: 0,
+                    animation: false,
                     zoomType: 'x',
                     backgroundColor: "#f8f8fb",
                     height: window.innerHeight,
@@ -187,7 +192,7 @@ export default {
                                 let mid = Math.floor((r - l) / 2) + l
 
                                 if (arr[mid] == value)
-                                    return  mid;
+                                    return mid;
                                 if (r - l == 0)
                                     return r + (arr[r] < value ? 1 : 0);
                                 if (arr[mid] < value) {
@@ -213,10 +218,10 @@ export default {
                             this.series.filter(series => series.userOptions.yAxis == 0).forEach(series => {
                                 let data = find_visible_data(series.data)
 
-                                if  (data.length) {
+                                if (data.length) {
                                     // calculate statistics for visible points
-                                    const max = data.reduce((a,b) => Math.max(a,b))
-                                    const min = data.reduce((a,b) => Math.min(a,b))
+                                    const max = data.reduce((a, b) => Math.max(a, b))
+                                    const min = data.reduce((a, b) => Math.min(a, b))
                                     const average = (data.reduce((a, b) => a + b, 0) / data.length).toFixed(2) * 1
 
                                     if (data.length > 0) {
@@ -248,16 +253,16 @@ export default {
                                     name: 'Среднее давление (MAP)',
                                     code: 'map',
                                     avg: map_data.reduce((a, b) => a + b, 0) / map_data.length,
-                                    min: map_data.reduce((a,b) => Math.min(a,b)),
-                                    max: map_data.reduce((a,b) => Math.max(a,b))
+                                    min: map_data.reduce((a, b) => Math.min(a, b)),
+                                    max: map_data.reduce((a, b) => Math.max(a, b))
                                 })
 
                                 stats.push({
                                     name: 'Пульсовое давление',
                                     code: 'pulse_pressure',
                                     avg: pp_data.reduce((a, b) => a + b, 0) / pp_data.length,
-                                    min: pp_data.reduce((a,b) => Math.min(a,b)),
-                                    max: pp_data.reduce((a,b) => Math.max(a,b))
+                                    min: pp_data.reduce((a, b) => Math.min(a, b)),
+                                    max: pp_data.reduce((a, b) => Math.max(a, b))
                                 })
                             }
 
@@ -322,12 +327,12 @@ export default {
                 plotOptions: {
                     line: {
                         dataLabels: {
-                            enabled: true
+                            enabled: false
                         }
                     },
                     series: {
                         marker: {
-                            lineWidth: 2,
+                            lineWidth: 1,
                             lineColor: null,
                         }
                     }
@@ -419,11 +424,10 @@ export default {
                             timestamp: medicine.timestamp,
                             dose: medicine.params.dose == null ? '' : ` (${medicine.params.dose})`
                         })
-                    }
-                    else
+                    } else
                         medicines[medicine.value] = [{
                             timestamp: medicine.timestamp,
-                            dose: medicine.params.dose == null ? '' :  ` (${medicine.params.dose})`
+                            dose: medicine.params.dose == null ? '' : ` (${medicine.params.dose})`
                         }]
                 })
             });
@@ -495,7 +499,7 @@ export default {
             });
 
             let group_series = this.options.series.filter(s => s.yAxis == 0)
-            if (group_series.map(s => s.data.length).reduce((a,b) => a + b) > 1000) {
+            if (group_series.map(s => s.data.length).reduce((a, b) => a + b) > 1000) {
                 this.errors = ['За данный период в медицинской карте присутствует слишком большое количество записей (> 1000). ' +
                 'Чтобы увидеть комментарии к точкам и симптомы, загрузите период с меньшим количеством записей.']
                 group_series.forEach(s => {
