@@ -283,7 +283,8 @@ Vue.mixin({
                 graph: window.LOCAL_HOST + '/static/images/icons8-play-graph-report-48.png',
             },
             is_admin: window.IS_ADMIN,
-            clinic_id: window.CLINIC_ID
+            clinic_id: window.CLINIC_ID,
+            is_preview: window.IS_PREVIEW
         }
     }
 })
