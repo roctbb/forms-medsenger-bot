@@ -120,8 +120,6 @@ export default {
             let start = Date.parse(this.dates.start)
             let end = Date.parse(this.dates.end) + 24 * 60 * 60 * 1000 - 1
 
-            console.log(start, end)
-
             this.options = {
                 colors: ['#058DC7', '#50B432', '#aa27ce', '#fcff00',
                     '#24CBE5', '#64E572', '#c355ff', '#fce200', '#6AF9C4'],
@@ -202,23 +200,14 @@ export default {
                             }
 
                             this.series.filter(series => series.userOptions.yAxis == 0).forEach(series => {
-                                const legendItem = series.legendItem;
                                 let data = find_visible_data(series.data)
 
-                                if  (!data.length) {
-                                    legendItem.attr({
-                                        text: series.name + '<br><strong style="color: dimgrey">Нет данных</strong>'
-                                    });
-                                } else {
+                                if  (data.length) {
                                     // calculate statistics for visible points
                                     const max = data.reduce((a,b) => Math.max(a,b))
                                     const min = data.reduce((a,b) => Math.min(a,b))
                                     const average = (data.reduce((a, b) => a + b, 0) / data.length).toFixed(2) * 1
 
-                                    // set the constructed text for the legend
-                                    legendItem.attr({
-                                        text: `${series.name} <br><strong style="color: dimgrey">min: ${min} max: ${max}<br>avg: ${average}</strong>`
-                                    });
                                     if (data.length > 0) {
                                         stats.push({
                                             name: series.name,
@@ -262,20 +251,6 @@ export default {
                             }
 
                             Event.fire('refresh-stats', stats)
-
-                            this.series.filter(series => series.userOptions.yAxis == 1).forEach(series => {
-                                let data = find_visible_data(series.data);
-
-                                const legendItem = series.legendItem;
-                                // construct the legend string
-                                const text = series.name + '<br><strong style="color: dimgrey">' +
-                                    (data.length > 0 ? ('Количество: ' + data.length) : 'Нет данных') + '</strong>';
-
-                                // set the constructed text for the legend
-                                legendItem.attr({
-                                    text: text
-                                });
-                            });
                         }
                     }
                 },
@@ -352,7 +327,7 @@ export default {
                     enabled: true,
                     itemDistance: 70,
                     labelFormatter: function () {
-                        return this.name + '<br>.<br>.'
+                        return this.name
                     }
                 },
                 tooltip: {
