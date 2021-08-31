@@ -200,6 +200,12 @@ def get_settings(args, form):
     return get_ui('settings', contract, medsenger_api.get_categories())
 
 
+@app.route('/preview_form/<form_id>', methods=['GET'])
+@verify_args
+def form_preview_page(args, form, form_id):
+    contract = contract_manager.get(args.get('contract_id'))
+    return get_ui('form', contract, medsenger_api.get_categories(), form_id, True)
+
 @app.route('/form/<form_id>', methods=['GET'])
 @verify_args
 def form_page(args, form, form_id):

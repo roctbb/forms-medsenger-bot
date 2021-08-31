@@ -49,7 +49,7 @@
 
         </form-group48>
 
-        <button @click="save()" class="btn btn-success" :disabled="submitted">Отправить ответ</button>
+        <button @click="save()" class="btn btn-success" :disabled="submitted || is_preview">Отправить ответ</button>
 
 
     </div>

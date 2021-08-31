@@ -145,6 +145,7 @@ export default {
         load: function () {
             this.mode = window.PAGE
             this.object_id = window.OBJECT_ID
+            this.is_preview = window.IS_PREVIEW
 
             if (this.mode == 'done') {
                 this.state = 'done'
