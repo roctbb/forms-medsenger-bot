@@ -409,6 +409,9 @@ export default {
                 }
             })
         },
+        preview_form_url: function (form) {
+            return this.url('/preview_form/' + form.id)
+        },
         setup_algorithm: function (algorithm) {
             let setup = () => {
                 this.$modal.show('algorithm-settings', {algorithm: algorithm})
