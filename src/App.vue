@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div style="padding-bottom: 15px;">
         <vue-confirm-dialog></vue-confirm-dialog>
         <loading v-if="state == 'loading'"/>
         <div v-else>
