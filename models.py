@@ -191,6 +191,7 @@ class Form(db.Model, Compliance):
 
     algorithm_id = db.Column(db.Integer, db.ForeignKey('algorithm.id', ondelete="set null"), nullable=True)
     clinics = db.Column(db.JSON, nullable=True)
+    exclude_clinics = db.Column(db.JSON, nullable=True)
 
     last_sent = db.Column(db.DateTime(), nullable=True)
 
@@ -228,6 +229,7 @@ class Form(db.Model, Compliance):
             "template_category": self.template_category,
             "instant_report": self.instant_report,
             "clinics": self.clinics,
+            "exclude_clinics": self.exclude_clinics,
             "sent": sent,
             "done": done
         }
