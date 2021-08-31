@@ -445,9 +445,6 @@ export default {
                 }
             )
         },
-        preview_form_url: function (form) {
-            return this.url('/preview_form/' + form.id)
-        },
         process_delete_form_answer: function (response) {
             if (response.data.deleted_id) {
                 this.patient.forms = this.patient.forms.filter(f => f.id != response.data.deleted_id)
@@ -1008,7 +1005,7 @@ export default {
             )
         },
         preview_form_url: function (form) {
-            return this.url('/form/' + form.id)
+            return this.url('/preview_form/' + form.id)
         },
         process_delete_form_answer: function (response) {
             if (response.data.deleted_id) {
