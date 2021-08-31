@@ -1,8 +1,23 @@
 <template>
     <div>
-        <div style="margin-left: 10px;">
-            <a class="btn btn-outline-info btn-sm" @click="select_graph()">Назад</a>
+        <div class="container row">
+            <div class="col-1">
+                <a class="btn btn-outline-info btn-sm" @click="select_graph()">Назад</a>
+            </div>
+            <div class="col-4">
+                <span>c </span>
+                <date-picker v-model="dates.start" value-type="YYYY-MM-DD"></date-picker>
+            </div>
+            <div class="col-4">
+                <span>по </span>
+                <date-picker v-model="dates.end" value-type="YYYY-MM-DD"></date-picker>
+            </div>
+            <div class="col-1">
+                <a class="btn btn-success btn-sm" @click="load_data()">Загрузить</a>
+            </div>
         </div>
+
+        <hr>
 
         <div v-if="loaded">
             <highcharts :constructor-type="'stockChart'" :options="options"></highcharts>
@@ -66,12 +81,16 @@ import {Chart} from 'highcharts-vue'
 import exporting from "highcharts/modules/exporting";
 import Highcharts from "highcharts";
 import stockInit from 'highcharts/modules/stock'
+import DatePicker from 'vue2-datepicker';
+import 'vue2-datepicker/index.css';
+import 'vue2-datepicker/locale/ru';
+import * as moment from "moment/moment";
 
 stockInit(Highcharts)
 
 export default {
     name: "GraphPresenter",
-    components: {highcharts: Chart},
+    components: {highcharts: Chart, DatePicker},
     props: ['patient'],
     data() {
         return {
@@ -80,20 +99,28 @@ export default {
             options: {},
             statistics: [],
             loaded: false,
+            dates: {}
         }
     },
     methods: {
-        show_table: function () {
-            return window.innerWidth >= window.innerHeight
-        },
         load_data: function () {
-            this.axios.post(this.url('/api/graph/group'), this.group).then(this.process_load_answer);
+            this.loaded = false
+            let data = {
+                group: this.group,
+                dates: {
+                    start: Date.parse(this.dates.start) / 1000,
+                    end: Date.parse(this.dates.end) / 1000 + 24 * 60 * 60 - 1,
+                }
+            }
+            this.axios.post(this.url('/api/graph/group'), data).then(this.process_load_answer);
         },
         process_load_answer: function (response) {
             this.data = response.data
-            let today = new Date()
-            today.setHours(23, 59, 59)
-            let now = +today + this.offset
+            console.log('data', this.data)
+            let start = Date.parse(this.dates.start)
+            let end = Date.parse(this.dates.end) + 24 * 60 * 60 * 1000 - 1
+
+            console.log(start, end)
 
             this.options = {
                 colors: ['#058DC7', '#50B432', '#aa27ce', '#fcff00',
@@ -266,7 +293,8 @@ export default {
                     minorTickLength: 0,
                     minorTickInterval: 24 * 3600 * 1000,
                     plotLines: [],
-                    max: now + 1000 * 3600 * 10,
+                    min: start,
+                    max: end,
                     ordinal: false,
                     dateTimeLabelFormats: {
                         day: '%d.%m'
@@ -485,6 +513,7 @@ export default {
                 }
             });
 
+            console.log('end symptom pushing', new Date())
             if (this.options.chart.height > this.options.chart.width && this.options.series.length > 2) {
                 this.options.chart.height += 50 * (this.options.series.length - 2)
             }
@@ -601,6 +630,10 @@ export default {
         }
 
         Event.listen('load-graph', (group) => {
+            this.dates = {
+                start: moment().add(-14, 'days').format('YYYY-MM-DD'),
+                end: moment().format('YYYY-MM-DD')
+            }
             this.group = group
             this.load_data()
         });
