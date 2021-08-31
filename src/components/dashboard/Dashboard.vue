@@ -687,7 +687,7 @@ h5 {
                 </card>
             </div>
 
-            <button class="btn btn-primary btn-sm" v-if="id_admin" @click="state = 'algorithm_templates'">Выбрать или создать
+            <button class="btn btn-primary btn-sm" v-if="is_admin" @click="state = 'algorithm_templates'">Выбрать или создать
                 алгоритм
             </button>
 
