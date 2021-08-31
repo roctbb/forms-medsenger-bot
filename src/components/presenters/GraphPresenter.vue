@@ -316,7 +316,7 @@ export default {
                 plotOptions: {
                     line: {
                         dataLabels: {
-                            enabled: false
+                            enabled: true
                         }
                     },
                     series: {
@@ -494,6 +494,7 @@ export default {
                 group_series.forEach(s => {
                     s.data = s.data.map(d => [d.x, d.y])
                 })
+                this.options.plotOptions.line.dataLabels.enabled = false
             }
 
             if (this.options.chart.height > this.options.chart.width && this.options.series.length > 2) {
