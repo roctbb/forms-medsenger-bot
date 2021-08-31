@@ -18,6 +18,7 @@
         </div>
 
         <hr>
+        <error-block :errors="errors" v-if="errors.length"></error-block>
 
         <div v-if="loaded">
             <highcharts :constructor-type="'stockChart'" :options="options"></highcharts>
@@ -72,6 +73,7 @@
 
             </div>
         </div>
+        <loading v-else-if="!errors.length"></loading>
         <br>
     </div>
 </template>
@@ -85,17 +87,20 @@ import DatePicker from 'vue2-datepicker';
 import 'vue2-datepicker/index.css';
 import 'vue2-datepicker/locale/ru';
 import * as moment from "moment/moment";
+import ErrorBlock from "../common/ErrorBlock";
+import Loading from "../Loading";
 
 stockInit(Highcharts)
 
 export default {
     name: "GraphPresenter",
-    components: {highcharts: Chart, DatePicker},
+    components: {Loading, ErrorBlock, highcharts: Chart, DatePicker},
     props: ['patient'],
     data() {
         return {
             group: {},
             data: [],
+            errors: [],
             options: {},
             statistics: [],
             loaded: false,
@@ -105,12 +110,18 @@ export default {
     methods: {
         load_data: function () {
             this.loaded = false
+            this.errors = []
             let data = {
                 group: this.group,
                 dates: {
                     start: Date.parse(this.dates.start) / 1000,
                     end: Date.parse(this.dates.end) / 1000 + 24 * 60 * 60 - 1,
                 }
+            }
+
+            if (data.dates.start > data.dates.end) {
+                this.errors = ['Выбран некорректный период']
+                return
             }
             this.axios.post(this.url('/api/graph/group'), data).then(this.process_load_answer);
         },
@@ -318,9 +329,7 @@ export default {
                         marker: {
                             lineWidth: 2,
                             lineColor: null,
-                        },
-                        turboThreshold: 1000000
-
+                        }
                     }
                 },
                 legend: {
@@ -364,7 +373,6 @@ export default {
             this.data.filter((graph) => graph.category.type != 'string').forEach((graph) => {
                 this.options.series.push({
                     name: graph.category.description,
-                    turboThreshold: 1000000,
                     graph_code: graph.category.name,
                     yAxis: 0,
                     showInNavigator: true,
@@ -423,7 +431,6 @@ export default {
             Object.entries(medicines).forEach(([medicine, values]) => {
                 this.options.series.push({
                     yAxis: 1,
-                    turboThreshold: 1000000,
                     name: medicine,
                     data: values.map((value) => {
                         return {
@@ -457,7 +464,6 @@ export default {
             this.data.filter((graph) => graph.category.name == 'symptom').forEach((graph) => {
                 if (graph.values.length > 0) {
                     this.options.series.push({
-                        turboThreshold: 1000000,
                         yAxis: 1,
                         color: '#ad0eca',
                         name: graph.category.description,
@@ -488,7 +494,15 @@ export default {
                 }
             });
 
-            console.log('end symptom pushing', new Date())
+            let group_series = this.options.series.filter(s => s.yAxis == 0)
+            if (group_series.map(s => s.data.length).reduce((a,b) => a + b) > 1000) {
+                this.errors = ['За данный период в медицинской карте присутствует слишком большое количество записей (> 1000). ' +
+                'Чтобы увидеть комментарии к точкам и симптомы, загрузите период с меньшим количеством записей.']
+                group_series.forEach(s => {
+                    s.data = s.data.map(d => [d.x, d.y])
+                })
+            }
+
             if (this.options.chart.height > this.options.chart.width && this.options.series.length > 2) {
                 this.options.chart.height += 50 * (this.options.series.length - 2)
             }
