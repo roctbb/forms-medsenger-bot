@@ -525,7 +525,7 @@ export default {
             }
         },
         show_form: function (form) {
-            if (!form.title.includes(this.search_query)) return false
+            if (!form.title.toLowerCase().includes(this.search_query.toLowerCase())) return false
             if (this.is_admin) return true
             if (form.clinics) {
                 return form.clinics.includes(this.clinic_id);
