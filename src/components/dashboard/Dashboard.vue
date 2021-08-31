@@ -155,7 +155,7 @@
                     вопросы.</p>
             </div>
 
-            <input type="text" v-model="search_query" class="form-control" placeholder="Поиск...">
+            <input type="text" v-model="search_query" class="form-control form-control-sm" style="margin-bottom: 5px;" placeholder="Поиск...">
 
             <div class="row" v-for="(group, name) in group_by(templates.forms.filter(show_form).map((form) => {
                 if (!form.template_category) form.template_category = 'Общее'
@@ -567,5 +567,7 @@ p {
 h5 {
     margin-bottom: 10px;
     margin-top: 10px;
+    font-size: 1.15rem;
 }
+
 </style>
