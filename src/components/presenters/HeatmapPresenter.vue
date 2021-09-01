@@ -54,7 +54,10 @@ export default {
     },
     methods: {
         load_data: function () {
-            this.axios.post(this.url('/api/graph/group'), this.group).then(this.process_load_answer);
+            let data = {
+                group: this.group
+            }
+            this.axios.post(this.url('/api/graph/group'), data).then(this.process_load_answer);
         },
         process_load_answer: function (response) {
             this.data = response.data
