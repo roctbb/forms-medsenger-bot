@@ -10,13 +10,19 @@
                            v-model="medicine.title"/>
                 </form-group48>
 
-                <form-group48 title="Доза и правила приема">
+                <form-group48 title="Дозировка">
                     <textarea class="form-control form-control-sm"
-                              :class="this.save_clicked && !medicine.rules ? 'is-invalid' : ''"
+                              :class="this.save_clicked && empty(medicine.dose) ? 'is-invalid' : ''"
+                              v-model="medicine.dose"></textarea>
+                </form-group48>
+
+                <form-group48 title="Правила приема">
+                    <textarea class="form-control form-control-sm"
+                              :class="this.save_clicked && empty(medicine.rules) ? 'is-invalid' : ''"
                               v-model="medicine.rules"></textarea>
                 </form-group48>
 
-                <form-group48 title="Разрешить пациенту регулировать дозу">
+                <form-group48 title="Разрешить пациенту регулировать дозировку">
                     <input class="form-check" type="checkbox" v-model="medicine.verify_dose"/>
                 </form-group48>
 
@@ -90,12 +96,16 @@ export default {
 
         check: function () {
             this.errors = [];
-            if (!this.medicine.title) {
+            if (this.empty(this.medicine.title)) {
                 this.errors.push('Укажите название опросника')
             }
 
-            if (!this.medicine.rules) {
-                this.errors.push('Укажите дозу и правила приема лекарства')
+            if (this.empty(this.medicine.rules)) {
+                this.errors.push('Укажите правила приема лекарства')
+            }
+
+            if (this.empty(this.medicine.dose)) {
+                this.errors.push('Укажите дозировку')
             }
 
             this.medicine.warning_days = parseInt(this.medicine.warning_days)
