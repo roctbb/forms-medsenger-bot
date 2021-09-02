@@ -9,6 +9,7 @@
                     <dashboard :patient="patient" :templates="templates" v-show="state == 'dashboard'"/>
                     <form-editor v-show="state == 'form-manager'"/>
                     <medicine-editor v-show="state == 'medicine-manager'"/>
+                    <reminder-editor v-show="state == 'reminder-manager'" />
                     <algorithm-editor v-show="state == 'algorithm-manager'"/>
                     <action-done v-if="state == 'done'"></action-done>
                 </div>
@@ -48,12 +49,14 @@ import LoadError from "./components/presenters/LoadError";
 import ConfirmMedicinePresenter from "./components/presenters/ConfirmMedicinePresenter";
 import HeatmapPresenter from "./components/presenters/HeatmapPresenter";
 import DoseVerifier from "./components/presenters/DoseVerifier";
+import ReminderEditor from "./components/editors/ReminderEditor";
 
 
 
 export default {
     name: 'app',
     components: {
+        ReminderEditor,
         DoseVerifier,
         HeatmapPresenter,
         ConfirmMedicinePresenter,
@@ -81,6 +84,7 @@ export default {
         console.log("running created");
         Event.listen('navigate-to-create-form-page', () => this.state = 'form-manager');
         Event.listen('navigate-to-create-medicine-page', () => this.state = 'medicine-manager');
+        Event.listen('navigate-to-create-reminder-page', () => this.state = 'reminder-manager');
         Event.listen('navigate-to-create-algorithm-page', () => this.state = 'algorithm-manager');
         Event.listen('back-to-dashboard', () => this.state = 'dashboard');
         Event.listen('home', () => this.state = 'dashboard');
@@ -106,6 +110,16 @@ export default {
             }
             if (data.close_window) this.state = 'done'
         });
+        Event.listen('reminder-created', (data) => {
+            this.state = 'dashboard'
+            if (!data.reminder.is_template) {
+                Event.fire('dashboard-to-main');
+                this.patient.reminders.push(data.reminder)
+            } else {
+                this.templates.reminders.push(data.reminder)
+            }
+            if (data.close_window) this.state = 'done'
+        });
         Event.listen('algorithm-created', (algorithm) => {
             this.state = 'dashboard'
             if (!algorithm.is_template) {
@@ -122,6 +136,10 @@ export default {
         Event.listen('edit-medicine', (medicine) => {
             this.state = 'medicine-manager'
             Event.fire('navigate-to-edit-medicine-page', medicine);
+        });
+        Event.listen('edit-reminder', (reminder) => {
+            this.state = 'reminder-manager'
+            Event.fire('navigate-to-edit-reminder-page', reminder);
         });
         Event.listen('edit-algorithm', (algorithm) => {
             this.state = 'algorithm-manager'

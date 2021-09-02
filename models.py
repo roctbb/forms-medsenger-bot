@@ -39,6 +39,7 @@ class Patient(db.Model):
     contracts = db.relationship('Contract', backref=backref('patient', uselist=False), lazy=True)
     forms = db.relationship('Form', backref=backref('patient', uselist=False), lazy=True)
     medicines = db.relationship('Medicine', backref=backref('patient', uselist=False), lazy=True)
+    reminders = db.relationship('Reminder', backref=backref('patient', uselist=False), lazy=True)
     algorithms = db.relationship('Algorithm', backref=backref('patient', uselist=False), lazy=True)
 
     def as_dict(self):
@@ -49,6 +50,7 @@ class Patient(db.Model):
             "forms": [form.as_dict() for form in self.forms],
             "medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at == None],
             "canceled_medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at != None],
+            "reminders": [reminder.as_dict() for reminder in self.reminders],
             "algorithms": [algorithm.as_dict() for algorithm in self.algorithms]
         }
 
@@ -80,6 +82,7 @@ class Contract(db.Model):
 
     forms = db.relationship('Form', backref=backref('contract', uselist=False), lazy=True)
     medicines = db.relationship('Medicine', backref=backref('contract', uselist=False), lazy=True)
+    reminders = db.relationship('Reminder', backref=backref('contract', uselist=False), lazy=True)
     algorithms = db.relationship('Algorithm', backref=backref('contract', uselist=False), lazy=True)
     tasks = db.Column(db.JSON, nullable=True)
 
@@ -350,3 +353,52 @@ class ActionRequest(db.Model):
 
     sent = db.Column(db.DateTime(), default=db.func.current_timestamp())
     done = db.Column(db.DateTime(), nullable=True)
+
+
+class Reminder(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=True)
+    contract_id = db.Column(db.Integer, db.ForeignKey('contract.id', ondelete="CASCADE"), nullable=True)
+
+    type = db.Column(db.String(7), nullable=False)
+    different_text = db.Column(db.Boolean, default=False)
+    doctor_text = db.Column(db.Text, nullable=True)
+    patient_text = db.Column(db.Text, nullable=True)
+    date = db.Column(db.DateTime(), nullable=True)
+    reminder_date = db.Column(db.Text, nullable=True)
+
+    is_template = db.Column(db.Boolean, default=False)
+    template_id = db.Column(db.Integer, db.ForeignKey('reminder.id', ondelete="set null"), nullable=True)
+
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "contract_id": self.contract_id,
+            "patient_id": self.patient_id,
+            "type": self.type,
+            "different_text": self.different_text,
+            "doctor_text": self.doctor_text,
+            "patient_text": self.patient_text,
+            "date": self.date,
+            "reminder_date": self.reminder_date,
+            "is_template": self.is_template,
+            "template_id": self.template_id,
+        }
+
+    def clone(self):
+        new_reminder = Reminder()
+        new_reminder.type = self.type
+
+        new_reminder.different_text = self.different_text
+        new_reminder.doctor_text = self.doctor_text
+        new_reminder.patient_text = self.patient_text
+
+        new_reminder.date = self.date
+        new_reminder.reminder_date = self.reminder_date
+
+        if self.is_template:
+            new_reminder.template_id = self.id
+        else:
+            new_reminder.template_id = self.template_id
+
+        return new_reminder

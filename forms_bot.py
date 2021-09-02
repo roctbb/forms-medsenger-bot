@@ -3,6 +3,7 @@ from managers.AlgorithmsManager import AlgorithmsManager
 from managers.ContractsManager import ContractManager
 from managers.FormManager import FormManager
 from managers.MedicineManager import MedicineManager
+from managers.ReminderManager import ReminderManager
 from managers.TimetableManager import TimetableManager
 from medsenger_api import AgentApiClient
 from helpers import *
@@ -12,7 +13,8 @@ medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG)
 contract_manager = ContractManager(medsenger_api, db)
 form_manager = FormManager(medsenger_api, db)
 medicine_manager = MedicineManager(medsenger_api, db)
-timetable_manager = TimetableManager(medicine_manager, form_manager, medsenger_api, db)
+reminder_manager = ReminderManager(medsenger_api, db)
+timetable_manager = TimetableManager(medicine_manager, form_manager, reminder_manager, medsenger_api, db)
 algorithm_manager = AlgorithmsManager(medsenger_api, db)
 
 
@@ -253,6 +255,7 @@ def get_data(args, form):
     patient = contract.patient.as_dict()
     patient["info"] = medsenger_api.get_patient_info(contract_id)
     patient["current_contract"] = contract.as_dict()
+    patient["reminders"] = sorted(patient["reminders"], key=lambda k: k["date"])
 
     return jsonify(patient)
 
@@ -263,6 +266,7 @@ def get_templates(args, form):
     templates = {
         "forms": form_manager.get_templates_as_dicts(),
         "medicines": medicine_manager.get_templates_as_dicts(),
+        "reminders": reminder_manager.get_templates_as_dicts(),
         "algorithms": algorithm_manager.get_templates_as_dicts()
     }
 
@@ -324,6 +328,35 @@ def delete_medicine(args, form):
         })
     else:
         abort(404)
+
+
+@app.route('/api/settings/delete_reminder', methods=['POST'])
+@only_doctor_args
+def delete_reminder(args, form):
+    contract_id = args.get('contract_id')
+    contract = contract_manager.get(contract_id)
+    result = reminder_manager.remove(request.json.get('id'), contract)
+
+    if result:
+        return jsonify({
+            "deleted_id": result
+        })
+    else:
+        abort(404)
+
+
+@app.route('/api/settings/reminder', methods=['POST'])
+@only_doctor_args
+def create_reminder(args, form):
+    contract_id = args.get('contract_id')
+    contract = contract_manager.get(contract_id)
+
+    reminder = reminder_manager.create_or_edit(request.json, contract)
+
+    if reminder:
+        return jsonify(reminder.as_dict())
+    else:
+        abort(422)
 
 
 @app.route('/api/settings/algorithm', methods=['POST'])
