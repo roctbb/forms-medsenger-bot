@@ -102,6 +102,33 @@
 
             <hr>
 
+            <h5>Напоминания</h5>
+
+            <div class="row">
+                <card v-for="(reminder, i) in patient.reminders" :key="reminder.id" :image="images.reminder"
+                      class="col-lg-3 col-md-4">
+                    <h6>Для {{ reminder.type == 'both' ? 'всех' : (reminder.type == 'patient' ? 'пациента' : 'врача') }}</h6>
+                    <small> <div v-html="get_reminder_text(reminder)"></div> </small><br>
+                    <small><i>на {{ format_date(reminder.date) }}</i></small><br>
+                    <div v-if="reminder.contract_id == current_contract_id">
+                        <a href="#" @click="edit_reminder(reminder)">Редактировать</a>
+                        <a href="#" @click="delete_reminder(reminder)">Удалить</a>
+                    </div>
+                    <div v-else>
+                        <small>Добавлен в другом контракте.</small>
+                    </div>
+
+                    <small v-if="!empty(reminder.template_id)" class="text-muted">
+                        ID шаблона: {{ reminder.template_id }}</small>
+
+                </card>
+            </div>
+
+            <button class="btn btn-primary btn-sm" @click="create_reminder()">Создать напоминание</button>
+
+            <button v-if="is_admin" class="btn btn-info btn-sm" @click="state = 'reminder_templates'">Управление шаблонами</button>
+            <hr>
+
             <h5>Алгоритмы</h5>
 
             <div class="row">
@@ -224,6 +251,38 @@
             <button class="btn btn-danger btn-sm" @click="state = 'main'">Назад</button>
 
         </div>
+        <div v-if="state == 'reminder_templates'">
+            <h3>Шаблоны напоминаний</h3>
+
+            <div class="alert alert-info" role="alert">
+                <p>Выберите напоминание или создайте новое.</p>
+            </div>
+
+            <div class="row">
+                <card v-for="(reminder, i) in templates.reminders" :key="reminder.id" :image="images.reminder"
+                      class="col-lg-3 col-md-4">
+                    <h6>Для {{ reminder.type == 'both' ? 'всех' : (reminder.type == 'patient' ? 'пациента' : 'врача') }}</h6>
+                    <small>{{ reminder.type == 'doctor' ? reminder.doctor_text : reminder.patient_text }}</small><br>
+                    <small><i>на {{ format_date(reminder.date) }}</i></small><br>
+                    <a href="#" @click="attach_reminder(reminder)">Подключить</a>
+                    <a href="#" v-if="is_admin" @click="edit_reminder(reminder)">Редактировать</a>
+                    <a href="#" v-if="is_admin" @click="delete_reminder(reminder)">Удалить</a>
+
+                    <br>
+
+                    <small v-if="!empty(reminder.template_id)" class="text-muted">
+                        ID шаблона: {{ reminder.template_id }}</small>
+                </card>
+                <div v-if="!templates.medicines.length" class="col-md-12">
+                    <p style="margin-bottom: 15px;">Список шаблонов пуст.</p>
+                </div>
+
+            </div>
+
+            <button class="btn btn-primary btn-sm" @click="create_reminder()">Добавить</button>
+            <button class="btn btn-danger btn-sm" @click="state = 'main'">Назад</button>
+
+        </div>
         <div v-if="state == 'algorithm_templates'">
 
             <div class="alert alert-info" role="alert">
@@ -300,6 +359,16 @@ export default {
         }
     },
     methods: {
+        format_date: function (date) {
+            return moment(date).format('DD.MM.YY в hh:mm')
+        },
+        get_reminder_text: function (reminder) {
+            if (reminder.type == 'doctor')
+                return reminder.doctor_text
+            if (reminder.type == 'both' && reminder.different_text)
+                return `<i>Пациенту:</i> ${reminder.patient_text}<br><i>Врачу:</i> ${reminder.doctor_text}`
+            return reminder.patient_text
+        },
         update_params: function () {
             this.loaded = false
             this.params = {
@@ -483,6 +552,37 @@ export default {
                     }
                 }
             )
+        },
+        attach_reminder: function (reminder) {
+            Event.fire('attach-reminder', reminder)
+        },
+        create_reminder: function () {
+            Event.fire('navigate-to-create-reminder-page')
+        },
+        edit_reminder: function (reminder) {
+            Event.fire('edit-reminder', reminder)
+        },
+        delete_reminder: function (reminder) {
+            this.$confirm(
+                {
+                    message: `Вы уверены, что хотите удалить напоминание?`,
+                    button: {
+                        no: 'Нет',
+                        yes: 'Да, удалить'
+                    },
+                    callback: confirm => {
+                        if (confirm) {
+                            this.axios.post(this.url('/api/settings/delete_reminder'), reminder).then(this.process_delete_reminder_answer);
+                        }
+                    }
+                }
+            )
+        },
+        process_delete_reminder_answer: function (response) {
+            if (response.data.deleted_id) {
+                this.patient.reminders = this.patient.reminders.filter(r => r.id != response.data.deleted_id)
+                this.templates.reminders = this.templates.reminders.filter(r => r.id != response.data.deleted_id)
+            }
         },
         create_algorithm: function () {
             Event.fire('navigate-to-create-algorithm-page')
