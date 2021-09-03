@@ -107,6 +107,7 @@ class Medicine(db.Model, Compliance):
 
     title = db.Column(db.String(255), nullable=True)
     rules = db.Column(db.Text, nullable=True)
+    dose = db.Column(db.Text, nullable=True)
     timetable = db.Column(db.JSON, nullable=True)
     is_template = db.Column(db.Boolean, default=False)
     verify_dose = db.Column(db.Boolean, default=False)
@@ -133,6 +134,7 @@ class Medicine(db.Model, Compliance):
             "patient_id": self.patient_id,
             "title": self.title,
             "rules": self.rules,
+            "dose": self.dose,
             "timetable": self.timetable,
             "is_template": self.is_template,
             "verify_dose": self.verify_dose,
@@ -156,6 +158,7 @@ class Medicine(db.Model, Compliance):
         new_medicine = Medicine()
         new_medicine.title = self.title
         new_medicine.rules = self.rules
+        new_medicine.dose = self.dose
 
         new_medicine.timetable = self.timetable
         new_medicine.warning_days = self.warning_days
