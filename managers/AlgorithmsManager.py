@@ -86,6 +86,7 @@ class AlgorithmsManager(Manager):
             self.db.session.add(new_algorithm)
 
             self.check_inits(new_algorithm, contract)
+            self.change_step(new_algorithm, new_algorithm.initial_step)
             self.check_init_timeouts(new_algorithm, contract)
 
             self.__commit__()
@@ -563,7 +564,7 @@ class AlgorithmsManager(Manager):
         for condition in new_step['conditions']:
             if condition.get('timeout_on_init'):
                 condition['last_fired'] = int(time.time())
-            if any(any(criteria['category'] == 'step_init' for criteria in block) for block in condition['criteria']):
+            if any(any(criteria['left_mode'] == 'step_init' for criteria in block) for block in condition['criteria']):
                 for action in condition['positive_actions']:
                     self.run_action(action, algorithm.contract.id, [], algorithm)
         self.__commit__()
@@ -768,12 +769,6 @@ class AlgorithmsManager(Manager):
             else:
                 algorithm.detach_date = None
 
-            if not algorithm.current_step:
-                algorithm.current_step = data.get('steps')[0].get('uid')
-                self.change_step(algorithm, algorithm.initial_step)
-            else:
-                self.update_categories(algorithm)
-
             if data.get('is_template') and contract.is_admin:
                 algorithm.clinics = data.get('clinics')
                 algorithm.is_template = True
@@ -785,8 +780,15 @@ class AlgorithmsManager(Manager):
             if not algorithm_id:
                 self.db.session.add(algorithm)
 
+            self.__commit__()
+
             self.check_inits(algorithm, contract)
             self.check_init_timeouts(algorithm, contract)
+            self.update_categories(algorithm)
+
+            if not algorithm.current_step:
+                algorithm.current_step = data.get('steps')[0].get('uid')
+                self.change_step(algorithm, algorithm.initial_step)
 
             self.__commit__()
             return algorithm

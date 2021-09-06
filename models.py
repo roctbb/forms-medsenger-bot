@@ -331,7 +331,6 @@ class Algorithm(db.Model):
         new_algorithm.categories = self.categories
         new_algorithm.attached_form = self.attached_form
         new_algorithm.initial_step = self.initial_step
-        new_algorithm.current_step = self.current_step
         new_algorithm.attach_date = attach
         new_algorithm.detach_date = detach
 
