@@ -723,18 +723,18 @@ class AlgorithmsManager(Manager):
 
     def check_inits(self, algorithm, contract):
         if 'init' in algorithm.categories.split('|') and algorithm.contract_id:
+            for condition in algorithm.common_conditions:
+                if any(
+                    any(criteria['category'] == 'init' for criteria in block) for block in condition['criteria']):
+                    for action in condition['positive_actions']:
+                        self.run_action(action, contract.id, [], algorithm)
+
             for step in algorithm.steps:
                 for condition in step['conditions']:
                     if any(
                         any(criteria['category'] == 'init' for criteria in block) for block in condition['criteria']):
                         for action in condition['positive_actions']:
                             self.run_action(action, contract.id, [], algorithm)
-
-            for condition in algorithm.common_conditions:
-                if any(
-                    any(criteria['category'] == 'init' for criteria in block) for block in condition['criteria']):
-                    for action in condition['positive_actions']:
-                        self.run_action(action, contract.id, [], algorithm)
 
     def check_init_timeouts(self, algorithm, contract):
         if algorithm.common_conditions:
