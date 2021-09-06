@@ -102,6 +102,16 @@
             </div>
         </div>
 
+        <div v-if="field.type == 'file'">
+            <form-group48 title="Отправить файл врачу">
+                <input type="checkbox" class="form-check" v-model="field.params.send_to_doctor">
+            </form-group48>
+
+            <form-group48 title="Пояснение в медкарте">
+                <input type="text" class="form-control form-control-sm" v-model="field.category_value"/>
+            </form-group48>
+        </div>
+
         <div v-if="field.type != 'radio' && is_admin">
             <form-group48 title="Дополнительные параметры">
                 <input type="text" class="form-control form-control-sm"

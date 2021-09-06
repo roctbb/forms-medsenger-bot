@@ -31,10 +31,8 @@ Vue.mixin({
             if (!doc) return doc;
             return doc.replace(/([^>])\n/g, '$1<br/>')
         },
-        blur: function ()
-        {
-            if (window.activeElement)
-            {
+        blur: function () {
+            if (window.activeElement) {
                 window.activeElement.blur()
             }
         },
@@ -52,7 +50,7 @@ Vue.mixin({
         empty: function (e) {
             return !e && e !== 0
         },
-        isJsonString: function(str) {
+        isJsonString: function (str) {
             if (!str)
                 return true;
             try {
@@ -123,35 +121,35 @@ Vue.mixin({
                 }
             }
 
-            if (category_name == "exact_date" ) {
+            if (category_name == "exact_date") {
                 return {
                     description: 'дата',
                     type: "date",
                 }
             }
 
-            if (category_name == "contract_start_date" ) {
+            if (category_name == "contract_start_date") {
                 return {
                     description: 'дата начала контракта',
                     type: "date",
                 }
             }
 
-            if (category_name == "contract_end_date" ) {
+            if (category_name == "contract_end_date") {
                 return {
                     description: 'дата завершения контракта',
                     type: "date",
                 }
             }
 
-            if (category_name == "algorithm_attach_date" ) {
+            if (category_name == "algorithm_attach_date") {
                 return {
                     description: 'дата отсчета алгоритма',
                     type: "date",
                 }
             }
 
-            if (category_name == "algorithm_detach_date" ) {
+            if (category_name == "algorithm_detach_date") {
                 return {
                     description: 'дата завершения алгоритма',
                     type: "date",
@@ -160,8 +158,7 @@ Vue.mixin({
 
             let category = this.category_list.find(x => x.name == category_name)
 
-            if (!category)
-            {
+            if (!category) {
                 return {
                     description: ''
                 }
@@ -174,8 +171,7 @@ Vue.mixin({
             })
         },
         tt_description: function (timetable) {
-            if (timetable.mode == 'manual')
-            {
+            if (timetable.mode == 'manual') {
                 return 'Заполняется вручную или присылается алгоритмом.'
             }
             if (timetable.mode == 'daily') {
@@ -244,7 +240,16 @@ Vue.mixin({
                 groups[item[field]] = group;
                 return groups;
             }, {});
+        },
+        toBase64: function (file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onloadend = () => resolve(reader.result.split(';base64,')[1]);
+                reader.onerror = error => reject(error);
+            })
         }
+
     },
     data() {
         return {
@@ -258,6 +263,7 @@ Vue.mixin({
                 scale: "Шкала",
                 date: "Дата",
                 time: "Время",
+                file: "Файл",
             },
             current_contract_id: window.CONTRACT_ID,
             weekdays: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
@@ -270,7 +276,8 @@ Vue.mixin({
                 text: ['string'],
                 checkbox: ['string'],
                 date: ['date'],
-                time: ['string']
+                time: ['string'],
+                file: ['file']
             },
             images: {
                 form: window.LOCAL_HOST + '/static/images/icons8-fill-in-form-48.png',
