@@ -284,6 +284,7 @@ Vue.mixin({
                 warning: window.LOCAL_HOST + '/static/images/icons8-error-18.png',
                 medicine: window.LOCAL_HOST + '/static/images/icons8-pill-96.png',
                 reminder: window.LOCAL_HOST + '/static/images/icons8-notification-96.png',
+                old_reminder: window.LOCAL_HOST + '/static/images/icons8-gray-notification-96.png',
                 canceled_medicine: window.LOCAL_HOST + '/static/images/icons8-gray-pill-96.png',
                 algorithm: window.LOCAL_HOST + '/static/images/icons8-artificial-intelligence-96.png',
                 ok: window.LOCAL_HOST + '/static/images/icons8-ok-128.png',

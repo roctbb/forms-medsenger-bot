@@ -255,7 +255,6 @@ def get_data(args, form):
     patient = contract.patient.as_dict()
     patient["info"] = medsenger_api.get_patient_info(contract_id)
     patient["current_contract"] = contract.as_dict()
-    patient["reminders"] = sorted(patient["reminders"], key=lambda k: k["date"])
 
     return jsonify(patient)
 

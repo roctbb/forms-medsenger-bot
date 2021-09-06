@@ -20,8 +20,6 @@ class TimetableManager(Manager):
         now = datetime.now()
 
         if isinstance(object, Reminder):
-            print(object.reminder_date)
-            print(now.strftime('%d.%m.%Y %H:%M'))
             return object.reminder_date == now.strftime('%d.%m.%Y %H:%M')
 
         timetable = object.timetable
