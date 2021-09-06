@@ -56,8 +56,10 @@ class AlgorithmsManager(Manager):
         self.__commit__()
 
     def attach(self, template_id, contract, setup=None):
-        algorithm = self.get(template_id)
+        print(template_id)
+        algorithm = self.get(int(template_id))
 
+        print(algorithm.as_dict())
         if algorithm:
             new_algorithm = algorithm.clone()
             new_algorithm.contract_id = contract.id
