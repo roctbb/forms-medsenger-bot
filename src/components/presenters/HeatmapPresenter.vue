@@ -324,7 +324,7 @@ export default {
                         return a.time < b.time ? -1 : a.time > b.time ? 1 : 0
                     })
                     val.points.forEach(p => {
-                        val.description += `<br> • <strong> ${this.formatTime(p.time)}: ${p.dose} </strong>`
+                        val.description += `<br> • <strong> ${this.formatTime(p.time)} ${p.dose} </strong>`
                     })
                 })
 
