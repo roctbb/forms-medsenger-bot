@@ -84,6 +84,7 @@ class AlgorithmsManager(Manager):
                         pass
 
             self.db.session.add(new_algorithm)
+            self.__commit__()
 
             self.check_inits(new_algorithm, contract)
             self.change_step(new_algorithm, new_algorithm.initial_step)
