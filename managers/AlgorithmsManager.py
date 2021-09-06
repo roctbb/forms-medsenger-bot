@@ -45,7 +45,7 @@ class AlgorithmsManager(Manager):
         self.__commit__()
 
     def get(self, algorithm_id):
-        return Algorithm.query.filter_by(id=algorithm_id).first_or_404()
+        return Algorithm.query.filter_by(id=algorithm_id).first()
 
     def detach(self, template_id, contract):
         algorithms = list(filter(lambda x: x.template_id == template_id, contract.patient.algorithms))
@@ -56,10 +56,8 @@ class AlgorithmsManager(Manager):
         self.__commit__()
 
     def attach(self, template_id, contract, setup=None):
-        print(template_id)
-        algorithm = self.get(int(template_id))
+        algorithm = self.get(template_id)
 
-        print(algorithm.as_dict())
         if algorithm:
             new_algorithm = algorithm.clone()
             new_algorithm.contract_id = contract.id
@@ -489,7 +487,7 @@ class AlgorithmsManager(Manager):
                                                     only_doctor=True)
 
             if action['type'] == 'attach_medicine':
-                medicine = self.get(template_id)
+                medicine = medicine_manager.get(template_id)
 
                 if medicine:
                     medicine_manager.attach(template_id, contract)
@@ -503,7 +501,7 @@ class AlgorithmsManager(Manager):
                                                     only_doctor=True)
 
             if action['type'] == 'detach_medicine':
-                medicine = self.get(template_id)
+                medicine = medicine_manager.get(template_id)
 
                 if medicine:
                     medicine_manager.detach(template_id, contract)
