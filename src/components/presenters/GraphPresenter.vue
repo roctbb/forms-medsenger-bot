@@ -411,12 +411,12 @@ export default {
                     if (medicine.value in medicines) {
                         medicines[medicine.value].push({
                             timestamp: medicine.timestamp,
-                            dose: medicine.params.dose == null ? '' : ` (${medicine.params.dose})`
+                            dose: !medicine.params || medicine.params.dose == null ? '' : ` (${medicine.params.dose})`
                         })
                     } else
                         medicines[medicine.value] = [{
                             timestamp: medicine.timestamp,
-                            dose: medicine.params.dose == null ? '' : ` (${medicine.params.dose})`
+                            dose: !medicine.params || medicine.params.dose == null ? '' : ` (${medicine.params.dose})`
                         }]
                 })
             });
