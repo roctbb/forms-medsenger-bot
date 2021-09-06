@@ -43,14 +43,18 @@ class Patient(db.Model):
     algorithms = db.relationship('Algorithm', backref=backref('patient', uselist=False), lazy=True)
 
     def as_dict(self):
+        now = datetime.now()
         return {
             "id": self.id,
             "month_compliance": self.count_month_compliance(),
             "contracts": [contract.as_dict() for contract in self.contracts],
             "forms": [form.as_dict() for form in self.forms],
-            "medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at == None],
-            "canceled_medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at != None],
-            "reminders": [reminder.as_dict() for reminder in self.reminders],
+            "medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is not None],
+            "canceled_medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is not None],
+            "reminders": sorted([reminder.as_dict() for reminder in self.reminders
+                                 if datetime.strptime(reminder.reminder_date, '%d.%m.%Y %H:%M') >= now], key=lambda k: k["date"]),
+            "old_reminders": sorted([reminder.as_dict() for reminder in self.reminders
+                                 if datetime.strptime(reminder.reminder_date, '%d.%m.%Y %H:%M') < now], key=lambda k: k["date"], reverse=True),
             "algorithms": [algorithm.as_dict() for algorithm in self.algorithms]
         }
 

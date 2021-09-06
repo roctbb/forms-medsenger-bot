@@ -122,6 +122,22 @@
                         ID шаблона: {{ reminder.template_id }}</small>
 
                 </card>
+                <card v-for="(reminder, i) in patient.old_reminders" :key="reminder.id" :image="images.old_reminder"
+                      class="col-lg-3 col-md-4">
+                    <h6>Для {{ reminder.type == 'both' ? 'всех' : (reminder.type == 'patient' ? 'пациента' : 'врача') }}</h6>
+                    <small> <div v-html="get_reminder_text(reminder)"></div> </small><br>
+                    <small><i>на {{ format_date(reminder.date) }}</i></small><br>
+                    <div v-if="reminder.contract_id == current_contract_id">
+                        <a href="#" @click="edit_reminder(reminder)">Редактировать</a>
+                    </div>
+                    <div v-else>
+                        <small>Добавлен в другом контракте.</small>
+                    </div>
+
+                    <small v-if="!empty(reminder.template_id)" class="text-muted">
+                        ID шаблона: {{ reminder.template_id }}</small>
+
+                </card>
             </div>
 
             <button class="btn btn-primary btn-sm" @click="create_reminder()">Создать напоминание</button>

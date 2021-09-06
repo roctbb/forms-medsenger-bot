@@ -14,12 +14,12 @@ class ReminderManager(Manager):
         return Reminder.query.filter_by(is_template=True).all()
 
     def get(self, reminder_id):
-        medicine = Reminder.query.filter_by(id=reminder_id).first()
+        reminder = Reminder.query.filter_by(id=reminder_id).first()
 
-        if not medicine:
+        if not reminder:
             raise Exception("No reminder_id = {} found".format(reminder_id))
 
-        return medicine
+        return reminder
 
     def clear(self, contract):
         Reminder.query.filter_by(contract_id=contract.id).delete()
