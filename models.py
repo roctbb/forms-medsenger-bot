@@ -151,6 +151,20 @@ class Medicine(db.Model, Compliance):
         else:
             return '{} раз(а) в месяц'.format(len(self.timetable['points']))
 
+    def get_description(self, tt=False):
+        medicine_description = "«{}»".format(self.title)
+        print(self.dose)
+        if self.dose is not None:
+            medicine_description += " {}".format(self.dose)
+        if self.rules and not tt:
+            medicine_description += " ({})".format(self.rules)
+        elif self.rules:
+            medicine_description += " ({} / {})".format(self.rules, self.timetable_description())
+        elif tt:
+            medicine_description += '({})'.format(self.timetable_description())
+
+        return medicine_description
+
     def clone(self):
         new_medicine = Medicine()
         new_medicine.title = self.title

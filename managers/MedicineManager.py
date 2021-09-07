@@ -103,9 +103,7 @@ class MedicineManager(Manager):
             return None
 
         if medicine.contract_id:
-            self.medsenger_api.send_message(contract.id,
-                                            "Врач отменил препарат «{}» {} ({} / {}).".format(
-                                                medicine.title, medicine.dose, medicine.rules, medicine.timetable_description()))
+            self.medsenger_api.send_message(contract.id, "Врач отменил препарат {}.".format(medicine.get_description()))
 
         medicine.canceled_at = datetime.now()
 
@@ -121,7 +119,7 @@ class MedicineManager(Manager):
         super().log_request("medicine_{}".format(medicine.id), contract_id, description)
 
     def run(self, medicine, commit=True):
-        text = 'Пожалуйста, не забудьте принять лекарство "{}" {} ({}).'.format(medicine.title, medicine.dose, medicine.rules)
+        text = 'Пожалуйста, не забудьте принять лекарство {}.'.format(medicine.get_description())
         action = 'medicine/{}'.format(medicine.id)
         action_name = 'Подтвердить прием'
         deadline = self.calculate_deadline(medicine.timetable)
@@ -168,9 +166,8 @@ class MedicineManager(Manager):
 
                 action = 'назначил препарат' if is_new else 'изменил параметры приема препарата'
                 self.medsenger_api.send_message(contract.id,
-                                                "Врач {} «{}» {} ({} / {}). Мы будем автоматически присылать напоминания об этом.".format(
-                                                        action, medicine.title, medicine.dose, medicine.rules,
-                                                        medicine.timetable_description()))
+                                                "Врач {} {}. Мы будем автоматически присылать напоминания об этом.".format(
+                                                        action, medicine.get_description(True)))
 
             if not medicine_id:
                 self.db.session.add(medicine)
