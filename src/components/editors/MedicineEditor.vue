@@ -11,15 +11,11 @@
                 </form-group48>
 
                 <form-group48 title="Дозировка">
-                    <textarea class="form-control form-control-sm"
-                              :class="this.save_clicked && empty(medicine.dose) ? 'is-invalid' : ''"
-                              v-model="medicine.dose"></textarea>
+                    <textarea class="form-control form-control-sm" v-model="medicine.dose"></textarea>
                 </form-group48>
 
                 <form-group48 title="Правила приема">
-                    <textarea class="form-control form-control-sm"
-                              :class="this.save_clicked && empty(medicine.rules) ? 'is-invalid' : ''"
-                              v-model="medicine.rules"></textarea>
+                    <textarea class="form-control form-control-sm" v-model="medicine.rules"></textarea>
                 </form-group48>
 
                 <form-group48 title="Разрешить пациенту регулировать дозировку">
@@ -98,14 +94,6 @@ export default {
             this.errors = [];
             if (this.empty(this.medicine.title)) {
                 this.errors.push('Укажите название опросника')
-            }
-
-            if (this.empty(this.medicine.rules)) {
-                this.errors.push('Укажите правила приема лекарства')
-            }
-
-            if (this.empty(this.medicine.dose)) {
-                this.errors.push('Укажите дозировку')
             }
 
             this.medicine.warning_days = parseInt(this.medicine.warning_days)
