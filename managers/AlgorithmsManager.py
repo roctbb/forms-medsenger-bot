@@ -791,10 +791,13 @@ class AlgorithmsManager(Manager):
 
             self.check_inits(algorithm, contract)
             self.check_init_timeouts(algorithm, contract)
+            self.update_categories(algorithm)
 
             if not algorithm.current_step:
                 algorithm.current_step = data.get('steps')[0].get('uid')
                 self.change_step(algorithm, algorithm.initial_step)
+
+
 
             self.__commit__()
             return algorithm
