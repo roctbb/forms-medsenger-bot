@@ -183,6 +183,8 @@ Vue.mixin({
             }
         },
         alg_description: function (algorithm) {
+            if (!algorithm.categories) return "";
+
             let criteria = `<b>Анализирует:</b> ` + algorithm.categories.split('|').map((c) => this.get_category(c).description.toLowerCase()).filter((v, i, a) => a.indexOf(v) === i).join(', ') + `<br>`;
 
             /*
