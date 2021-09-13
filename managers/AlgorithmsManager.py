@@ -45,7 +45,7 @@ class AlgorithmsManager(Manager):
         self.__commit__()
 
     def get(self, algorithm_id):
-        return Algorithm.query.filter_by(id=algorithm_id).first_or_404()
+        return Algorithm.query.filter_by(id=algorithm_id).first()
 
     def detach(self, template_id, contract):
         algorithms = list(filter(lambda x: x.template_id == template_id, contract.patient.algorithms))
@@ -88,6 +88,11 @@ class AlgorithmsManager(Manager):
             self.db.session.refresh(new_algorithm)
 
             self.check_inits(new_algorithm, contract)
+            self.change_step(new_algorithm, new_algorithm.initial_step)
+            self.check_init_timeouts(new_algorithm, contract)
+
+            self.__commit__()
+            self.db.session.refresh(new_algorithm)
 
             return True
         else:
@@ -158,7 +163,7 @@ class AlgorithmsManager(Manager):
                 return None, None
 
         if mode == 'value' or mode == 'category_value':
-            answer = self.medsenger_api.get_records(contract_id, category_name, group=True)
+            answer = self.medsenger_api.get_records(contract_id, category_name, group=True, limit=1)
         else:
             time_from = datetime.now() - timedelta(hours=hours)
             time_to = datetime.now()
@@ -191,7 +196,7 @@ class AlgorithmsManager(Manager):
 
         if not values:
             answer = None, None
-        elif mode == 'value' and time.time() - int(answer['values'][0].get('timestamp')) > 10:
+        elif mode == 'value' and (time.time() - int(answer['values'][0].get('timestamp')) > 60 * 60 * 12 or time.time() - int(answer['values'][0].get('uploaded')) > 10):
             answer = None, None
         elif mode == 'value' or mode == 'category_value':
             answer = values, objects
@@ -219,7 +224,6 @@ class AlgorithmsManager(Manager):
         except:
             modifier = 0
 
-
         if "date_" in sign:
             left = datetime.strptime(left, '%Y-%m-%d').date()
             right = (datetime.strptime(right, '%Y-%m-%d') + timedelta(days=modifier)).date()
@@ -234,7 +238,6 @@ class AlgorithmsManager(Manager):
                 right = float(right)
             except:
                 pass
-
 
             try:
                 right = right * multiplier + modifier
@@ -484,7 +487,7 @@ class AlgorithmsManager(Manager):
                                                     only_doctor=True)
 
             if action['type'] == 'attach_medicine':
-                medicine = self.get(template_id)
+                medicine = medicine_manager.get(template_id)
 
                 if medicine:
                     medicine_manager.attach(template_id, contract)
@@ -498,7 +501,7 @@ class AlgorithmsManager(Manager):
                                                     only_doctor=True)
 
             if action['type'] == 'detach_medicine':
-                medicine = self.get(template_id)
+                medicine = medicine_manager.get(template_id)
 
                 if medicine:
                     medicine_manager.detach(template_id, contract)
@@ -561,7 +564,9 @@ class AlgorithmsManager(Manager):
         self.update_categories(algorithm)
 
         for condition in new_step['conditions']:
-            if any(any(criteria['category'] == 'step_init' for criteria in block) for block in condition['criteria']):
+            if condition.get('timeout_on_init'):
+                condition['last_fired'] = int(time.time())
+            if any(any(criteria['left_mode'] == 'step_init' for criteria in block) for block in condition['criteria']):
                 for action in condition['positive_actions']:
                     self.run_action(action, algorithm.contract.id, [], algorithm)
         self.__commit__()
@@ -603,13 +608,16 @@ class AlgorithmsManager(Manager):
             additional_conditions = algorithm.common_conditions
 
         for condition in additional_conditions + current_step['conditions']:
+            bypass = False
+
             criteria = condition['criteria']
 
             reset_minutes = int(condition.get('reset_minutes', 0))
             last_fired = int(condition.get('last_fired', 0))
+
             if reset_minutes and last_fired:
                 if time.time() - last_fired < reset_minutes * 60:
-                    continue
+                    bypass = True
 
             additions = []
             descriptions = []
@@ -630,9 +638,11 @@ class AlgorithmsManager(Manager):
                             "comment": addition["comment"]
                         })
                 fired = True
-                for action in condition.get('positive_actions', []):
-                    self.run_action(action, contract_id, descriptions, algorithm)
-                condition['last_fired'] = int(time.time())
+
+                if not bypass:
+                    for action in condition.get('positive_actions', []):
+                        self.run_action(action, contract_id, descriptions, algorithm)
+                    condition['last_fired'] = int(time.time())
             else:
                 for action in condition.get('negative_actions', []):
                     self.run_action(action, contract_id, descriptions, algorithm)
@@ -648,31 +658,40 @@ class AlgorithmsManager(Manager):
     def search_params(self, contract):
         params = {}
 
+        def search_condition(condition, step_index, condition_index, common=False):
+            for block_index, block in enumerate(condition['criteria']):
+                for criteria_index, criteria in enumerate(block):
+                    if criteria.get('ask_value'):
+                        pair = (criteria.get('value_name'), criteria.get('value'))
+
+                        loc = {
+                            'algorithm': algorithm.id,
+                            'step': step_index,
+                            'condition': condition_index,
+                            'block': block_index,
+                            'criteria': criteria_index,
+                            'common': common
+                        }
+
+                        if pair in params:
+                            params[pair]['locations'].append(loc)
+                        else:
+                            params.update({
+                                pair: {
+                                    'name': pair[0],
+                                    'value': pair[1],
+                                    'locations': [loc]
+                                }
+                            })
+
         for algorithm in contract.algorithms:
             for step_index, step in enumerate(algorithm.steps):
                 for condition_index, condition in enumerate(step['conditions']):
-                    for block_index, block in enumerate(condition['criteria']):
-                        for criteria_index, criteria in enumerate(block):
-                            if criteria.get('ask_value'):
-                                pair = (criteria.get('value_name'), criteria.get('value'))
-                                loc = {
-                                    'algorithm': algorithm.id,
-                                    'step': step_index,
-                                    'condition': condition_index,
-                                    'block': block_index,
-                                    'criteria': criteria_index
-                                }
+                    search_condition(condition, step_index, condition_index)
 
-                                if pair in params:
-                                    params[pair]['locations'].append(loc)
-                                else:
-                                    params.update({
-                                        pair: {
-                                            'name': pair[0],
-                                            'value': pair[1],
-                                            'locations': [loc]
-                                        }
-                                    })
+            if algorithm.common_conditions:
+                for condition_index, condition in enumerate(algorithm.common_conditions):
+                    search_condition(condition, None, condition_index, True)
 
         return [value for key, value in params.items()]
 
@@ -692,11 +711,11 @@ class AlgorithmsManager(Manager):
             self.medsenger_api.send_message(contract.id, text=form.thanks_text, only_patient=True,
                                             action_deadline=time.time() + 60 * 60)
 
-    def hook(self, contract, category_name):
+    def hook(self, contract, category_names):
         patient = contract.patient
 
         algorithms = list(
-            filter(lambda algorithm: category_name in algorithm.categories.split('|'), patient.algorithms))
+            filter(lambda algorithm: any(map(lambda cat: cat in algorithm.categories.split('|'), category_names.split('|'))), patient.algorithms))
 
         for algorithm in algorithms:
             self.run(algorithm)
@@ -704,13 +723,25 @@ class AlgorithmsManager(Manager):
         return True
 
     def check_inits(self, algorithm, contract):
-        if 'init' in algorithm.categories.split('|') and algorithm.contract_id:
-            for step in algorithm.steps:
-                for condition in step['conditions']:
-                    if any(
-                        any(criteria['category'] == 'init' for criteria in block) for block in condition['criteria']):
-                        for action in condition['positive_actions']:
-                            self.run_action(action, contract.id, [], algorithm)
+        if algorithm.common_conditions:
+            for condition in algorithm.common_conditions:
+                if any(
+                    any(criteria['category'] == 'init' for criteria in block) for block in condition['criteria']):
+                    for action in condition['positive_actions']:
+                        self.run_action(action, contract.id, [], algorithm)
+
+        for step in algorithm.steps:
+            for condition in step['conditions']:
+                if any(
+                    any(criteria['category'] == 'init' for criteria in block) for block in condition['criteria']):
+                    for action in condition['positive_actions']:
+                        self.run_action(action, contract.id, [], algorithm)
+
+    def check_init_timeouts(self, algorithm, contract):
+        if algorithm.common_conditions:
+            for condition in algorithm.common_conditions:
+                if condition.get('timeout_on_init'):
+                    condition['last_fired'] = int(time.time())
 
     def create_or_edit(self, data, contract):
         try:
@@ -747,12 +778,6 @@ class AlgorithmsManager(Manager):
             else:
                 algorithm.detach_date = None
 
-            if not algorithm.current_step:
-                algorithm.current_step = data.get('steps')[0].get('uid')
-                self.change_step(algorithm, algorithm.initial_step)
-            else:
-                self.update_categories(algorithm)
-
             if data.get('is_template') and contract.is_admin:
                 algorithm.clinics = data.get('clinics')
                 algorithm.is_template = True
@@ -764,7 +789,18 @@ class AlgorithmsManager(Manager):
             if not algorithm_id:
                 self.db.session.add(algorithm)
 
+            self.__commit__()
+
             self.check_inits(algorithm, contract)
+            self.check_init_timeouts(algorithm, contract)
+
+            if not algorithm.current_step:
+                algorithm.current_step = data.get('steps')[0].get('uid')
+                self.change_step(algorithm, algorithm.initial_step)
+
+            self.update_categories(algorithm)
+
+
 
             self.__commit__()
             return algorithm

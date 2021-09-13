@@ -19,7 +19,7 @@
                                 </form-group-4-8>
                             </div>
                             <div>
-                                <button class="btn btn-outline-info btn-sm" @click="save_params()">Сохранить</button>
+                                <button class="btn btn-success btn-sm" @click="save_params()">Сохранить</button>
                             </div>
                             <div class="alert alert-success" v-if="errors.length && errors[0] == 'Сохранено'" style="margin-top: 15px">Данные успешно сохранены.</div>
                             <error-block v-else :errors="errors"></error-block>
@@ -81,6 +81,16 @@
                         }}</small>
 
                 </card>
+
+                <card v-for="(medicine, i) in patient.canceled_medicines" :key="medicine.id" :image="images.canceled_medicine"
+                      class="col-lg-3 col-md-4 text-muted">
+                    <h6>{{ medicine.title }}</h6>
+                    <small>{{ medicine.rules }}</small><br>
+                    <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
+                    <small>Назначено: {{ medicine.prescribed_at }}</small><br>
+                    <small>Отменено: {{ medicine.canceled_at }}</small><br>
+
+                </card>
             </div>
 
             <button class="btn btn-primary btn-sm" @click="create_medicine()">Назначить лекарство
@@ -90,6 +100,49 @@
                 шаблонами
             </button>
 
+            <hr>
+
+            <h5>Напоминания</h5>
+
+            <div class="row">
+                <card v-for="(reminder, i) in patient.reminders" :key="reminder.id" :image="images.reminder"
+                      class="col-lg-3 col-md-4">
+                    <h6>Для {{ reminder.type == 'both' ? 'всех' : (reminder.type == 'patient' ? 'пациента' : 'врача') }}</h6>
+                    <small> <div v-html="get_reminder_text(reminder)"></div> </small><br>
+                    <small><i>на {{ format_date(reminder.date) }}</i></small><br>
+                    <div v-if="reminder.contract_id == current_contract_id">
+                        <a href="#" @click="edit_reminder(reminder)">Редактировать</a>
+                        <a href="#" @click="delete_reminder(reminder)">Удалить</a>
+                    </div>
+                    <div v-else>
+                        <small>Добавлен в другом контракте.</small>
+                    </div>
+
+                    <small v-if="!empty(reminder.template_id)" class="text-muted">
+                        ID шаблона: {{ reminder.template_id }}</small>
+
+                </card>
+                <card v-for="(reminder, i) in patient.old_reminders" :key="reminder.id" :image="images.old_reminder"
+                      class="col-lg-3 col-md-4">
+                    <h6>Для {{ reminder.type == 'both' ? 'всех' : (reminder.type == 'patient' ? 'пациента' : 'врача') }}</h6>
+                    <small> <div v-html="get_reminder_text(reminder)"></div> </small><br>
+                    <small><i>на {{ format_date(reminder.date) }}</i></small><br>
+                    <div v-if="reminder.contract_id == current_contract_id">
+                        <a href="#" @click="edit_reminder(reminder)">Редактировать</a>
+                    </div>
+                    <div v-else>
+                        <small>Добавлен в другом контракте.</small>
+                    </div>
+
+                    <small v-if="!empty(reminder.template_id)" class="text-muted">
+                        ID шаблона: {{ reminder.template_id }}</small>
+
+                </card>
+            </div>
+
+            <button class="btn btn-primary btn-sm" @click="create_reminder()">Создать напоминание</button>
+
+            <button v-if="is_admin" class="btn btn-info btn-sm" @click="state = 'reminder_templates'">Управление шаблонами</button>
             <hr>
 
             <h5>Алгоритмы</h5>
@@ -145,19 +198,23 @@
                     вопросы.</p>
             </div>
 
-            <div class="row" v-for="(group, name) in group_by(templates.forms.map((form) => {
+            <input type="text" v-model="search_query" class="form-control form-control-sm" style="margin-bottom: 5px;" placeholder="Поиск...">
+
+            <div class="row" v-for="(group, name) in group_by(templates.forms.filter(show_form).map((form) => {
                 if (!form.template_category) form.template_category = 'Общее'
                 return form
             }), 'template_category')">
 
                 <div class="col-md-12"><h5>{{ name }}</h5></div>
 
-                <card v-for="(form, i) in group" v-if="is_admin || !form.clinics || form.clinics.includes(clinic_id)" :key="form.id" class="col-lg-3 col-md-4"
+                <card v-for="(form, i) in group" :key="form.id" class="col-lg-3 col-md-4"
                       :image="images.form">
                     <h6>{{ form.title }}</h6>
                     <small>{{ form.doctor_description }}</small><br>
                     <small><i>{{ tt_description(form.timetable) }}</i></small><br>
-                    <a href="#" @click="attach_form(form)">Подключить</a>
+                    <a href="#" v-if="!is_attached(form)" @click="attach_form(form)">Подключить</a>
+                    <small v-else class="text-muted">Опросник подключен</small>
+
                     <a href="#" v-if="is_admin" @click="edit_form(form)">Редактировать</a>
                     <a href="#" v-if="is_admin" @click="delete_form(form)">Удалить</a>
                     <a target="_blank" :href="preview_form_url(form)">Просмотр</a>
@@ -207,6 +264,38 @@
             </div>
 
             <button class="btn btn-primary btn-sm" @click="create_medicine()">Добавить</button>
+            <button class="btn btn-danger btn-sm" @click="state = 'main'">Назад</button>
+
+        </div>
+        <div v-if="state == 'reminder_templates'">
+            <h3>Шаблоны напоминаний</h3>
+
+            <div class="alert alert-info" role="alert">
+                <p>Выберите напоминание или создайте новое.</p>
+            </div>
+
+            <div class="row">
+                <card v-for="(reminder, i) in templates.reminders" :key="reminder.id" :image="images.reminder"
+                      class="col-lg-3 col-md-4">
+                    <h6>Для {{ reminder.type == 'both' ? 'всех' : (reminder.type == 'patient' ? 'пациента' : 'врача') }}</h6>
+                    <small>{{ reminder.type == 'doctor' ? reminder.doctor_text : reminder.patient_text }}</small><br>
+                    <small><i>на {{ format_date(reminder.date) }}</i></small><br>
+                    <a href="#" @click="attach_reminder(reminder)">Подключить</a>
+                    <a href="#" v-if="is_admin" @click="edit_reminder(reminder)">Редактировать</a>
+                    <a href="#" v-if="is_admin" @click="delete_reminder(reminder)">Удалить</a>
+
+                    <br>
+
+                    <small v-if="!empty(reminder.template_id)" class="text-muted">
+                        ID шаблона: {{ reminder.template_id }}</small>
+                </card>
+                <div v-if="!templates.medicines.length" class="col-md-12">
+                    <p style="margin-bottom: 15px;">Список шаблонов пуст.</p>
+                </div>
+
+            </div>
+
+            <button class="btn btn-primary btn-sm" @click="create_reminder()">Добавить</button>
             <button class="btn btn-danger btn-sm" @click="state = 'main'">Назад</button>
 
         </div>
@@ -262,6 +351,7 @@ import Card from "../common/Card";
 import AlgorithmSettings from "./AlgorithmSettings";
 import FormGroup48 from "../common/FormGroup-4-8";
 import ErrorBlock from "../common/ErrorBlock";
+import * as moment from "moment/moment";
 
 export default {
     name: "Dashboard",
@@ -280,10 +370,21 @@ export default {
             loaded: false,
             errors: [],
             lock_btn: false,
-            params: {}
+            params: {},
+            search_query: ''
         }
     },
     methods: {
+        format_date: function (date) {
+            return moment(date).format('DD.MM.YY в hh:mm')
+        },
+        get_reminder_text: function (reminder) {
+            if (reminder.type == 'doctor')
+                return reminder.doctor_text
+            if (reminder.type == 'both' && reminder.different_text)
+                return `<i>Пациенту:</i> ${reminder.patient_text}<br><i>Врачу:</i> ${reminder.doctor_text}`
+            return reminder.patient_text
+        },
         update_params: function () {
             this.loaded = false
             this.params = {
@@ -322,6 +423,14 @@ export default {
                     if (this.to_float(param.value) != this.params.edited[i]) {
                         param.locations.forEach(loc => {
                             let alg = this.patient.algorithms.filter(a => a.id == loc.algorithm)[0]
+
+                            if (loc.common) {
+                                alg.common_conditions[loc.condition]
+                                    .criteria[loc.block][loc.criteria].value = this.params.edited[i]
+                            } else {
+                                alg.steps[loc.step].conditions[loc.condition]
+                                    .criteria[loc.block][loc.criteria].value = this.params.edited[i]
+                            }
                             alg.steps[loc.step].conditions[loc.condition]
                                 .criteria[loc.block][loc.criteria].value = this.params.edited[i]
                             changed_algorithms.add(alg)
@@ -342,6 +451,9 @@ export default {
         },
         find_algorithm: function (id) {
             return this.templates.algorithms.filter(t => t.id == id)[0]
+        },
+        is_attached: function (form) {
+            return this.patient.forms.filter(f => f.template_id == form.id).length != 0
         },
         attach_form: function (form) {
             let attach = () => {
@@ -387,6 +499,9 @@ export default {
                 }
             })
         },
+        preview_form_url: function (form) {
+            return this.url('/preview_form/' + form.id)
+        },
         setup_algorithm: function (algorithm) {
             let setup = () => {
                 this.$modal.show('algorithm-settings', {algorithm: algorithm})
@@ -426,9 +541,6 @@ export default {
                 }
             )
         },
-        preview_form_url: function (form) {
-            return this.url('/form/' + form.id)
-        },
         process_delete_form_answer: function (response) {
             if (response.data.deleted_id) {
                 this.patient.forms = this.patient.forms.filter(f => f.id != response.data.deleted_id)
@@ -444,7 +556,7 @@ export default {
         delete_medicine: function (medicine) {
             this.$confirm(
                 {
-                    message: `Вы уверены, что хотите удалить препарат ` + medicine.title + `?`,
+                    message: `Вы уверены, что хотите отменить препарат ` + medicine.title + `?`,
                     button: {
                         no: 'Нет',
                         yes: 'Да, удалить'
@@ -456,6 +568,37 @@ export default {
                     }
                 }
             )
+        },
+        attach_reminder: function (reminder) {
+            Event.fire('attach-reminder', reminder)
+        },
+        create_reminder: function () {
+            Event.fire('navigate-to-create-reminder-page')
+        },
+        edit_reminder: function (reminder) {
+            Event.fire('edit-reminder', reminder)
+        },
+        delete_reminder: function (reminder) {
+            this.$confirm(
+                {
+                    message: `Вы уверены, что хотите удалить напоминание?`,
+                    button: {
+                        no: 'Нет',
+                        yes: 'Да, удалить'
+                    },
+                    callback: confirm => {
+                        if (confirm) {
+                            this.axios.post(this.url('/api/settings/delete_reminder'), reminder).then(this.process_delete_reminder_answer);
+                        }
+                    }
+                }
+            )
+        },
+        process_delete_reminder_answer: function (response) {
+            if (response.data.deleted_id) {
+                this.patient.reminders = this.patient.reminders.filter(r => r.id != response.data.deleted_id)
+                this.templates.reminders = this.templates.reminders.filter(r => r.id != response.data.deleted_id)
+            }
         },
         create_algorithm: function () {
             Event.fire('navigate-to-create-algorithm-page')
@@ -481,6 +624,12 @@ export default {
         },
         process_delete_medicine_answer: function (response) {
             if (response.data.deleted_id) {
+                let medicine = this.patient.medicines.find(m => m.id == response.data.deleted_id)
+                if (medicine) {
+                    medicine.canceled_at = moment(new Date()).format("DD.MM.YYYY")
+                    this.patient.canceled_medicines.push(medicine);
+                }
+
                 this.patient.medicines = this.patient.medicines.filter(m => m.id != response.data.deleted_id)
                 this.templates.medicines = this.templates.medicines.filter(m => m.id != response.data.deleted_id)
             }
@@ -491,6 +640,17 @@ export default {
                 this.templates.algorithms = this.templates.algorithms.filter(m => m.id != response.data.deleted_id)
             }
         },
+        show_form: function (form) {
+            if (!form.title.toLowerCase().includes(this.search_query.toLowerCase())) return false
+            if (this.is_admin) return true
+            if (form.clinics) {
+                return form.clinics.includes(this.clinic_id);
+            }
+            if (form.exclude_clinics) {
+                return !form.exclude_clinics.includes(this.clinic_id);
+            }
+            return true;
+        }
     },
     mounted() {
         Event.listen('dashboard-to-main', () => {
@@ -523,5 +683,7 @@ p {
 h5 {
     margin-bottom: 10px;
     margin-top: 10px;
+    font-size: 1.15rem;
 }
+
 </style>

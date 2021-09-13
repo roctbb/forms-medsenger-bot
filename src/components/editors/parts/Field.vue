@@ -50,7 +50,7 @@
         </form-group48>
         <hr>
 
-        <div v-if="field.type == 'integer'">
+        <div v-if="field.type == 'integer' && is_admin">
             <div class="form-group row">
                 <div class="col-md-4">
                     <strong>Ограничения</strong>
@@ -100,6 +100,16 @@
                                              v-model="field.params.max"/>
                 </div>
             </div>
+        </div>
+
+        <div v-if="field.type == 'file'">
+            <form-group48 title="Отправить файл врачу">
+                <input type="checkbox" class="form-check" v-model="field.params.send_to_doctor">
+            </form-group48>
+
+            <form-group48 title="Пояснение в медкарте">
+                <input type="text" class="form-control form-control-sm" v-model="field.category_value"/>
+            </form-group48>
         </div>
 
         <div v-if="field.type != 'radio' && is_admin">

@@ -5,19 +5,27 @@ from managers.AlgorithmsManager import AlgorithmsManager
 from managers.FormManager import FormManager
 from managers.Manager import Manager
 from managers.MedicineManager import MedicineManager
-from models import Contract, Patient
+from models import Contract, Patient, Medicine, Reminder
 from threading import Thread
 
 
 class TimetableManager(Manager):
-    def __init__(self, medicine_manager, form_manager, *args):
+    def __init__(self, medicine_manager, form_manager, reminder_manager, *args):
         super(TimetableManager, self).__init__(*args)
         self.medicine_manager = medicine_manager
         self.form_manager = form_manager
+        self.reminder_manager = reminder_manager
 
     def should_run(self, object, today=False):
         now = datetime.now()
+
+        if isinstance(object, Reminder):
+            return object.reminder_date == now.strftime('%d.%m.%Y %H:%M')
+
         timetable = object.timetable
+
+        if isinstance(object, Medicine) and object.canceled_at != None:
+            return False
 
         if timetable.get('mode') == 'manual':
             return False
@@ -126,12 +134,16 @@ class TimetableManager(Manager):
 
             medicines_groups = list(map(lambda x: x.medicines, contracts))
             forms_groups = list(map(lambda x: x.forms, contracts))
+            reminders_groups = list(map(lambda x: x.reminders, contracts))
 
             for medicines in medicines_groups:
                 self.run_if_should(medicines, self.medicine_manager)
 
             for forms in forms_groups:
                 self.run_if_should(forms, self.form_manager)
+
+            for reminders in reminders_groups:
+                self.run_if_should(reminders, self.reminder_manager)
 
     def check_forgotten(self, app):
         with app.app_context():

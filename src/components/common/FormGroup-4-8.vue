@@ -6,6 +6,9 @@
         <div class="col-md-8">
             <slot></slot>
             <span class="text-muted" v-if="description">{{ description }}</span>
+            <div v-if="errors">
+                <span style="color: red;">{{ errors }}</span>
+            </div>
         </div>
     </div>
 </template>
@@ -13,7 +16,7 @@
 <script>
 export default {
     name: "FormGroup-4-8",
-    props: ['title', 'description', 'required']
+    props: ['title', 'description', 'required', 'errors']
 }
 </script>
 

@@ -1,8 +1,13 @@
 <template>
     <div>
-        <div style="margin-left: 10px;">
-            <a class="btn btn-outline-info btn-sm" @click="select_graph()">Назад</a>
-        </div>
+            <a class="btn btn-outline-info btn-sm" @click="select_graph()" style="margin: 10px">Назад</a>
+            <div :class="!mobile ? 'row' : ''" style="margin-left: 10px">
+                <date-picker range v-model="dates_range" style="margin-right: 10px" :style="mobile ? 'margin-bottom: 10px' : ''"></date-picker>
+                <a class="btn btn-success btn-sm" @click="load_data()">Загрузить</a>
+            </div>
+
+        <hr>
+        <error-block :errors="errors" v-if="errors.length"></error-block>
 
         <div v-if="loaded">
             <highcharts :constructor-type="'stockChart'" :options="options"></highcharts>
@@ -12,28 +17,52 @@
                 <label for="show_legend">Показать легенду</label>
             </div>
 
-            <div class="container center" v-if="this.statistics.length && this.show_table()">
-                <h5>Значения за отображенный период</h5>
-                <table class="table table-hover">
+            <div class="container center" v-if="this.statistics.length">
+                <h5 class="text-center">Значения параметров за выбранный период</h5>
+
+                <table class="table table-hover table-striped" v-if="!mobile">
                     <thead>
                     <tr>
                         <th scope="col" class="bg-info text-light">Параметр</th>
-                        <th scope="col" class="bg-info text-light">В среднем</th>
-                        <th scope="col" class="bg-info text-light">Минимум</th>
-                        <th scope="col" class="bg-info text-light">Максимум</th>
+                        <th scope="col" class="bg-info text-light">Среднее</th>
+                        <th scope="col" class="bg-info text-light">Мин</th>
+                        <th scope="col" class="bg-info text-light">Макс</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr v-for="stat in this.statistics">
-                        <th scope="row">{{ stat.name }}</th>
-                        <td>{{ stat.avg }}</td>
-                        <td>{{ stat.min }}</td>
-                        <td>{{ stat.max }}</td>
+                        <th scope="row" style="text-align: left;">{{ stat.name }}</th>
+                        <td>{{ stat.avg.toFixed(2) * 1 }}</td>
+                        <td>{{ stat.min.toFixed(2) * 1 }}</td>
+                        <td>{{ stat.max.toFixed(2) * 1 }}</td>
                     </tr>
                     </tbody>
                 </table>
+
+                <div v-else v-for="stat in this.statistics">
+                    <hr>
+                    <h6 class="text-center">{{ stat.name }}</h6>
+                    <table class="table table-hover table-striped">
+                        <thead>
+                        <tr>
+                            <th scope="col" class="bg-info text-light">Среднее</th>
+                            <th scope="col" class="bg-info text-light">Мин</th>
+                            <th scope="col" class="bg-info text-light">Макс</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>{{ stat.avg.toFixed(2) * 1 }}</td>
+                            <td>{{ stat.min.toFixed(2) * 1 }}</td>
+                            <td>{{ stat.max.toFixed(2) * 1 }}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
         </div>
+        <loading v-else-if="!errors.length"></loading>
         <br>
     </div>
 </template>
@@ -43,34 +72,55 @@ import {Chart} from 'highcharts-vue'
 import exporting from "highcharts/modules/exporting";
 import Highcharts from "highcharts";
 import stockInit from 'highcharts/modules/stock'
+import DatePicker from 'vue2-datepicker';
+import 'vue2-datepicker/index.css';
+import 'vue2-datepicker/locale/ru';
+import * as moment from "moment/moment";
+import ErrorBlock from "../common/ErrorBlock";
+import Loading from "../Loading";
+import boost from "highcharts/modules/boost";
 
 stockInit(Highcharts)
+boost(Highcharts)
 
 export default {
     name: "GraphPresenter",
-    components: {highcharts: Chart},
+    components: {Loading, ErrorBlock, highcharts: Chart, DatePicker},
     props: ['patient'],
     data() {
         return {
             group: {},
             data: [],
+            errors: [],
             options: {},
             statistics: [],
             loaded: false,
+            dates_range: []
         }
     },
     methods: {
-        show_table: function () {
-            return window.innerWidth >= window.innerHeight
-        },
         load_data: function () {
-            this.axios.post(this.url('/api/graph/group'), this.group).then(this.process_load_answer);
+            this.loaded = false
+            this.errors = []
+            let data = {
+                group: this.group,
+                dates: {
+                    start: this.dates_range[0].getTime() / 1000,
+                    end: this.dates_range[1].getTime() / 1000 + 24 * 60 * 60 - 1,
+                }
+            }
+
+            if (data.dates.start > data.dates.end) {
+                this.errors = ['Выбран некорректный период']
+                return
+            }
+            this.axios.post(this.url('/api/graph/group'), data).then(this.process_load_answer);
         },
         process_load_answer: function (response) {
             this.data = response.data
-            let today = new Date()
-            today.setHours(23,59,59)
-            let now = +today + this.offset
+            console.log('data', this.data)
+            let start = this.dates_range[0].getTime()
+            let end = this.dates_range[1].getTime() + 24 * 60 * 60 * 1000 - 1
 
             this.options = {
                 colors: ['#058DC7', '#50B432', '#aa27ce', '#fcff00',
@@ -116,64 +166,96 @@ export default {
 
                 chart: {
                     type: 'line',
+                    boostThreshold: 1000,
+                    turboThreshold: 0,
+                    animation: false,
                     zoomType: 'x',
                     backgroundColor: "#f8f8fb",
                     height: window.innerHeight,
                     width: window.innerWidth,
                     events: {
                         render: function (event) {
-                            let isInside = (point) => {
-                                const min = event.target.axes[0].min
-                                const max = event.target.axes[0].max
-                                return point.x >= min && point.x <= max
-                            }
-
                             let stats = []
 
+                            let binary_search = function (arr, value, l, r) {
+                                let mid = Math.floor((r - l) / 2) + l
+
+                                if (arr[mid] == value)
+                                    return mid;
+                                if (r - l == 0)
+                                    return r + (arr[r] < value ? 1 : 0);
+                                if (arr[mid] < value) {
+                                    l = (mid + 1) > r ? r : (mid + 1)
+                                    return binary_search(arr, value, l, r);
+                                }
+                                r = (mid - 1) < l ? l : (mid - 1)
+                                return binary_search(arr, value, l, r);
+                            }
+
+                            let find_visible_data = function (data) {
+                                const start = event.target.axes[0].min
+                                const end = event.target.axes[0].max
+
+                                let timestamps = data.map(point => point.x)
+
+                                let start_index = binary_search(timestamps, start, 0, data.length - 1)
+                                let end_index = binary_search(timestamps, end, 0, data.length - 1)
+
+                                return data.slice(start_index, end_index).map(point => point.y)
+                            }
+
                             this.series.filter(series => series.userOptions.yAxis == 0).forEach(series => {
-                                let data = series.data.filter(point => isInside(point)).map(point => point.y);
+                                let data = find_visible_data(series.data)
 
-                                // calculate statistics for visible points
-                                const max = Math.max.apply(null, data)
-                                const min = Math.min.apply(null, data)
-                                const average = (data.reduce((a, b) => a + b, 0) / data.length).toFixed(1)
+                                if (data.length) {
+                                    // calculate statistics for visible points
+                                    const max = data.reduce((a, b) => Math.max(a, b))
+                                    const min = data.reduce((a, b) => Math.min(a, b))
+                                    const average = (data.reduce((a, b) => a + b, 0) / data.length).toFixed(2) * 1
 
-                                const legendItem = series.legendItem;
-
-                                // construct the legend string
-                                const text = series.name + '<br><strong style="color: dimgrey">min: ' + min +
-                                    ' max: ' + max +
-                                    '<br>avg: ' + average + '</strong>';
-
-                                // set the constructed text for the legend
-                                legendItem.attr({
-                                    text: data.length > 0 ? text : (series.name + '<br><strong style="color: dimgrey">Нет данных</strong>')
-                                });
-                                if (data.length > 0) {
-                                    stats.push({
-                                        name: series.name,
-                                        avg: average,
-                                        min: min,
-                                        max: max
-                                    })
+                                    if (data.length > 0) {
+                                        stats.push({
+                                            name: series.name,
+                                            code: series.options.graph_code,
+                                            data: data,
+                                            avg: average,
+                                            min: min,
+                                            max: max
+                                        })
+                                    }
                                 }
                             });
 
+                            let systolic_pressure = stats.find(st => st.code == 'systolic_pressure')
+                            let diastolic_pressure = stats.find(st => st.code == 'diastolic_pressure')
+
+                            if (systolic_pressure != null && diastolic_pressure != null) {
+                                let pp_data = []
+                                let map_data = []
+                                systolic_pressure.data.forEach((s, index) => {
+                                    let d = diastolic_pressure.data[index]
+                                    map_data.push((s - d) / 3 + d)
+                                    pp_data.push(s - d)
+                                })
+
+                                stats.push({
+                                    name: 'Среднее давление (MAP)',
+                                    code: 'map',
+                                    avg: map_data.reduce((a, b) => a + b, 0) / map_data.length,
+                                    min: map_data.reduce((a, b) => Math.min(a, b)),
+                                    max: map_data.reduce((a, b) => Math.max(a, b))
+                                })
+
+                                stats.push({
+                                    name: 'Пульсовое давление',
+                                    code: 'pulse_pressure',
+                                    avg: pp_data.reduce((a, b) => a + b, 0) / pp_data.length,
+                                    min: pp_data.reduce((a, b) => Math.min(a, b)),
+                                    max: pp_data.reduce((a, b) => Math.max(a, b))
+                                })
+                            }
+
                             Event.fire('refresh-stats', stats)
-
-                            this.series.filter(series => series.userOptions.yAxis == 1).forEach(series => {
-                                let data = series.data.filter(point => isInside(point));
-
-                                const legendItem = series.legendItem;
-                                // construct the legend string
-                                const text = series.name + '<br><strong style="color: dimgrey">' +
-                                    (data.length > 0 ? ('Количество: ' + data.length) : 'Нет данных') + '</strong>';
-
-                                // set the constructed text for the legend
-                                legendItem.attr({
-                                    text: text
-                                });
-                            });
                         }
                     }
                 },
@@ -191,7 +273,8 @@ export default {
                     minorTickLength: 0,
                     minorTickInterval: 24 * 3600 * 1000,
                     plotLines: [],
-                    max: now + 1000 * 3600 * 10,
+                    min: start,
+                    max: end,
                     ordinal: false,
                     dateTimeLabelFormats: {
                         day: '%d.%m'
@@ -238,18 +321,16 @@ export default {
                     },
                     series: {
                         marker: {
-                            lineWidth: 2,
+                            lineWidth: 1,
                             lineColor: null,
-                        },
-
+                        }
                     }
                 },
                 legend: {
                     enabled: true,
                     itemDistance: 70,
-                    maxHeight: 100,
                     labelFormatter: function () {
-                        return this.name + '<br>.<br>.'
+                        return this.name
                     }
                 },
                 tooltip: {
@@ -283,13 +364,14 @@ export default {
                     resetZoom: 'Весь график'
                 }
             });
-
             this.data.filter((graph) => graph.category.type != 'string').forEach((graph) => {
                 this.options.series.push({
                     name: graph.category.description,
+                    graph_code: graph.category.name,
                     yAxis: 0,
                     showInNavigator: true,
                     data: graph.values.map((value) => {
+
                         return {
                             x: (value.timestamp + this.offset) * 1000,
                             y: value.value,
@@ -312,19 +394,30 @@ export default {
                         inactive: {
                             opacity: 1,
                         }
+                    },
+                    dataGrouping: {
+                        enabled: false
                     }
                 })
             })
+
 
             let y = -5;
 
             let medicines = {}
             this.data.filter((graph) => graph.category.name == 'medicine').forEach((graph) => {
                 graph.values.forEach((medicine) => {
-                    if (medicine.value in medicines)
-                        medicines[medicine.value].push(medicine.timestamp)
-                    else
-                        medicines[medicine.value] = [medicine.timestamp]
+
+                    if (medicine.value in medicines) {
+                        medicines[medicine.value].push({
+                            timestamp: medicine.timestamp,
+                            dose: !medicine.params || medicine.params.dose == null ? '' : ` (${medicine.params.dose})`
+                        })
+                    } else
+                        medicines[medicine.value] = [{
+                            timestamp: medicine.timestamp,
+                            dose: !medicine.params || medicine.params.dose == null ? '' : ` (${medicine.params.dose})`
+                        }]
                 })
             });
 
@@ -332,17 +425,17 @@ export default {
                 this.options.series.push({
                     yAxis: 1,
                     name: medicine,
-                    data: values.map((timestamp) => {
+                    data: values.map((value) => {
                         return {
                             dataLabels: {
                                 enabled: false,
                             },
-                            x: (timestamp + this.offset) * 1000,
+                            x: (value.timestamp + this.offset) * 1000,
                             y: y,
                             comment: this.get_comment({
-                                value: medicine,
-                                timestamp: timestamp
-                            },  'Прием лекарства'),
+                                value: medicine + value.dose,
+                                timestamp: value.timestamp
+                            }, `Прием лекарства`),
                         }
                     }).reverse(),
                     lineWidth: 0,
@@ -394,6 +487,20 @@ export default {
                 }
             });
 
+            let group_series = this.options.series.filter(s => s.yAxis == 0)
+            if (group_series.map(s => s.data.length).reduce((a, b) => a + b) > 1000) {
+                this.errors = ['За данный период в медицинской карте присутствует слишком большое количество записей (> 1000). ' +
+                'Чтобы увидеть комментарии к точкам и симптомы, загрузите период с меньшим количеством записей.']
+                group_series.forEach(s => {
+                    s.data = s.data.map(d => [d.x, d.y])
+                })
+                this.options.plotOptions.line.dataLabels.enabled = false
+            }
+
+            if (this.options.chart.height > this.options.chart.width && this.options.series.length > 2) {
+                this.options.chart.height += 50 * (this.options.series.length - 2)
+            }
+
             if (this.group.categories.includes('glukose')) {
                 this.set_bands()
             }
@@ -425,7 +532,7 @@ export default {
         },
         get_comment: function (point, category) {
 
-            let comment =  "<strong>" + this.formatTime(new Date((point.timestamp + this.offset) * 1000))+ " </strong>"
+            let comment = "<strong>" + this.formatTime(new Date((point.timestamp) * 1000)) + " </strong>"
                 + category + ': ' + point.value
             if (point.additions) {
                 point.additions.forEach((value) => {
@@ -487,12 +594,15 @@ export default {
                 this.options.yAxis[0].plotBands[3].from = max
                 this.options.yAxis[0].plotBands[4].to = max
             }
-            console.log(this.options.yAxis[0].plotBands)
         }
     },
     computed: {
         offset() {
             return -1 * new Date().getTimezoneOffset() * 60
+            //return 1
+        },
+        mobile() {
+            return window.innerWidth < window.innerHeight
         }
     },
     created() {
@@ -503,6 +613,7 @@ export default {
         }
 
         Event.listen('load-graph', (group) => {
+            this.dates_range = [new Date(moment().add(-14, 'days').format('YYYY-MM-DD')), new Date(moment().format('YYYY-MM-DD'))]
             this.group = group
             this.load_data()
         });
@@ -513,9 +624,12 @@ export default {
 
         Event.listen('window-resized', () => {
             if (this.options.chart != null) {
-                console.log(this.options.chart)
                 this.options.chart.height = window.innerHeight
                 this.options.chart.width = window.innerWidth
+
+                if (this.options.chart.height > this.options.chart.width && this.options.series.length > 2) {
+                    this.options.chart.height += 50 * (this.options.series.length - 2)
+                }
             }
         })
     }
@@ -524,6 +638,9 @@ export default {
 
 <style scoped>
 .table {
-    font-size: small;
+    table-layout: fixed;
+    width: 100%;
+    text-align: center;
+    font-size: 0.8rem;
 }
 </style>

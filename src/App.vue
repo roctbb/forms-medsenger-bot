@@ -1,21 +1,23 @@
 <template>
-    <div>
+    <div style="padding-bottom: 15px;">
         <vue-confirm-dialog></vue-confirm-dialog>
         <loading v-if="state == 'loading'"/>
         <div v-else>
-            <div v-if="mode == 'settings'">
+            <div v-if="mode == 'settings' || mode == 'medicine-manager'">
                 <dashboard-header :patient="patient"/>
-
                 <div class="container" style="margin-top: 15px;">
                     <dashboard :patient="patient" :templates="templates" v-show="state == 'dashboard'"/>
                     <form-editor v-show="state == 'form-manager'"/>
                     <medicine-editor v-show="state == 'medicine-manager'"/>
+                    <reminder-editor v-show="state == 'reminder-manager'" />
                     <algorithm-editor v-show="state == 'algorithm-manager'"/>
+                    <action-done v-if="state == 'done'"></action-done>
                 </div>
             </div>
-            <div v-if="mode == 'form' || mode == 'done' || mode == 'graph' || mode == 'confirm-medicine'">
+            <div v-if="mode == 'form' || mode == 'done' || mode == 'graph' || mode == 'confirm-medicine' || mode == 'verify-dose'">
                 <div class="container" style="margin-top: 15px;">
                     <confirm-medicine-presenter :data="patient.medicines" v-if="state == 'confirm-medicine'"/>
+                    <dose-verifier :data="medicine" v-if="state == 'verify-dose'"/>
                     <form-presenter :data="form" v-if="state == 'form-presenter'"/>
                     <graph-category-chooser :data="available_categories" v-if="state == 'graph-category-chooser'"/>
                     <action-done v-if="state == 'done'"></action-done>
@@ -46,12 +48,16 @@ import GraphPresenter from "./components/presenters/GraphPresenter";
 import LoadError from "./components/presenters/LoadError";
 import ConfirmMedicinePresenter from "./components/presenters/ConfirmMedicinePresenter";
 import HeatmapPresenter from "./components/presenters/HeatmapPresenter";
+import DoseVerifier from "./components/presenters/DoseVerifier";
+import ReminderEditor from "./components/editors/ReminderEditor";
 
 
 
 export default {
     name: 'app',
     components: {
+        ReminderEditor,
+        DoseVerifier,
         HeatmapPresenter,
         ConfirmMedicinePresenter,
         LoadError,
@@ -64,6 +70,7 @@ export default {
             state: "loading",
             patient: {},
             form: {},
+            medicine: {},
             mode: "",
             object_id: -1,
             templates: {
@@ -77,6 +84,7 @@ export default {
         console.log("running created");
         Event.listen('navigate-to-create-form-page', () => this.state = 'form-manager');
         Event.listen('navigate-to-create-medicine-page', () => this.state = 'medicine-manager');
+        Event.listen('navigate-to-create-reminder-page', () => this.state = 'reminder-manager');
         Event.listen('navigate-to-create-algorithm-page', () => this.state = 'algorithm-manager');
         Event.listen('back-to-dashboard', () => this.state = 'dashboard');
         Event.listen('home', () => this.state = 'dashboard');
@@ -92,14 +100,25 @@ export default {
             }
 
         });
-        Event.listen('medicine-created', (medicine) => {
+        Event.listen('medicine-created', (data) => {
             this.state = 'dashboard'
-            if (!medicine.is_template) {
+            if (!data.medicine.is_template) {
                 Event.fire('dashboard-to-main');
-                this.patient.medicines.push(medicine)
+                this.patient.medicines.push(data.medicine)
             } else {
-                this.templates.medicines.push(medicine)
+                this.templates.medicines.push(data.medicine)
             }
+            if (data.close_window) this.state = 'done'
+        });
+        Event.listen('reminder-created', (data) => {
+            this.state = 'dashboard'
+            if (!data.reminder.is_template) {
+                Event.fire('dashboard-to-main');
+                this.patient.reminders.push(data.reminder)
+            } else {
+                this.templates.reminders.push(data.reminder)
+            }
+            if (data.close_window) this.state = 'done'
         });
         Event.listen('algorithm-created', (algorithm) => {
             this.state = 'dashboard'
@@ -118,6 +137,10 @@ export default {
             this.state = 'medicine-manager'
             Event.fire('navigate-to-edit-medicine-page', medicine);
         });
+        Event.listen('edit-reminder', (reminder) => {
+            this.state = 'reminder-manager'
+            Event.fire('navigate-to-edit-reminder-page', reminder);
+        });
         Event.listen('edit-algorithm', (algorithm) => {
             this.state = 'algorithm-manager'
             Event.fire('navigate-to-edit-algorithm-page', algorithm);
@@ -131,6 +154,10 @@ export default {
         Event.listen('select-graph', () => {
             this.state = 'graph-category-chooser'
         });
+        Event.listen('verify-dose', (medicine) => {
+            this.medicine = medicine
+            this.state = 'verify-dose'
+        })
     },
     methods: {
         load: function () {
@@ -149,6 +176,12 @@ export default {
                 this.axios.get(this.url('/api/form/' + this.object_id)).then(this.process_load_answer).catch(this.process_load_error);
             }
             if (this.mode == 'confirm-medicine') {
+                this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
+            }
+            if (this.mode == 'verify-dose') {
+                this.axios.get(this.url('/api/medicine/' + this.object_id)).then(this.process_load_answer);
+            }
+            if (this.mode == 'medicine-manager') {
                 this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
             }
             if (this.mode == 'graph') {
@@ -172,6 +205,16 @@ export default {
             if (this.mode == 'confirm-medicine') {
                 this.patient = response.data;
                 this.state = 'confirm-medicine'
+            }
+
+            if (this.mode == 'verify-dose') {
+                this.medicine = response.data
+                this.state = 'verify-dose'
+            }
+
+            if (this.mode == 'medicine-manager') {
+                this.patient = response.data;
+                Event.fire('navigate-to-create-medicine-page')
             }
 
             if (this.mode == 'graph') {

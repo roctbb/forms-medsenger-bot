@@ -39,15 +39,22 @@ class Patient(db.Model):
     contracts = db.relationship('Contract', backref=backref('patient', uselist=False), lazy=True)
     forms = db.relationship('Form', backref=backref('patient', uselist=False), lazy=True)
     medicines = db.relationship('Medicine', backref=backref('patient', uselist=False), lazy=True)
+    reminders = db.relationship('Reminder', backref=backref('patient', uselist=False), lazy=True)
     algorithms = db.relationship('Algorithm', backref=backref('patient', uselist=False), lazy=True)
 
     def as_dict(self):
+        now = datetime.now()
         return {
             "id": self.id,
             "month_compliance": self.count_month_compliance(),
             "contracts": [contract.as_dict() for contract in self.contracts],
             "forms": [form.as_dict() for form in self.forms],
-            "medicines": [medicine.as_dict() for medicine in self.medicines],
+            "medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is None],
+            "canceled_medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is not None],
+            "reminders": sorted([reminder.as_dict() for reminder in self.reminders
+                                 if datetime.strptime(reminder.reminder_date, '%d.%m.%Y %H:%M') >= now], key=lambda k: k["date"]),
+            "old_reminders": sorted([reminder.as_dict() for reminder in self.reminders
+                                 if datetime.strptime(reminder.reminder_date, '%d.%m.%Y %H:%M') < now], key=lambda k: k["date"], reverse=True),
             "algorithms": [algorithm.as_dict() for algorithm in self.algorithms]
         }
 
@@ -79,6 +86,7 @@ class Contract(db.Model):
 
     forms = db.relationship('Form', backref=backref('contract', uselist=False), lazy=True)
     medicines = db.relationship('Medicine', backref=backref('contract', uselist=False), lazy=True)
+    reminders = db.relationship('Reminder', backref=backref('contract', uselist=False), lazy=True)
     algorithms = db.relationship('Algorithm', backref=backref('contract', uselist=False), lazy=True)
     tasks = db.Column(db.JSON, nullable=True)
 
@@ -103,8 +111,10 @@ class Medicine(db.Model, Compliance):
 
     title = db.Column(db.String(255), nullable=True)
     rules = db.Column(db.Text, nullable=True)
+    dose = db.Column(db.Text, nullable=True)
     timetable = db.Column(db.JSON, nullable=True)
     is_template = db.Column(db.Boolean, default=False)
+    verify_dose = db.Column(db.Boolean, default=False)
     template_id = db.Column(db.Integer, db.ForeignKey('medicine.id', ondelete="set null"), nullable=True)
 
     last_sent = db.Column(db.DateTime(), nullable=True)
@@ -112,6 +122,9 @@ class Medicine(db.Model, Compliance):
     warning_days = db.Column(db.Integer, default=0)
     warning_timestamp = db.Column(db.Integer, default=0)
     filled_timestamp = db.Column(db.Integer, default=0)
+
+    prescribed_at = db.Column(db.DateTime, server_default=db.func.now())
+    canceled_at = db.Column(db.DateTime, nullable=True)
 
     def as_dict(self):
         if self.contract_id:
@@ -125,10 +138,14 @@ class Medicine(db.Model, Compliance):
             "patient_id": self.patient_id,
             "title": self.title,
             "rules": self.rules,
+            "dose": self.dose,
             "timetable": self.timetable,
             "is_template": self.is_template,
+            "verify_dose": self.verify_dose,
             "template_id": self.template_id,
             "warning_days": self.warning_days,
+            "prescribed_at": self.prescribed_at.strftime("%d.%m.%Y"),
+            "canceled_at": self.canceled_at.strftime("%d.%m.%Y") if self.canceled_at else None,
             "sent": sent,
             "done": done
         }
@@ -141,13 +158,29 @@ class Medicine(db.Model, Compliance):
         else:
             return '{} раз(а) в месяц'.format(len(self.timetable['points']))
 
+    def get_description(self, tt=False):
+        medicine_description = "«{}»".format(self.title)
+        print(self.dose)
+        if self.dose is not None:
+            medicine_description += " {}".format(self.dose)
+        if self.rules and not tt:
+            medicine_description += " ({})".format(self.rules)
+        elif self.rules:
+            medicine_description += " ({} / {})".format(self.rules, self.timetable_description())
+        elif tt:
+            medicine_description += '({})'.format(self.timetable_description())
+
+        return medicine_description
+
     def clone(self):
         new_medicine = Medicine()
         new_medicine.title = self.title
         new_medicine.rules = self.rules
+        new_medicine.dose = self.dose
 
         new_medicine.timetable = self.timetable
         new_medicine.warning_days = self.warning_days
+        new_medicine.prescribed_at = datetime.now()
 
         if self.is_template:
             new_medicine.template_id = self.id
@@ -182,6 +215,7 @@ class Form(db.Model, Compliance):
 
     algorithm_id = db.Column(db.Integer, db.ForeignKey('algorithm.id', ondelete="set null"), nullable=True)
     clinics = db.Column(db.JSON, nullable=True)
+    exclude_clinics = db.Column(db.JSON, nullable=True)
 
     last_sent = db.Column(db.DateTime(), nullable=True)
 
@@ -219,6 +253,7 @@ class Form(db.Model, Compliance):
             "template_category": self.template_category,
             "instant_report": self.instant_report,
             "clinics": self.clinics,
+            "exclude_clinics": self.exclude_clinics,
             "sent": sent,
             "done": done
         }
@@ -310,7 +345,6 @@ class Algorithm(db.Model):
         new_algorithm.categories = self.categories
         new_algorithm.attached_form = self.attached_form
         new_algorithm.initial_step = self.initial_step
-        new_algorithm.current_step = self.current_step
         new_algorithm.attach_date = attach
         new_algorithm.detach_date = detach
 
@@ -339,3 +373,52 @@ class ActionRequest(db.Model):
 
     sent = db.Column(db.DateTime(), default=db.func.current_timestamp())
     done = db.Column(db.DateTime(), nullable=True)
+
+
+class Reminder(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=True)
+    contract_id = db.Column(db.Integer, db.ForeignKey('contract.id', ondelete="CASCADE"), nullable=True)
+
+    type = db.Column(db.String(7), nullable=False)
+    different_text = db.Column(db.Boolean, default=False)
+    doctor_text = db.Column(db.Text, nullable=True)
+    patient_text = db.Column(db.Text, nullable=True)
+    date = db.Column(db.DateTime(), nullable=True)
+    reminder_date = db.Column(db.Text, nullable=True)
+
+    is_template = db.Column(db.Boolean, default=False)
+    template_id = db.Column(db.Integer, db.ForeignKey('reminder.id', ondelete="set null"), nullable=True)
+
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "contract_id": self.contract_id,
+            "patient_id": self.patient_id,
+            "type": self.type,
+            "different_text": self.different_text,
+            "doctor_text": self.doctor_text,
+            "patient_text": self.patient_text,
+            "date": self.date,
+            "reminder_date": self.reminder_date,
+            "is_template": self.is_template,
+            "template_id": self.template_id,
+        }
+
+    def clone(self):
+        new_reminder = Reminder()
+        new_reminder.type = self.type
+
+        new_reminder.different_text = self.different_text
+        new_reminder.doctor_text = self.doctor_text
+        new_reminder.patient_text = self.patient_text
+
+        new_reminder.date = self.date
+        new_reminder.reminder_date = self.reminder_date
+
+        if self.is_template:
+            new_reminder.template_id = self.id
+        else:
+            new_reminder.template_id = self.template_id
+
+        return new_reminder

@@ -10,10 +10,16 @@
                            v-model="medicine.title"/>
                 </form-group48>
 
-                <form-group48 title="Доза и правила приема">
-                    <textarea class="form-control form-control-sm"
-                              :class="this.save_clicked && !medicine.rules ? 'is-invalid' : ''"
-                              v-model="medicine.rules"></textarea>
+                <form-group48 title="Дозировка">
+                    <textarea class="form-control form-control-sm" v-model="medicine.dose"></textarea>
+                </form-group48>
+
+                <form-group48 title="Правила приема">
+                    <textarea class="form-control form-control-sm" v-model="medicine.rules"></textarea>
+                </form-group48>
+
+                <form-group48 title="Разрешить пациенту регулировать дозировку">
+                    <input class="form-check" type="checkbox" v-model="medicine.verify_dose"/>
                 </form-group48>
 
                 <form-group48 title="Уведомить, если пациент не заполнят опросник">
@@ -31,7 +37,7 @@
             <timetable-editor v-bind:data="medicine.timetable" :timetable_save_clicked="timetable_save_clicked"/>
         </div>
 
-        <button class="btn btn-danger" @click="go_back()">Назад</button>
+        <button v-if="show_button" class="btn btn-danger" @click="go_back()">Назад</button>
         <button class="btn btn-success" @click="save()">Сохранить <span
             v-if="medicine.is_template"> шаблон</span></button>
         <button v-if="!medicine.id && is_admin" class="btn btn-primary" @click="save(true)">Сохранить как
@@ -47,6 +53,7 @@ import Card from "../common/Card";
 import FormGroup48 from "../common/FormGroup-4-8";
 import TimetableEditor from "./parts/TimetableEditor";
 import ErrorBlock from "../common/ErrorBlock";
+import * as moment from "moment/moment";
 
 export default {
     name: "MedicineEditor",
@@ -85,12 +92,8 @@ export default {
 
         check: function () {
             this.errors = [];
-            if (!this.medicine.title) {
+            if (this.empty(this.medicine.title)) {
                 this.errors.push('Укажите название опросника')
-            }
-
-            if (!this.medicine.rules) {
-                this.errors.push('Укажите дозу и правила приема лекарства')
             }
 
             this.medicine.warning_days = parseInt(this.medicine.warning_days)
@@ -102,11 +105,7 @@ export default {
                 this.errors.push('Проверьте корректность расписания')
             }
 
-            if (this.errors.length != 0) {
-                return false;
-            } else {
-                return true;
-            }
+            return this.errors.length == 0;
         },
         show_validation: function () {
             this.save_clicked = true
@@ -132,11 +131,15 @@ export default {
             this.medicine.id = response.data.id
 
             if (!this.medicine.is_template) {
+                this.medicine.prescribed_at = moment(new Date()).format("DD.MM.YYYY")
                 this.medicine.patient_id = response.data.patient_id
                 this.medicine.contract_id = response.data.contract_id
             }
 
-            if (is_new) Event.fire('medicine-created', this.medicine)
+            if (is_new) Event.fire('medicine-created', {
+                medicine: this.medicine,
+                close_window: !this.show_button
+            })
             else Event.fire('back-to-dashboard', this.medicine)
 
             this.medicine = undefined
@@ -164,8 +167,13 @@ export default {
             medicine: undefined,
             backup: "",
             save_clicked: false,
-            timetable_save_clicked: [false]
+            timetable_save_clicked: [false],
+            show_button: false
         }
+    },
+    created() {
+        /*this.medicine = undefined;
+        this.backup = JSON.stringify(this.medicine)*/
     },
     mounted() {
         Event.listen('attach-medicine', (medicine) => {
@@ -184,11 +192,13 @@ export default {
         });
 
         Event.listen('navigate-to-create-medicine-page', () => {
+            this.show_button = true
             this.medicine = this.create_empty_medicine()
             this.backup = JSON.stringify(this.medicine)
         });
 
         Event.listen('navigate-to-edit-medicine-page', medicine => {
+            this.show_button = true
             this.medicine = medicine
 
             if (this.medicine.warning_days > 0)

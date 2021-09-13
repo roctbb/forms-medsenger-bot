@@ -14,7 +14,7 @@ class MedicineManager(Manager):
         medicines = list(filter(lambda x: x.template_id == template_id, contract.patient.medicines))
 
         for medicine in medicines:
-            medicine.delete()
+            medicine.canceled_at = datetime.now()
 
         self.__commit__()
 
@@ -74,14 +74,17 @@ class MedicineManager(Manager):
                                                     medicine.title, medicine.warning_days))
                 self.__commit__()
 
-    def submit(self, medicine_id, contract_id):
+    def submit(self, medicine_id, contract_id, params=None):
         medicine = self.get(medicine_id)
         medicine.warning_timestamp = 0
         medicine.filled_timestamp = int(time.time())
 
-        self.medsenger_api.add_record(contract_id, 'medicine', medicine.title, params={
-            "medicine_id": medicine_id
-        })
+        if params is None:
+            params = {"medicine_id": medicine_id}
+        else:
+            params.update({"medicine_id": medicine_id})
+
+        self.medsenger_api.add_record(contract_id, 'medicine', medicine.title, params=params)
 
         self.log_done("form_{}".format(medicine_id), contract_id)
 
@@ -100,15 +103,12 @@ class MedicineManager(Manager):
             return None
 
         if medicine.contract_id:
-            self.medsenger_api.send_message(contract.id,
-                                            "Врач отменил препарат «{}» ({} / {}).".format(
-                                                medicine.title, medicine.rules, medicine.timetable_description()))
+            self.medsenger_api.send_message(contract.id, "Врач отменил препарат {}.".format(medicine.get_description()))
 
-        Medicine.query.filter_by(id=id).delete()
+        medicine.canceled_at = datetime.now()
 
         self.__commit__()
         return id
-
 
     def log_request(self, medicine, contract_id=None, description=None):
         if not contract_id:
@@ -119,7 +119,7 @@ class MedicineManager(Manager):
         super().log_request("medicine_{}".format(medicine.id), contract_id, description)
 
     def run(self, medicine, commit=True):
-        text = 'Пожалуйста, не забудьте принять лекарство "{}" ({}).'.format(medicine.title, medicine.rules)
+        text = 'Пожалуйста, не забудьте принять лекарство {}.'.format(medicine.get_description())
         action = 'medicine/{}'.format(medicine.id)
         action_name = 'Подтвердить прием'
         deadline = self.calculate_deadline(medicine.timetable)
@@ -151,9 +151,12 @@ class MedicineManager(Manager):
 
             medicine.title = data.get('title')
             medicine.rules = data.get('rules')
+            medicine.dose = data.get('dose')
             medicine.timetable = data.get('timetable')
             medicine.template_id = data.get('template_id')
             medicine.warning_days = data.get('warning_days')
+            medicine.verify_dose = data.get('verify_dose', False)
+            medicine.prescribed_at = datetime.now()
 
             if data.get('is_template'):
                 medicine.is_template = True
@@ -161,16 +164,10 @@ class MedicineManager(Manager):
                 medicine.patient_id = contract.patient_id
                 medicine.contract_id = contract.id
 
-                if is_new:
-                    self.medsenger_api.send_message(contract.id,
-                                                    "Врач назначил препарат «{}» ({} / {}). Мы будем автоматически присылать напоминания об этом.".format(
-                                                        medicine.title, medicine.rules,
-                                                        medicine.timetable_description()))
-                else:
-                    self.medsenger_api.send_message(contract.id,
-                                                    "Врач изменил параметры приема препарата «{}» ({} / {}). Мы будем автоматически присылать напоминания об этом.".format(
-                                                        medicine.title, medicine.rules,
-                                                        medicine.timetable_description()))
+                action = 'назначил препарат' if is_new else 'изменил параметры приема препарата'
+                self.medsenger_api.send_message(contract.id,
+                                                "Врач {} {}. Мы будем автоматически присылать напоминания об этом.".format(
+                                                        action, medicine.get_description(True)))
 
             if not medicine_id:
                 self.db.session.add(medicine)

@@ -6,7 +6,7 @@
         <form-group48 v-for="(field, i) in form.fields" v-if="!field.show_if || answers[field.show_if]"
                       :required="field.required"
                       :title="field.text" :key="i"
-                      :description="field.description">
+                      :description="field.description" :errors="field_errors[field.uid]">
             <input type="number" min="field.params.min" max="field.params.max" step="1"
                    class="form-control monitoring-input"
                    :class="save_clicked && field.required &&
@@ -21,6 +21,9 @@
                    :required="field.required"
                    :class="save_clicked && field.required && !answers[field.uid] && answers[field.uid] !== 0 ? 'is-invalid' : ''"
                    v-model="answers[field.uid]"/>
+            <input type="file" class="monitoring-input" v-if="field.type == 'file'"
+                   :required="field.required"
+                   v-bind:ref="'file_' + field.uid" v-on:change="submit_file(field)"/>
             <textarea class="form-control monitoring-input" v-if="field.type == 'textarea'" :required="field.required"
                       :class="save_clicked && field.required && !answers[field.uid] && answers[field.uid] !== 0 ? 'is-invalid' : ''"
                       v-model="answers[field.uid]"></textarea>
@@ -49,7 +52,7 @@
 
         </form-group48>
 
-        <button @click="save()" class="btn btn-success" :disabled="submitted">Отправить ответ</button>
+        <button @click="save()" class="btn btn-success" :disabled="submitted || is_preview">Отправить ответ</button>
 
 
     </div>
@@ -76,6 +79,7 @@ export default {
             form: {},
             answers: {},
             errors: [],
+            field_errors: {},
             submitted: false,
             save_clicked: false
         }
@@ -106,6 +110,7 @@ export default {
                 if (field.type == 'float') {
                     this.answers[field.uid] = parseFloat(this.answers[field.uid])
                 }
+
                 if (field.show_if && !this.answers[field.show_if]) {
                     this.answers[field.uid] = undefined;
                 }
@@ -115,6 +120,7 @@ export default {
 
             let validate_field = (field, i) => {
                 if (field.required && this.empty(this.answers[field.uid])) return true;
+                if (field.type == 'file' && this.field_errors[field.uid]) return true;
                 if (field.type == 'integer' || field.type == 'float') {
                     if (!this.empty(field.params.min) && !this.empty(field.params.max)) {
                         if (this.answers[field.uid] < field.params.min || this.answers[field.uid] > field.params.max) return true
@@ -133,7 +139,41 @@ export default {
             }
 
             this.form.fields.map(prepare_field)
-        }
+        },
+        submit_file: function (field) {
+            if (this.$refs['file_' + field.uid] && this.$refs['file_' + field.uid][0].files) {
+                if (this.$refs['file_' + field.uid][0].files[0].size > 50 * 1024 * 1024) {
+                    this.field_errors[field.uid] = "Размер файла не должен превышать 50 МБ.";
+                } else {
+                    let file = this.$refs['file_' + field.uid][0].files[0];
+
+                    let filename = file.name;
+                    let type = file.type;
+
+                    if (!type) {
+                        type = 'text/plain'
+                    }
+
+                    this.field_errors[field.uid] = "Готовим файл к загрузке...";
+
+                    this.toBase64(file).then((base64) => {
+                        console.log("file is ready")
+
+                        this.answers[field.uid] = {
+                            name: filename,
+                            type: type,
+                            base64: base64
+                        }
+                        this.field_errors[field.uid] = "";
+                        this.$forceUpdate();
+                    })
+
+
+                }
+
+
+            }
+        },
     },
     created() {
         this.form = this.data

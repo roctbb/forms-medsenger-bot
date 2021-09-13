@@ -17,7 +17,7 @@ export default {
         bg: function () {
             if (this.image)
             {
-                return "background-image: url('" + this.image + "');"
+                return "background-image: url('" + this.image + "'); "
             }
             else {
                 return "background-image: none;"

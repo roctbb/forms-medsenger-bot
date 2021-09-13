@@ -54,7 +54,10 @@ export default {
     },
     methods: {
         load_data: function () {
-            this.axios.post(this.url('/api/graph/group'), this.group).then(this.process_load_answer);
+            let data = {
+                group: this.group
+            }
+            this.axios.post(this.url('/api/graph/group'), data).then(this.process_load_answer);
         },
         process_load_answer: function (response) {
             this.data = response.data
@@ -291,7 +294,8 @@ export default {
 
                     let m = {
                         points: [{
-                            time: new Date(medicine.timestamp * 1000)
+                            time: new Date(medicine.timestamp * 1000),
+                            dose: !medicine.params || medicine.params.dose == null ? '' : ` (${medicine.params.dose})`
                         }],
                         date: +date + offset,
                         description: "Прием лекарства <strong>" + medicine.value + "</strong> в ",
@@ -320,7 +324,7 @@ export default {
                         return a.time < b.time ? -1 : a.time > b.time ? 1 : 0
                     })
                     val.points.forEach(p => {
-                        val.description += "<br> • <strong>" + this.formatTime(p.time) + "</strong>"
+                        val.description += `<br> • <strong> ${this.formatTime(p.time)} ${p.dose} </strong>`
                     })
                 })
 

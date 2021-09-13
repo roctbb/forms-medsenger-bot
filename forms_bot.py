@@ -3,6 +3,7 @@ from managers.AlgorithmsManager import AlgorithmsManager
 from managers.ContractsManager import ContractManager
 from managers.FormManager import FormManager
 from managers.MedicineManager import MedicineManager
+from managers.ReminderManager import ReminderManager
 from managers.TimetableManager import TimetableManager
 from medsenger_api import AgentApiClient
 from helpers import *
@@ -12,7 +13,8 @@ medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG)
 contract_manager = ContractManager(medsenger_api, db)
 form_manager = FormManager(medsenger_api, db)
 medicine_manager = MedicineManager(medsenger_api, db)
-timetable_manager = TimetableManager(medicine_manager, form_manager, medsenger_api, db)
+reminder_manager = ReminderManager(medsenger_api, db)
+timetable_manager = TimetableManager(medicine_manager, form_manager, reminder_manager, medsenger_api, db)
 algorithm_manager = AlgorithmsManager(medsenger_api, db)
 
 
@@ -136,9 +138,9 @@ def init(data):
 def hook(data):
     contract_id = int(data.get('contract_id'))
     contract = contract_manager.get(contract_id)
-    category_name = data.get('category_name')
+    category_names = data.get('category_names')
 
-    if algorithm_manager.hook(contract, category_name):
+    if algorithm_manager.hook(contract, category_names):
         return jsonify({
             "result": "ok",
         })
@@ -200,6 +202,12 @@ def get_settings(args, form):
     return get_ui('settings', contract, medsenger_api.get_categories())
 
 
+@app.route('/preview_form/<form_id>', methods=['GET'])
+@verify_args
+def form_preview_page(args, form, form_id):
+    contract = contract_manager.get(args.get('contract_id'))
+    return get_ui('form', contract, medsenger_api.get_categories(), form_id, True)
+
 @app.route('/form/<form_id>', methods=['GET'])
 @verify_args
 def form_page(args, form, form_id):
@@ -225,6 +233,11 @@ def graph_page_with_args(args, form, category_id):
 @verify_args
 def medicine_page(args, form, medicine_id):
     contract = contract_manager.get(args.get('contract_id'))
+    medicine = medicine_manager.get(medicine_id)
+
+    if medicine.verify_dose:
+        return get_ui('verify-dose', contract, object_id=medicine_id)
+
     medicine_manager.submit(medicine_id, contract.id)
 
     if contract.tasks and 'medicine-{}'.format(medicine_id) in contract.tasks:
@@ -252,6 +265,7 @@ def get_templates(args, form):
     templates = {
         "forms": form_manager.get_templates_as_dicts(),
         "medicines": medicine_manager.get_templates_as_dicts(),
+        "reminders": reminder_manager.get_templates_as_dicts(),
         "algorithms": algorithm_manager.get_templates_as_dicts()
     }
 
@@ -315,6 +329,35 @@ def delete_medicine(args, form):
         abort(404)
 
 
+@app.route('/api/settings/delete_reminder', methods=['POST'])
+@only_doctor_args
+def delete_reminder(args, form):
+    contract_id = args.get('contract_id')
+    contract = contract_manager.get(contract_id)
+    result = reminder_manager.remove(request.json.get('id'), contract)
+
+    if result:
+        return jsonify({
+            "deleted_id": result
+        })
+    else:
+        abort(404)
+
+
+@app.route('/api/settings/reminder', methods=['POST'])
+@only_doctor_args
+def create_reminder(args, form):
+    contract_id = args.get('contract_id')
+    contract = contract_manager.get(contract_id)
+
+    reminder = reminder_manager.create_or_edit(request.json, contract)
+
+    if reminder:
+        return jsonify(reminder.as_dict())
+    else:
+        abort(422)
+
+
 @app.route('/api/settings/algorithm', methods=['POST'])
 @only_doctor_args
 def create_algorithm(args, form):
@@ -369,10 +412,15 @@ def graph_categories(args, form):
 @verify_args
 def graph_data(args, form):
     contract_id = args.get('contract_id')
-    group = request.json
-    answer = [medsenger_api.get_records(contract_id, category_name) for category_name in
-              group['categories'] + ['medicine', 'symptom']]
-    answer = list(filter(lambda x: x != None, answer))
+    data = request.json
+    group = data.get('group')
+    dates = data.get('dates', None)
+    print('dates', dates)
+
+    answer = [(medsenger_api.get_records(contract_id, category_name) if dates is None
+               else medsenger_api.get_records(contract_id, category_name, time_from=dates['start'], time_to=dates['end']))
+              for category_name in group['categories'] + ['medicine', 'symptom']]
+    answer = list(filter(lambda x: x is not None, answer))
 
     return jsonify(answer)
 
@@ -417,6 +465,24 @@ def post_form(args, form, form_id):
         abort(404)
 
 
+@app.route('/api/medicine/<medicine_id>', methods=['GET'])
+@verify_args
+def get_medicine(args, form, medicine_id):
+    medicine = medicine_manager.get(medicine_id)
+
+    if medicine.contract_id != int(args.get('contract_id')) and not medicine.is_template:
+        abort(401)
+
+    return jsonify(medicine.as_dict())
+
+
+@app.route('/medicine-manager', methods=['GET'])
+@verify_args
+def medicine_editor_page(args, form):
+    contract = contract_manager.get(args.get('contract_id'))
+    return get_ui('medicine-manager', contract, medsenger_api.get_categories())
+
+
 @app.route('/confirm-medicine', methods=['GET'])
 @verify_args
 def medicines_page(args, form):
@@ -433,9 +499,9 @@ def post_medicines(args, form):
     data = request.json
 
     if data['custom']:
-        medsenger_api.add_record(contract_id, 'medicine', data['medicine'])
+        medsenger_api.add_record(contract_id, 'medicine', data['medicine'], params=data['params'])
     else:
-        medicine_manager.submit(data['medicine'], contract.id)
+        medicine_manager.submit(data['medicine'], contract.id, params=data['params'])
         if contract.tasks and 'medicine-{}'.format(data['medicine']) in contract.tasks:
             medsenger_api.finish_task(contract.id, contract.tasks['medicine-{}'.format(data['medicine'])])
 

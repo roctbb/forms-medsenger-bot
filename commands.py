@@ -5,6 +5,7 @@ import flask
 
 from managers.FormManager import FormManager
 from managers.MedicineManager import MedicineManager
+from managers.ReminderManager import ReminderManager
 from managers.TimetableManager import TimetableManager
 from models import db
 from flask_script import Command
@@ -22,7 +23,8 @@ class ReinitTasks(Command):
         medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG)
         form_manager = FormManager(medsenger_api, db)
         medicine_manager = MedicineManager(medsenger_api, db)
-        timetable_manager = TimetableManager(medicine_manager, form_manager, medsenger_api, db)
+        reminder_manager = ReminderManager(medsenger_api, db)
+        timetable_manager = TimetableManager(medicine_manager, form_manager, reminder_manager, medsenger_api, db)
         timetable_manager.update_daily_tasks(flask.current_app)
         print("done tasks")
 
