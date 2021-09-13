@@ -84,7 +84,7 @@
 
                     <hr>
 
-                    <button class="btn btn-sm btn-danger" @click="remove_condition(step, condition_index)">Удалить
+                    <button class="btn btn-sm btn-danger" @click="remove_common_condition(condition_index)">Удалить
                         условие
                     </button>
                 </card>
@@ -315,7 +315,10 @@ export default {
                     }
 
                     if (!this.empty(criteria.multiplier)) {
-                        criteria.multiplier = parseFloat(criteria.multiplier.replace(',', '.'))
+                        if (criteria.multiplier)
+                        {
+                            criteria.multiplier = parseFloat(criteria.multiplier.toString().replace(',', '.'))
+                        }
                     } else {
                         criteria.multiplier = 1
                     }
@@ -499,6 +502,9 @@ export default {
         },
         remove_condition: function (step, index) {
             step.conditions.splice(index, 1);
+        },
+        remove_common_condition: function (index) {
+            this.algorithm.common_conditions.splice(index, 1);
         },
         remove_step: function (index) {
             this.algorithm.steps.splice(index, 1);

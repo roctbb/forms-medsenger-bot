@@ -167,8 +167,10 @@ export default {
                 if (!field.text) return true;
                 if (!Object.keys(this.field_types).includes(field.type)) return true;
                 if (['integer', 'float'].includes(field.type)) {
-                    if (this.empty(field.params.max) || this.empty(field.params.min)) return true;
-                    if (field.params.max < field.params.min) return true;
+                    if (!this.empty(field.params.max) && !this.empty(field.params.min)) {
+                        if (field.params.max < field.params.min) return true;
+                    }
+
                 }
                 if (!this.isJsonString(field.params.custom_params)) return true;
                 if (field.type == 'radio') {

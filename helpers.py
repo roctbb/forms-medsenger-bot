@@ -119,6 +119,7 @@ def generate_description(criteria, l_value, r_value, category_names, current_ans
 
     left_modes = {
         "value": "Значение ",
+        "category_value": "Значение ",
         "sum": "Сумма ",
         "difference": "Разность крайних значений ",
         "delta": "Разброс ",

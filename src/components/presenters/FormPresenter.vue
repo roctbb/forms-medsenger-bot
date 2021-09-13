@@ -116,7 +116,9 @@ export default {
             let validate_field = (field, i) => {
                 if (field.required && this.empty(this.answers[field.uid])) return true;
                 if (field.type == 'integer' || field.type == 'float') {
-                    if (this.answers[field.uid] < field.params.min || this.answers[field.uid] > field.params.max) return true
+                    if (!this.empty(field.params.min) && !this.empty(field.params.max)) {
+                        if (this.answers[field.uid] < field.params.min || this.answers[field.uid] > field.params.max) return true
+                    }
                 }
                 return false
             }

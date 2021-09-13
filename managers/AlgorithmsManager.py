@@ -639,6 +639,7 @@ class AlgorithmsManager(Manager):
         if fired:
             try:
                 flag_modified(algorithm, "steps")
+                flag_modified(algorithm, "common_conditions")
                 self.__commit__()
             except Exception as e:
                 log(e, False)
