@@ -1,5 +1,5 @@
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from functools import reduce
 
 from flask_sqlalchemy import SQLAlchemy
@@ -43,7 +43,7 @@ class Patient(db.Model):
     algorithms = db.relationship('Algorithm', backref=backref('patient', uselist=False), lazy=True)
 
     def as_dict(self):
-        now = datetime.now()
+        today = date.today()
         return {
             "id": self.id,
             "month_compliance": self.count_month_compliance(),
@@ -51,10 +51,10 @@ class Patient(db.Model):
             "forms": [form.as_dict() for form in self.forms],
             "medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is not None],
             "canceled_medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is not None],
-            "reminders": sorted([reminder.as_dict() for reminder in self.reminders
-                                 if datetime.strptime(reminder.reminder_date, '%d.%m.%Y %H:%M') >= now], key=lambda k: k["date"]),
-            "old_reminders": sorted([reminder.as_dict() for reminder in self.reminders
-                                 if datetime.strptime(reminder.reminder_date, '%d.%m.%Y %H:%M') < now], key=lambda k: k["date"], reverse=True),
+            "reminders": sorted([reminder.as_dict() for reminder in self.reminders if reminder.detach_date >= today],
+                                key=lambda k: k["attach_date"]),
+            "old_reminders": sorted([reminder.as_dict() for reminder in self.reminders if reminder.detach_date < today],
+                                    key=lambda k: k["attach_date"], reverse=True),
             "algorithms": [algorithm.as_dict() for algorithm in self.algorithms]
         }
 
@@ -364,15 +364,27 @@ class Reminder(db.Model):
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=True)
     contract_id = db.Column(db.Integer, db.ForeignKey('contract.id', ondelete="CASCADE"), nullable=True)
 
+    attach_date = db.Column(db.Date, nullable=True)
+    detach_date = db.Column(db.Date, nullable=True)
+    timetable = db.Column(db.JSON, nullable=True)
+
     type = db.Column(db.String(7), nullable=False)
     different_text = db.Column(db.Boolean, default=False)
     doctor_text = db.Column(db.Text, nullable=True)
     patient_text = db.Column(db.Text, nullable=True)
-    date = db.Column(db.DateTime(), nullable=True)
-    reminder_date = db.Column(db.Text, nullable=True)
 
     is_template = db.Column(db.Boolean, default=False)
     template_id = db.Column(db.Integer, db.ForeignKey('reminder.id', ondelete="set null"), nullable=True)
+
+    def timetable_description(self):
+        if self.timetable['mode'] == 'daily':
+            description = '{} раз(а) в день'.format(len(self.timetable['points']))
+        elif self.timetable['mode'] == 'weekly':
+            description = '{} раз(а) в неделю'.format(len(self.timetable['points']))
+        else:
+            description = '{} раз(а) в месяц'.format(len(self.timetable['points']))
+        description += ' в течение {} дней'.format(abs((self.detach_date - self.attach_date).days))
+        return description
 
     def as_dict(self):
         return {
@@ -383,8 +395,9 @@ class Reminder(db.Model):
             "different_text": self.different_text,
             "doctor_text": self.doctor_text,
             "patient_text": self.patient_text,
-            "date": self.date,
-            "reminder_date": self.reminder_date,
+            "attach_date": self.attach_date.strftime('%Y-%m-%d') if self.attach_date else None,
+            "detach_date": self.detach_date.strftime('%Y-%m-%d') if self.detach_date else None,
+            "timetable": self.timetable,
             "is_template": self.is_template,
             "template_id": self.template_id,
         }
@@ -397,8 +410,9 @@ class Reminder(db.Model):
         new_reminder.doctor_text = self.doctor_text
         new_reminder.patient_text = self.patient_text
 
-        new_reminder.date = self.date
-        new_reminder.reminder_date = self.reminder_date
+        new_reminder.attach_date = self.attach_date
+        new_reminder.detach_date = self.detach_date
+        new_reminder.timetable = self.timetable
 
         if self.is_template:
             new_reminder.template_id = self.id

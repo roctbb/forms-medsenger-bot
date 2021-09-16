@@ -18,22 +18,32 @@
                 <form-group48 :title="'Текст напоминания' + (reminder.type == 'both' && !reminder.different_text ? '' : ' для пациента')"
                               v-if="reminder.type != 'doctor'">
                     <textarea class="form-control form-control-sm"
-                              :class="this.save_clicked && empty(reminder.patient_text) ? 'is-invalid' : ''"
+                              :class="this.validated && empty(reminder.patient_text) ? 'is-invalid' : ''"
                               v-model="reminder.patient_text"></textarea>
                 </form-group48>
 
                 <form-group48 title="Текст напоминания для врача"
                               v-if="reminder.type == 'doctor' || reminder.type == 'both' && reminder.different_text">
                     <textarea class="form-control form-control-sm"
-                              :class="this.save_clicked && empty(reminder.doctor_text) ? 'is-invalid' : ''"
+                              :class="this.validated && empty(reminder.doctor_text) ? 'is-invalid' : ''"
                               v-model="reminder.doctor_text"></textarea>
                 </form-group48>
 
-                <form-group48 title="Дата напоминания">
-                    <date-picker v-model="reminder.date" type="datetime" format="DD.MM.YYYY в HH:mm"></date-picker>
+                <form-group48 title="Дата начала">
+                    <date-picker v-model="reminder.attach_date"
+                                 :class="this.validated && !reminder.is_template && empty(reminder.attach_date) ? 'is-invalid' : ''"
+                                 value-type="YYYY-MM-DD"></date-picker>
+                </form-group48>
+
+                <form-group48 title="Дата завершения">
+                    <date-picker v-model="reminder.detach_date"
+                                 :class="this.validated && !reminder.is_template && empty(reminder.detach_date) ? 'is-invalid' : ''"
+                                 value-type="YYYY-MM-DD"></date-picker>
                 </form-group48>
 
             </card>
+
+            <timetable-editor v-bind:data="reminder.timetable" :timetable_save_clicked="timetable_validated"/>
         </div>
 
         <button v-if="show_button" class="btn btn-danger" @click="go_back()">Назад</button>
@@ -51,6 +61,7 @@
 import Card from "../common/Card";
 import FormGroup48 from "../common/FormGroup-4-8";
 import ErrorBlock from "../common/ErrorBlock";
+import TimetableEditor from "./parts/TimetableEditor";
 import DatePicker from 'vue2-datepicker';
 import 'vue2-datepicker/index.css';
 import 'vue2-datepicker/locale/ru';
@@ -59,7 +70,7 @@ import * as moment from "moment/moment";
 
 export default {
     name: "ReminderEditor",
-    components: {FormGroup48, Card, ErrorBlock, DatePicker},
+    components: {FormGroup48, Card, ErrorBlock, DatePicker, TimetableEditor},
     props: {
         data: {
             required: false,
@@ -87,13 +98,19 @@ export default {
             })
         },
         create_empty_reminder: function () {
+            let attach_date = moment().format('YYYY-MM-DD')
+            let detach_date = moment().add(7, 'days').format('YYYY-MM-DD')
+            let timetable =  this.empty_timetable()
+            timetable.points[0].hour = 10
+            timetable.points[0].minute = 0
             return {
                 type: 'patient',
                 different_text: false,
                 patient_text: '',
                 doctor_text: '',
-                date: new Date(moment().add(1, "day").format('YYYY-MM-DD hh:mm')),
-                reminder_date: ''
+                timetable: timetable,
+                attach_date: attach_date,
+                detach_date: detach_date
             }
         },
         check: function () {
@@ -115,14 +132,25 @@ export default {
                     this.errors.push('Заполните текст напоминания для врача')
             }
 
-            this.reminder.reminder_date = moment(this.reminder.date).format('DD.MM.YYYY HH:mm')
-            if (+new Date() >= +this.reminder.date) {
-                this.errors.push('Установлена некорректная дата')
+            if (this.reminder.attach_date > this.reminder.detach_date) {
+                this.errors.push('Дата завершения не может быть раньше даты начала')
             }
+
+            if (!this.verify_timetable(this.reminder.timetable)) {
+                this.errors.push('Проверьте корректность расписания')
+            }
+
             return this.errors.length == 0;
         },
+        show_validation: function () {
+            this.validated = true
+            for (let i of this.timetable_validated.keys()) {
+                this.$set(this.timetable_validated, i, true)
+            }
+        },
         save: function (is_template) {
-            this.save_clicked = true
+            this.validated = true
+            this.show_validation()
 
             if (this.check()) {
                 this.errors = []
@@ -151,7 +179,8 @@ export default {
             else Event.fire('back-to-dashboard', this.reminder)
 
             this.reminder = undefined
-            this.save_clicked = false
+            this.validated = false
+            this.timetable_validated = [false]
         },
         process_save_error: function (response) {
             console.log(response)
@@ -163,7 +192,8 @@ export default {
             errors: [],
             reminder: undefined,
             backup: "",
-            save_clicked: false,
+            validated: false,
+            timetable_validated: [false],
             show_button: false
         }
     },
@@ -172,10 +202,23 @@ export default {
     mounted() {
         Event.listen('attach-reminder', (reminder) => {
             this.reminder = {}
+
             this.copy(this.reminder, reminder)
             this.reminder.id = undefined
+
+            this.reminder.attach_date = moment().format('YYYY-MM-DD')
+            let len = 7
+            if (reminder.attach_date && reminder.detach_date)
+            {
+                let attach = moment(reminder.attach_date, "YYYY-MM-DD")
+                let detach = moment(reminder.detach_date, "YYYY-MM-DD")
+                len = moment.duration(detach.diff(attach)).asDays()
+            }
+            this.reminder.detach_date = moment().add(len, 'days').format('YYYY-MM-DD')
+
             this.reminder.is_template = false;
             this.reminder.template_id = reminder.id;
+
             this.save()
         });
 

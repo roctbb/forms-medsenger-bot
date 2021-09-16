@@ -51,8 +51,10 @@ class ReminderManager(Manager):
             reminder.different_text = data.get('different_text')
             reminder.patient_text = data.get('patient_text')
             reminder.doctor_text = data.get('doctor_text')
-            reminder.date = data.get('date')
-            reminder.reminder_date = data.get('reminder_date')
+
+            reminder.attach_date = data.get('attach_date')
+            reminder.detach_date = data.get('detach_date')
+            reminder.timetable = data.get('timetable')
 
             if data.get('is_template'):
                 reminder.is_template = True
