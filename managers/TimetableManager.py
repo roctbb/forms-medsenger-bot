@@ -18,10 +18,6 @@ class TimetableManager(Manager):
 
     def should_run(self, object, today=False):
         now = datetime.now()
-
-        if isinstance(object, Reminder):
-            return object.reminder_date == now.strftime('%d.%m.%Y %H:%M')
-
         timetable = object.timetable
 
         if isinstance(object, Medicine) and object.canceled_at != None:

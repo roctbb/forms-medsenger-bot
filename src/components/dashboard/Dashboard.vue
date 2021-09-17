@@ -32,7 +32,7 @@
             <h5>Опросники</h5>
 
             <div class="row">
-                <card v-for="(form, i) in patient.forms" :key="form.id" class="col-lg-3 col-md-4"
+                <card v-for="(form, i) in patient.forms" :key="'form' + form.id" class="col-lg-3 col-md-4"
                       :image="images.form">
                     <h6>{{ form.title }}</h6>
                     <small>{{ form.doctor_description }}</small><br>
@@ -61,7 +61,7 @@
             <h5>Лекарства</h5>
 
             <div class="row">
-                <card v-for="(medicine, i) in patient.medicines" :key="medicine.id" :image="images.medicine"
+                <card v-for="(medicine, i) in patient.medicines" :key="'medicine' + medicine.id" :image="images.medicine"
                       class="col-lg-3 col-md-4">
                     <h6>{{ medicine.title }}</h6>
                     <small>{{ medicine.rules }}</small><br>
@@ -82,7 +82,7 @@
 
                 </card>
 
-                <card v-for="(medicine, i) in patient.canceled_medicines" :key="medicine.id" :image="images.canceled_medicine"
+                <card v-for="(medicine, i) in patient.canceled_medicines" :key="'canceled_medicine' + medicine.id" :image="images.canceled_medicine"
                       class="col-lg-3 col-md-4 text-muted">
                     <h6>{{ medicine.title }}</h6>
                     <small>{{ medicine.rules }}</small><br>
@@ -105,11 +105,13 @@
             <h5>Напоминания</h5>
 
             <div class="row">
-                <card v-for="(reminder, i) in patient.reminders" :key="reminder.id" :image="images.reminder"
+                <card v-for="(reminder, i) in patient.reminders" :key="'reminder_' + reminder.id" :image="images.reminder"
                       class="col-lg-3 col-md-4">
                     <h6>Для {{ reminder.type == 'both' ? 'всех' : (reminder.type == 'patient' ? 'пациента' : 'врача') }}</h6>
                     <small> <div v-html="get_reminder_text(reminder)"></div> </small><br>
-                    <small><i>на {{ format_date(reminder.date) }}</i></small><br>
+                    <small><i>{{ tt_description(reminder.timetable) }}</i></small><br>
+                    <small>Начало: {{ reminder.attach_date }}</small><br>
+                    <small>Завершение: {{ reminder.detach_date }}</small><br>
                     <div v-if="reminder.contract_id == current_contract_id">
                         <a href="#" @click="edit_reminder(reminder)">Редактировать</a>
                         <a href="#" @click="delete_reminder(reminder)">Удалить</a>
@@ -122,11 +124,13 @@
                         ID шаблона: {{ reminder.template_id }}</small>
 
                 </card>
-                <card v-for="(reminder, i) in patient.old_reminders" :key="reminder.id" :image="images.old_reminder"
+                <card v-for="(reminder, i) in patient.old_reminders" :key="'old_reminder_' + reminder.id" :image="images.old_reminder"
                       class="col-lg-3 col-md-4">
                     <h6>Для {{ reminder.type == 'both' ? 'всех' : (reminder.type == 'patient' ? 'пациента' : 'врача') }}</h6>
                     <small> <div v-html="get_reminder_text(reminder)"></div> </small><br>
-                    <small><i>на {{ format_date(reminder.date) }}</i></small><br>
+                    <small><i>{{ tt_description(reminder.timetable) }}</i></small><br>
+                    <small>Начало: {{ reminder.attach_date }}</small><br>
+                    <small>Завершение: {{ reminder.detach_date }}</small><br>
                     <div v-if="reminder.contract_id == current_contract_id">
                         <a href="#" @click="edit_reminder(reminder)">Редактировать</a>
                     </div>
@@ -148,7 +152,7 @@
             <h5>Алгоритмы</h5>
 
             <div class="row">
-                <card v-for="(algorithm, i) in patient.algorithms" :key="algorithm.id" :image="images.algorithm"
+                <card v-for="(algorithm, i) in patient.algorithms" :key="'algorithm_' + algorithm.id" :image="images.algorithm"
                       class="col-lg-3 col-md-4">
                     <h6>{{ algorithm.title }}</h6>
                     <small>{{ algorithm.description }}</small><br>
@@ -207,7 +211,7 @@
 
                 <div class="col-md-12"><h5>{{ name }}</h5></div>
 
-                <card v-for="(form, i) in group" :key="form.id" class="col-lg-3 col-md-4"
+                <card v-for="(form, i) in group" :key="'form_template_' + form.id" class="col-lg-3 col-md-4"
                       :image="images.form">
                     <h6>{{ form.title }}</h6>
                     <small>{{ form.doctor_description }}</small><br>
@@ -244,7 +248,7 @@
             </div>
 
             <div class="row">
-                <card v-for="(medicine, i) in templates.medicines" :key="medicine.id" :image="images.medicine"
+                <card v-for="(medicine, i) in templates.medicines" :key="'medicine_template_' + medicine.id" :image="images.medicine"
                       class="col-lg-3 col-md-4">
                     <h6>{{ medicine.title }}</h6>
                     <small>{{ medicine.rules }}</small><br>
@@ -275,11 +279,12 @@
             </div>
 
             <div class="row">
-                <card v-for="(reminder, i) in templates.reminders" :key="reminder.id" :image="images.reminder"
+                <card v-for="(reminder, i) in templates.reminders" :key="'reminder_template_' + reminder.id" :image="images.reminder"
                       class="col-lg-3 col-md-4">
                     <h6>Для {{ reminder.type == 'both' ? 'всех' : (reminder.type == 'patient' ? 'пациента' : 'врача') }}</h6>
                     <small>{{ reminder.type == 'doctor' ? reminder.doctor_text : reminder.patient_text }}</small><br>
-                    <small><i>на {{ format_date(reminder.date) }}</i></small><br>
+                    <small><i>{{ tt_description(reminder.timetable) }}</i></small><br>
+                    <small><i>в течение {{ reminder_duration(reminder) }} дн.</i></small><br>
                     <a href="#" @click="attach_reminder(reminder)">Подключить</a>
                     <a href="#" v-if="is_admin" @click="edit_reminder(reminder)">Редактировать</a>
                     <a href="#" v-if="is_admin" @click="delete_reminder(reminder)">Удалить</a>
@@ -314,7 +319,7 @@
             }), 'template_category')">
 
                 <div class="col-md-12"><h5>{{ name }}</h5></div>
-                <card v-for="(algorithm, i) in group" v-if="is_admin || !algorithm.clinics || algorithm.clinics.includes(clinic_id)" :key="algorithm.id" :image="images.algorithm"
+                <card v-for="(algorithm, i) in group" v-if="is_admin || !algorithm.clinics || algorithm.clinics.includes(clinic_id)" :key="'algorithm_' + algorithm.id" :image="images.algorithm"
                       class="col-lg-3 col-md-4">
                     <h6>{{ algorithm.title }}</h6>
                     <small>{{ algorithm.description }}</small><br>
@@ -375,8 +380,10 @@ export default {
         }
     },
     methods: {
-        format_date: function (date) {
-            return moment(date).format('DD.MM.YY в hh:mm')
+        reminder_duration: function (reminder) {
+            let attach = moment(reminder.attach_date, "YYYY-MM-DD")
+            let detach = moment(reminder.detach_date, "YYYY-MM-DD")
+            return moment.duration(detach.diff(attach)).asDays()
         },
         get_reminder_text: function (reminder) {
             if (reminder.type == 'doctor')
