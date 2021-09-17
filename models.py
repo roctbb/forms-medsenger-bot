@@ -389,6 +389,8 @@ class Reminder(db.Model):
     doctor_text = db.Column(db.Text, nullable=True)
     patient_text = db.Column(db.Text, nullable=True)
 
+    last_sent = db.Column(db.DateTime(), nullable=True)
+
     is_template = db.Column(db.Boolean, default=False)
     template_id = db.Column(db.Integer, db.ForeignKey('reminder.id', ondelete="set null"), nullable=True)
 
