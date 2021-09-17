@@ -1,10 +1,28 @@
 <template>
     <div>
-            <a class="btn btn-outline-info btn-sm" @click="select_graph()" style="margin: 10px">Назад</a>
-            <div :class="!mobile ? 'row' : ''" style="margin-left: 10px">
-                <date-picker range v-model="dates_range" style="margin-right: 10px" :style="mobile ? 'margin-bottom: 10px' : ''"></date-picker>
+        <div class="container" v-if="!mobile">
+            <div class="row">
+                <a class="btn btn-outline-info btn-sm" @click="select_graph()">Назад</a>
+                <span>c</span>
+                <date-picker v-model="dates_range[0]"></date-picker>
+                <span>по</span>
+                <date-picker v-model="dates_range[1]"></date-picker>
                 <a class="btn btn-success btn-sm" @click="load_data()">Загрузить</a>
             </div>
+        </div>
+        <div class="container" v-else>
+            <a class="btn btn-outline-info btn-sm" @click="select_graph()">Назад</a>
+            <div class="row">
+                <span class="col-1">c</span>
+                <date-picker v-model="dates_range[0]" class="col-12"></date-picker>
+            </div>
+            <div class="row">
+                <span class="col-1">по</span>
+                <date-picker v-model="dates_range[1]" class="col-12"></date-picker>
+            </div>
+
+            <a class="btn btn-success btn-sm" @click="load_data()">Загрузить</a>
+        </div>
 
         <hr>
         <error-block :errors="errors" v-if="errors.length"></error-block>
@@ -161,12 +179,13 @@ export default {
                         width: 60
                     },
                     selected: 4,
+                    inputEnabled: false,
                     inputDateFormat: "%b %e, %Y %H:%M"
                 },
 
                 chart: {
                     type: 'line',
-                    boostThreshold: 1000,
+                    boostThreshold: 500,
                     turboThreshold: 0,
                     animation: false,
                     zoomType: 'x',
@@ -489,7 +508,7 @@ export default {
 
             let group_series = this.options.series.filter(s => s.yAxis == 0)
             if (group_series.map(s => s.data.length).reduce((a, b) => a + b) > 1000) {
-                this.errors = ['За данный период в медицинской карте присутствует слишком большое количество записей (> 1000). ' +
+                this.errors = ['За данный период в медицинской карте присутствует слишком большое количество записей (> 500). ' +
                 'Чтобы увидеть комментарии к точкам и симптомы, загрузите период с меньшим количеством записей.']
                 group_series.forEach(s => {
                     s.data = s.data.map(d => [d.x, d.y])
@@ -642,5 +661,14 @@ export default {
     width: 100%;
     text-align: center;
     font-size: 0.8rem;
+}
+
+.container {
+    padding: 5px 10px 5px 0;
+}
+
+.row {
+    grid-column-gap: 10px;
+    margin-bottom: 5px;
 }
 </style>
