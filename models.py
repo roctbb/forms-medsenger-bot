@@ -156,7 +156,7 @@ class Medicine(db.Model, Compliance):
         elif self.timetable['mode'] == 'weekly':
             return '{} раз(а) в неделю'.format(len(self.timetable['points']))
         elif self.timetable['mode'] == 'manual':
-            return 'вносится вручную'
+            return ''
         else:
             return '{} раз(а) в месяц'.format(len(self.timetable['points']))
 
@@ -168,9 +168,17 @@ class Medicine(db.Model, Compliance):
         if self.rules and not tt:
             medicine_description += " ({})".format(self.rules)
         elif self.rules:
-            medicine_description += " ({} / {})".format(self.rules, self.timetable_description())
+            tt_description = self.timetable_description()
+
+            if tt_description:
+                tt_description = ' / ' + tt_description
+
+            medicine_description += " ({}{})".format(self.rules, tt_description)
         elif tt:
-            medicine_description += '({})'.format(self.timetable_description())
+            tt_description = self.timetable_description()
+
+            if tt_description:
+                medicine_description += '({})'.format(tt_description)
 
         return medicine_description
 
