@@ -155,6 +155,8 @@ class Medicine(db.Model, Compliance):
             return '{} раз(а) в день'.format(len(self.timetable['points']))
         elif self.timetable['mode'] == 'weekly':
             return '{} раз(а) в неделю'.format(len(self.timetable['points']))
+        elif self.timetable['mode'] == 'manual':
+            return 'вносится вручную'
         else:
             return '{} раз(а) в месяц'.format(len(self.timetable['points']))
 

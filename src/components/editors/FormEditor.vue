@@ -27,11 +27,11 @@
                            v-model="form.button_title"/>
                 </form-group48>
 
-                <form-group48 title="Текст для кнопки в сообщении">
+                <form-group48 title="Текст для кнопки в сообщении" v-if="is_admin">
                     <input class="form-control form-control-sm" v-model="form.custom_title"/>
                 </form-group48>
 
-                <form-group48 title="Текст внутри сообщения">
+                <form-group48 title="Текст внутри сообщения" v-if="is_admin">
                     <input class="form-control form-control-sm" v-model="form.custom_text"/>
                 </form-group48>
 
