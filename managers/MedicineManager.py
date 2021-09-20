@@ -42,7 +42,7 @@ class MedicineManager(Manager):
                         {
                             "hour": int(h),
                             "minute": int(m)
-                        } for h, m in map(lambda x:x.split(':'), custom_params.get('times'))
+                        } for h, m in map(lambda x: x.split(':'), custom_params.get('times'))
                     ]
                 }
 
@@ -166,8 +166,10 @@ class MedicineManager(Manager):
 
                 action = 'назначил препарат' if is_new else 'изменил параметры приема препарата'
                 self.medsenger_api.send_message(contract.id,
-                                                "Врач {} {}. Мы будем автоматически присылать напоминания об этом.".format(
-                                                        action, medicine.get_description(True)))
+                                                "Врач {} {}.{}".format(
+                                                    action, medicine.get_description(True),
+                                                    " Мы будем автоматически присылать напоминания об этом." if
+                                                    medicine.timetable['mode'] != "manual" else ''))
 
             if not medicine_id:
                 self.db.session.add(medicine)
