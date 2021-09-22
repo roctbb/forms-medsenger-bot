@@ -43,7 +43,7 @@ class ContractManager(Manager):
 
             contract.is_active = False
 
-            for object in contract.forms + contract.algorithms + contract.medicines:
+            for object in contract.forms + contract.algorithms + contract.medicines + contract.reminders:
                 self.db.session.delete(object)
 
 
@@ -59,7 +59,7 @@ class ContractManager(Manager):
 
         return contract.patient
 
-    def get(self, contract_id):
+    def get(self, contract_id, active=None):
         contract = Contract.query.filter_by(id=contract_id).first()
 
         if not contract:
