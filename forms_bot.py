@@ -358,6 +358,44 @@ def create_reminder(args, form):
         abort(422)
 
 
+@app.route('/reminder/<reminder_id>', methods=['GET'])
+@verify_args
+def reminder_page(args, form, reminder_id):
+    contract = contract_manager.get(args.get('contract_id'))
+    return get_ui('confirm-reminder', contract, medsenger_api.get_categories(), reminder_id)
+
+
+@app.route('/api/reminder/<reminder_id>', methods=['GET'])
+@verify_args
+def get_reminder(args, form, reminder_id):
+    reminder = reminder_manager.get(reminder_id)
+
+    if reminder.contract_id != int(args.get('contract_id')) and not reminder.is_template:
+        abort(401)
+
+    return jsonify(reminder.as_dict())
+
+
+@app.route('/api/reminder/<reminder_id>/set_state', methods=['POST'])
+@verify_args
+def set_reminder_state(args, form, reminder_id):
+    contract_id = int(args.get('contract_id'))
+    contract = contract_manager.get(contract_id)
+
+    reminder = reminder_manager.get(reminder_id)
+    data = request.json
+
+    if reminder.contract_id != contract_id and not reminder.is_template:
+        abort(401)
+
+    if data['state'] == 'later':
+        reminder_manager.set_next_date(reminder_id, contract, data['type'], data['count'])
+
+    result = reminder_manager.set_state(reminder, data['state'])
+
+    return jsonify(result)
+
+
 @app.route('/api/settings/algorithm', methods=['POST'])
 @only_doctor_args
 def create_algorithm(args, form):

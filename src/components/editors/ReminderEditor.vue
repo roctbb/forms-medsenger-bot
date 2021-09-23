@@ -7,26 +7,13 @@
                     <select class="form-control form-control-sm" v-model="reminder.type">
                         <option value="patient">пациенту</option>
                         <option value="doctor">врачу</option>
-                        <option value="both">всем</option>
                     </select>
                 </form-group48>
 
-                <form-group48 title="Разные напоминания" v-if="reminder.type == 'both'">
-                    <input class="form-check" type="checkbox" v-model="reminder.different_text"/>
-                </form-group48>
-
-                <form-group48 :title="'Текст напоминания' + (reminder.type == 'both' && !reminder.different_text ? '' : ' для пациента')"
-                              v-if="reminder.type != 'doctor'">
+                <form-group48 title="Текст напоминания">
                     <textarea class="form-control form-control-sm"
-                              :class="this.validated && empty(reminder.patient_text) ? 'is-invalid' : ''"
-                              v-model="reminder.patient_text"></textarea>
-                </form-group48>
-
-                <form-group48 title="Текст напоминания для врача"
-                              v-if="reminder.type == 'doctor' || reminder.type == 'both' && reminder.different_text">
-                    <textarea class="form-control form-control-sm"
-                              :class="this.validated && empty(reminder.doctor_text) ? 'is-invalid' : ''"
-                              v-model="reminder.doctor_text"></textarea>
+                              :class="this.validated && empty(reminder.text) ? 'is-invalid' : ''"
+                              v-model="reminder.text"></textarea>
                 </form-group48>
 
                 <form-group48 title="Дата начала">
@@ -105,9 +92,7 @@ export default {
             timetable.points[0].minute = 0
             return {
                 type: 'patient',
-                different_text: false,
-                patient_text: '',
-                doctor_text: '',
+                text: '',
                 timetable: timetable,
                 attach_date: attach_date,
                 detach_date: detach_date
@@ -116,20 +101,8 @@ export default {
         check: function () {
             this.errors = [];
 
-            if (this.reminder.type == 'both' && !this.reminder.different_text)
-                this.reminder.doctor_text = this.reminder.patient_text
-
-            if (this.reminder.type == 'patient' && this.empty(this.reminder.patient_text) ||
-                this.reminder.type == 'doctor' && this.empty(this.reminder.doctor_text) ||
-                this.reminder.type == 'both' && this.empty(this.reminder.patient_text) && !this.reminder.different_text) {
+            if (this.empty(this.reminder.text)) {
                 this.errors.push('Заполните текст напоминания')
-            }
-
-            if (this.reminder.type == 'both' && this.reminder.different_text) {
-                if (this.empty(this.reminder.patient_text))
-                    this.errors.push('Заполните текст напоминания для пациента')
-                if (this.empty(this.reminder.doctor_text))
-                    this.errors.push('Заполните текст напоминания для врача')
             }
 
             if (this.reminder.attach_date > this.reminder.detach_date) {

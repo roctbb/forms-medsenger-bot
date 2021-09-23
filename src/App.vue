@@ -14,9 +14,11 @@
                     <action-done v-if="state == 'done'"></action-done>
                 </div>
             </div>
-            <div v-if="mode == 'form' || mode == 'done' || mode == 'graph' || mode == 'confirm-medicine' || mode == 'verify-dose'">
+            <div v-if="mode == 'form' || mode == 'done' || mode == 'graph' || mode == 'confirm-reminder' ||
+                       mode == 'confirm-medicine' || mode == 'verify-dose'">
                 <div class="container" style="margin-top: 15px;">
                     <confirm-medicine-presenter :data="patient.medicines" v-if="state == 'confirm-medicine'"/>
+                    <reminder-confirmer :data="reminder" v-if="state == 'confirm-reminder'"></reminder-confirmer>
                     <dose-verifier :data="medicine" v-if="state == 'verify-dose'"/>
                     <form-presenter :data="form" v-if="state == 'form-presenter'"/>
                     <graph-category-chooser :data="available_categories" v-if="state == 'graph-category-chooser'"/>
@@ -27,7 +29,6 @@
                 <graph-presenter v-show="state == 'graph-presenter'" :patient="patient"/>
                 <heatmap-presenter v-show="state.startsWith('heatmap-presenter')" :heatmap_type="state.split('-')[2]"/>
             </div>
-
 
         </div>
     </div>
@@ -50,12 +51,14 @@ import ConfirmMedicinePresenter from "./components/presenters/ConfirmMedicinePre
 import HeatmapPresenter from "./components/presenters/HeatmapPresenter";
 import DoseVerifier from "./components/presenters/DoseVerifier";
 import ReminderEditor from "./components/editors/ReminderEditor";
+import ReminderConfirmer from "./components/presenters/ReminderConfirmer";
 
 
 
 export default {
     name: 'app',
     components: {
+        ReminderConfirmer,
         ReminderEditor,
         DoseVerifier,
         HeatmapPresenter,
@@ -71,6 +74,7 @@ export default {
             patient: {},
             form: {},
             medicine: {},
+            reminder: {},
             mode: "",
             object_id: -1,
             templates: {
@@ -90,6 +94,7 @@ export default {
         Event.listen('home', () => this.state = 'dashboard');
         Event.listen('form-done', () => this.state = 'done');
         Event.listen('confirm-medicine-done', () => this.state = 'done');
+        Event.listen('confirm-reminder-done', () => this.state = 'done');
         Event.listen('form-created', (form) => {
             this.state = 'dashboard'
             if (!form.is_template) {
@@ -178,6 +183,9 @@ export default {
             if (this.mode == 'confirm-medicine') {
                 this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
             }
+            if (this.mode == 'confirm-reminder') {
+                this.axios.get(this.url('/api/reminder/' + this.object_id)).then(this.process_load_answer);
+            }
             if (this.mode == 'verify-dose') {
                 this.axios.get(this.url('/api/medicine/' + this.object_id)).then(this.process_load_answer);
             }
@@ -205,6 +213,11 @@ export default {
             if (this.mode == 'confirm-medicine') {
                 this.patient = response.data;
                 this.state = 'confirm-medicine'
+            }
+
+            if (this.mode == 'confirm-reminder') {
+                this.reminder = response.data;
+                this.state = 'confirm-reminder'
             }
 
             if (this.mode == 'verify-dose') {
