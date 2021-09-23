@@ -107,8 +107,8 @@
             <div class="row">
                 <card v-for="(reminder, i) in patient.reminders" :key="'reminder_' + reminder.id" :image="images.reminder"
                       class="col-lg-3 col-md-4">
-                    <h6>Для {{ reminder.type == 'both' ? 'всех' : (reminder.type == 'patient' ? 'пациента' : 'врача') }}</h6>
-                    <small> <div v-html="get_reminder_text(reminder)"></div> </small><br>
+                    <h6>Для {{ reminder.type == 'patient' ? 'пациента' : 'врача' }}</h6>
+                    <small> {{ reminder.text }} </small><br>
                     <small><i>{{ tt_description(reminder.timetable) }}</i></small><br>
                     <small>Начало: {{ reminder.attach_date }}</small><br>
                     <small>Завершение: {{ reminder.detach_date }}</small><br>
@@ -126,15 +126,12 @@
                 </card>
                 <card v-for="(reminder, i) in patient.old_reminders" :key="'old_reminder_' + reminder.id" :image="images.old_reminder"
                       class="col-lg-3 col-md-4">
-                    <h6>Для {{ reminder.type == 'both' ? 'всех' : (reminder.type == 'patient' ? 'пациента' : 'врача') }}</h6>
-                    <small> <div v-html="get_reminder_text(reminder)"></div> </small><br>
+                    <h6>Для {{ reminder.type == 'patient' ? 'пациента' : 'врача' }}</h6>
+                    <small> {{ reminder.text }} </small><br>
                     <small><i>{{ tt_description(reminder.timetable) }}</i></small><br>
                     <small>Начало: {{ reminder.attach_date }}</small><br>
                     <small>Завершение: {{ reminder.detach_date }}</small><br>
-                    <div v-if="reminder.contract_id == current_contract_id">
-                        <a href="#" @click="edit_reminder(reminder)">Редактировать</a>
-                    </div>
-                    <div v-else>
+                    <div v-if="reminder.contract_id != current_contract_id">
                         <small>Добавлен в другом контракте.</small>
                     </div>
 
@@ -384,13 +381,6 @@ export default {
             let attach = moment(reminder.attach_date, "YYYY-MM-DD")
             let detach = moment(reminder.detach_date, "YYYY-MM-DD")
             return moment.duration(detach.diff(attach)).asDays()
-        },
-        get_reminder_text: function (reminder) {
-            if (reminder.type == 'doctor')
-                return reminder.doctor_text
-            if (reminder.type == 'both' && reminder.different_text)
-                return `<i>Пациенту:</i> ${reminder.patient_text}<br><i>Врачу:</i> ${reminder.doctor_text}`
-            return reminder.patient_text
         },
         update_params: function () {
             this.loaded = false

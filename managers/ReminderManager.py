@@ -1,5 +1,5 @@
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from helpers import log
 from managers.Manager import Manager
@@ -32,10 +32,68 @@ class ReminderManager(Manager):
         if reminder.contract_id != contract.id and not contract.is_admin:
             return None
 
-        Reminder.query.filter_by(id=id).delete()
+        reminder.canceled_at = datetime.now()
 
         self.__commit__()
         return id
+
+    def set_state(self, reminder, state):
+
+        reminder.state = state
+        self.__commit__()
+
+        patient_text = None
+        doctor_text = None
+        action = None
+        if state == 'done':
+            action = 'выполнил назначение'
+        elif state == 'reject':
+            action = 'отказался от выполнения назначения'
+        elif state == 'cancel':
+            action = 'отключил напоминание'
+
+        if reminder.type == 'patient':
+            patient_text = 'Спасибо! Мы сообщили врачу.'
+            doctor_text = 'Пациент {}:\n\n{}'.format(action, reminder.text)
+        else:
+            doctor_text = 'Спасибо!'
+
+        deadline = (datetime.now() + timedelta(days=1)).timestamp()
+
+        if state == 'later':
+            result = self.medsenger_api.send_message(reminder.contract_id, 'Напоминание автоматически отправится позже.',
+                                                     only_patient=reminder.type == 'patient', only_doctor=reminder.type == 'doctor',
+                                                     action_deadline=deadline)
+            return result
+
+        reminder.canceled_at = datetime.now()
+        self.__commit__()
+
+        if patient_text:
+            result = self.medsenger_api.send_message(reminder.contract_id, patient_text, only_patient=True, action_deadline=deadline)
+        if doctor_text:
+            result = self.medsenger_api.send_message(reminder.contract_id, doctor_text, only_doctor=True, action_deadline=deadline)
+
+        return result
+
+    def set_next_date(self, id, contract, type, count):
+        reminder = Reminder.query.filter_by(id=id).first_or_404()
+
+        if reminder.contract_id != contract.id and not contract.is_admin:
+            return None
+
+        send_next = None
+
+        if type == 'hour':
+            send_next = datetime.now() + timedelta(hours=count)
+        elif type == 'day':
+            send_next = datetime.now() + timedelta(days=count)
+
+        reminder.send_next = send_next
+        reminder.state = 'later'
+
+        self.__commit__()
+        return reminder.id
 
     def create_or_edit(self, data, contract):
         try:
@@ -48,13 +106,13 @@ class ReminderManager(Manager):
                     return None
 
             reminder.type = data.get('type')
-            reminder.different_text = data.get('different_text')
-            reminder.patient_text = data.get('patient_text')
-            reminder.doctor_text = data.get('doctor_text')
+            reminder.text = data.get('text')
 
             reminder.attach_date = data.get('attach_date')
             reminder.detach_date = data.get('detach_date')
             reminder.timetable = data.get('timetable')
+
+            reminder.state = data.get('state', 'active')
 
             if data.get('is_template'):
                 reminder.is_template = True
@@ -76,17 +134,27 @@ class ReminderManager(Manager):
             contract_id = reminder.contract_id
         if not description:
             description = ''
+            if reminder.type == 'patient':
+                description += "Отправка напоминания пациенту: \"{}\". ".format(reminder.text)
             if reminder.type == 'patient' or reminder.type == 'both':
-                description += "Отправка напоминания пациенту: \"{}\". ".format(reminder.patient_text)
-            if reminder.type == 'patient' or reminder.type == 'both':
-                description += "Отправка напоминания врачу: \"{}\".".format(reminder.doctor_text)
+                description += "Отправка напоминания врачу: \"{}\".".format(reminder.text)
 
         super().log_request("reminder_{}".format(reminder.id), contract_id, description)
 
-    def run(self, reminder):
+    def run(self, reminder, commit=True):
         result = None
-        if reminder.type == 'patient' or reminder.type == 'both':
-            result = self.medsenger_api.send_message(reminder.contract_id, reminder.patient_text, only_patient=True)
-        if reminder.type == 'doctor' or reminder.type == 'both':
-            result = self.medsenger_api.send_message(reminder.contract_id, reminder.doctor_text, only_doctor=True)
+        if reminder.type == 'patient':
+            result = self.medsenger_api.send_message(reminder.contract_id, reminder.text, action_name='Отметить действие',
+                                                     action_onetime=True,
+                                                     action_link='reminder/{}'.format(reminder.id), only_patient=True)
+        if reminder.type == 'doctor':
+            result = self.medsenger_api.send_message(reminder.contract_id, reminder.text, action_name='Отметить действие',
+                                                     action_onetime=True,
+                                                     action_link='reminder/{}'.format(reminder.id), only_doctor=True)
+        if result:
+            reminder.last_sent = datetime.now()
+            if commit:
+                self.__commit__()
+                return result
+
         return result

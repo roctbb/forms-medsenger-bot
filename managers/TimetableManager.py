@@ -20,7 +20,7 @@ class TimetableManager(Manager):
         now = datetime.now()
         timetable = object.timetable
 
-        if isinstance(object, Medicine) and object.canceled_at != None:
+        if (isinstance(object, Medicine) or isinstance(object, Reminder)) and object.canceled_at is not None:
             return False
 
         if timetable.get('mode') == 'manual':
@@ -30,6 +30,9 @@ class TimetableManager(Manager):
             last_sent = max(object.last_sent, now - timedelta(minutes=5))
         else:
             last_sent = now - timedelta(minutes=5)
+
+        if isinstance(object, Reminder) and object.send_next:
+            return now >= object.send_next > last_sent
 
         points = timetable['points']
         if timetable['mode'] == 'weekly':

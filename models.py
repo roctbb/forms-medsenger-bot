@@ -43,7 +43,6 @@ class Patient(db.Model):
     algorithms = db.relationship('Algorithm', backref=backref('patient', uselist=False), lazy=True)
 
     def as_dict(self):
-        today = date.today()
         return {
             "id": self.id,
             "month_compliance": self.count_month_compliance(),
@@ -51,10 +50,8 @@ class Patient(db.Model):
             "forms": [form.as_dict() for form in self.forms],
             "medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is None],
             "canceled_medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is not None],
-            "reminders": sorted([reminder.as_dict() for reminder in self.reminders if reminder.detach_date >= today],
-                                key=lambda k: k["attach_date"]),
-            "old_reminders": sorted([reminder.as_dict() for reminder in self.reminders if reminder.detach_date < today],
-                                    key=lambda k: k["attach_date"], reverse=True),
+            "reminders": sorted([reminder.as_dict() for reminder in self.reminders if reminder.canceled_at is None], key=lambda k: k["attach_date"]),
+            "old_reminders": sorted([reminder.as_dict() for reminder in self.reminders if reminder.canceled_at is not None], key=lambda k: k["attach_date"], reverse=True),
             "algorithms": [algorithm.as_dict() for algorithm in self.algorithms]
         }
 
@@ -394,15 +391,19 @@ class Reminder(db.Model):
     detach_date = db.Column(db.Date, nullable=True)
     timetable = db.Column(db.JSON, nullable=True)
 
+    last_sent = db.Column(db.DateTime(), nullable=True)
+    send_next = db.Column(db.DateTime(), nullable=True)
+
     type = db.Column(db.String(7), nullable=False)
-    different_text = db.Column(db.Boolean, default=False)
-    doctor_text = db.Column(db.Text, nullable=True)
-    patient_text = db.Column(db.Text, nullable=True)
+    state = db.Column(db.Text, nullable=True)
+    text = db.Column(db.Text, nullable=True)
 
     last_sent = db.Column(db.DateTime(), nullable=True)
 
     is_template = db.Column(db.Boolean, default=False)
     template_id = db.Column(db.Integer, db.ForeignKey('reminder.id', ondelete="set null"), nullable=True)
+
+    canceled_at = db.Column(db.DateTime, nullable=True)
 
     def timetable_description(self):
         if self.timetable['mode'] == 'daily':
@@ -411,7 +412,8 @@ class Reminder(db.Model):
             description = '{} раз(а) в неделю'.format(len(self.timetable['points']))
         else:
             description = '{} раз(а) в месяц'.format(len(self.timetable['points']))
-        description += ' в течение {} дней'.format(abs((self.detach_date - self.attach_date).days))
+        delta = self.detach_date - self.attach_date
+        description += ' в течение {} дней'.format(abs(delta.days))
         return description
 
     def as_dict(self):
@@ -420,12 +422,12 @@ class Reminder(db.Model):
             "contract_id": self.contract_id,
             "patient_id": self.patient_id,
             "type": self.type,
-            "different_text": self.different_text,
-            "doctor_text": self.doctor_text,
-            "patient_text": self.patient_text,
+            "state": self.state,
+            "text": self.text,
             "attach_date": self.attach_date.strftime('%Y-%m-%d') if self.attach_date else None,
             "detach_date": self.detach_date.strftime('%Y-%m-%d') if self.detach_date else None,
             "timetable": self.timetable,
+            "canceled_at": self.canceled_at.strftime("%d.%m.%Y") if self.canceled_at else None,
             "is_template": self.is_template,
             "template_id": self.template_id,
         }
@@ -433,10 +435,9 @@ class Reminder(db.Model):
     def clone(self):
         new_reminder = Reminder()
         new_reminder.type = self.type
+        new_reminder.state = 'active'
 
-        new_reminder.different_text = self.different_text
-        new_reminder.doctor_text = self.doctor_text
-        new_reminder.patient_text = self.patient_text
+        new_reminder.patient_text = self.text
 
         new_reminder.attach_date = self.attach_date
         new_reminder.detach_date = self.detach_date
