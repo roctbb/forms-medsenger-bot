@@ -66,6 +66,9 @@ class ReminderManager(Manager):
                                                      action_deadline=deadline)
             return result
 
+        reminder.canceled_at = datetime.now()
+        self.__commit__()
+
         if patient_text:
             result = self.medsenger_api.send_message(reminder.contract_id, patient_text, only_patient=True, action_deadline=deadline)
         if doctor_text:
