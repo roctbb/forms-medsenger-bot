@@ -13,9 +13,10 @@
                     <action-done v-if="state == 'done'"></action-done>
                 </div>
             </div>
-            <div v-if="mode == 'form' || mode == 'done' || mode == 'graph' || mode == 'confirm-medicine' || mode == 'verify-dose'">
+            <div v-if="mode == 'form' || mode == 'done' || mode == 'graph' || mode == 'confirm-medicine' || mode == 'medicines-list' || mode == 'verify-dose'">
                 <div class="container" style="margin-top: 15px;">
                     <confirm-medicine-presenter :data="patient.medicines" v-if="state == 'confirm-medicine'"/>
+                    <medicines-list-presenter :data="patient.medicines" v-if="state == 'medicines-list'"/>
                     <dose-verifier :data="medicine" v-if="state == 'verify-dose'"/>
                     <form-presenter :data="form" v-if="state == 'form-presenter'"/>
                     <graph-category-chooser :data="available_categories" v-if="state == 'graph-category-chooser'"/>
@@ -48,12 +49,14 @@ import LoadError from "./components/presenters/LoadError";
 import ConfirmMedicinePresenter from "./components/presenters/ConfirmMedicinePresenter";
 import HeatmapPresenter from "./components/presenters/HeatmapPresenter";
 import DoseVerifier from "./components/presenters/DoseVerifier";
+import MedicinesListPresenter from "./components/presenters/MedicinesListPresenter";
 
 
 
 export default {
     name: 'app',
     components: {
+        MedicinesListPresenter,
         DoseVerifier,
         HeatmapPresenter,
         ConfirmMedicinePresenter,
@@ -166,6 +169,9 @@ export default {
             if (this.mode == 'medicine-manager') {
                 this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
             }
+            if (this.mode == 'medicines-list') {
+                this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
+            }
             if (this.mode == 'graph') {
                 this.axios.get(this.url('/api/settings/get_patient')).then(response => {
                     this.patient = response.data
@@ -187,6 +193,11 @@ export default {
             if (this.mode == 'confirm-medicine') {
                 this.patient = response.data;
                 this.state = 'confirm-medicine'
+            }
+
+            if (this.mode == 'medicines-list') {
+                this.patient = response.data;
+                this.state = 'medicines-list'
             }
 
             if (this.mode == 'verify-dose') {

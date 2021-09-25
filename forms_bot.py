@@ -446,6 +446,13 @@ def medicine_editor_page(args, form):
     return get_ui('medicine-manager', contract, medsenger_api.get_categories())
 
 
+@app.route('/medicines-list', methods=['GET'])
+@verify_args
+def medicines_list_page(args, form):
+    contract = contract_manager.get(args.get('contract_id'))
+    return get_ui('medicines-list', contract, medsenger_api.get_categories())
+
+
 @app.route('/confirm-medicine', methods=['GET'])
 @verify_args
 def medicines_page(args, form):
