@@ -615,9 +615,9 @@ class AlgorithmsManager(Manager):
             reset_minutes = int(condition.get('reset_minutes', 0))
             last_fired = int(condition.get('last_fired', 0))
 
-            if reset_minutes and last_fired:
-                if time.time() - last_fired < reset_minutes * 60:
-                    bypass = True
+            if time.time() - last_fired < max(reset_minutes  * 60, 10):
+                bypass = True
+                print("bypassed")
 
             additions = []
             descriptions = []
