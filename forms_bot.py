@@ -166,6 +166,9 @@ def actions(data):
 
     actions = [{'link': 'form/{}'.format(form.id), 'type': 'patient', 'name': form.button_title} for form in forms]
 
+    if len(contract.medicines):
+        actions.append({'link': '/medicines-list', 'type': 'patient', 'name': 'Назначенные лекарства'})
+
     return jsonify(actions)
 
 
