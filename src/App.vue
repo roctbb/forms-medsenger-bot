@@ -15,10 +15,11 @@
                 </div>
             </div>
             <div v-if="mode == 'form' || mode == 'done' || mode == 'graph' || mode == 'confirm-reminder' ||
-                       mode == 'confirm-medicine' || mode == 'verify-dose'">
+                       mode == 'confirm-medicine' || mode == 'verify-dose' || mode == 'medicines-list'">
                 <div class="container" style="margin-top: 15px;">
                     <confirm-medicine-presenter :data="patient.medicines" v-if="state == 'confirm-medicine'"/>
                     <reminder-confirmer :data="reminder" v-if="state == 'confirm-reminder'"></reminder-confirmer>
+                    <medicines-list-presenter :data="patient.medicines" v-if="state == 'medicines-list'"/>
                     <dose-verifier :data="medicine" v-if="state == 'verify-dose'"/>
                     <form-presenter :data="form" v-if="state == 'form-presenter'"/>
                     <graph-category-chooser :data="available_categories" v-if="state == 'graph-category-chooser'"/>
@@ -52,6 +53,7 @@ import HeatmapPresenter from "./components/presenters/HeatmapPresenter";
 import DoseVerifier from "./components/presenters/DoseVerifier";
 import ReminderEditor from "./components/editors/ReminderEditor";
 import ReminderConfirmer from "./components/presenters/ReminderConfirmer";
+import MedicinesListPresenter from "./components/presenters/MedicinesListPresenter";
 
 
 
@@ -60,6 +62,7 @@ export default {
     components: {
         ReminderConfirmer,
         ReminderEditor,
+        MedicinesListPresenter,
         DoseVerifier,
         HeatmapPresenter,
         ConfirmMedicinePresenter,
@@ -192,6 +195,9 @@ export default {
             if (this.mode == 'medicine-manager') {
                 this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
             }
+            if (this.mode == 'medicines-list') {
+                this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
+            }
             if (this.mode == 'graph') {
                 this.axios.get(this.url('/api/settings/get_patient')).then(response => {
                     this.patient = response.data
@@ -218,6 +224,11 @@ export default {
             if (this.mode == 'confirm-reminder') {
                 this.reminder = response.data;
                 this.state = 'confirm-reminder'
+            }
+
+            if (this.mode == 'medicines-list') {
+                this.patient = response.data;
+                this.state = 'medicines-list'
             }
 
             if (this.mode == 'verify-dose') {

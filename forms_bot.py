@@ -168,6 +168,9 @@ def actions(data):
 
     actions = [{'link': 'form/{}'.format(form.id), 'type': 'patient', 'name': form.button_title} for form in forms]
 
+    if len(contract.medicines):
+        actions.append({'link': '/medicines-list', 'type': 'patient', 'name': 'Назначенные лекарства'})
+
     return jsonify(actions)
 
 
@@ -519,6 +522,13 @@ def get_medicine(args, form, medicine_id):
 def medicine_editor_page(args, form):
     contract = contract_manager.get(args.get('contract_id'))
     return get_ui('medicine-manager', contract, medsenger_api.get_categories())
+
+
+@app.route('/medicines-list', methods=['GET'])
+@verify_args
+def medicines_list_page(args, form):
+    contract = contract_manager.get(args.get('contract_id'))
+    return get_ui('medicines-list', contract, medsenger_api.get_categories())
 
 
 @app.route('/confirm-medicine', methods=['GET'])
