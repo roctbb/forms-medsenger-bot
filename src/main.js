@@ -279,7 +279,8 @@ Vue.mixin({
                 checkbox: ['string'],
                 date: ['date'],
                 time: ['string'],
-                file: ['file']
+                file: ['file'],
+                scale: ['integer']
             },
             images: {
                 form: window.LOCAL_HOST + '/static/images/icons8-fill-in-form-48.png',

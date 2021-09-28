@@ -39,6 +39,18 @@
                 </div>
             </div>
 
+            <div v-if="field.type == 'scale'">
+                <visual-analog-scale :colors="field.params.colors" :from_zero="field.params.from_zero">
+                    <div class="row">
+                        <div class="col d-flex justify-content-center" v-for="(color, i) in field.params.colors" >
+                            <input class="form-check-input monitoring-input" style="margin-left: 4px" type="radio"
+                                   :id="'radio_' + field.uid + '_' + i" :name="'radio_' + field.uid"
+                                   v-model="answers[field.uid]" :value="i + (field.params.from_zero ? 0 : 1)">
+                        </div>
+                    </div>
+                </visual-analog-scale>
+            </div>
+
             <div v-if="field.type == 'date'">
                 <date-picker :required="field.required" v-model="answers[field.uid]"
                              value-type="YYYY-MM-DD"></date-picker>
@@ -65,10 +77,11 @@ import ActionDone from "./ActionDone";
 import DatePicker from 'vue2-datepicker';
 import 'vue2-datepicker/index.css';
 import 'vue2-datepicker/locale/ru';
+import VisualAnalogScale from "./parts/VisualAnalogScale";
 
 export default {
     name: "FormPresenter",
-    components: {ActionDone, FormGroup48, ErrorBlock, DatePicker},
+    components: {VisualAnalogScale, ActionDone, FormGroup48, ErrorBlock, DatePicker},
     props: {
         data: {
             required: false,

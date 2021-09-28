@@ -1,6 +1,5 @@
 <template>
     <div v-if="form">
-        <error-block :errors="errors"/>
         <div class="form">
             <card title="Параметры опросника">
                 <form-group48 title="Название опросника">
@@ -84,6 +83,7 @@
         <button class="btn btn-danger" @click="go_back()">Вернуться назад</button>
         <button class="btn btn-success" @click="save()">Сохранить <span v-if="form.is_template"> шаблон</span></button>
         <button v-if="!form.id && is_admin" class="btn btn-primary" @click="save(true)">Сохранить как шаблон</button>
+        <error-block :errors="errors"/>
     </div>
 </template>
 
@@ -163,6 +163,9 @@ export default {
                         field.category = field.params.variants.map(v => v.category).join('|')
                     }
                 }
+                if (field.type == 'scale') {
+                    field.params.colors = field.params.colors.toString().split(',')
+                }
                 return field
             }
             this.form.fields = this.form.fields.map(prepare_field);
@@ -183,6 +186,9 @@ export default {
                     if (field.params.variants.length < 2) return true
                     if (field.params.variants.filter(variant_validator).length) return true;
                 }
+                if (field.type == 'scale') {
+                    if (!field.params.colors.length) return true
+                }
                 if (!field.category) return true;
             }
 
@@ -191,11 +197,7 @@ export default {
                 this.errors.push('Проверьте корректность вопросов')
             }
 
-            if (this.errors.length != 0) {
-                return false;
-            } else {
-                return true;
-            }
+            return this.errors.length == 0;
 
         },
         show_validation: function () {
