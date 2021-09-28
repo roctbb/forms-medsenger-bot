@@ -5,7 +5,7 @@
 
             <h6 v-if="patient.month_compliance[0]" class="badge badge-info">Общая комплаентность за месяц: {{ Math.round(100 * patient.month_compliance[1] / patient.month_compliance[0]) }}%</h6>
 
-            <div style="margin-right: -15px;">
+            <div style="margin-right: -15px;" v-if="params.backup && params.backup.length">
                 <input class="btn btn-block btn-outline-info" type="button" data-toggle="collapse" aria-expanded="false"
                        value="Ограничения показателей" data-target="#collapse" aria-controls="collapse">
                 <div class="collapse" id="collapse" style="font-size: 14px">
