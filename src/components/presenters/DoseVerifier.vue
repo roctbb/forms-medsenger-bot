@@ -3,7 +3,7 @@
         <h3>{{ medicine.title }}</h3>
         <p>Пожалуйста, заполните данные по приему лекарства.</p>
 
-        <form-group48 title="Доза, которую Вы приняли">
+        <form-group48 title="Принятая дозировка">
             <input class="form-control form-control-sm" v-model="dose"/>
         </form-group48>
 
@@ -11,7 +11,7 @@
             <input class="form-control form-control-sm" v-model="comment"/>
         </form-group48>
 
-        <button class="btn btn-outline-info" @click="save()">Записать прием</button>
+        <button class="btn btn-success" @click="save()">Записать прием</button>
 
     </div>
 </template>

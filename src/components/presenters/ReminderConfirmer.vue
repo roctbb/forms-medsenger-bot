@@ -12,7 +12,7 @@
             <button class="btn btn-primary btn-block" @click="set_reminder(1, 'hour')">Через 1 час</button>
             <button class="btn btn-primary btn-block" @click="set_reminder(2, 'hour')">Через 2 часа</button>
             <button class="btn btn-primary btn-block" @click="set_reminder(1, 'day')">Завтра</button>
-            <button class="btn btn-outline-primary btn-block" @click="remind_later()">Назад</button>
+            <button class="btn btn-danger" @click="remind_later()" style="margin-top: 15px;">Назад</button>
         </div>
     </div>
 </template>
@@ -63,8 +63,7 @@ export default {
 </script>
 
 <style scoped>
-.row {
-    grid-column-gap: 10px;
+.btn {
     margin-bottom: 5px;
 }
 </style>
