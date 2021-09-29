@@ -164,6 +164,29 @@
                 </div>
             </div>
         </div>
+
+        <div v-if="field.type == 'scale'">
+            <form-group48 title="Цвета (через запятую)">
+                <input type="text" class="form-control form-control-sm"
+                       v-model="field.params.colors"/>
+            </form-group48>
+
+            <form-group48 title="Начинать с 0">
+                <input type="checkbox" class="form-check" v-model="field.params.from_zero">
+            </form-group48>
+
+            <form-group48 title="Предпросмотр шкалы">
+                <visual-analog-scale :colors="parse_colors()" :from_zero="field.params.from_zero">
+                    <div class="row">
+                        <div class="col d-flex justify-content-center" v-for="(color, i) in parse_colors()" >
+                            <input class="form-check-input monitoring-input" style="margin-left: 5px" type="radio"
+                                   :id="'radio_' + field.uid + '_' + i" :name="'radio_' + field.uid">
+                        </div>
+                    </div>
+                </visual-analog-scale>
+            </form-group48>
+        </div>
+
         <a v-if="field.type == 'radio'" class="btn btn-primary btn-sm" @click="add_variant()">Добавить вариант</a>
         <a class="btn btn-danger btn-sm" @click="remove()">Удалить вопрос</a>
 
@@ -174,10 +197,11 @@
 
 import Card from "../../common/Card";
 import FormGroup48 from "../../common/FormGroup-4-8";
+import VisualAnalogScale from "../../presenters/parts/VisualAnalogScale";
 
 export default {
     name: "Field",
-    components: {FormGroup48, Card},
+    components: {VisualAnalogScale, FormGroup48, Card},
     props: ['data', 'pkey', 'form', 'save_clicked'],
     data() {
         return {
@@ -206,6 +230,10 @@ export default {
                 if (this.field.type == 'radio') {
                     this.field.params.variants = [{text: '', category: ''}, {text: '', category: ''}]
                 }
+                if (this.field.type == 'scale') {
+                    this.field.params.from_zero = false
+                    this.field.params.colors = ["#63bf3a","#72c433","#b0dc40","#eed748","#e9b942","#e3a03c","#e18738","#d96932","#d4482e","#d3312c"]
+                }
             }
 
         },
@@ -217,24 +245,16 @@ export default {
             this.field.params.variants.splice(j, 1);
             this.$forceUpdate()
         },
+        parse_colors: function () {
+            return this.field.params.colors.toString().split(',')
+        },
         remove: function () {
             Event.fire('remove-field', this.pkey)
         },
-        isJsonString: function(str) {
-            if (!str)
-                return true;
-            try {
-                JSON.parse(str);
-            } catch (e) {
-                return false;
-            }
-            return true;
-        }
     },
     created() {
         this.mode = this.data.type;
         this.field = this.data;
-
     }
 }
 </script>
