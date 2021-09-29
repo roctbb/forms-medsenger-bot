@@ -1,13 +1,11 @@
 <template>
     <div>
-        <h3>Записать прием лекарства</h3>
-
         <div v-if="data.length" style="margin-bottom: 15px;">
             <h5>Назначенные лекарства</h5>
-            <p>Нажмите на название лекарства, прием которого Вы хотите записать.</p>
+            <p>Выберите лекарство, прием которого Вы хотите записать.</p>
             <div class="row">
                 <div class="col-4" v-for="(medicine, i) in data" style="padding-bottom: 10px;">
-                    <button class="btn btn-info btn-block" @click="save(medicine)">{{ medicine.title }}</button>
+                    <button class="btn btn-primary btn-block" @click="save(medicine)">{{ medicine.title }}</button>
                 </div>
             </div>
         </div>
@@ -19,17 +17,17 @@
                        v-model="custom_medicine.title"/>
             </form-group48>
 
-            <form-group48 title="Доза, которую Вы приняли">
+            <form-group48 title="Принятая дозировка">
                 <input class="form-control form-control-sm"
                        :class="save_clicked && empty(custom_medicine.dose) ? 'is-invalid' : ''"
                        v-model="custom_medicine.dose"/>
             </form-group48>
 
-            <form-group48 title="Комментарии">
+            <form-group48 title="Комментарий">
                 <input class="form-control form-control-sm" v-model="custom_medicine.comment"/>
             </form-group48>
         </div>
-        <button class="btn btn-outline-info" @click="custom_save()">Записать прием</button>
+        <button class="btn btn-success" @click="custom_save()">Записать прием</button>
         <error-block :errors="errors"/>
 
     </div>

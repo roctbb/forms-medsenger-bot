@@ -2,7 +2,7 @@
     <div>
         <div class="container" v-if="!mobile">
             <div class="row">
-                <a class="btn btn-outline-info btn-sm" @click="select_graph()">Назад</a>
+                <a class="btn btn-danger btn-sm" @click="select_graph()">Назад</a>
                 <span>c</span>
                 <date-picker v-model="dates_range[0]"></date-picker>
                 <span>по</span>
@@ -11,7 +11,7 @@
             </div>
         </div>
         <div class="container" v-else>
-            <a class="btn btn-outline-info btn-sm" @click="select_graph()">Назад</a>
+            <a class="btn btn-danger btn-sm" @click="select_graph()">Назад</a>
             <div class="row">
                 <span class="col-1">c</span>
                 <date-picker v-model="dates_range[0]" class="col-12"></date-picker>

@@ -145,11 +145,11 @@ class ReminderManager(Manager):
         result = None
         if reminder.type == 'patient':
             result = self.medsenger_api.send_message(reminder.contract_id, reminder.text, action_name='Отметить действие',
-                                                     action_onetime=True,
+                                                     action_onetime=True, action_big=False,
                                                      action_link='reminder/{}'.format(reminder.id), only_patient=True)
         if reminder.type == 'doctor':
             result = self.medsenger_api.send_message(reminder.contract_id, reminder.text, action_name='Отметить действие',
-                                                     action_onetime=True,
+                                                     action_onetime=True, action_big=False,
                                                      action_link='reminder/{}'.format(reminder.id), only_doctor=True)
         if result:
             reminder.last_sent = datetime.now()

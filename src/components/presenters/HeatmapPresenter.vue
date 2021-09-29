@@ -1,7 +1,7 @@
 <template>
     <div>
         <div style="margin-left: 10px;">
-            <a class="btn btn-outline-info btn-sm" @click="select_graph()">Назад</a>
+            <a class="btn btn-danger btn-sm" @click="select_graph()">Назад</a>
         </div>
 
         <div v-if="loaded">
