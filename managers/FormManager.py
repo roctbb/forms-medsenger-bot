@@ -57,7 +57,7 @@ class FormManager(Manager):
             if new_form.categories:
                 self.medsenger_api.add_hooks(contract.id, new_form.categories.split('|'))
 
-            if "times" in custom_params and custom_params.get('times'):
+            if "times" in custom_params and custom_params.get('times', None) != None:
                 try:
                     new_form.timetable = generate_timetable(9, 21, int(custom_params.get('times')))
                 except Exception as e:
