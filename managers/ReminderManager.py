@@ -42,8 +42,8 @@ class ReminderManager(Manager):
         reminder.state = state
         self.__commit__()
 
-        patient_text = None
-        doctor_text = None
+        patient_text = ""
+        doctor_text = ""
         action = None
         if state == 'done':
             action = 'выполнил назначение'
