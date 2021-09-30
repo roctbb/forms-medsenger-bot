@@ -42,7 +42,7 @@ class FormManager(Manager):
         forms = list(filter(lambda x: x.template_id == template_id, contract.forms))
 
         for form in forms:
-            form.delete()
+            self.db.session.delete(form)
 
         self.__commit__()
 

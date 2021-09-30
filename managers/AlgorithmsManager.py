@@ -51,7 +51,7 @@ class AlgorithmsManager(Manager):
         algorithms = list(filter(lambda x: x.template_id == template_id, contract.patient.algorithms))
 
         for algorithm in algorithms:
-            algorithm.delete()
+            self.db.session.delete(algorithm)
 
         self.__commit__()
 
