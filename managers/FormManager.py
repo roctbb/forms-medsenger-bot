@@ -13,7 +13,7 @@ class FormManager(Manager):
         super(FormManager, self).__init__(*args)
 
     def get(self, form_id):
-        return Form.query.filter_by(id=form_id).first_or_404()
+        return Form.query.filter_by(id=form_id).first()
 
     def get_templates(self):
         return Form.query.filter_by(is_template=True).all()
