@@ -39,13 +39,9 @@ class FormManager(Manager):
         return id
 
     def detach(self, template_id, contract):
-        print(contract.forms)
         forms = list(filter(lambda x: x.template_id == template_id, contract.forms))
 
-        print(forms)
-
         for form in forms:
-            print("deleting for id", form.id)
             form.delete()
 
         self.__commit__()
