@@ -123,7 +123,7 @@ def init(data):
                 print(e)
 
         custom_algorithms = filter(lambda x: "algorithm_" in x and params.get(x), params.keys())
-        print(custom_algorithms)
+        print(list(custom_algorithms))
         for custom_algorithm in custom_algorithms:
             try:
                 algorithm_id = int(custom_algorithm.split('_')[1])
