@@ -164,6 +164,7 @@ export default {
                     }
                 }
                 if (field.type == 'scale') {
+                    field.params.start_from = parseInt(field.params.start_from.toString())
                     field.params.colors = field.params.colors.toString().split(',')
                 }
                 return field
