@@ -284,6 +284,8 @@ class FormManager(Manager):
             form.custom_text = data.get('custom_text')
             form.timetable = data.get('timetable')
             form.fields = data.get('fields')
+            form.has_integral_evaluation = bool(data.get('has_integral_evaluation'))
+            form.integral_evaluation = data.get('integral_evaluation')
             form.categories = data.get('categories')
             form.template_id = data.get('template_id')
             form.warning_days = data.get('warning_days')

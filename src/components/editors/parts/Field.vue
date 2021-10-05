@@ -171,13 +171,13 @@
             </form-group48>
 
             <form-group48 title="Начинать с">
-                <input class="form-control form-control-sm" v-model="field.params.start_from">
+                <input type="number" class="form-control form-control-sm" v-model="field.params.start_from">
             </form-group48>
 
             <form-group48 title="Предпросмотр шкалы" description="Шкала будет выглядеть так">
                 <visual-analog-scale :colors="parsed_colors" :start_from="parseInt(field.params.start_from)">
                     <div class="row">
-                        <div class="col d-flex justify-content-center" v-for="(color, i) in parse_colors()" >
+                        <div class="col d-flex justify-content-center" v-for="(color, i) in parsed_colors" >
                             <input class="form-check-input monitoring-input" style="margin-left: 5px" type="radio"
                                    :id="'radio_' + field.uid + '_' + i" :name="'radio_' + field.uid">
                         </div>
@@ -244,17 +244,12 @@ export default {
             this.field.params.variants.splice(j, 1);
             this.$forceUpdate()
         },
-        parse_colors: function () {
-            console.log(this.field.params.colors.toString().split(',').length)
-            return this.field.params.colors.toString().split(',')
-        },
         remove: function () {
             Event.fire('remove-field', this.pkey)
         },
     },
     computed : {
         parsed_colors: function () {
-            console.log(this.field.params.colors.toString().split(',').length)
             return this.field.params.colors.toString().split(',')
         },
     },
