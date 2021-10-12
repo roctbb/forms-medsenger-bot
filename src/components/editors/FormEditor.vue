@@ -174,7 +174,7 @@ export default {
                 this.form.warning_days = 0
             }
 
-            this.form.integral_evaluation.start_from = parseInt(this.form.integral_evaluation.start_from)
+            this.form.integral_evaluation.offset = parseInt(this.form.integral_evaluation.offset)
             this.form.integral_evaluation.results = this.form.integral_evaluation.results.map(res => {
                 return {
                     value: parseInt(res.value),
@@ -195,11 +195,16 @@ export default {
                     if (field.params.variants) {
                         field.category = field.params.variants.map(v => v.category).join('|')
                     }
+                    if (this.form.has_integral_evaluation){
+                        field.params.variants.forEach(variant => variant.weight = parseFloat(variant.weight))
+                    }
                 }
                 if (field.type == 'scale') {
                     field.params.start_from = parseInt(field.params.start_from.toString())
                     field.params.colors = field.params.colors.toString().split(',')
                 }
+                if (field.type == 'checkbox' && this.form.has_integral_evaluation)
+                    field.weight = parseFloat(field.weight)
                 return field
             }
             this.form.fields = this.form.fields.map(prepare_field);

@@ -82,6 +82,9 @@
             <form-group48 title="Значение при включении">
                 <input type="text" class="form-control form-control-sm" v-model="field.category_value"/>
             </form-group48>
+            <form-group48 title="Вес" description="Добавляется, если галочка стоит" v-if="form.has_integral_evaluation">
+                <input type="number" class="form-control form-control-sm" step="0.1" v-model="field.weight"/>
+            </form-group48>
         </div>
 
         <div v-if="field.type == 'float'">
@@ -150,7 +153,13 @@
                            :class="save_clicked && empty(variant.text) ? 'is-invalid' : ''"
                            class="form-control form-control-sm" v-model="variant.text"/>
                 </div>
-                <div class="col-md-2"><br>
+                <div class="col-md-2" v-if="form.has_integral_evaluation">
+                    <small class="text-mutted">Вес</small><br>
+                    <input type="number" step="0.1"
+                           :class="save_clicked && empty(variant.weight) ? 'is-invalid' : ''"
+                           class="form-control form-control-sm" v-model="variant.weight"/>
+                </div>
+                <div class="col-md-1"><br>
                     <a class="btn btn-default btn-sm" v-if="field.params.variants.length > 2"
                        @click="remove_variant(j)">Удалить
                         вариант</a>
