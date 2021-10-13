@@ -697,6 +697,8 @@ class AlgorithmsManager(Manager):
 
     def examine(self, contract, form):
         categories = form.categories.split('|')
+        categories.append('action')
+
         patient = contract.patient
 
         algorithms = filter(lambda algorithm: any([cat in algorithm.categories.split('|') for cat in categories]),
