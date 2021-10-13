@@ -72,9 +72,15 @@
                 <form-group48 title="Текст после успешного заполнения (если не сработал алгоритм)">
                     <textarea class="form-control form-control-sm" v-model="form.thanks_text"></textarea>
                 </form-group48>
+
+                <form-group48 title="Интегральная оценка результатов" v-if="is_admin">
+                    <input class="form-check" type="checkbox" @change="add_integral_evaluation()" v-model="form.has_integral_evaluation"/>
+                </form-group48>
             </card>
 
             <timetable-editor :data="form.timetable" :timetable_save_clicked="this.timetable_save_clicked"/>
+            <integral-evaluation :data="form.integral_evaluation" :save_clicked="save_clicked"
+                                 v-if="form.has_integral_evaluation"></integral-evaluation>
 
             <hr>
             <fields-editor v-if="form" :form="form" :fields="form.fields" :fields_save_clicked="fields_save_clicked"/>
@@ -94,10 +100,11 @@ import FormGroup48 from "../common/FormGroup-4-8";
 import TimetableEditor from "./parts/TimetableEditor";
 import FieldsEditor from "./parts/FieldsEditor";
 import ErrorBlock from "../common/ErrorBlock";
+import IntegralEvaluation from "./parts/IntegralEvaluation";
 
 export default {
     name: "FormEditor",
-    components: {ErrorBlock, FieldsEditor, TimetableEditor, FormGroup48, Card},
+    components: {IntegralEvaluation, ErrorBlock, FieldsEditor, TimetableEditor, FormGroup48, Card},
     props: {
         data: {
             required: false
@@ -127,8 +134,22 @@ export default {
             return {
                 fields: [],
                 timetable: this.empty_timetable(),
+                has_integral_evaluation: false,
                 warning_days: 0
             };
+        },
+        empty_integral_evaluation : function () {
+            return {
+                offset: 0,
+                results: [{
+                    value: 0,
+                    description: ""
+                }]
+            }
+        },
+        add_integral_evaluation: function () {
+            if (!this.form.integral_evaluation)
+                this.form.integral_evaluation = this.empty_integral_evaluation()
         },
 
         check: function () {
@@ -153,6 +174,18 @@ export default {
                 this.form.warning_days = 0
             }
 
+            this.form.integral_evaluation.offset = parseInt(this.form.integral_evaluation.offset)
+            this.form.integral_evaluation.results = this.form.integral_evaluation.results.map(res => {
+                return {
+                    value: parseInt(res.value),
+                    description: res.description
+                }
+            })
+
+            if (this.form.integral_evaluation.results.filter(res => !res.description).length > 0) {
+                this.errors.push('Проверьте корректность описания интеграционной оценки')
+            }
+
             let prepare_field = (field) => {
                 if (['integer', 'float'].includes(field.type)) {
                     field.params.max = parseFloat(field.params.max)
@@ -162,10 +195,16 @@ export default {
                     if (field.params.variants) {
                         field.category = field.params.variants.map(v => v.category).join('|')
                     }
+                    if (this.form.has_integral_evaluation){
+                        field.params.variants.forEach(variant => variant.weight = parseFloat(variant.weight))
+                    }
                 }
                 if (field.type == 'scale') {
+                    field.params.start_from = parseInt(field.params.start_from.toString())
                     field.params.colors = field.params.colors.toString().split(',')
                 }
+                if (field.type == 'checkbox' && this.form.has_integral_evaluation)
+                    field.weight = parseFloat(field.weight)
                 return field
             }
             this.form.fields = this.form.fields.map(prepare_field);

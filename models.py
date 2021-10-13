@@ -216,6 +216,9 @@ class Form(db.Model, Compliance):
     fields = db.Column(db.JSON, nullable=True)
     timetable = db.Column(db.JSON, nullable=True)
 
+    has_integral_evaluation = db.Column(db.Boolean, default=False)
+    integral_evaluation = db.Column(db.JSON, nullable=True)
+
     is_template = db.Column(db.Boolean, default=False)
     template_id = db.Column(db.Integer, db.ForeignKey('form.id', ondelete="set null"), nullable=True)
     categories = db.Column(db.String(512), nullable=True)
@@ -248,6 +251,8 @@ class Form(db.Model, Compliance):
             "patient_description": self.patient_description,
             "thanks_text": self.thanks_text,
             "fields": self.fields,
+            "has_integral_evaluation": self.has_integral_evaluation,
+            "integral_evaluation": self.integral_evaluation,
             "timetable": self.timetable,
             "show_button": self.show_button,
             "button_title": self.button_title,
@@ -276,6 +281,8 @@ class Form(db.Model, Compliance):
         new_form.custom_title = self.custom_title
         new_form.custom_text = self.custom_text
         new_form.fields = self.fields
+        new_form.has_integral_evaluation = self.has_integral_evaluation
+        new_form.integral_evaluation = self.integral_evaluation
         new_form.timetable = self.timetable
         new_form.algorithm_id = self.algorithm_id
         new_form.categories = self.categories

@@ -153,6 +153,8 @@ class FormManager(Manager):
         packet = []
         report = []
 
+        integral_evaluation = 0
+
         for field in form.fields:
             if field['uid'] in answers.keys():
                 if field['type'] == 'file':
@@ -168,6 +170,9 @@ class FormManager(Manager):
                     category = field['params']['variants'][answers[field['uid']]]['category']
                     answer = field['params']['variants'][answers[field['uid']]].get('text')
                     report.append((field.get('text'), answer))
+
+                    if form.has_integral_evaluation:
+                        integral_evaluation += field['params']['variants'][answers[field['uid']]]['weight']
 
                     if category == 'none':
                         continue
@@ -191,13 +196,16 @@ class FormManager(Manager):
                     packet.append((category, value, params))
                 elif field['type'] == 'checkbox':
                     category = field['category']
-                    value = field.get('category_value')
+                    # value = field.get('category_value')
+                    value = answers[field['uid']]
 
                     if not value:
                         report.append((field.get('text'), "Нет"))
                         continue
                     else:
                         report.append((field.get('text'), "Да"))
+                        if form.has_integral_evaluation:
+                            integral_evaluation += field['weight']
 
                     if category == 'none':
                         continue
@@ -220,6 +228,9 @@ class FormManager(Manager):
                     category = field['category']
                     report.append((field.get('text'), answers[field['uid']]))
 
+                    if field['type'] == 'scale' and form.has_integral_evaluation:
+                        integral_evaluation += answers[field['uid']] + form.integral_evaluation['offset']
+
                     if category == 'none':
                         continue
 
@@ -241,11 +252,15 @@ class FormManager(Manager):
                     else:
                         packet.append((category, answers[field['uid']], params))
 
-        if form.template_id:
-            packet.append(('action', 'Заполнение опросника ID {} "{}"'.format(form.template_id, form.title)))
-        else:
-            packet.append(('action', 'Заполнение опросника ID {} "{}"'.format(form_id, form.title)))
+        action_name = 'Заполнение опросника ID {} "{}"'.format(form.template_id if form.template_id else form_id, form.title)
 
+        if form.has_integral_evaluation:
+            for res in form.integral_evaluation['results']:
+                if res['value'] <= integral_evaluation:
+                    action_name += ' - {} ({})'.format(res['description'], integral_evaluation)
+                    break
+
+        packet.append(('action', action_name))
         params = {
             "form_id": form.id
         }
@@ -284,6 +299,8 @@ class FormManager(Manager):
             form.custom_text = data.get('custom_text')
             form.timetable = data.get('timetable')
             form.fields = data.get('fields')
+            form.has_integral_evaluation = bool(data.get('has_integral_evaluation'))
+            form.integral_evaluation = data.get('integral_evaluation')
             form.categories = data.get('categories')
             form.template_id = data.get('template_id')
             form.warning_days = data.get('warning_days')

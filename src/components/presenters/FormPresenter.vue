@@ -40,12 +40,12 @@
             </div>
 
             <div v-if="field.type == 'scale'">
-                <visual-analog-scale :colors="field.params.colors" :from_zero="field.params.from_zero">
+                <visual-analog-scale :colors="field.params.colors" :start_from="field.params.start_from">
                     <div class="row">
                         <div class="col d-flex justify-content-center" v-for="(color, i) in field.params.colors" >
                             <input class="form-check-input monitoring-input" style="margin-left: 4px" type="radio"
                                    :id="'radio_' + field.uid + '_' + i" :name="'radio_' + field.uid"
-                                   v-model="answers[field.uid]" :value="i + (field.params.from_zero ? 0 : 1)">
+                                   v-model="answers[field.uid]" :value="i + field.params.start_from">
                         </div>
                     </div>
                 </visual-analog-scale>
@@ -104,6 +104,7 @@ export default {
 
             if (this.check()) {
                 this.submitted = true
+                console.log(this.answers)
                 this.axios.post(this.url('/api/form/' + this.form.id), this.answers).then(r => Event.fire('form-done')).catch(r => {
                     this.errors.push('Ошибка сохранения')
                     this.submitted = false

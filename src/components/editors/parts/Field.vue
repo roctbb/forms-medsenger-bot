@@ -82,6 +82,9 @@
             <form-group48 title="Значение при включении">
                 <input type="text" class="form-control form-control-sm" v-model="field.category_value"/>
             </form-group48>
+            <form-group48 title="Вес" description="Добавляется, если галочка стоит" v-if="form.has_integral_evaluation">
+                <input type="number" class="form-control form-control-sm" step="0.1" v-model="field.weight"/>
+            </form-group48>
         </div>
 
         <div v-if="field.type == 'float'">
@@ -150,7 +153,13 @@
                            :class="save_clicked && empty(variant.text) ? 'is-invalid' : ''"
                            class="form-control form-control-sm" v-model="variant.text"/>
                 </div>
-                <div class="col-md-2"><br>
+                <div class="col-md-2" v-if="form.has_integral_evaluation">
+                    <small class="text-mutted">Вес</small><br>
+                    <input type="number" step="0.1"
+                           :class="save_clicked && empty(variant.weight) ? 'is-invalid' : ''"
+                           class="form-control form-control-sm" v-model="variant.weight"/>
+                </div>
+                <div class="col-md-1"><br>
                     <a class="btn btn-default btn-sm" v-if="field.params.variants.length > 2"
                        @click="remove_variant(j)">Удалить
                         вариант</a>
@@ -167,18 +176,17 @@
 
         <div v-if="field.type == 'scale'">
             <form-group48 title="Цвета (через запятую)">
-                <input type="text" class="form-control form-control-sm"
-                       v-model="field.params.colors"/>
+                <input type="text" class="form-control form-control-sm" v-model="field.params.colors"/>
             </form-group48>
 
-            <form-group48 title="Начинать с 0">
-                <input type="checkbox" class="form-check" v-model="field.params.from_zero">
+            <form-group48 title="Начинать с">
+                <input type="number" class="form-control form-control-sm" v-model="field.params.start_from">
             </form-group48>
 
-            <form-group48 title="Предпросмотр шкалы">
-                <visual-analog-scale :colors="parse_colors()" :from_zero="field.params.from_zero">
+            <form-group48 title="Предпросмотр шкалы" description="Шкала будет выглядеть так">
+                <visual-analog-scale :colors="parsed_colors" :start_from="parseInt(field.params.start_from)">
                     <div class="row">
-                        <div class="col d-flex justify-content-center" v-for="(color, i) in parse_colors()" >
+                        <div class="col d-flex justify-content-center" v-for="(color, i) in parsed_colors" >
                             <input class="form-check-input monitoring-input" style="margin-left: 5px" type="radio"
                                    :id="'radio_' + field.uid + '_' + i" :name="'radio_' + field.uid">
                         </div>
@@ -231,7 +239,7 @@ export default {
                     this.field.params.variants = [{text: '', category: ''}, {text: '', category: ''}]
                 }
                 if (this.field.type == 'scale') {
-                    this.field.params.from_zero = false
+                    this.field.params.start_from = '0'
                     this.field.params.colors = ["#63bf3a","#72c433","#b0dc40","#eed748","#e9b942","#e3a03c","#e18738","#d96932","#d4482e","#d3312c"]
                 }
             }
@@ -245,11 +253,13 @@ export default {
             this.field.params.variants.splice(j, 1);
             this.$forceUpdate()
         },
-        parse_colors: function () {
-            return this.field.params.colors.toString().split(',')
-        },
         remove: function () {
             Event.fire('remove-field', this.pkey)
+        },
+    },
+    computed : {
+        parsed_colors: function () {
+            return this.field.params.colors.toString().split(',')
         },
     },
     created() {
