@@ -134,9 +134,12 @@ class FormManager(Manager):
                                                                                                       form.warning_days), only_doctor=True, need_answer=True)
                 self.__commit__()
 
-    def __instant_report__(self, contract_id, form, report):
+    def __instant_report__(self, contract_id, form, report, integral_result=None):
         text = 'Пациент заполнил опросник "{}" и дал следующие ответы.<br><br>'.format(form.title)
         text += '<ul>{}</ul>'.format(''.join(list(map(lambda line: '<li><strong>{}</strong>: {};</li>'.format(*line), report))))
+
+        if integral_result:
+            text += '<strong>Результат интегральной оценки:</strong> {}'.format(integral_result)
 
         deadline = time.time() + 1 * 60 * 60
 
@@ -229,7 +232,7 @@ class FormManager(Manager):
                     report.append((field.get('text'), answers[field['uid']]))
 
                     if field['type'] == 'scale' and form.has_integral_evaluation:
-                        integral_evaluation += answers[field['uid']] + form.integral_evaluation['offset']
+                        integral_evaluation += answers[field['uid']]
 
                     if category == 'none':
                         continue
@@ -253,12 +256,18 @@ class FormManager(Manager):
                         packet.append((category, answers[field['uid']], params))
 
         action_name = 'Заполнение опросника ID {} "{}"'.format(form.template_id if form.template_id else form_id, form.title)
+        integral_result = None
 
         if form.has_integral_evaluation:
+            action_name += ' - '
+            integral_evaluation += form.integral_evaluation['offset']
             for res in form.integral_evaluation['results']:
                 if res['value'] <= integral_evaluation:
-                    action_name += ' - {} ({})'.format(res['description'], integral_evaluation)
+                    integral_result = '{}, {} балл(ов)'.format(res['description'], integral_evaluation)
                     break
+            if integral_result is None:
+                integral_result = '{} балл(ов)'.format(integral_evaluation)
+            action_name += integral_result
 
         packet.append(('action', action_name))
         params = {
@@ -266,7 +275,7 @@ class FormManager(Manager):
         }
 
         if form.instant_report:
-            self.__instant_report__(contract_id, form, report)
+            self.__instant_report__(contract_id, form, report, integral_result)
 
         result = bool(self.medsenger_api.add_records(contract_id, packet, params=params))
 
