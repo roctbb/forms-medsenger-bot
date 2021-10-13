@@ -254,13 +254,19 @@ class FormManager(Manager):
 
         action_name = 'Заполнение опросника ID {} "{}"'.format(form.template_id if form.template_id else form_id, form.title)
 
+        custom_params = {}
+
         if form.has_integral_evaluation:
             for res in form.integral_evaluation['results']:
                 if res['value'] <= integral_evaluation:
-                    action_name += ' - {} ({})'.format(res['description'], integral_evaluation)
+                    custom_params['integral_result'] = res['description']
+                    custom_params['integral_value'] = integral_evaluation
+
+                    action_name += ', результат интегральной оценки - {} (баллов: {})'.format(res['description'], integral_evaluation)
                     break
 
-        packet.append(('action', action_name))
+        packet.append(('action', action_name, custom_params))
+
         params = {
             "form_id": form.id
         }
