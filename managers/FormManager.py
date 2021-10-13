@@ -139,7 +139,7 @@ class FormManager(Manager):
         text += '<ul>{}</ul>'.format(''.join(list(map(lambda line: '<li><strong>{}</strong>: {};</li>'.format(*line), report))))
 
         if integral_result:
-            text += '<strong>Результат интегральной оценки:</strong> {}'.format(integral_result)
+            text += '<strong>Результат интегральной оценки</strong> – {}'.format(integral_result)
 
         deadline = time.time() + 1 * 60 * 60
 
@@ -261,19 +261,18 @@ class FormManager(Manager):
         custom_params = {}
 
         if form.has_integral_evaluation:
-            action_name += ' - '
             integral_evaluation += form.integral_evaluation['offset']
             for res in form.integral_evaluation['results']:
                 if res['value'] <= integral_evaluation:
-                    integral_result = '{}, {} балл(ов)'.format(res['description'], integral_evaluation)
+                    integral_result = '{} (баллов: {})'.format(res['description'], integral_evaluation)
                     custom_params['integral_result'] = res['description']
                     custom_params['integral_value'] = integral_evaluation
 
-                    action_name += ', результат интегральной оценки - {} (баллов: {})'.format(res['description'], integral_evaluation)
+                    action_name += ', результат интегральной оценки - {}'.format(integral_result)
                     break
             if integral_result is None:
                 integral_result = '{} балл(ов)'.format(integral_evaluation)
-            action_name += integral_result
+                action_name += ', результат интегральной оценки - {}'.format(integral_result)
 
         packet.append(('action', action_name, custom_params))
 
