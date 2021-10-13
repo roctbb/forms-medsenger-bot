@@ -174,16 +174,19 @@ export default {
                 this.form.warning_days = 0
             }
 
-            this.form.integral_evaluation.offset = parseInt(this.form.integral_evaluation.offset)
-            this.form.integral_evaluation.results = this.form.integral_evaluation.results.map(res => {
-                return {
-                    value: parseInt(res.value),
-                    description: res.description
-                }
-            })
+            if (this.form.integral_evaluation)
+            {
+                 this.form.integral_evaluation.offset = parseInt(this.form.integral_evaluation.offset)
+                this.form.integral_evaluation.results = this.form.integral_evaluation.results.map(res => {
+                    return {
+                        value: parseInt(res.value),
+                        description: res.description
+                    }
+                })
 
-            if (this.form.integral_evaluation.results.filter(res => !res.description).length > 0) {
-                this.errors.push('Проверьте корректность описания интеграционной оценки')
+                if (this.form.integral_evaluation.results.filter(res => !res.description).length > 0) {
+                    this.errors.push('Проверьте корректность описания интеграционной оценки')
+                }
             }
 
             let prepare_field = (field) => {
