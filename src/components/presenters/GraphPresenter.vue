@@ -144,43 +144,7 @@ export default {
                 colors: ['#058DC7', '#50B432', '#aa27ce', '#fcff00',
                     '#24CBE5', '#64E572', '#c355ff', '#fce200', '#6AF9C4'],
                 rangeSelector: {
-                    allButtonsEnabled: true,
-                    buttons: [
-                        {
-                            type: 'hour',
-                            count: 1,
-                            text: 'Час',
-                        },
-                        {
-                            type: 'day',
-                            count: 1,
-                            text: 'День',
-                        }, {
-                            type: 'day',
-                            count: 3,
-                            text: '3 дня',
-                        }, {
-                            type: 'week',
-                            count: 1,
-                            text: 'Неделя',
-                        }, {
-                            type: 'week',
-                            count: 2,
-                            text: '2 недели',
-                        }, {
-                            type: 'month',
-                            count: 1,
-                            text: 'Месяц',
-                        }, {
-                            type: 'all',
-                            text: 'Все'
-                        }],
-                    buttonTheme: {
-                        width: 60
-                    },
-                    selected: 4,
-                    inputEnabled: false,
-                    inputDateFormat: "%b %e, %Y %H:%M"
+                    enabled: false,
                 },
 
                 chart: {

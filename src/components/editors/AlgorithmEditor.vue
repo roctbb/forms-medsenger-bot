@@ -514,9 +514,6 @@ export default {
         remove_condition: function (step, index) {
             step.conditions.splice(index, 1);
         },
-        remove_common_condition: function (index) {
-            this.algorithm.common_conditions.splice(index, 1);
-        },
         remove_step: function (index) {
             this.algorithm.steps.splice(index, 1);
         }

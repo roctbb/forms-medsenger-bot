@@ -51,7 +51,7 @@ class AlgorithmsManager(Manager):
         algorithms = list(filter(lambda x: x.template_id == template_id, contract.patient.algorithms))
 
         for algorithm in algorithms:
-            algorithm.delete()
+            self.db.session.delete(algorithm)
 
         self.__commit__()
 
@@ -442,7 +442,7 @@ class AlgorithmsManager(Manager):
             medicine_manager = MedicineManager(self.medsenger_api, self.db)
 
             contract = contract_manager.get(contract_id)
-            template_id = action['params'].get('template_id')
+            template_id = int(action['params'].get('template_id'))
 
             if action['type'] == 'form':
                 form = form_manager.get(template_id)

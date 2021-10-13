@@ -13,7 +13,7 @@ class FormManager(Manager):
         super(FormManager, self).__init__(*args)
 
     def get(self, form_id):
-        return Form.query.filter_by(id=form_id).first_or_404()
+        return Form.query.filter_by(id=form_id).first()
 
     def get_templates(self):
         return Form.query.filter_by(is_template=True).all()
@@ -39,10 +39,10 @@ class FormManager(Manager):
         return id
 
     def detach(self, template_id, contract):
-        forms = list(filter(lambda x: x.template_id == template_id, contract.patient.forms))
+        forms = list(filter(lambda x: x.template_id == template_id, contract.forms))
 
         for form in forms:
-            form.delete()
+            self.db.session.delete(form)
 
         self.__commit__()
 
@@ -57,7 +57,7 @@ class FormManager(Manager):
             if new_form.categories:
                 self.medsenger_api.add_hooks(contract.id, new_form.categories.split('|'))
 
-            if "times" in custom_params and custom_params.get('times'):
+            if "times" in custom_params and custom_params.get('times', None) != None:
                 try:
                     new_form.timetable = generate_timetable(9, 21, int(custom_params.get('times')))
                 except Exception as e:
@@ -258,18 +258,25 @@ class FormManager(Manager):
         action_name = 'Заполнение опросника ID {} "{}"'.format(form.template_id if form.template_id else form_id, form.title)
         integral_result = None
 
+        custom_params = {}
+
         if form.has_integral_evaluation:
             action_name += ' - '
             integral_evaluation += form.integral_evaluation['offset']
             for res in form.integral_evaluation['results']:
                 if res['value'] <= integral_evaluation:
                     integral_result = '{}, {} балл(ов)'.format(res['description'], integral_evaluation)
+                    custom_params['integral_result'] = res['description']
+                    custom_params['integral_value'] = integral_evaluation
+
+                    action_name += ', результат интегральной оценки - {} (баллов: {})'.format(res['description'], integral_evaluation)
                     break
             if integral_result is None:
                 integral_result = '{} балл(ов)'.format(integral_evaluation)
             action_name += integral_result
 
-        packet.append(('action', action_name))
+        packet.append(('action', action_name, custom_params))
+
         params = {
             "form_id": form.id
         }
