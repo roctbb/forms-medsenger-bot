@@ -793,18 +793,20 @@ class AlgorithmsManager(Manager):
 
             self.__commit__()
 
-            self.check_inits(algorithm, contract)
-            self.check_init_timeouts(algorithm, contract)
+            if algorithm.contract_id == contract.id:
 
-            if not algorithm.current_step:
-                algorithm.current_step = data.get('steps')[0].get('uid')
-                self.change_step(algorithm, algorithm.initial_step)
+                self.check_inits(algorithm, contract)
+                self.check_init_timeouts(algorithm, contract)
 
-            self.update_categories(algorithm)
+                if not algorithm.current_step:
+                    algorithm.current_step = data.get('steps')[0].get('uid')
+                    self.change_step(algorithm, algorithm.initial_step)
+
+                self.update_categories(algorithm)
 
 
 
-            self.__commit__()
+                self.__commit__()
             return algorithm
         except Exception as e:
             log(e)
