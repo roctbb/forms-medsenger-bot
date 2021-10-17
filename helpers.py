@@ -95,10 +95,10 @@ def dir_last_updated(folder):
 
 
 def generate_description(criteria, l_value, r_value, category_names, current_answer):
-    if not current_answer.get('params', {}).get('type'):
-        return ""
-
     if criteria.get('left_mode') == 'value' and criteria.get('right_mode') == 'value' and criteria.get('sign') in ['equal', 'contains'] and current_answer:
+        if not current_answer.get('params', {}).get('type'):
+            return ""
+
         if current_answer['params'].get('type') != 'checkbox':
             return "<strong>{}</strong>: {}".format(current_answer['params']['question_text'], current_answer['params']['answer'])
         else:
