@@ -158,7 +158,7 @@ class MedicineManager(Manager):
             medicine.verify_dose = data.get('verify_dose', False)
             medicine.prescribed_at = datetime.now()
 
-            if data.get('is_template'):
+            if data.get('is_template') or medicine.is_template:
                 medicine.is_template = True
             else:
                 medicine.patient_id = contract.patient_id

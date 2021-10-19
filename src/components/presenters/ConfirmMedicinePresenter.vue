@@ -17,7 +17,7 @@
                        v-model="custom_medicine.title"/>
             </form-group48>
 
-            <form-group48 title="Принятая дозировка">
+            <form-group48 title="Принятая доза">
                 <input class="form-control form-control-sm"
                        :class="save_clicked && empty(custom_medicine.dose) ? 'is-invalid' : ''"
                        v-model="custom_medicine.dose"/>
