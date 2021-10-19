@@ -184,6 +184,7 @@ class Medicine(db.Model, Compliance):
         new_medicine.title = self.title
         new_medicine.rules = self.rules
         new_medicine.dose = self.dose
+        new_medicine.verify_dose = self.verify_dose
 
         new_medicine.timetable = self.timetable
         new_medicine.warning_days = self.warning_days
