@@ -46,6 +46,10 @@ class MedicineManager(Manager):
                     ]
                 }
 
+            self.medsenger_api.send_message(contract.id,
+                                            "Врач назначил препарат {}.{}".format(new_medicine.get_description(True),
+                                                " Мы будем автоматически присылать напоминания об этом." if
+                                                new_medicine.timetable['mode'] != "manual" else ''))
             self.db.session.add(new_medicine)
             self.__commit__()
 
