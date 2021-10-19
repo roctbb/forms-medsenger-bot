@@ -3,7 +3,7 @@
         <h3>{{ medicine.title }}</h3>
         <p>Пожалуйста, заполните данные по приему лекарства.</p>
 
-        <form-group48 title="Принятая дозировка">
+        <form-group48 title="Принятая доза">
             <input class="form-control form-control-sm" v-model="dose"/>
         </form-group48>
 
@@ -32,7 +32,7 @@ export default {
     },
     created() {
         this.medicine = this.data
-        this.dose = this.medicine.rules
+        this.dose = this.medicine.dose
     },
     methods: {
         save: function (medicine) {
