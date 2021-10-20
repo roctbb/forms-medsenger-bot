@@ -75,7 +75,7 @@ class MedicineManager(Manager):
 
                 self.medsenger_api.send_message(medicine.contract_id,
                                                 "Пациент не сообщал о приеме лекарства {} уже {} дней.".format(
-                                                    medicine.title, medicine.warning_days))
+                                                    medicine.title, medicine.warning_days), only_doctor=True)
                 self.__commit__()
 
     def submit(self, medicine_id, contract_id, params=None):
