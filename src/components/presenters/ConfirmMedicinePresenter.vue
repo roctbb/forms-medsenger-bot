@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-if="medicines.length" style="margin-bottom: 15px;">
+        <div style="margin-bottom: 15px;">
             <h5>Записать прием лекарства</h5>
             <div v-if="!custom && medicines.length">
                 <div style="margin-top: 15px;" class="alert alert-info" role="alert">
@@ -118,6 +118,8 @@ export default {
         this.medicines.sort((a, b) => {
             return a.title < b.title ? -1 : a.title > b.title ? 1 : 0
         })
+        console.log(!this.custom && this.medicines.length)
+        console.log(this.medicines.length)
         this.custom_medicine = {
             title: '',
             dose: '',
