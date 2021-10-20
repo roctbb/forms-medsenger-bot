@@ -253,6 +253,11 @@ Vue.mixin({
         }
 
     },
+    computed: {
+        mobile() {
+            return window.innerWidth < window.innerHeight
+        }
+    },
     data() {
         return {
             field_types: {

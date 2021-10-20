@@ -31,6 +31,10 @@ export default {
     methods: {},
     created() {
         this.medicines = this.data
+        this.medicines.sort((a, b) => {
+            return a.title < b.title ? -1 : a.title > b.title ? 1 : 0
+        })
+
     }
 }
 </script>

@@ -136,7 +136,6 @@ export default {
         },
         process_load_answer: function (response) {
             this.data = response.data
-            console.log('data', this.data)
             let start = this.dates_range[0].getTime()
             let end = this.dates_range[1].getTime() + 24 * 60 * 60 * 1000 - 1
 
@@ -583,9 +582,6 @@ export default {
         offset() {
             return -1 * new Date().getTimezoneOffset() * 60
             //return 1
-        },
-        mobile() {
-            return window.innerWidth < window.innerHeight
         }
     },
     created() {
