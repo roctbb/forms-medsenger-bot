@@ -1,8 +1,8 @@
 <template>
     <div>
         <div v-if="medicines.length" style="margin-bottom: 15px;">
-            <div v-if="!custom">
-                <h5>Записать прием лекарства</h5>
+            <h5>Записать прием лекарства</h5>
+            <div v-if="!custom && medicines.length">
                 <div style="margin-top: 15px;" class="alert alert-info" role="alert">
                     <p>Напоминания о плановом приеме лекарств приходят согласно расписанию.
                         Если Вы уже отметили прием препарата с помощью кнопки в чате, поваторно записвать прием не нужно.</p>
@@ -30,7 +30,6 @@
                 <button class="btn btn-primary" @click="custom = true">Другое лекарство</button>
             </div>
             <div v-else>
-                <h5>Другое лекарство</h5>
                 <div>
                     <form-group48 title="Название лекарства">
                         <input class="form-control form-control-sm"
@@ -48,7 +47,7 @@
                         <textarea class="form-control monitoring-input" v-model="custom_medicine.comment"/>
                     </form-group48>
                 </div>
-                <button class="btn btn-danger btn-sm" @click="custom = false">Назад</button>
+                <button class="btn btn-danger btn-sm" @click="custom = false" v-if="medicines.length">Назад</button>
                 <button class="btn btn-success btn-sm" @click="custom_save()">Записать прием</button>
             </div>
         </div>
