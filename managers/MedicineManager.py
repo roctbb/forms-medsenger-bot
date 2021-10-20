@@ -70,7 +70,10 @@ class MedicineManager(Manager):
 
     def check_warning(self, medicine):
         if medicine.warning_days > 0 and medicine.warning_timestamp == 0:
-            if time.time() - max(medicine.filled_timestamp, medicine.prescribed_at.timestamp()) > 24 * 60 * 60 * medicine.warning_days:
+            time_from = medicine.filled_timestamp
+            if medicine.prescribed_at:
+                time_from = max(medicine.filled_timestamp, medicine.prescribed_at.timestamp())
+            if time.time() - time_from > 24 * 60 * 60 * medicine.warning_days:
                 medicine.warning_timestamp = int(time.time())
 
                 self.medsenger_api.send_message(medicine.contract_id,
