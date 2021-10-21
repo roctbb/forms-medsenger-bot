@@ -42,7 +42,7 @@
             <div v-if="field.type == 'scale'">
                 <visual-analog-scale :colors="field.params.colors" :start_from="field.params.start_from">
                     <div class="row">
-                        <div class="col d-flex justify-content-center" v-for="(color, i) in field.params.colors" >
+                        <div class="col-1 d-flex justify-content-center" v-for="(color, i) in field.params.colors" >
                             <input class="form-check-input monitoring-input" style="margin-left: 4px" type="radio"
                                    :id="'radio_' + field.uid + '_' + i" :name="'radio_' + field.uid"
                                    v-model="answers[field.uid]" :value="i + field.params.start_from">
