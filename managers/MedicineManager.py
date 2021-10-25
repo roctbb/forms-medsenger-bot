@@ -69,7 +69,7 @@ class MedicineManager(Manager):
         return medicine
 
     def check_warning(self, medicine):
-        if medicine.warning_days > 0 and medicine.warning_timestamp == 0:
+        if medicine.warning_days and medicine.warning_timestamp == 0:
             time_from = medicine.filled_timestamp
             if medicine.prescribed_at:
                 time_from = max(medicine.filled_timestamp, medicine.prescribed_at.timestamp())
