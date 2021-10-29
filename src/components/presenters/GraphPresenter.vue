@@ -426,7 +426,7 @@ export default {
                                 dose: !medicine.params || medicine.params.dose == null ? '' : ` (${medicine.params.dose})`
                             }],
                             x: +x + this.offset * 1000,
-                            description: `Прием лекарства <strong>${medicine.value}</strong> в `,
+                            description: `Прием препарата <strong>"${medicine.value}"</strong> в `,
                         }
 
                         if (medicine.value in medicines) {
