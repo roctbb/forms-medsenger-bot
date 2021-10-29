@@ -180,7 +180,7 @@ export default {
             this.no_data = true
             this.errors = []
 
-            if (this.type == 'line') {
+            if (this.type == 'line' && !this.group.categories.includes('symptom')) {
                 this.group.categories = this.group.categories.concat(['symptom', 'medicine'])
             }
 
@@ -883,10 +883,10 @@ export default {
         },
         get_comment: function (point, category) {
 
-            let comment = `<strong>${this.format_time(new Date((point.timestamp) * 1000))}</strong>${category}: ${point.value}`
+            let comment = `<strong>${this.format_time(new Date((point.timestamp) * 1000))}</strong> - ${category}: ${point.value}`
             if (point.additions) {
                 point.additions.forEach((value) => {
-                    comment += `<br/><strong style="color: red;">${value['addition']['comment']}</strong>`
+                    comment += `<br><strong style="color: red;">${value['addition']['comment']}</strong>`
                 })
             }
             return comment
