@@ -662,7 +662,7 @@ class AlgorithmsManager(Manager):
             for block_index, block in enumerate(condition['criteria']):
                 for criteria_index, criteria in enumerate(block):
                     if criteria.get('ask_value'):
-                        pair = (criteria.get('value_name'), criteria.get('value'))
+                        pair = (criteria.get('value_name'), criteria.get('value'), criteria.get('value_code'))
 
                         loc = {
                             'algorithm': algorithm.id,
@@ -680,6 +680,7 @@ class AlgorithmsManager(Manager):
                                 pair: {
                                     'name': pair[0],
                                     'value': pair[1],
+                                    'code': pair[2],
                                     'locations': [loc]
                                 }
                             })

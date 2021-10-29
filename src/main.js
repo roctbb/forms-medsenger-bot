@@ -298,6 +298,7 @@ Vue.mixin({
                 ok: window.LOCAL_HOST + '/static/images/icons8-ok-128.png',
                 error: window.LOCAL_HOST + '/static/images/icons8-delete-128.png',
                 graph: window.LOCAL_HOST + '/static/images/icons8-play-graph-report-48.png',
+                heatmap: window.LOCAL_HOST + '/static/images/icons8-heat-map-96.png',
             },
             is_admin: window.IS_ADMIN,
             clinic_id: window.CLINIC_ID,
