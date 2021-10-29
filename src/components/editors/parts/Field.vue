@@ -183,8 +183,12 @@
                 <input type="number" class="form-control form-control-sm" v-model="field.params.start_from">
             </form-group48>
 
+            <form-group48 title="Числа по убыванию">
+                <input type="checkbox" class="form-check" v-model="field.params.reversed">
+            </form-group48>
+
             <form-group48 title="Предпросмотр шкалы" description="Шкала будет выглядеть так">
-                <visual-analog-scale :colors="parsed_colors" :start_from="parseInt(field.params.start_from)">
+                <visual-analog-scale :params="vas_params">
                     <div class="row">
                         <div class="col-1 d-flex justify-content-center" v-for="(color, i) in parsed_colors" >
                             <input class="form-check-input monitoring-input" style="margin-left: 5px" type="radio"
@@ -258,8 +262,12 @@ export default {
         },
     },
     computed : {
-        parsed_colors: function () {
-            return this.field.params.colors.toString().split(',')
+        vas_params: function () {
+            return {
+                colors: this.field.params.colors.toString().split(','),
+                start_from: parseInt(this.field.params.start_from.toString()),
+                reversed: this.field.params.reversed
+            }
         },
     },
     created() {
