@@ -74,7 +74,8 @@
                 </form-group48>
 
                 <form-group48 title="Интегральная оценка результатов" v-if="is_admin">
-                    <input class="form-check" type="checkbox" @change="add_integral_evaluation()" v-model="form.has_integral_evaluation"/>
+                    <input class="form-check" type="checkbox" @change="add_integral_evaluation()"
+                           v-model="form.has_integral_evaluation"/>
                 </form-group48>
             </card>
 
@@ -138,9 +139,10 @@ export default {
                 warning_days: 0
             };
         },
-        empty_integral_evaluation : function () {
+        empty_integral_evaluation: function () {
             return {
                 offset: 0,
+                groups_enabled: false,
                 results: [{
                     value: 0,
                     description: ""
@@ -174,18 +176,33 @@ export default {
                 this.form.warning_days = 0
             }
 
-            if (this.form.integral_evaluation)
-            {
-                 this.form.integral_evaluation.offset = parseInt(this.form.integral_evaluation.offset)
+            if (this.form.integral_evaluation) {
+                this.form.integral_evaluation.offset = parseInt(this.form.integral_evaluation.offset)
                 this.form.integral_evaluation.results = this.form.integral_evaluation.results.map(res => {
                     return {
                         value: parseInt(res.value),
-                        description: res.description
+                        description: res.description,
+                        urgent: res.urgent
                     }
                 })
 
-                if (this.form.integral_evaluation.results.filter(res => !res.description).length > 0) {
-                    this.errors.push('Проверьте корректность описания интеграционной оценки')
+                if (this.form.integral_evaluation.groups_enabled) {
+                    this.form.integral_evaluation.groups = this.form.integral_evaluation.groups.map(group => {
+                        return {
+                            value: parseInt(group.value.toString()),
+                            questions: group.questions.toString().split(',')
+                                .map(q => parseInt(q)).filter(q => !isNaN(q)),
+                            description: group.description
+                        }
+                    })
+
+                    if (this.form.integral_evaluation.groups.filter(group => !group.description || isNaN(group.value)).length > 0) {
+                        this.errors.push('Проверьте корректность групп интеграционной оценки')
+                    }
+                }
+
+                if (this.form.integral_evaluation.results.filter(res => !res.description || isNaN(res.value)).length > 0) {
+                    this.errors.push('Проверьте корректность результатов интеграционной оценки')
                 }
             }
 
@@ -198,16 +215,12 @@ export default {
                     if (field.params.variants) {
                         field.category = field.params.variants.map(v => v.category).join('|')
                     }
-                    if (this.form.has_integral_evaluation){
+                    if (this.form.has_integral_evaluation) {
                         field.params.variants.forEach(variant => variant.weight = parseFloat(variant.weight))
                     }
                 }
-                if (field.type == 'scale') {
-                    field.params.start_from = parseInt(field.params.start_from.toString())
-                    field.params.colors = field.params.colors.toString().split(',')
-                }
                 if (field.type == 'checkbox' && this.form.has_integral_evaluation)
-                    field.weight = parseFloat(field.weight)
+                    field.weight = parseFloat(field.weight.toString())
                 return field
             }
             this.form.fields = this.form.fields.map(prepare_field);
@@ -244,7 +257,7 @@ export default {
         },
         show_validation: function () {
             this.save_clicked = true
-            for (let i of  this.timetable_save_clicked.keys()) {
+            for (let i of this.timetable_save_clicked.keys()) {
                 this.$set(this.timetable_save_clicked, i, true)
             }
             for (let i of this.fields_save_clicked.keys()) {
@@ -288,13 +301,10 @@ export default {
         process_save_error: function (response) {
             this.errors.push('Ошибка сохранения');
         },
-        warning_change: function ()
-        {
-            if (this.form.warning_enabled)
-            {
+        warning_change: function () {
+            if (this.form.warning_enabled) {
                 this.form.warning_days = 7
-            }
-            else {
+            } else {
                 this.form.warning_days = 0
             }
         }
@@ -343,7 +353,7 @@ export default {
             this.save_clicked = false
 
             if (this.form.timetable.points) {
-                for (let i of  this.form.timetable.points.keys()) {
+                for (let i of this.form.timetable.points.keys()) {
                     this.$set(this.timetable_save_clicked, i, false)
                 }
             }
@@ -353,8 +363,7 @@ export default {
             }
 
 
-            if (this.form.warning_days > 0)
-            {
+            if (this.form.warning_days > 0) {
                 this.form.warning_enabled = true;
             }
 

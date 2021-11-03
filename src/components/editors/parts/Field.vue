@@ -1,5 +1,6 @@
 <template>
     <card>
+        <h5>Вопрос {{ pkey + 1 }}</h5>
         <form-group48 title="Текст вопроса">
             <input class="form-control form-control-sm"
                    :class="save_clicked && empty(field.text) ? 'is-invalid' : ''"
@@ -176,11 +177,11 @@
 
         <div v-if="field.type == 'scale'">
             <form-group48 title="Цвета (через запятую)">
-                <input type="text" class="form-control form-control-sm" v-model="field.params.colors"/>
+                <input type="text" class="form-control form-control-sm" v-model="field.params.tmp_colors" @change="update_vas_params()"/>
             </form-group48>
 
             <form-group48 title="Начинать с">
-                <input type="number" class="form-control form-control-sm" v-model="field.params.start_from">
+                <input type="number" class="form-control form-control-sm" v-model="field.params.start_from" @change="update_vas_params()">
             </form-group48>
 
             <form-group48 title="Числа по убыванию">
@@ -188,9 +189,9 @@
             </form-group48>
 
             <form-group48 title="Предпросмотр шкалы" description="Шкала будет выглядеть так">
-                <visual-analog-scale :params="vas_params">
+                <visual-analog-scale :params="field.params">
                     <div class="row">
-                        <div class="col-1 d-flex justify-content-center" v-for="(color, i) in parsed_colors" >
+                        <div class="col-1 d-flex justify-content-center" v-for="(color, i) in field.params.colors" >
                             <input class="form-check-input monitoring-input" style="margin-left: 5px" type="radio"
                                    :id="'radio_' + field.uid + '_' + i" :name="'radio_' + field.uid">
                         </div>
@@ -243,8 +244,9 @@ export default {
                     this.field.params.variants = [{text: '', category: ''}, {text: '', category: ''}]
                 }
                 if (this.field.type == 'scale') {
-                    this.field.params.start_from = '0'
+                    this.field.params.start_from = 0
                     this.field.params.colors = ["#63bf3a","#72c433","#b0dc40","#eed748","#e9b942","#e3a03c","#e18738","#d96932","#d4482e","#d3312c"]
+                    this.field.params.tmp_colors = this.field.params.colors.toString()
                 }
             }
 
@@ -260,19 +262,19 @@ export default {
         remove: function () {
             Event.fire('remove-field', this.pkey)
         },
-    },
-    computed : {
-        vas_params: function () {
-            return {
-                colors: this.field.params.colors.toString().split(','),
-                start_from: parseInt(this.field.params.start_from.toString()),
-                reversed: this.field.params.reversed
-            }
-        },
+        update_vas_params: function () {
+            console.log(`Вопрос ${this.pkey + 1}`, this.field.params)
+            this.field.params.colors = this.field.params.tmp_colors.toString().split(',')
+            this.field.params.start_from = parseInt(this.field.params.start_from.toString())
+            this.$forceUpdate()
+        }
     },
     created() {
         this.mode = this.data.type;
         this.field = this.data;
+
+        if (this.field.type == 'scale')
+            this.field.params.tmp_colors = this.field.params.colors.toString()
     }
 }
 </script>

@@ -40,7 +40,7 @@
             </div>
 
             <div v-if="field.type == 'scale'">
-                <visual-analog-scale :params="field.params">
+                <visual-analog-scale :params="field.params" :colors="field.params.colors">
                     <div class="row">
                         <div class="col-1 d-flex justify-content-center" v-for="(color, i) in field.params.colors" >
                             <input class="form-check-input monitoring-input" style="margin-left: 4px" type="radio"

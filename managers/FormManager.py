@@ -134,12 +134,26 @@ class FormManager(Manager):
                                                                                                       form.warning_days), only_doctor=True, need_answer=True)
                 self.__commit__()
 
-    def __instant_report__(self, contract_id, form, report, integral_result=None):
+    def __integral_result_report__(self, contract_id, form, integral_result):
+        text = '<strong>Результат интегральной оценки опросника "{}"</strong>:<br>{}'.format(form.title, integral_result['result'])
+
+        if form.integral_evaluation.get('groups_enabled'):
+            text += '<br><br>Общая сумма баллов - {}<br><ul>'.format(integral_result['params']['score'])
+            for group in integral_result['params']['group_scores'].keys():
+                text += '<li>{} - {}</li>'.format(group, integral_result['params']['group_scores'][group])
+            text += '</ul>'
+
+        urgent = integral_result['params'].get('urgent', False)
+        self.medsenger_api.send_message(contract_id, text, only_doctor=True, is_urgent=urgent)
+
+        if urgent and form.integral_evaluation.get('warning_text'):
+            self.medsenger_api.send_message(contract_id, form.integral_evaluation.get('warning_text'), only_patient=True, is_urgent=urgent)
+        if not urgent and form.integral_evaluation.get('ok_text'):
+            self.medsenger_api.send_message(contract_id, form.integral_evaluation.get('ok_text'), only_patient=True, is_urgent=urgent)
+
+    def __instant_report__(self, contract_id, form, report):
         text = 'Пациент заполнил опросник "{}" и дал следующие ответы.<br><br>'.format(form.title)
         text += '<ul>{}</ul>'.format(''.join(list(map(lambda line: '<li><strong>{}</strong>: {};</li>'.format(*line), report))))
-
-        if integral_result:
-            text += '<strong>Результат интегральной оценки</strong> – {}'.format(integral_result)
 
         deadline = time.time() + 1 * 60 * 60
 
@@ -156,8 +170,6 @@ class FormManager(Manager):
         packet = []
         report = []
 
-        integral_evaluation = 0
-
         for field in form.fields:
             if field['uid'] in answers.keys():
                 if field['type'] == 'file':
@@ -173,9 +185,6 @@ class FormManager(Manager):
                     category = field['params']['variants'][answers[field['uid']]]['category']
                     answer = field['params']['variants'][answers[field['uid']]].get('text')
                     report.append((field.get('text'), answer))
-
-                    if form.has_integral_evaluation:
-                        integral_evaluation += field['params']['variants'][answers[field['uid']]]['weight']
 
                     if category == 'none':
                         continue
@@ -207,8 +216,6 @@ class FormManager(Manager):
                         continue
                     else:
                         report.append((field.get('text'), "Да"))
-                        if form.has_integral_evaluation:
-                            integral_evaluation += field['weight']
 
                     if category == 'none':
                         continue
@@ -230,9 +237,6 @@ class FormManager(Manager):
                 else:
                     category = field['category']
                     report.append((field.get('text'), answers[field['uid']]))
-
-                    if field['type'] == 'scale' and form.has_integral_evaluation:
-                        integral_evaluation += answers[field['uid']]
 
                     if category == 'none':
                         continue
@@ -256,23 +260,9 @@ class FormManager(Manager):
                         packet.append((category, answers[field['uid']], params))
 
         action_name = 'Заполнение опросника ID {} "{}"'.format(form.template_id if form.template_id else form_id, form.title)
-        integral_result = None
 
-        custom_params = {}
-
-        if form.has_integral_evaluation:
-            integral_evaluation += form.integral_evaluation['offset']
-            for res in form.integral_evaluation['results']:
-                if res['value'] <= integral_evaluation:
-                    integral_result = '{} (баллов: {})'.format(res['description'], integral_evaluation)
-                    custom_params['integral_result'] = res['description']
-                    custom_params['integral_value'] = integral_evaluation
-
-                    action_name += ', результат интегральной оценки - {}'.format(integral_result)
-                    break
-            if integral_result is None:
-                integral_result = '{} балл(ов)'.format(integral_evaluation)
-                action_name += ', результат интегральной оценки - {}'.format(integral_result)
+        integral_result, integral_description, custom_params = self.get_integral_evaluation(answers, form)
+        action_name += integral_description
 
         packet.append(('action', action_name, custom_params))
 
@@ -281,7 +271,11 @@ class FormManager(Manager):
         }
 
         if form.instant_report:
-            self.__instant_report__(contract_id, form, report, integral_result)
+            self.__instant_report__(contract_id, form, report)
+
+        if form.has_integral_evaluation:
+            integral_result = None if integral_result is None else {'result': integral_result, 'params': custom_params}
+            self.__integral_result_report__(contract_id, form, integral_result)
 
         result = bool(self.medsenger_api.add_records(contract_id, packet, params=params))
 
@@ -289,6 +283,69 @@ class FormManager(Manager):
             self.log_done("form_{}".format(form.id), contract_id)
 
         return result
+
+    def get_integral_evaluation(self, answers, form):
+        result = None
+        action_name = ''
+        custom_params = {}
+
+        if not form.has_integral_evaluation:
+            return result, action_name, custom_params
+
+        score = 0
+        group_scores = {}
+
+        if form.integral_evaluation.get('groups_enabled'):
+            for group in form.integral_evaluation['groups']:
+                group_scores.update({group['description']: 0})
+
+        for (i, field) in enumerate(form.fields, start=1):
+            if field['uid'] in answers.keys():
+                ans_score = 0
+
+                if field['type'] == 'radio':
+                    ans_score = field['params']['variants'][answers[field['uid']]]['weight']
+                elif field['type'] == 'checkbox':
+                    if answers[field['uid']]:
+                        ans_score = field['weight']
+                elif field['type'] == 'scale':
+                    ans_score = answers[field['uid']]
+
+                score += ans_score
+
+                if form.integral_evaluation.get('groups_enabled'):
+                    for group in form.integral_evaluation['groups']:
+                        if i in group['questions']:
+                            group_scores[group['description']] += ans_score
+
+        if score == 0:
+            return result, action_name, custom_params
+
+        score += form.integral_evaluation['offset']
+
+        for res in form.integral_evaluation['results']:
+            if res['value'] <= score:
+                result = '{} (баллов: {})'.format(res['description'], score)
+                custom_params['result'] = res['description']
+                custom_params['urgent'] = res.get('urgent', False)
+                custom_params['score'] = score
+                break
+
+        if result is None:
+            result = '{} балл(ов)'.format(score)
+
+        action_name += ', результат интегральной оценки - {}'.format(result)
+
+        if form.integral_evaluation.get('groups_enabled'):
+            custom_params['group_scores'] = group_scores
+
+            for group in form.integral_evaluation['groups']:
+                if group_scores[group['description']] > group['value']:
+                    action_name += ', сумма в группе превышает критическое значение'
+                    custom_params['urgent'] = True
+                    break
+
+        return result, action_name, custom_params
 
     def create_or_edit(self, data, contract):
         try:
