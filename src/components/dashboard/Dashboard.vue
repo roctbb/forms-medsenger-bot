@@ -428,8 +428,7 @@ export default {
                                 alg.steps[loc.step].conditions[loc.condition]
                                     .criteria[loc.block][loc.criteria].value = this.params.edited[i]
                             }
-                            alg.steps[loc.step].conditions[loc.condition]
-                                .criteria[loc.block][loc.criteria].value = this.params.edited[i]
+
                             changed_algorithms.add(alg)
                         })
                     }
