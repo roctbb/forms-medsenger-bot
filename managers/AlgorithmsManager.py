@@ -207,7 +207,8 @@ class AlgorithmsManager(Manager):
         elif mode == 'delta':
             answer = [values[-1] - values[0]], None
         elif mode == 'average':
-            answer = [sum(values) / len(values)], None
+            avg = sum(values) / len(values)
+            answer = [round(avg, 2)], None
         elif mode == 'max':
             answer = [max(values)], None
         elif mode == 'min':
