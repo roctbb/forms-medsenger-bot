@@ -37,7 +37,7 @@ class TimetableManager(Manager):
             last_sent = now - timedelta(minutes=5)
 
         if isinstance(object, Reminder) and object.send_next:
-            return now >= object.send_next > last_sent
+            return now >= localize(object.send_next, object.contract.timezone) > last_sent
 
         points = timetable['points']
         if timetable['mode'] == 'weekly':
