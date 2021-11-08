@@ -1,12 +1,16 @@
 from datetime import datetime, timedelta
 import time
-from helpers import log
+
+import pytz
+
+from helpers import log, timezone_now
 from managers.AlgorithmsManager import AlgorithmsManager
 from managers.FormManager import FormManager
 from managers.Manager import Manager
 from managers.MedicineManager import MedicineManager
 from models import Contract, Patient, Medicine, Reminder
 from threading import Thread
+from pytz import timezone
 
 
 class TimetableManager(Manager):
@@ -17,7 +21,10 @@ class TimetableManager(Manager):
         self.reminder_manager = reminder_manager
 
     def should_run(self, object, today=False):
-        now = datetime.now()
+        now = timezone_now(object.contract.timezone)
+        zone = pytz.timezone(object.contract.timezone)
+        moscow_zone = pytz.timezone('Europe/Moscow')
+
         timetable = object.timetable
 
         if (isinstance(object, Medicine) or isinstance(object, Reminder)) and object.canceled_at is not None:
@@ -27,7 +34,7 @@ class TimetableManager(Manager):
             return False
 
         if object.last_sent:
-            last_sent = max(object.last_sent, now - timedelta(minutes=5))
+            last_sent = max(moscow_zone.localize(object.last_sent), now - timedelta(minutes=5))
         else:
             last_sent = now - timedelta(minutes=5)
 
@@ -43,11 +50,16 @@ class TimetableManager(Manager):
         if today:
             return bool(points)
 
-        points = list(
-            map(lambda p: datetime(minute=int(p['minute']), hour=int(p['hour']), day=now.day, month=now.month, year=now.year),
-                points))
+        timepoints = list(
+            map(lambda p:
+                zone.localize(
+                    datetime(minute=int(p['minute']), hour=int(p['hour']), day=now.day, month=now.month, year=now.year)
+                ),
+                points)
+        )
+        print(timepoints)
 
-        return bool(list(filter(lambda p: p <= now and p > last_sent, points)))
+        return bool(list(filter(lambda p: p <= now and p > last_sent, timepoints)))
 
     def run_if_should(self, objects, manager):
         for object in objects:
@@ -92,7 +104,7 @@ class TimetableManager(Manager):
                     log(e, True)
 
     def count_times(self, obj):
-        now = datetime.now()
+        now = timezone_now(obj.contract.timezone)
         timetable = obj.timetable
         points = timetable['points']
 

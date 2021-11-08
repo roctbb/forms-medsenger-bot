@@ -9,10 +9,9 @@ class ContractManager(Manager):
 
     def add(self, contract_id, clinic_id):
         contract = Contract.query.filter_by(id=contract_id).first()
+        patient_info = self.medsenger_api.get_patient_info(contract_id)
 
         if not contract:
-            patient_info = self.medsenger_api.get_patient_info(contract_id)
-
             try:
                 patient_id = int(patient_info['id'])
             except:
@@ -27,6 +26,7 @@ class ContractManager(Manager):
             self.db.session.add(contract)
 
         contract.is_active = True
+        contract.timezone=patient_info.get('timezone')
         contract.clinic_id = clinic_id
         contract.agent_token = self.medsenger_api.get_agent_token(contract_id).get('agent_token')
 

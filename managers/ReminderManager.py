@@ -1,7 +1,7 @@
 import time
 from datetime import datetime, timedelta
 
-from helpers import log
+from helpers import log, timezone_now
 from managers.Manager import Manager
 from models import Patient, Contract, Reminder
 
@@ -58,7 +58,7 @@ class ReminderManager(Manager):
         else:
             doctor_text = 'Спасибо!'
 
-        deadline = (datetime.now() + timedelta(days=1)).timestamp()
+        deadline = (timezone_now(reminder.contract.timezone) + timedelta(days=1)).timestamp()
 
         if state == 'later':
             result = self.medsenger_api.send_message(reminder.contract_id, 'Напоминание автоматически отправится позже.',
@@ -85,9 +85,9 @@ class ReminderManager(Manager):
         send_next = None
 
         if type == 'hour':
-            send_next = datetime.now() + timedelta(hours=count)
+            send_next = timezone_now(contract.timezone) + timedelta(hours=count)
         elif type == 'day':
-            send_next = datetime.now() + timedelta(days=count)
+            send_next = timezone_now(contract.timezone) + timedelta(days=count)
 
         reminder.send_next = send_next
         reminder.state = 'later'

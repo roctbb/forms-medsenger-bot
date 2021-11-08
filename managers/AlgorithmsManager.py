@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 from sqlalchemy.orm.attributes import flag_modified, flag_dirty
 
-from helpers import log, generate_description, DATACACHE
+from helpers import log, generate_description, DATACACHE, timezone_now
 from managers.ContractsManager import ContractManager
 from managers.FormManager import FormManager
 from managers.Manager import Manager
@@ -138,14 +138,14 @@ class AlgorithmsManager(Manager):
         return value
 
     def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1, algorithm=None,
-                   offset_dim='times', offset_count=0):
+                   offset_dim='times', offset_count=0, zone=None):
         k = (category_name, mode, contract_id, dimension, hours, times, offset_dim, offset_count)
         cached = self.get_from_cache(k)
         if cached != None:
             return cached
 
         if category_name == "exact_date":
-            return [datetime.now().strftime("%Y-%m-%d")], None
+            return [timezone_now(algorithm.contract.timezone).strftime("%Y-%m-%d")], None
         if category_name == "contract_start_date":
             return self.save_to_cache(k, ([self.medsenger_api.get_patient_info(contract_id).get('start_date')], None))
         if category_name == "contract_end_date":
@@ -262,7 +262,7 @@ class AlgorithmsManager(Manager):
 
         return False
 
-    def check_criteria(self, criteria, contract_id, buffer, descriptions, category_names, algorithm=None):
+    def check_criteria(self, criteria, contract_id, buffer, descriptions, category_names, algorithm=None, contract=None):
         category_name = criteria.get('category')
         mode = criteria.get('left_mode')
 
@@ -354,7 +354,7 @@ class AlgorithmsManager(Manager):
             sign = criteria.get('sign')
 
             date_obj = datetime.strptime(date, '%Y-%m-%d') + timedelta(hours=add_hours)
-            now_obj = datetime.now()
+            now_obj = timezone_now(algorithm.contract.timezone)
 
             if sign == 'equal' and 0 <= (now_obj - date_obj).total_seconds() < 60 * 60:
                 return True
