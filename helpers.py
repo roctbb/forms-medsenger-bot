@@ -199,9 +199,16 @@ def generate_timetable(start, end, times):
 
     return timetable
 
-def timezone_now(zone):
+def timezone_now(zone=None):
     if zone:
         tz = timezone(zone)
-        return datetime.now(tz)
     else:
-        return datetime.now()
+        tz = timezone('Europe/Moscow')
+    return datetime.now(tz)
+
+def localize(d, zone=None):
+    if zone:
+        tz = timezone(zone)
+    else:
+        tz = timezone('Europe/Moscow')
+    return tz.localize(d)

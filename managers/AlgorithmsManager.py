@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 from sqlalchemy.orm.attributes import flag_modified, flag_dirty
 
-from helpers import log, generate_description, DATACACHE, timezone_now
+from helpers import log, generate_description, DATACACHE, timezone_now, localize
 from managers.ContractsManager import ContractManager
 from managers.FormManager import FormManager
 from managers.Manager import Manager
@@ -145,7 +145,7 @@ class AlgorithmsManager(Manager):
             return cached
 
         if category_name == "exact_date":
-            return [timezone_now(algorithm.contract.timezone).strftime("%Y-%m-%d")], None
+            return [datetime.now().strftime("%Y-%m-%d")], None
         if category_name == "contract_start_date":
             return self.save_to_cache(k, ([self.medsenger_api.get_patient_info(contract_id).get('start_date')], None))
         if category_name == "contract_end_date":
@@ -353,7 +353,7 @@ class AlgorithmsManager(Manager):
             add_hours = criteria.get('right_hours')
             sign = criteria.get('sign')
 
-            date_obj = datetime.strptime(date, '%Y-%m-%d') + timedelta(hours=add_hours)
+            date_obj = localize(datetime.strptime(date, '%Y-%m-%d'), algorithm.contract.timezone) + timedelta(hours=add_hours)
             now_obj = timezone_now(algorithm.contract.timezone)
 
             if sign == 'equal' and 0 <= (now_obj - date_obj).total_seconds() < 60 * 60:
@@ -616,7 +616,7 @@ class AlgorithmsManager(Manager):
             reset_minutes = int(condition.get('reset_minutes', 0))
             last_fired = int(condition.get('last_fired', 0))
 
-            if time.time() - last_fired < max(reset_minutes  * 60, 10):
+            if time.time() - last_fired < max(reset_minutes * 60, 10):
                 bypass = True
                 print("bypassed")
 
@@ -804,8 +804,6 @@ class AlgorithmsManager(Manager):
                     self.change_step(algorithm, algorithm.initial_step)
 
                 self.update_categories(algorithm)
-
-
 
                 self.__commit__()
             return algorithm

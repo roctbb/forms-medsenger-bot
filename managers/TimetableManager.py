@@ -3,7 +3,7 @@ import time
 
 import pytz
 
-from helpers import log, timezone_now
+from helpers import log, timezone_now, localize
 from managers.AlgorithmsManager import AlgorithmsManager
 from managers.FormManager import FormManager
 from managers.Manager import Manager
@@ -22,8 +22,6 @@ class TimetableManager(Manager):
 
     def should_run(self, object, today=False):
         now = timezone_now(object.contract.timezone)
-        zone = pytz.timezone(object.contract.timezone)
-        moscow_zone = pytz.timezone('Europe/Moscow')
 
         timetable = object.timetable
 
@@ -34,7 +32,7 @@ class TimetableManager(Manager):
             return False
 
         if object.last_sent:
-            last_sent = max(moscow_zone.localize(object.last_sent), now - timedelta(minutes=5))
+            last_sent = max(localize(object.last_sent), now - timedelta(minutes=5))
         else:
             last_sent = now - timedelta(minutes=5)
 
@@ -52,8 +50,9 @@ class TimetableManager(Manager):
 
         timepoints = list(
             map(lambda p:
-                zone.localize(
-                    datetime(minute=int(p['minute']), hour=int(p['hour']), day=now.day, month=now.month, year=now.year)
+                localize(
+                    datetime(minute=int(p['minute']), hour=int(p['hour']), day=now.day, month=now.month, year=now.year),
+                    object.contract.timezone
                 ),
                 points)
         )
