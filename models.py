@@ -88,6 +88,7 @@ class Contract(db.Model):
     tasks = db.Column(db.JSON, nullable=True)
 
     is_admin = db.Column(db.Boolean, default=False)
+    timezone = db.Column(db.String(255), nullable=True)
 
     def as_dict(self, native=False):
         serialized = {

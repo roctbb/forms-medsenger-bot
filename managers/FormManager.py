@@ -107,7 +107,7 @@ class FormManager(Manager):
             action_name = form.custom_title
 
         if not contract_id:
-            deadline = self.calculate_deadline(form.timetable)
+            deadline = self.calculate_deadline(form)
             contract_id = form.contract_id
         else:
             deadline = None

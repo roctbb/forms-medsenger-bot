@@ -129,7 +129,7 @@ class MedicineManager(Manager):
         text = 'Пожалуйста, не забудьте принять лекарство {}.'.format(medicine.get_description())
         action = 'medicine/{}'.format(medicine.id)
         action_name = 'Подтвердить прием'
-        deadline = self.calculate_deadline(medicine.timetable)
+        deadline = self.calculate_deadline(medicine)
 
         result = self.medsenger_api.send_message(medicine.contract_id, text, action, action_name, True, False, True,
                                                  deadline)

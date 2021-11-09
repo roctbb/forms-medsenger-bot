@@ -4,6 +4,7 @@ from datetime import datetime
 from flask import request, abort, jsonify, render_template
 from config import *
 from sentry_sdk import capture_exception
+from pytz import timezone
 import sys, os
 
 DATACACHE = {}
@@ -197,3 +198,17 @@ def generate_timetable(start, end, times):
         })
 
     return timetable
+
+def timezone_now(zone=None):
+    if zone:
+        tz = timezone(zone)
+    else:
+        tz = timezone('Europe/Moscow')
+    return datetime.now(tz)
+
+def localize(d, zone=None):
+    if zone:
+        tz = timezone(zone)
+    else:
+        tz = timezone('Europe/Moscow')
+    return tz.localize(d)

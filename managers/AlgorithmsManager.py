@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 from sqlalchemy.orm.attributes import flag_modified, flag_dirty
 
-from helpers import log, generate_description, DATACACHE
+from helpers import log, generate_description, DATACACHE, timezone_now, localize
 from managers.ContractsManager import ContractManager
 from managers.FormManager import FormManager
 from managers.Manager import Manager
@@ -138,7 +138,7 @@ class AlgorithmsManager(Manager):
         return value
 
     def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1, algorithm=None,
-                   offset_dim='times', offset_count=0):
+                   offset_dim='times', offset_count=0, zone=None):
         k = (category_name, mode, contract_id, dimension, hours, times, offset_dim, offset_count)
         cached = self.get_from_cache(k)
         if cached != None:
@@ -262,7 +262,7 @@ class AlgorithmsManager(Manager):
 
         return False
 
-    def check_criteria(self, criteria, contract_id, buffer, descriptions, category_names, algorithm=None):
+    def check_criteria(self, criteria, contract_id, buffer, descriptions, category_names, algorithm=None, contract=None):
         category_name = criteria.get('category')
         mode = criteria.get('left_mode')
 
@@ -353,8 +353,8 @@ class AlgorithmsManager(Manager):
             add_hours = criteria.get('right_hours')
             sign = criteria.get('sign')
 
-            date_obj = datetime.strptime(date, '%Y-%m-%d') + timedelta(hours=add_hours)
-            now_obj = datetime.now()
+            date_obj = localize(datetime.strptime(date, '%Y-%m-%d'), algorithm.contract.timezone) + timedelta(hours=add_hours)
+            now_obj = timezone_now(algorithm.contract.timezone)
 
             if sign == 'equal' and 0 <= (now_obj - date_obj).total_seconds() < 60 * 60:
                 return True
@@ -616,7 +616,7 @@ class AlgorithmsManager(Manager):
             reset_minutes = int(condition.get('reset_minutes', 0))
             last_fired = int(condition.get('last_fired', 0))
 
-            if time.time() - last_fired < max(reset_minutes  * 60, 10):
+            if time.time() - last_fired < max(reset_minutes * 60, 10):
                 bypass = True
                 print("bypassed")
 
@@ -804,8 +804,6 @@ class AlgorithmsManager(Manager):
                     self.change_step(algorithm, algorithm.initial_step)
 
                 self.update_categories(algorithm)
-
-
 
                 self.__commit__()
             return algorithm
