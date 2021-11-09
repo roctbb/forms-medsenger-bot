@@ -178,6 +178,8 @@ def actions(data):
 @verify_json
 def params(data):
     contract = contract_manager.get(data.get('contract_id'))
+    contract.timezone = medsenger_api.get_patient_info(contract.id).get('timezone')
+    db.session.commit()
     return jsonify(algorithm_manager.search_params(contract))
 
 

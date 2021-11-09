@@ -56,7 +56,6 @@ class TimetableManager(Manager):
                 ),
                 points)
         )
-        print(timepoints)
 
         return bool(list(filter(lambda p: p <= now and p > last_sent, timepoints)))
 
