@@ -459,11 +459,10 @@ def graph_data(args, form):
     data = request.json
     group = data.get('group')
     dates = data.get('dates', None)
-    print('dates', dates)
 
     answer = [(medsenger_api.get_records(contract_id, category_name) if dates is None
                else medsenger_api.get_records(contract_id, category_name, time_from=dates['start'], time_to=dates['end']))
-              for category_name in group['categories'] + ['medicine', 'symptom']]
+              for category_name in group['categories']]
     answer = list(filter(lambda x: x is not None, answer))
 
     return jsonify(answer)
