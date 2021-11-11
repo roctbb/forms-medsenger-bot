@@ -297,6 +297,7 @@ Vue.mixin({
                 algorithm: window.LOCAL_HOST + '/static/images/icons8-artificial-intelligence-96.png',
                 ok: window.LOCAL_HOST + '/static/images/icons8-ok-128.png',
                 error: window.LOCAL_HOST + '/static/images/icons8-delete-128.png',
+                nothing_found: window.LOCAL_HOST + '/static/images/icons8-nothing-found-100.png',
                 graph: window.LOCAL_HOST + '/static/images/icons8-play-graph-report-48.png',
                 heatmap: window.LOCAL_HOST + '/static/images/icons8-heat-map-96.png',
             },

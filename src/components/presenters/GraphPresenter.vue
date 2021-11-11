@@ -1,15 +1,16 @@
 <template>
     <div>
-        <!-- выбор периода -->
+        <!-- выбор периода  -->
         <div class="container" v-if="!mobile">
             <div class="row">
                 <a class="btn btn-danger btn-sm" @click="select_graph()">Назад</a>
-                <button class="btn btn-primary btn-sm" @click="scroll_dates(true)">◂</button>
 
-                <date-picker format="с YYYY-MM-DD" v-model="dates.range[0]" @change="dates.period = -1"></date-picker>
-                <date-picker format="по YYYY-MM-DD" v-model="dates.range[1]" @change="dates.period = -1"></date-picker>
+                <button class="btn btn-primary btn-sm" @click="scroll_dates(true)">&#8592;</button>
 
-                <button class="btn btn-primary btn-sm" @click="scroll_dates(false)">▸</button>
+                <date-picker format="с YYYY-MM-DD" v-model="dates.range[0]" @change="select_dates()"></date-picker>
+                <date-picker format="по YYYY-MM-DD" v-model="dates.range[1]" @change="select_dates()"></date-picker>
+
+                <button class="btn btn-primary btn-sm" @click="scroll_dates(false)">&#8594;</button>
 
                 <select class="form-control form-control-sm col-2" v-model="dates.period" @change="select_period()">
                     <option :value="30">Месяц</option>
@@ -19,8 +20,6 @@
                     <option :value="1" v-if="type == 'line'">День</option>
                     <option :value="-1">Не выбран</option>
                 </select>
-
-                <a class="btn btn-success btn-sm" @click="load_data()">Загрузить</a>
             </div>
         </div>
         <div class="container" v-else>
@@ -28,16 +27,15 @@
                 <a class="btn btn-danger btn-sm" @click="select_graph()">Назад</a>
             </div>
             <div class="row">
-                <date-picker format="с YYYY-MM-DD" v-model="dates.range[0]" class="col" @change="dates.period = -1"></date-picker>
+                <date-picker  class="col" format="с YYYY-MM-DD" v-model="dates.range[0]" @change="select_dates()"></date-picker>
             </div>
             <div class="row">
-                <date-picker format="по YYYY-MM-DD" v-model="dates.range[1]" class="col"
-                             @change="dates.period = -1"></date-picker>
+                <date-picker  class="col" format="по YYYY-MM-DD" v-model="dates.range[1]" @change="select_dates()"></date-picker>
             </div>
 
             <div class="row" style="margin-left: 0; grid-column-gap: 3px;">
-                <button class="btn btn-primary btn-sm" @click="scroll_dates(true)">◂</button>
-                <button class="btn btn-primary btn-sm" @click="scroll_dates(false)">▸</button>
+                <button class="btn btn-primary btn-sm" @click="scroll_dates(true)">&#8592;</button>
+                <button class="btn btn-primary btn-sm" @click="scroll_dates(false)">&#8594;</button>
 
                 <select class="form-control form-control-sm col" style="margin-right: 15px;"
                         v-model="dates.period" @change="select_period()">
@@ -49,29 +47,33 @@
                     <option :value="-1">Не выбран</option>
                 </select>
             </div>
-
-            <a class="btn btn-success btn-sm" @click="load_data()">Загрузить</a>
         </div>
 
         <!-- Ошибки -->
         <hr>
         <error-block :errors="errors" v-if="errors.length"></error-block>
 
-        <!-- График -->
-        <div v-if="loaded">
-            <div style="margin-left: 10px;" class="container"
-                 v-if="type == 'heatmap' && group.categories.includes('symptom') && heatmap_data.medicine_series.length && !no_data">
-                <input type="checkbox" id="show_medicines" @change="show_medicines()" v-model="heatmap_data.show_medicines"/>
-                <label for="show_medicines">Показать лекарства</label>
-            </div>
+        <!-- Тепловая карта -->
+        <div style="margin-left: 10px;" class="container" v-if="type == 'heatmap' && group.categories.includes('symptom')">
+            <input type="checkbox" id="show_medicines" @change="load_data()" v-model="heatmap_data.show_medicines"/>
+            <label for="show_medicines">Показать лекарства</label>
+        </div>
 
+        <!-- Основная часть -->
+        <div v-if="loaded">
+            <!-- График -->
             <div class="container" v-if="type == 'line' && !no_data">
                 <input type="checkbox" v-model="options.legend.enabled" id="show_legend"/>
                 <label for="show_legend">Показать легенду</label>
             </div>
 
-            <div class="text-center text-muted" v-if="no_data">
-                Нет данных за выбранный период
+            <div v-if="no_data" style="margin-top: 100px">
+                <p style="text-align: center"><img :src="images.nothing_found" /></p>
+
+                <p style="text-align: center">
+                    <small>Нет данных за выбранный период.</small>
+                </p>
+
             </div>
 
             <highcharts :constructor-type="'stockChart'" :options="options" v-else></highcharts>
@@ -223,7 +225,7 @@ export default {
                         day: '%d.%m'
                     }
                 },
-                zoom: 'x',
+                // zoom: 'x',
                 yAxis: [
                     this.get_y_axis(0),
                     this.get_y_axis(1)
@@ -247,8 +249,12 @@ export default {
                 rangeSelector: {
                     enabled: false,
                 },
+                navigator: {
+                    enabled: this.type == 'line',
+                },
                 scrollbar: {
-                    step: 1
+                    enabled: false,
+                    // step: 1
                 },
             }
 
@@ -317,7 +323,7 @@ export default {
 
             if (this.type == 'heatmap') {
                 let count = this.heatmap_data.categories.symptoms.length + this.heatmap_data.categories.medicines.length
-                this.options.chart.height = count * 20 + 250
+                this.options.chart.height = count * 20 + 110
 
                 this.options.yAxis[0].categories = this.heatmap_data.categories.symptoms
                 this.options.yAxis[1].categories = this.heatmap_data.categories.medicines
@@ -325,13 +331,19 @@ export default {
                 if (this.group.categories.includes('symptom')) {
                     this.options.yAxis[0].height = 20 * this.heatmap_data.categories.symptoms.length
 
-                    this.options.yAxis[1].top = 20 * this.heatmap_data.categories.symptoms.length + 100
+                    this.options.yAxis[1].top = 20 * this.heatmap_data.categories.symptoms.length + 60
                     this.options.yAxis[1].height = 20 * this.heatmap_data.categories.medicines.length
 
-                    if (this.heatmap_data.categories.symptoms.length) {
-                        this.heatmap_data.show_medicines = false
-                        this.show_medicines()
+                    if (!this.heatmap_data.show_medicines || ! this.heatmap_data.categories.medicines.length) {
+                        this.options.yAxis.splice(1, 2)
+                        let count = this.heatmap_data.categories.medicines.length
+                        this.options.chart.height -= count * 20
                     }
+
+                    console.log( this.options.height)
+                    // if (this.heatmap_data.categories.symptoms.length) {
+                    //     this.heatmap_data.show_medicines = false
+                    // }
                 } else {
                     this.options.yAxis.splice(0, 1)
                 }
@@ -346,7 +358,10 @@ export default {
         get_series: function () {
             let series = []
             series = series.concat(this.get_symptom_series())
-            series = series.concat(this.get_medicine_series())
+
+            if (!(this.type == 'heatmap' && this.group.categories.includes('symptom') && !this.heatmap_data.show_medicines)) {
+                series = series.concat(this.get_medicine_series())
+            }
 
             if (this.type == 'line') {
                 let graph_series = this.get_graph_series()
@@ -719,7 +734,7 @@ export default {
                 boostThreshold: 500,
                 turboThreshold: 0,
                 animation: false,
-                zoomType: 'x',
+                zoomType: '',
                 backgroundColor: "#f8f8fb",
                 height: window.innerHeight,
                 width: window.innerWidth
@@ -915,27 +930,39 @@ export default {
                 this.options.yAxis[1].title.text = ''
                 this.options.chart.height -= 20 * this.heatmap_data.categories.medicines.length
             }
+
         },
 
         scroll_dates: function (back) {
             let start = moment(this.dates.range[0])
             let end = moment(this.dates.range[1])
-            let duration = start.diff(end, 'day')
+            let duration = end.diff(start, 'day')
 
-            if (this.dates.range[1] > this.dates.range[0]) {
-                this.dates.range[0] = new Date(start.add((back ? 1 : -1) * duration, 'days').format('YYYY-MM-DD'))
-                this.dates.range[1] = new Date(end.add((back ? 1 : -1) * duration, 'days').format('YYYY-MM-DD'))
+            if (end > start) {
+                this.dates.range[0] = new Date(start.add((back ? -1 : 1) * duration, 'days').format('YYYY-MM-DD'))
+                this.dates.range[1] = new Date(end.add((back ? -1 : 1) * duration, 'days').format('YYYY-MM-DD'))
             }
+
+            this.$forceUpdate()
+            this.load_data()
+        },
+        select_dates: function () {
+            let duration = moment(this.dates.range[1]).diff(moment(this.dates.range[0]), 'day')
+            this.dates.period = [30, 14, 7, 3, 1].includes(duration) ? duration : -1
+
+            this.$forceUpdate()
+            this.load_data()
         },
         select_period: function () {
             let end = moment(this.dates.range[1])
             this.dates.range[0] = new Date(end.add(-this.dates.period, 'days').format('YYYY-MM-DD'))
+            this.load_data()
         }
     },
     created() {
         this.dates = {
             range: [],
-            period: '2 week'
+            period: 14
         }
         Event.listen('load-graph', (group) => {
             this.type = 'line'
@@ -957,7 +984,7 @@ export default {
                     symptoms: [],
                     medicines: []
                 },
-                show_medicines: true
+                show_medicines: false
             }
 
             this.load_data()
