@@ -213,6 +213,7 @@ def form_preview_page(args, form, form_id):
     contract = contract_manager.get(args.get('contract_id'))
     return get_ui('form', contract, medsenger_api.get_categories(), form_id, True)
 
+
 @app.route('/form/<form_id>', methods=['GET'])
 @verify_args
 def form_page(args, form, form_id):
@@ -506,6 +507,19 @@ def post_form(args, form, form_id):
         })
     else:
         abort(404)
+
+
+@app.route('/api/send_form/<form_id>', methods=['GET'])
+@verify_args
+def send_form(args, form, form_id):
+    form = form_manager.get(form_id)
+    contract_id = int(args.get('contract_id'))
+
+    form_manager.run(form, contract_id=contract_id, commit=False)
+
+    return jsonify({
+        "result": "ok",
+    })
 
 
 @app.route('/api/medicine/<medicine_id>', methods=['GET'])

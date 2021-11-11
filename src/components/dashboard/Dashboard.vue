@@ -47,7 +47,9 @@
                     <div v-else>
                         <small>Добавлен в другом контракте.</small>
                     </div>
-
+                    <div>
+                        <a href="#" @click="send_now(form)">Отправить сейчас</a>
+                    </div>
                     <small v-if="!empty(form.template_id)" class="text-muted">ID шаблона: {{ form.template_id }}</small>
                     <small v-else class="text-muted">ID опросника: {{ form.id }}</small>
                 </card>
@@ -220,7 +222,11 @@
                     <a href="#" v-if="is_admin" @click="delete_form(form)">Удалить</a>
                     <a target="_blank" :href="preview_form_url(form)">Просмотр</a>
 
-                    <small v-if="form.algorithm_id"><br><b>Связанный алгоритм:</b>
+                    <div>
+                        <a href="#" @click="send_now(form)">Отправить сейчас</a>
+                    </div>
+
+                    <small v-if="form.algorithm_id"><b>Связанный алгоритм:</b>
                         {{ find_algorithm(form.algorithm_id).title }}</small>
 
                     <br>
@@ -497,6 +503,26 @@ export default {
         },
         preview_form_url: function (form) {
             return this.url('/preview_form/' + form.id)
+        },
+        send_now: function (form) {
+            let alert = () => {
+                this.$alert("Опросник отправлен!");
+            }
+
+            this.$confirm(
+                {
+                    message: `Отправить опросник ` + form.title + ` пациенту прямо сейчас?`,
+                    button: {
+                        no: 'Нет',
+                        yes: 'Да'
+                    },
+                    callback: confirm => {
+                        if (confirm) {
+                            this.axios.get(this.url('/api/send_form/' + form.id)).then(alert);
+                        }
+                    }
+                }
+            )
         },
         setup_algorithm: function (algorithm) {
             let setup = () => {
