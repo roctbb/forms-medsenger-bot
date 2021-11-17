@@ -28,7 +28,6 @@
                 </div>
 
                 <graph-presenter v-show="state == 'graph-presenter'" :patient="patient"/>
-                <heatmap-presenter v-show="state.startsWith('heatmap-presenter')" :heatmap_type="state.split('-')[2]"/>
             </div>
 
         </div>
@@ -49,7 +48,6 @@ import GraphCategoryChooser from "./components/presenters/GraphCategoryChooser";
 import GraphPresenter from "./components/presenters/GraphPresenter";
 import LoadError from "./components/presenters/LoadError";
 import ConfirmMedicinePresenter from "./components/presenters/ConfirmMedicinePresenter";
-import HeatmapPresenter from "./components/presenters/HeatmapPresenter";
 import DoseVerifier from "./components/presenters/DoseVerifier";
 import ReminderEditor from "./components/editors/ReminderEditor";
 import ReminderConfirmer from "./components/presenters/ReminderConfirmer";
@@ -64,7 +62,6 @@ export default {
         ReminderEditor,
         MedicinesListPresenter,
         DoseVerifier,
-        HeatmapPresenter,
         ConfirmMedicinePresenter,
         LoadError,
         GraphPresenter,
@@ -153,11 +150,11 @@ export default {
             this.state = 'algorithm-manager'
             Event.fire('navigate-to-edit-algorithm-page', algorithm);
         });
-        Event.listen('load-graph', (form) => {
+        Event.listen('load-graph', (params) => {
             this.state = 'graph-presenter'
         });
-        Event.listen('load-heatmap', (heatmap_type) => {
-            this.state = 'heatmap-presenter-' + heatmap_type
+        Event.listen('load-heatmap', (params) => {
+            this.state = 'graph-presenter'
         });
         Event.listen('select-graph', () => {
             this.state = 'graph-category-chooser'
