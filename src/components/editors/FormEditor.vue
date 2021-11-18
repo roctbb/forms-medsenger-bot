@@ -1,8 +1,8 @@
 <template>
     <div v-if="form">
         <div class="form">
-            <h4 v-if="!form.id">Создание опросника</h4>
-            <h4 v-if="form.id">Настройка опросника "{{ form.title }}" </h4>
+            <h5 v-if="!form.id">Создание опросника</h5>
+            <h5 v-if="form.id">Настройка опросника "{{ form.title }}" </h5>
 
             <error-block :errors="errors"/>
 
@@ -100,7 +100,15 @@
     </div>
 </template>
 
+<style scoped>
+h5 {
+    margin-bottom: 10px;
+}
+</style>
+
+
 <script>
+
 
 import Card from "../common/Card";
 import FormGroup48 from "../common/FormGroup-4-8";
