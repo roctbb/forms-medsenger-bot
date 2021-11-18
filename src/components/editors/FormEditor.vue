@@ -1,6 +1,12 @@
 <template>
     <div v-if="form">
         <div class="form">
+            <h4 v-if="!form.id">Создание опросника</h4>
+            <h4 v-if="form.id">Настройка опросника "{{ form.title }}" </h4>
+
+            <error-block :errors="errors"/>
+
+            <timetable-editor :data="form.timetable" :timetable_save_clicked="this.timetable_save_clicked">&nbsp;<a v-if="form.id" class="btn btn-success btn-sm" @click="save()">Сохранить</a></timetable-editor>
             <card title="Параметры опросника">
                 <form-group48 title="Название опросника">
                     <input class="form-control form-control-sm"
@@ -8,12 +14,12 @@
                            v-model="form.title"/>
                 </form-group48>
 
-                <form-group48 title="Краткое описание для врача">
-                    <textarea class="form-control form-control-sm" v-model="form.doctor_description"></textarea>
-                </form-group48>
-
                 <form-group48 title="Описание для пациента">
                     <textarea class="form-control form-control-sm" v-model="form.patient_description"></textarea>
+                </form-group48>
+
+                <form-group48 title="Краткое описание для врача">
+                    <textarea class="form-control form-control-sm" v-model="form.doctor_description"></textarea>
                 </form-group48>
 
                 <form-group48 title="Пациент может заполнить опросник в произвольное время">
@@ -78,8 +84,6 @@
                            v-model="form.has_integral_evaluation"/>
                 </form-group48>
             </card>
-
-            <timetable-editor :data="form.timetable" :timetable_save_clicked="this.timetable_save_clicked"/>
             <integral-evaluation :data="form.integral_evaluation" :save_clicked="save_clicked"
                                  v-if="form.has_integral_evaluation"></integral-evaluation>
 
@@ -87,10 +91,12 @@
             <fields-editor v-if="form" :form="form" :fields="form.fields" :fields_save_clicked="fields_save_clicked"/>
         </div>
 
+         <error-block :errors="errors"/>
+
         <button class="btn btn-danger" @click="go_back()">Вернуться назад</button>
         <button class="btn btn-success" @click="save()">Сохранить <span v-if="form.is_template"> шаблон</span></button>
         <button v-if="!form.id && is_admin" class="btn btn-primary" @click="save(true)">Сохранить как шаблон</button>
-        <error-block :errors="errors"/>
+
     </div>
 </template>
 

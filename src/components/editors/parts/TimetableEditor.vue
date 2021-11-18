@@ -49,8 +49,11 @@
                 </div>
             </div>
 
-            <a class="btn btn-primary btn-sm" @click="add_time_point()">Добавить время</a>
+            <a class="btn btn-primary btn-sm" @click="add_time_point()">Добавить время</a><slot></slot>
 
+        </div>
+        <div v-else>
+          <slot></slot>
         </div>
     </card>
 </template>

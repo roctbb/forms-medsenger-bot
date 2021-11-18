@@ -2,7 +2,7 @@
     <div>
         <div class="card"  :class="additional_class" :style="bg">
             <div class="card-body">
-                <h5 class="card-title" v-if="title">{{ title }}</h5>
+                <h6 class="card-title" v-if="title">{{ title }}</h6>
                 <slot></slot>
             </div>
         </div>
