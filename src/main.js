@@ -3,7 +3,7 @@ import App from './App.vue'
 import axios from "axios";
 import VueConfirmDialog from 'vue-confirm-dialog'
 import vmodal from 'vue-js-modal'
-
+import VueSimpleAlert from "vue-simple-alert";
 
 window.Event = new class {
     constructor() {
@@ -297,7 +297,9 @@ Vue.mixin({
                 algorithm: window.LOCAL_HOST + '/static/images/icons8-artificial-intelligence-96.png',
                 ok: window.LOCAL_HOST + '/static/images/icons8-ok-128.png',
                 error: window.LOCAL_HOST + '/static/images/icons8-delete-128.png',
+                nothing_found: window.LOCAL_HOST + '/static/images/icons8-nothing-found-100.png',
                 graph: window.LOCAL_HOST + '/static/images/icons8-play-graph-report-48.png',
+                heatmap: window.LOCAL_HOST + '/static/images/icons8-heat-map-96.png',
             },
             is_admin: window.IS_ADMIN,
             clinic_id: window.CLINIC_ID,
@@ -313,6 +315,8 @@ window.onresize = function () {
 Vue.use(vmodal, {componentName: 'Modal'})
 Vue.use(VueConfirmDialog)
 Vue.component('vue-confirm-dialog', VueConfirmDialog.default)
+Vue.use(VueSimpleAlert);
+
 
 new Vue({
     el: '#app',

@@ -213,6 +213,7 @@ def form_preview_page(args, form, form_id):
     contract = contract_manager.get(args.get('contract_id'))
     return get_ui('form', contract, medsenger_api.get_categories(), form_id, True)
 
+
 @app.route('/form/<form_id>', methods=['GET'])
 @verify_args
 def form_page(args, form, form_id):
@@ -458,11 +459,10 @@ def graph_data(args, form):
     data = request.json
     group = data.get('group')
     dates = data.get('dates', None)
-    print('dates', dates)
 
     answer = [(medsenger_api.get_records(contract_id, category_name) if dates is None
                else medsenger_api.get_records(contract_id, category_name, time_from=dates['start'], time_to=dates['end']))
-              for category_name in group['categories'] + ['medicine', 'symptom']]
+              for category_name in group['categories']]
     answer = list(filter(lambda x: x is not None, answer))
 
     return jsonify(answer)
@@ -506,6 +506,19 @@ def post_form(args, form, form_id):
         })
     else:
         abort(404)
+
+
+@app.route('/api/send_form/<form_id>', methods=['GET'])
+@verify_args
+def send_form(args, form, form_id):
+    form = form_manager.get(form_id)
+    contract_id = int(args.get('contract_id'))
+
+    form_manager.run(form, contract_id=contract_id, commit=False)
+
+    return jsonify({
+        "result": "ok",
+    })
 
 
 @app.route('/api/medicine/<medicine_id>', methods=['GET'])
