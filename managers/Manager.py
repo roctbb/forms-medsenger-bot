@@ -53,9 +53,10 @@ class Manager:
                                        year=now.year), zone), raw))
             points.sort()
             if points:
+                year = now.year if points[0].month + 1 <= 12 else now.year + 1
                 points.append(
-                    localize(datetime(minute=points[0].minute, hour=points[0].hour, day=points[0].day, month=points[0].month + 1,
-                             year=now.year), zone))
+                    localize(datetime(minute=points[0].minute, hour=points[0].hour, day=points[0].day, month=points[0].month + 1 % 12,
+                             year=year), zone))
         return points
 
     def calculate_deadline(self, obj):
