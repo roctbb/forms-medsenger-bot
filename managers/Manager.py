@@ -55,7 +55,7 @@ class Manager:
             if points:
                 year = now.year if points[0].month + 1 <= 12 else now.year + 1
                 points.append(
-                    localize(datetime(minute=points[0].minute, hour=points[0].hour, day=points[0].day, month=points[0].month + 1 % 12,
+                    localize(datetime(minute=points[0].minute, hour=points[0].hour, day=points[0].day, month=(points[0].month + 1) % 12,
                              year=year), zone))
         return points
 
