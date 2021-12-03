@@ -238,6 +238,8 @@ class Form(db.Model, Compliance):
     template_category = db.Column(db.String(512), default="Общее", nullable=True)
     instant_report = db.Column(db.Boolean, default=False, nullable=False, server_default='false')
 
+    init_text = db.Column(db.Text, nullable=True)
+
     def as_dict(self):
         if self.contract_id:
             sent, done = self.current_month_compliance()

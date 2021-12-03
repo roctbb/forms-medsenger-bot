@@ -75,6 +75,9 @@ class FormManager(Manager):
                 except Exception as e:
                     log(e, False)
 
+            if new_form.init_text:
+                self.medsenger_api.send_message(form.contract_id, form.init_text, only_patient=True)
+
             self.db.session.add(new_form)
             self.__commit__()
 
@@ -364,6 +367,7 @@ class FormManager(Manager):
             form.title = data.get('title')
             form.doctor_description = data.get('doctor_description')
             form.patient_description = data.get('patient_description')
+            form.init_text = data.get('init_text')
             form.thanks_text = data.get('thanks_text')
             form.show_button = bool(data.get('show_button'))
             form.button_title = data.get('button_title')
@@ -406,9 +410,14 @@ class FormManager(Manager):
                 self.db.session.add(form)
             self.__commit__()
 
-            if not form_id and form.timetable.get('send_on_init') and form.contract_id:
+            if not form_id and form.contract_id:
                 self.db.session.refresh(form)
-                self.run(form)
+
+                if form.init_text:
+                    self.medsenger_api.send_message(form.contract_id, form.init_text, only_patient=True)
+
+                if form.timetable.get('send_on_init'):
+                    self.run(form)
 
             return form
         except Exception as e:

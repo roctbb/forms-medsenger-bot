@@ -22,6 +22,10 @@
                     <textarea class="form-control form-control-sm" v-model="form.doctor_description"></textarea>
                 </form-group48>
 
+                <form-group48 v-if="is_admin" title="Приветственное сообщение">
+                    <textarea class="form-control form-control-sm" v-model="form.init_text"></textarea>
+                </form-group48>
+
                 <form-group48 title="Пациент может заполнить опросник в произвольное время">
                     <input class="form-check" type="checkbox" v-model="form.show_button"/>
                 </form-group48>
