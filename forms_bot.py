@@ -531,6 +531,30 @@ def get_medicine(args, form, medicine_id):
 
     return jsonify(medicine.as_dict())
 
+@app.route('/api/medicine/<medicine_id>/disable_notifications', methods=['POST'])
+@verify_args
+def disable_notifications(args, form, medicine_id):
+    medicine = medicine_manager.get(medicine_id)
+
+    if medicine.contract_id != int(args.get('contract_id')):
+        abort(401)
+    medicine.notifications_disabled = True
+    db.session.commit()
+
+    return jsonify(medicine.as_dict())
+
+@app.route('/api/medicine/<medicine_id>/enable_notifications', methods=['POST'])
+@verify_args
+def enable_notifications(args, form, medicine_id):
+    medicine = medicine_manager.get(medicine_id)
+
+    if medicine.contract_id != int(args.get('contract_id')):
+        abort(401)
+    medicine.notifications_disabled = False
+    db.session.commit()
+
+    return jsonify(medicine.as_dict())
+
 
 @app.route('/medicine-manager', methods=['GET'])
 @verify_args

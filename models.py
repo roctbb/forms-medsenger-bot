@@ -124,6 +124,8 @@ class Medicine(db.Model, Compliance):
     prescribed_at = db.Column(db.DateTime, server_default=db.func.now())
     canceled_at = db.Column(db.DateTime, nullable=True)
 
+    notifications_disabled = db.Column(db.Boolean, default=False)
+
     def as_dict(self):
         if self.contract_id:
             sent, done = self.current_month_compliance()
@@ -139,6 +141,7 @@ class Medicine(db.Model, Compliance):
             "dose": self.dose,
             "timetable": self.timetable,
             "is_template": self.is_template,
+            "notifications_disabled": self.notifications_disabled,
             "verify_dose": self.verify_dose,
             "template_id": self.template_id,
             "warning_days": self.warning_days,
