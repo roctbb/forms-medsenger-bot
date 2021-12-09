@@ -296,6 +296,7 @@
 
                     <small v-if="!empty(reminder.template_id)" class="text-muted">
                         ID шаблона: {{ reminder.template_id }}</small>
+                    <small class="text-muted" v-else>ID: {{ reminder.id }}</small>
                 </card>
                 <div v-if="!templates.medicines.length" class="col-md-12">
                     <p style="margin-bottom: 15px;">Список шаблонов пуст.</p>
