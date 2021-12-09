@@ -385,7 +385,7 @@ export default {
     },
     methods: {
         reminder_duration: function (reminder) {
-            if (!reminder.attach_date || !reminder.detach_date) return '&#8734;'
+            if (!reminder.attach_date || !reminder.detach_date) return '∞'
             let attach = moment(reminder.attach_date, "YYYY-MM-DD")
             let detach = moment(reminder.detach_date, "YYYY-MM-DD")
             return moment.duration(detach.diff(attach)).asDays()
