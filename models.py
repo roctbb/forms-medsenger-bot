@@ -416,6 +416,7 @@ class Reminder(db.Model):
     template_id = db.Column(db.Integer, db.ForeignKey('reminder.id', ondelete="set null"), nullable=True)
 
     canceled_at = db.Column(db.DateTime, nullable=True)
+    hide_actions = db.Column(db.Boolean, default=False)
 
     def timetable_description(self):
         if self.timetable['mode'] == 'daily':
@@ -442,6 +443,7 @@ class Reminder(db.Model):
             "canceled_at": self.canceled_at.strftime("%d.%m.%Y") if self.canceled_at else None,
             "is_template": self.is_template,
             "template_id": self.template_id,
+            "hide_actions": self.hide_actions,
         }
 
     def clone(self):
@@ -454,6 +456,7 @@ class Reminder(db.Model):
         new_reminder.attach_date = self.attach_date
         new_reminder.detach_date = self.detach_date
         new_reminder.timetable = self.timetable
+        new_reminder.hide_actions = self.hide_actions
 
         if self.is_template:
             new_reminder.template_id = self.id

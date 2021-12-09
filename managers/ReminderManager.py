@@ -126,6 +126,7 @@ class ReminderManager(Manager):
             reminder.attach_date = data.get('attach_date')
             reminder.detach_date = data.get('detach_date')
             reminder.timetable = data.get('timetable')
+            reminder.hide_actions = data.get('hide_actions')
 
             reminder.state = data.get('state', 'active')
 
