@@ -21,6 +21,21 @@ class ReminderManager(Manager):
 
         return reminder
 
+    def attach(self, template_id, contract):
+        reminder = self.get(template_id)
+
+        if reminder:
+            new_reminder = reminder.clone()
+            new_reminder.contract_id = contract.id
+            new_reminder.patient_id = contract.patient.id
+
+            self.db.session.add(new_reminder)
+            self.__commit__()
+
+            return reminder
+        else:
+            return False
+
     def clear(self, contract):
         Reminder.query.filter_by(contract_id=contract.id).delete()
         self.__commit__()
