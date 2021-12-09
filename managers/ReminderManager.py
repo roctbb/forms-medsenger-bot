@@ -159,14 +159,21 @@ class ReminderManager(Manager):
 
     def run(self, reminder, commit=True):
         result = None
+        action_name = None
+        action_link = None
+
+        if not reminder.hide_actions:
+            action_name = 'Отметить действие'
+            action_link = 'reminder/{}'.format(reminder.id)
+
         if reminder.type == 'patient':
-            result = self.medsenger_api.send_message(reminder.contract_id, reminder.text, action_name='Отметить действие',
+            result = self.medsenger_api.send_message(reminder.contract_id, reminder.text, action_name=action_name,
                                                      action_onetime=True, action_big=False,
-                                                     action_link='reminder/{}'.format(reminder.id), only_patient=True)
+                                                     action_link=action_link, only_patient=True)
         if reminder.type == 'doctor':
-            result = self.medsenger_api.send_message(reminder.contract_id, reminder.text, action_name='Отметить действие',
+            result = self.medsenger_api.send_message(reminder.contract_id, reminder.text, action_name=action_name,
                                                      action_onetime=True, action_big=False,
-                                                     action_link='reminder/{}'.format(reminder.id), only_doctor=True)
+                                                     action_link=action_link, only_doctor=True)
         if result:
             reminder.last_sent = datetime.now()
             if commit:
