@@ -412,8 +412,6 @@ class Reminder(db.Model):
     state = db.Column(db.Text, nullable=True)
     text = db.Column(db.Text, nullable=True)
 
-    last_sent = db.Column(db.DateTime(), nullable=True)
-
     is_template = db.Column(db.Boolean, default=False)
     template_id = db.Column(db.Integer, db.ForeignKey('reminder.id', ondelete="set null"), nullable=True)
 
@@ -451,7 +449,7 @@ class Reminder(db.Model):
         new_reminder.type = self.type
         new_reminder.state = 'active'
 
-        new_reminder.patient_text = self.text
+        new_reminder.text = self.text
 
         new_reminder.attach_date = self.attach_date
         new_reminder.detach_date = self.detach_date
