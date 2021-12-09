@@ -227,6 +227,8 @@ export default {
 
             let validate_field = (field) => {
                 if (!field.text) return true;
+                if (field.type == 'header') return false;
+
                 if (!Object.keys(this.field_types).includes(field.type)) return true;
                 if (['integer', 'float'].includes(field.type)) {
                     if (!this.empty(field.params.max) && !this.empty(field.params.min)) {

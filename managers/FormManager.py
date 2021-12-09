@@ -299,17 +299,19 @@ class FormManager(Manager):
             for group in form.integral_evaluation['groups']:
                 group_scores.update({group['description']: 0})
 
-        for (i, field) in enumerate(form.fields, start=1):
-            if field['uid'] in answers.keys():
+        questions = filter(lambda f: f['type'] != 'header', form.fields)
+
+        for (i, question) in enumerate(questions, start=1):
+            if question['uid'] in answers.keys():
                 ans_score = 0
 
-                if field['type'] == 'radio':
-                    ans_score = field['params']['variants'][answers[field['uid']]]['weight']
-                elif field['type'] == 'checkbox':
-                    if answers[field['uid']]:
-                        ans_score = field['weight']
-                elif field['type'] == 'scale':
-                    ans_score = answers[field['uid']]
+                if question['type'] == 'radio':
+                    ans_score = question['params']['variants'][answers[question['uid']]]['weight']
+                elif question['type'] == 'checkbox':
+                    if answers[question['uid']]:
+                        ans_score = question['weight']
+                elif question['type'] == 'scale':
+                    ans_score = answers[question['uid']]
 
                 score += ans_score
 
