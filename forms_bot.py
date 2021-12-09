@@ -90,7 +90,7 @@ def init(data):
 
         if reminders:
             for template_id in reminders.split(','):
-                reminder_manager.attach(template_id, contract, params)
+                reminder_manager.attach(template_id, contract)
 
         algorithms = params.get('algorithms')
 
