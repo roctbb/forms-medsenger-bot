@@ -86,6 +86,12 @@ def init(data):
                 if form.algorithm_id and str(form.algorithm_id) not in exclude_algorithms:
                     algorithm_manager.attach(form.algorithm_id, contract, params)
 
+        reminders = params.get('reminders')
+
+        if reminders:
+            for template_id in reminders.split(','):
+                reminder_manager.attach(template_id, contract)
+
         algorithms = params.get('algorithms')
 
         if algorithms:
@@ -528,6 +534,30 @@ def get_medicine(args, form, medicine_id):
 
     if medicine.contract_id != int(args.get('contract_id')) and not medicine.is_template:
         abort(401)
+
+    return jsonify(medicine.as_dict())
+
+@app.route('/api/medicine/<medicine_id>/disable_notifications', methods=['POST'])
+@verify_args
+def disable_notifications(args, form, medicine_id):
+    medicine = medicine_manager.get(medicine_id)
+
+    if medicine.contract_id != int(args.get('contract_id')):
+        abort(401)
+    medicine.notifications_disabled = True
+    db.session.commit()
+
+    return jsonify(medicine.as_dict())
+
+@app.route('/api/medicine/<medicine_id>/enable_notifications', methods=['POST'])
+@verify_args
+def enable_notifications(args, form, medicine_id):
+    medicine = medicine_manager.get(medicine_id)
+
+    if medicine.contract_id != int(args.get('contract_id')):
+        abort(401)
+    medicine.notifications_disabled = False
+    db.session.commit()
 
     return jsonify(medicine.as_dict())
 

@@ -165,6 +165,9 @@ def get_step(algorithm, step=None):
     if not step:
         step = algorithm.current_step
 
+    if not step:
+        step = algorithm.initial_step
+
     return next(s for s in algorithm.steps if s['uid'] == step)
 
 

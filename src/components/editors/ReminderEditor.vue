@@ -28,6 +28,11 @@
                                  value-type="YYYY-MM-DD"></date-picker>
                 </form-group48>
 
+                <form-group48 title="Спрятать действия" v-if="is_admin">
+                    <input class="form-check" type="checkbox"
+                           v-model="reminder.hide_actions"/>
+                </form-group48>
+
             </card>
 
             <timetable-editor v-bind:data="reminder.timetable" :timetable_save_clicked="timetable_validated"/>

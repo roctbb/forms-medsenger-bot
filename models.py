@@ -124,6 +124,8 @@ class Medicine(db.Model, Compliance):
     prescribed_at = db.Column(db.DateTime, server_default=db.func.now())
     canceled_at = db.Column(db.DateTime, nullable=True)
 
+    notifications_disabled = db.Column(db.Boolean, default=False)
+
     def as_dict(self):
         if self.contract_id:
             sent, done = self.current_month_compliance()
@@ -139,6 +141,7 @@ class Medicine(db.Model, Compliance):
             "dose": self.dose,
             "timetable": self.timetable,
             "is_template": self.is_template,
+            "notifications_disabled": self.notifications_disabled,
             "verify_dose": self.verify_dose,
             "template_id": self.template_id,
             "warning_days": self.warning_days,
@@ -237,6 +240,8 @@ class Form(db.Model, Compliance):
 
     template_category = db.Column(db.String(512), default="Общее", nullable=True)
     instant_report = db.Column(db.Boolean, default=False, nullable=False, server_default='false')
+
+    init_text = db.Column(db.Text, nullable=True)
 
     def as_dict(self):
         if self.contract_id:
@@ -407,12 +412,11 @@ class Reminder(db.Model):
     state = db.Column(db.Text, nullable=True)
     text = db.Column(db.Text, nullable=True)
 
-    last_sent = db.Column(db.DateTime(), nullable=True)
-
     is_template = db.Column(db.Boolean, default=False)
     template_id = db.Column(db.Integer, db.ForeignKey('reminder.id', ondelete="set null"), nullable=True)
 
     canceled_at = db.Column(db.DateTime, nullable=True)
+    hide_actions = db.Column(db.Boolean, default=False)
 
     def timetable_description(self):
         if self.timetable['mode'] == 'daily':
@@ -439,6 +443,7 @@ class Reminder(db.Model):
             "canceled_at": self.canceled_at.strftime("%d.%m.%Y") if self.canceled_at else None,
             "is_template": self.is_template,
             "template_id": self.template_id,
+            "hide_actions": self.hide_actions,
         }
 
     def clone(self):
@@ -446,11 +451,12 @@ class Reminder(db.Model):
         new_reminder.type = self.type
         new_reminder.state = 'active'
 
-        new_reminder.patient_text = self.text
+        new_reminder.text = self.text
 
         new_reminder.attach_date = self.attach_date
         new_reminder.detach_date = self.detach_date
         new_reminder.timetable = self.timetable
+        new_reminder.hide_actions = self.hide_actions
 
         if self.is_template:
             new_reminder.template_id = self.id

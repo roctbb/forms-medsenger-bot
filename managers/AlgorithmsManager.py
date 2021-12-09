@@ -492,9 +492,9 @@ class AlgorithmsManager(Manager):
 
                 if medicine:
                     medicine_manager.attach(template_id, contract)
-                    self.medsenger_api.send_message(contract_id, 'Вам назначен препарат {} ({} / {}).'.format(
-                        medicine.title, medicine.rules, medicine.timetable_description()),
-                                                    only_patient=True)
+                    #self.medsenger_api.send_message(contract_id, 'Вам назначен препарат {} ({} / {}).'.format(
+                    #    medicine.title, medicine.rules, medicine.timetable_description()),
+                    #                               only_patient=True)
                     self.medsenger_api.send_message(contract_id,
                                                     'Внимание! Препарат {} ({} / {}) назначен автоматически.'.format(
                                                         medicine.title, medicine.rules,

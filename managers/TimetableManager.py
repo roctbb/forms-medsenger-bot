@@ -28,6 +28,9 @@ class TimetableManager(Manager):
         if (isinstance(object, Medicine) or isinstance(object, Reminder)) and object.canceled_at is not None:
             return False
 
+        if isinstance(object, Medicine) and object.notifications_disabled:
+            return False
+
         if timetable.get('mode') == 'manual':
             return False
 
