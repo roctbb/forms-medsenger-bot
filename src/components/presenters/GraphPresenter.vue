@@ -977,11 +977,16 @@ export default {
         scroll_dates: function (back) {
             let start = moment(this.dates.range[0])
             let end = moment(this.dates.range[1])
-            let duration = end.diff(start, 'day')
+            let duration = this.dates.period == -1 ? end.diff(start, 'day') : this.dates.period
 
             if (end > start) {
-                this.dates.range[0] = new Date(start.add((back ? -1 : 1) * duration, 'days').format('YYYY-MM-DD'))
-                this.dates.range[1] = new Date(end.add((back ? -1 : 1) * duration, 'days').format('YYYY-MM-DD'))
+                if (back) {
+                    this.dates.range[1] = this.dates.range[0]
+                    this.dates.range[0] = new Date(start.subtract(duration, 'days').format('YYYY-MM-DD'))
+                } else {
+                    this.dates.range[0] = this.dates.range[1]
+                    this.dates.range[1] = new Date(end.add(duration, 'days').format('YYYY-MM-DD'))
+                }
             }
 
             this.$forceUpdate()
