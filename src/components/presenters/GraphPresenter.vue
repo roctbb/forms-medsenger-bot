@@ -801,7 +801,7 @@ export default {
                                 // calculate statistics for visible points
                                 const max = data.reduce((a, b) => Math.max(a, b))
                                 const min = data.reduce((a, b) => Math.min(a, b))
-                                const average = (data.reduce((a, b) => a + b, 0) / data.length).toFixed(2) * 1
+                                const average = Math.ceil(data.reduce((a, b) => a + b, 0) / data.length)
 
                                 if (data.length > 0) {
                                     stats.push({
@@ -824,7 +824,7 @@ export default {
                             let map_data = []
                             systolic_pressure.data.forEach((s, index) => {
                                 let d = diastolic_pressure.data[index]
-                                map_data.push((s - d) / 3 + d)
+                                map_data.push(Math.ceil((s - d) / 3 + d))
                                 pp_data.push(s - d)
                             })
 
