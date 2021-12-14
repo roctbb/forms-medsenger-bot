@@ -294,7 +294,7 @@ export default {
                     startOnTick: false,
                     endOnTick: false,
                     labels: {
-                        format: '{value}'
+                        format: "{value}"
                     }
                 }
             }
@@ -340,7 +340,7 @@ export default {
                         this.options.chart.height -= count * 20
                     }
 
-                    console.log( this.options.height)
+                    // я не помню зачем эти строки
                     // if (this.heatmap_data.categories.symptoms.length) {
                     //     this.heatmap_data.show_medicines = false
                     // }
@@ -660,7 +660,7 @@ export default {
                             dataLabels: {
                                 enabled: true,
                                 formatter: function () {
-                                    return value.points.length
+                                    return value.points.length != 1 ? value.points.length : ''
                                 },
                             },
                             x: value.x,
