@@ -86,6 +86,12 @@ def init(data):
                 if form.algorithm_id and str(form.algorithm_id) not in exclude_algorithms:
                     algorithm_manager.attach(form.algorithm_id, contract, params)
 
+        reminders = params.get('reminders')
+
+        if reminders:
+            for template_id in reminders.split(','):
+                reminder_manager.attach(template_id, contract)
+
         algorithms = params.get('algorithms')
 
         if algorithms:

@@ -21,6 +21,21 @@ class ReminderManager(Manager):
 
         return reminder
 
+    def attach(self, template_id, contract):
+        reminder = self.get(template_id)
+
+        if reminder:
+            new_reminder = reminder.clone()
+            new_reminder.contract_id = contract.id
+            new_reminder.patient_id = contract.patient.id
+
+            self.db.session.add(new_reminder)
+            self.__commit__()
+
+            return reminder
+        else:
+            return False
+
     def clear(self, contract):
         Reminder.query.filter_by(contract_id=contract.id).delete()
         self.__commit__()
@@ -111,6 +126,7 @@ class ReminderManager(Manager):
             reminder.attach_date = data.get('attach_date')
             reminder.detach_date = data.get('detach_date')
             reminder.timetable = data.get('timetable')
+            reminder.hide_actions = data.get('hide_actions')
 
             reminder.state = data.get('state', 'active')
 
@@ -143,14 +159,21 @@ class ReminderManager(Manager):
 
     def run(self, reminder, commit=True):
         result = None
+        action_name = None
+        action_link = None
+
+        if not reminder.hide_actions:
+            action_name = 'Отметить действие'
+            action_link = 'reminder/{}'.format(reminder.id)
+
         if reminder.type == 'patient':
-            result = self.medsenger_api.send_message(reminder.contract_id, reminder.text, action_name='Отметить действие',
+            result = self.medsenger_api.send_message(reminder.contract_id, reminder.text, action_name=action_name,
                                                      action_onetime=True, action_big=False,
-                                                     action_link='reminder/{}'.format(reminder.id), only_patient=True)
+                                                     action_link=action_link, only_patient=True)
         if reminder.type == 'doctor':
-            result = self.medsenger_api.send_message(reminder.contract_id, reminder.text, action_name='Отметить действие',
+            result = self.medsenger_api.send_message(reminder.contract_id, reminder.text, action_name=action_name,
                                                      action_onetime=True, action_big=False,
-                                                     action_link='reminder/{}'.format(reminder.id), only_doctor=True)
+                                                     action_link=action_link, only_doctor=True)
         if result:
             reminder.last_sent = datetime.now()
             if commit:
