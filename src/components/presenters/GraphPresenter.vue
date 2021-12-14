@@ -169,6 +169,9 @@ export default {
     computed: {
         offset() {
             return -1 * new Date().getTimezoneOffset() * 60
+        },
+        day() {
+            return 24 * 36e5
         }
     },
     methods: {
@@ -190,7 +193,7 @@ export default {
                 group: this.group,
                 dates: {
                     start: this.dates.range[0].getTime() / 1000,
-                    end: this.dates.range[1].getTime() / 1000 + 24 * 60 * 60 - 1,
+                    end: (this.dates.range[1].getTime() + this.day) / 1000 - 1,
                 }
             }
 
@@ -204,7 +207,7 @@ export default {
         process_load_answer: function (response) {
             this.data = response.data
             let start = this.dates.range[0].getTime()
-            let end = this.dates.range[1].getTime() + 24 * 60 * 60 * 1000 - 1
+            let end = this.dates.range[1].getTime() + this.day - 1
 
             this.options = {
                 chart: this.get_chart(),
@@ -217,7 +220,7 @@ export default {
                     gridLineWidth: 1,
                     minorGridLineWidth: 2,
                     minorTickLength: 0,
-                    minorTickInterval: 24 * 3600 * 1000,
+                    minorTickInterval: this.day,
                     min: start,
                     max: end,
                     ordinal: false,
@@ -599,7 +602,7 @@ export default {
                 }
             } else {
                 series.yAxis = +(this.group.categories.length == 2 && data.code == 'medicine')
-                series.colsize = 24 * 36e5
+                series.colsize = this.day
                 series.connectNulls = true
 
                 series.nullColor = '#50B432'
@@ -670,6 +673,7 @@ export default {
                             comment: value.description,
                         }
                     })
+                    res = this.fill_nulls(res, data.y)
                 } else {
                     res = data.values.map(value => {
                         return {
@@ -931,6 +935,43 @@ export default {
                 this.options.chart.height -= 20 * this.heatmap_data.categories.medicines.length
             }
 
+        },
+
+        fill_nulls: function (data, y) {
+            let start = this.dates.range[0]
+            start.setHours(12, 0, 0)
+            start = start.getTime() + this.offset * 1000
+
+            let end = this.dates.range[1]
+            end.setDate(end.getDate() + 1)
+            end.setHours(12, 0, 0)
+            end = end.getTime() + this.offset * 1000
+
+
+            let i = 0
+            let res = []
+
+            while (end >= start) {
+                if (i >= data.length || end != data[i].x) {
+                    res.push({
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function () {
+                                return ''
+                            },
+                        },
+                        x: end,
+                        y: y,
+                        value: null,
+                        comment: 'Нет данных',
+                    })
+                } else {
+                    res.push(data[i])
+                    i += 1
+                }
+                end -= this.day
+            }
+            return res
         },
 
         scroll_dates: function (back) {
