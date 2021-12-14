@@ -244,6 +244,16 @@ export default {
                             return p.comment
                         }).join('<br>')
                     },
+                    style: {
+                        width: this.mobile ? Math.ceil(window.innerWidth * 0.8) + 'px' : undefined
+                    },
+
+                    positioner: function () {
+                        return { x: 10, y: 10 };
+                    },
+                    shadow: false,
+                    backgroundColor: 'rgba(255,255,255,0.8)',
+
                     shared: true,
                     headerFormat: null
                 },
@@ -286,8 +296,16 @@ export default {
                         return this.name
                     }
                 }
+
+                if (!this.mobile) {
+                    this.options.tooltip.positioner = undefined
+                } else {
+                    this.options.chart.height += 100
+                }
             } else {
                 this.options.tooltip.pointFormatter = undefined
+                this.options.tooltip.positioner = undefined
+
                 this.options.colorAxis = {
                     stops: [
                         [0, '#50B432'], [0.1, '#fcff00'], [1, '#ed341b']
@@ -343,7 +361,6 @@ export default {
                         this.options.chart.height -= count * 20
                     }
 
-                    // я не помню зачем эти строки
                     // if (this.heatmap_data.categories.symptoms.length) {
                     //     this.heatmap_data.show_medicines = false
                     // }
@@ -647,7 +664,7 @@ export default {
                         return {
                             x: (value.timestamp + this.offset) * 1000,
                             y: value.value,
-                            comment: this.get_comment(value, data.name),
+                            comment:  this.get_comment(value, data.name),
                             marker: {
                                 symbol: this.get_symbol(value),
                                 lineColor: this.get_color(value),
@@ -741,7 +758,8 @@ export default {
                 zoomType: '',
                 backgroundColor: "#f8f8fb",
                 height: window.innerHeight,
-                width: window.innerWidth
+                width: window.innerWidth,
+                renderTo: 'container'
             }
 
             if (this.type == 'line') {
@@ -901,8 +919,8 @@ export default {
             return undefined;
         },
         get_comment: function (point, category) {
-
-            let comment = `<strong>${this.format_time(new Date((point.timestamp) * 1000))}</strong> - ${category}: ${point.value}`
+            let date = new Date((point.timestamp) * 1000)
+            let comment = `<strong>${this.format_time(date)}</strong> - ${category}: ${point.value}`
             if (point.additions) {
                 point.additions.forEach((value) => {
                     comment += `<br><strong style="color: red;">${value['addition']['comment']}</strong>`
