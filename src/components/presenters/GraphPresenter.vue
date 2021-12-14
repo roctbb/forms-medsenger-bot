@@ -993,6 +993,10 @@ export default {
             this.load_data()
         },
         select_dates: function () {
+            if (this.dates.range.filter(d => d == null).length > 0) {
+                this.errors = ['Пожалуйста, выберите даты']
+                return
+            }
             let duration = moment(this.dates.range[1]).diff(moment(this.dates.range[0]), 'day')
             this.dates.period = [30, 14, 7, 3, 1].includes(duration) ? duration : -1
 
