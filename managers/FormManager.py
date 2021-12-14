@@ -211,14 +211,13 @@ class FormManager(Manager):
                     packet.append((category, value, params))
                 elif field['type'] == 'checkbox':
                     category = field['category']
-                    # value = field.get('category_value')
-                    value = answers[field['uid']]
+                    value = field.get('category_value')
+
+                    if category == 'none':
+                        continue
 
                     if not value:
-                        report.append((field.get('text'), "Нет"))
-                        continue
-                    else:
-                        report.append((field.get('text'), "Да"))
+                        value = answers[field['uid']]
 
                     if category == 'none':
                         continue
