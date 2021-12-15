@@ -1,3 +1,4 @@
+import json
 import time
 import uuid
 from copy import copy, deepcopy
@@ -379,6 +380,12 @@ class AlgorithmsManager(Manager):
             params = deepcopy(action['params'].get('order_params', {}))
 
             if action['params'].get('send_report'):
+                if isinstance(params, str):
+                    try:
+                        params = json.loads(params)
+                    except:
+                        params = {}
+
                 params["message"] = params.get("message", "") + report
 
             self.medsenger_api.send_order(contract_id, order, agent_id, params)
@@ -492,7 +499,7 @@ class AlgorithmsManager(Manager):
 
                 if medicine:
                     medicine_manager.attach(template_id, contract)
-                    #self.medsenger_api.send_message(contract_id, 'Вам назначен препарат {} ({} / {}).'.format(
+                    # self.medsenger_api.send_message(contract_id, 'Вам назначен препарат {} ({} / {}).'.format(
                     #    medicine.title, medicine.rules, medicine.timetable_description()),
                     #                               only_patient=True)
                     self.medsenger_api.send_message(contract_id,
