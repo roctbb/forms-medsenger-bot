@@ -169,6 +169,7 @@ def remove(data):
 @app.route('/actions', methods=['POST'])
 @verify_json
 def actions(data):
+    print("asked for actions")
     contract = contract_manager.get(data.get('contract_id'))
     forms = filter(lambda f: f.show_button, contract.forms)
 

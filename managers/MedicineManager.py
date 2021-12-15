@@ -95,6 +95,8 @@ class MedicineManager(Manager):
 
         self.log_done("form_{}".format(medicine_id), contract_id)
 
+        self.medsenger_api.update_cache(contract_id)
+
         return True
 
     def clear(self, contract):
@@ -115,6 +117,7 @@ class MedicineManager(Manager):
         medicine.canceled_at = datetime.now()
 
         self.__commit__()
+
         return id
 
     def log_request(self, medicine, contract_id=None, description=None):

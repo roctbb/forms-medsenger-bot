@@ -18,33 +18,6 @@ class AlgorithmsManager(Manager):
     def __init__(self, *args):
         super(AlgorithmsManager, self).__init__(*args)
 
-    def __migrate__(self):
-        algorithms = Algorithm.query.all()
-
-        for algorithm in algorithms:
-            algorithm.steps = [
-                {
-                    "uid": str(uuid.uuid4()),
-                    "title": algorithm.title,
-                    "conditions": [
-                        {
-                            "uid": str(uuid.uuid4()),
-                            "criteria": algorithm.criteria,
-                            "positive_actions": [action for action in algorithm.actions if
-                                                 not action['params'].get('is_negative')],
-                            "negative_actions": [action for action in algorithm.actions if
-                                                 action['params'].get('is_negative')]
-                        }
-                    ],
-                    "timeout_actions": [],
-                    "reset_minutes": 0
-                }
-            ]
-            algorithm.current_step = algorithm.steps[0]['uid']
-            algorithm.initial_step = algorithm.steps[0]['uid']
-
-        self.__commit__()
-
     def get(self, algorithm_id):
         return Algorithm.query.filter_by(id=algorithm_id).first()
 
@@ -55,6 +28,8 @@ class AlgorithmsManager(Manager):
             self.db.session.delete(algorithm)
 
         self.__commit__()
+
+        self.medsenger_api.update_cache(contract.id)
 
     def attach(self, template_id, contract, setup=None):
         algorithm = self.get(template_id)
@@ -114,6 +89,9 @@ class AlgorithmsManager(Manager):
         Algorithm.query.filter_by(id=id).delete()
 
         self.__commit__()
+
+        self.medsenger_api.update_cache(contract.id)
+
         return id
 
     def get_templates(self):
@@ -661,6 +639,9 @@ class AlgorithmsManager(Manager):
                 self.__commit__()
             except Exception as e:
                 log(e, False)
+
+        self.medsenger_api.update_cache(contract_id)
+
         return fired
 
     def search_params(self, contract):
@@ -814,6 +795,10 @@ class AlgorithmsManager(Manager):
                 self.update_categories(algorithm)
 
                 self.__commit__()
+
+
+            self.medsenger_api.update_cache(contract.id)
+
             return algorithm
         except Exception as e:
             log(e)

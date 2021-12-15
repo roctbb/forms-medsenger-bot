@@ -36,6 +36,9 @@ class FormManager(Manager):
         Form.query.filter_by(id=id).delete()
 
         self.__commit__()
+
+        self.medsenger_api.update_cache(contract.id)
+
         return id
 
     def detach(self, template_id, contract):
@@ -84,7 +87,6 @@ class FormManager(Manager):
             if new_form.timetable.get('send_on_init'):
                 self.db.session.refresh(new_form)
                 self.run(new_form)
-
             return new_form
         else:
             return False
@@ -284,6 +286,8 @@ class FormManager(Manager):
         if result:
             self.log_done("form_{}".format(form.id), contract_id)
 
+        self.medsenger_api.update_cache(contract_id)
+
         return result
 
     def get_integral_evaluation(self, answers, form):
@@ -419,6 +423,8 @@ class FormManager(Manager):
 
                 if form.timetable.get('send_on_init'):
                     self.run(form)
+
+            self.medsenger_api.update_cache(contract.id)
 
             return form
         except Exception as e:
