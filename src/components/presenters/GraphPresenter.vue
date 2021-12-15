@@ -169,6 +169,9 @@ export default {
     computed: {
         offset() {
             return -1 * new Date().getTimezoneOffset() * 60
+        },
+        day() {
+            return 24 * 36e5
         }
     },
     methods: {
@@ -190,7 +193,7 @@ export default {
                 group: this.group,
                 dates: {
                     start: this.dates.range[0].getTime() / 1000,
-                    end: this.dates.range[1].getTime() / 1000 + 24 * 60 * 60 - 1,
+                    end: (this.dates.range[1].getTime() + this.day) / 1000 - 1,
                 }
             }
 
@@ -204,7 +207,7 @@ export default {
         process_load_answer: function (response) {
             this.data = response.data
             let start = this.dates.range[0].getTime()
-            let end = this.dates.range[1].getTime() + 24 * 60 * 60 * 1000 - 1
+            let end = this.dates.range[1].getTime() + this.day - 1
 
             this.options = {
                 chart: this.get_chart(),
@@ -217,7 +220,7 @@ export default {
                     gridLineWidth: 1,
                     minorGridLineWidth: 2,
                     minorTickLength: 0,
-                    minorTickInterval: 24 * 3600 * 1000,
+                    minorTickInterval: this.day,
                     min: start,
                     max: end,
                     ordinal: false,
@@ -241,6 +244,16 @@ export default {
                             return p.comment
                         }).join('<br>')
                     },
+                    style: {
+                        width: this.mobile ? Math.ceil(window.innerWidth * 0.8) + 'px' : undefined
+                    },
+
+                    positioner: function () {
+                        return { x: 10, y: 10 };
+                    },
+                    shadow: false,
+                    backgroundColor: 'rgba(255,255,255,0.8)',
+
                     shared: true,
                     headerFormat: null
                 },
@@ -283,8 +296,16 @@ export default {
                         return this.name
                     }
                 }
+
+                if (!this.mobile) {
+                    this.options.tooltip.positioner = undefined
+                } else {
+                    this.options.chart.height += 100
+                }
             } else {
                 this.options.tooltip.pointFormatter = undefined
+                this.options.tooltip.positioner = undefined
+
                 this.options.colorAxis = {
                     stops: [
                         [0, '#50B432'], [0.1, '#fcff00'], [1, '#ed341b']
@@ -294,7 +315,7 @@ export default {
                     startOnTick: false,
                     endOnTick: false,
                     labels: {
-                        format: '{value}'
+                        format: "{value}"
                     }
                 }
             }
@@ -340,7 +361,6 @@ export default {
                         this.options.chart.height -= count * 20
                     }
 
-                    console.log( this.options.height)
                     // if (this.heatmap_data.categories.symptoms.length) {
                     //     this.heatmap_data.show_medicines = false
                     // }
@@ -599,7 +619,7 @@ export default {
                 }
             } else {
                 series.yAxis = +(this.group.categories.length == 2 && data.code == 'medicine')
-                series.colsize = 24 * 36e5
+                series.colsize = this.day
                 series.connectNulls = true
 
                 series.nullColor = '#50B432'
@@ -644,7 +664,7 @@ export default {
                         return {
                             x: (value.timestamp + this.offset) * 1000,
                             y: value.value,
-                            comment: this.get_comment(value, data.name),
+                            comment:  this.get_comment(value, data.name),
                             marker: {
                                 symbol: this.get_symbol(value),
                                 lineColor: this.get_color(value),
@@ -660,7 +680,7 @@ export default {
                             dataLabels: {
                                 enabled: true,
                                 formatter: function () {
-                                    return value.points.length
+                                    return value.points.length != 1 ? value.points.length : ''
                                 },
                             },
                             x: value.x,
@@ -670,6 +690,7 @@ export default {
                             comment: value.description,
                         }
                     })
+                    res = this.fill_nulls(res, data.y)
                 } else {
                     res = data.values.map(value => {
                         return {
@@ -737,7 +758,8 @@ export default {
                 zoomType: '',
                 backgroundColor: "#f8f8fb",
                 height: window.innerHeight,
-                width: window.innerWidth
+                width: window.innerWidth,
+                renderTo: 'container'
             }
 
             if (this.type == 'line') {
@@ -779,7 +801,7 @@ export default {
                                 // calculate statistics for visible points
                                 const max = data.reduce((a, b) => Math.max(a, b))
                                 const min = data.reduce((a, b) => Math.min(a, b))
-                                const average = (data.reduce((a, b) => a + b, 0) / data.length).toFixed(2) * 1
+                                const average = Math.ceil(data.reduce((a, b) => a + b, 0) / data.length)
 
                                 if (data.length > 0) {
                                     stats.push({
@@ -802,7 +824,7 @@ export default {
                             let map_data = []
                             systolic_pressure.data.forEach((s, index) => {
                                 let d = diastolic_pressure.data[index]
-                                map_data.push((s - d) / 3 + d)
+                                map_data.push(Math.ceil((s - d) / 3 + d))
                                 pp_data.push(s - d)
                             })
 
@@ -897,8 +919,8 @@ export default {
             return undefined;
         },
         get_comment: function (point, category) {
-
-            let comment = `<strong>${this.format_time(new Date((point.timestamp) * 1000))}</strong> - ${category}: ${point.value}`
+            let date = new Date((point.timestamp) * 1000)
+            let comment = `<strong>${this.format_time(date)}</strong> - ${category}: ${point.value}`
             if (point.additions) {
                 point.additions.forEach((value) => {
                     comment += `<br><strong style="color: red;">${value['addition']['comment']}</strong>`
@@ -933,20 +955,66 @@ export default {
 
         },
 
+        fill_nulls: function (data, y) {
+            let start = this.dates.range[0]
+            start.setHours(12, 0, 0)
+            start = start.getTime() + this.offset * 1000
+
+            let end = this.dates.range[1]
+            end.setDate(end.getDate() + 1)
+            end.setHours(12, 0, 0)
+            end = end.getTime() + this.offset * 1000
+
+
+            let i = 0
+            let res = []
+
+            while (end >= start) {
+                if (i >= data.length || end != data[i].x) {
+                    res.push({
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function () {
+                                return ''
+                            },
+                        },
+                        x: end,
+                        y: y,
+                        value: null,
+                        comment: 'Нет данных',
+                    })
+                } else {
+                    res.push(data[i])
+                    i += 1
+                }
+                end -= this.day
+            }
+            return res
+        },
+
         scroll_dates: function (back) {
             let start = moment(this.dates.range[0])
             let end = moment(this.dates.range[1])
-            let duration = end.diff(start, 'day')
+            let duration = this.dates.period == -1 ? end.diff(start, 'day') : this.dates.period
 
             if (end > start) {
-                this.dates.range[0] = new Date(start.add((back ? -1 : 1) * duration, 'days').format('YYYY-MM-DD'))
-                this.dates.range[1] = new Date(end.add((back ? -1 : 1) * duration, 'days').format('YYYY-MM-DD'))
+                if (back) {
+                    this.dates.range[1] = this.dates.range[0]
+                    this.dates.range[0] = new Date(start.subtract(duration, 'days').format('YYYY-MM-DD'))
+                } else {
+                    this.dates.range[0] = this.dates.range[1]
+                    this.dates.range[1] = new Date(end.add(duration, 'days').format('YYYY-MM-DD'))
+                }
             }
 
             this.$forceUpdate()
             this.load_data()
         },
         select_dates: function () {
+            if (this.dates.range.filter(d => d == null).length > 0) {
+                this.errors = ['Пожалуйста, выберите даты']
+                return
+            }
             let duration = moment(this.dates.range[1]).diff(moment(this.dates.range[0]), 'day')
             this.dates.period = [30, 14, 7, 3, 1].includes(duration) ? duration : -1
 

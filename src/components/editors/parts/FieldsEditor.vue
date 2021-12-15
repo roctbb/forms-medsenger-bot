@@ -1,8 +1,12 @@
 <template>
     <div>
-        <field :form="form" v-for="(field, i) in fields" :data="field" :pkey="i" :key="field.uid" :save_clicked="fields_save_clicked[i]"></field>
+        <field :form="form" v-for="(field, i) in fields" :data="field" :pkey="i" :key="field.uid" :num="get_field_num(field.uid)"
+               :save_clicked="fields_save_clicked[i]"></field>
 
-        <p class="text-center"><a class="btn btn-primary btn-sm" @click="add_field()">Добавить вопрос</a></p>
+        <div class="row justify-content-md-center" style="column-gap: 5px; margin-bottom: 10px">
+            <a class="btn btn-primary btn-sm" @click="add_field()">Добавить вопрос</a>
+            <a class="btn btn-primary btn-sm" @click="add_header()">Добавить подзаголовок</a>
+        </div>
     </div>
 </template>
 
@@ -26,17 +30,27 @@ export default {
         }
     },
     data() {
-        return {
-        }
+        return {}
     },
     created() {
         console.log(this.form)
         Event.listen('remove-field', (i) => this.remove_field(i));
     },
     methods: {
+        get_field_num: function (uid) {
+            return this.fields.filter(f => f.type != 'header').findIndex(f => f.uid == uid) + 1
+        },
         add_field: function () {
             this.fields.push({
                 type: 'integer',
+                params: {},
+                uid: this.uuidv4()
+            });
+            this.fields_save_clicked.push(false)
+        },
+        add_header: function () {
+            this.fields.push({
+                type: 'header',
                 params: {},
                 uid: this.uuidv4()
             });
@@ -47,7 +61,7 @@ export default {
                 message: `Вы уверены?`,
                 button: {
                     no: 'Нет',
-                    yes: 'Удалить вопрос'
+                    yes: 'Удалить ' + (this.fields[index].type != 'header' ? 'вопрос' : 'подзаголовок')
                 },
                 callback: confirm => {
                     if (confirm) {
