@@ -2,14 +2,16 @@
     <div class="form-group form-group-sm row" :class="{'required': required}">
         <div class="col-md-4" :class="{'col-10': check}">
             <strong :class="{'big': big}">{{ title }}</strong>
+
+            <span class="text-muted" v-if="description">{{ description }}</span>
         </div>
         <div class="col-md-8" :class="{'col-2': check}">
             <slot></slot>
-            <span class="text-muted" v-if="description">{{ description }}</span>
             <div v-if="errors">
                 <span style="color: red;">{{ errors }}</span>
             </div>
         </div>
+
     </div>
 </template>
 
