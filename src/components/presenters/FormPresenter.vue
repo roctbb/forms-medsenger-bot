@@ -21,15 +21,26 @@
                                :class="save_clicked && field.required &&
                        (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
                                v-if="field.type == 'integer'" :required="field.required" v-model="answers[field.uid]"/>
+
+
                         <input type="number" min="field.params.min" max="field.params.max" step="0.01"
                                class="form-control monitoring-input"
                                :class="save_clicked && field.required &&
                        (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
-                               v-if="field.type == 'float'" :required="field.required" v-model="answers[field.uid]"/>
+                               v-if="field.type == 'float' && field.category != 'temperature'" :required="field.required" v-model="answers[field.uid]"/>
+
+                        <input type="number" min="field.params.min" max="field.params.max" step="0.01"
+                               class="form-control monitoring-input"
+                               :class="save_clicked && field.required &&
+                       (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
+                               v-if="field.category == 'temperature'" v-mask="'##.#'" :required="field.required" v-model="answers[field.uid]"/>
+
+
                         <input type="text" class="form-control monitoring-input" v-if="field.type == 'text'"
                                :required="field.required"
                                :class="save_clicked && field.required && !answers[field.uid] && answers[field.uid] !== 0 ? 'is-invalid' : ''"
                                v-model="answers[field.uid]"/>
+
                         <input type="file" class="monitoring-input" v-if="field.type == 'file'"
                                :required="field.required"
                                v-bind:ref="'file_' + field.uid" v-on:change="submit_file(field)"/>
@@ -79,7 +90,9 @@
 
         </div>
 
-        <button @click="save()" class="btn btn-success btn-lg" :disabled="submitted || is_preview">Отправить ответ</button>
+        <error-block :errors="errors"/>
+
+        <button style="margin-bottom: 20px;" @click="save()" class="btn btn-success btn-lg" :disabled="submitted || is_preview">Отправить ответ</button>
 
 
     </div>

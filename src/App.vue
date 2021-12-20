@@ -9,7 +9,7 @@
                     <dashboard :patient="patient" :templates="templates" v-show="state == 'dashboard'"/>
                     <form-editor v-show="state == 'form-manager'"/>
                     <medicine-editor v-show="state == 'medicine-manager'"/>
-                    <reminder-editor v-show="state == 'reminder-manager'" />
+                    <reminder-editor v-show="state == 'reminder-manager'"/>
                     <algorithm-editor v-show="state == 'algorithm-manager'"/>
                     <action-done v-if="state == 'done'"></action-done>
                 </div>
@@ -25,8 +25,8 @@
                     <action-done v-if="state == 'done'"></action-done>
                     <load-error v-if="state == 'load-error'"></load-error>
                 </div>
-                <div class="slim-container" v-if="state == 'form-presenter'">
-                     <form-presenter :data="form" v-if="state == 'form-presenter'"/>
+                <div class="container slim-container" v-if="state == 'form-presenter'">
+                    <form-presenter :data="form" v-if="state == 'form-presenter'"/>
                 </div>
 
                 <graph-presenter v-show="state == 'graph-presenter'" :patient="patient"/>
@@ -56,7 +56,6 @@ import ReminderConfirmer from "./components/presenters/ReminderConfirmer";
 import MedicinesListPresenter from "./components/presenters/MedicinesListPresenter";
 
 
-
 export default {
     name: 'app',
     components: {
@@ -69,7 +68,8 @@ export default {
         GraphPresenter,
         GraphCategoryChooser,
         ActionDone,
-        DashboardHeader, AlgorithmEditor, FormPresenter, FormEditor, Loading, Dashboard, MedicineEditor},
+        DashboardHeader, AlgorithmEditor, FormPresenter, FormEditor, Loading, Dashboard, MedicineEditor
+    },
     data() {
         return {
             state: "loading",
@@ -278,11 +278,14 @@ body {
     background-color: #f8f8fb;
 }
 
-.slim-container {
-    max-width: 100% !important;
-    padding-left: 10px;
-    padding-right: 10px;
+@media screen and (max-width: 900px) {
+    .slim-container {
+        max-width: 100% !important;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
 }
+
 
 </style>
 
