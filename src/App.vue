@@ -21,10 +21,12 @@
                     <reminder-confirmer :data="reminder" v-if="state == 'confirm-reminder'"></reminder-confirmer>
                     <medicines-list-presenter :data="patient.medicines" v-if="state == 'medicines-list'"/>
                     <dose-verifier :data="medicine" v-if="state == 'verify-dose'"/>
-                    <form-presenter :data="form" v-if="state == 'form-presenter'"/>
                     <graph-category-chooser :data="available_categories" v-if="state == 'graph-category-chooser'"/>
                     <action-done v-if="state == 'done'"></action-done>
                     <load-error v-if="state == 'load-error'"></load-error>
+                </div>
+                <div class="slim-container" v-if="state == 'form-presenter'">
+                     <form-presenter :data="form" v-if="state == 'form-presenter'"/>
                 </div>
 
                 <graph-presenter v-show="state == 'graph-presenter'" :patient="patient"/>
@@ -276,7 +278,7 @@ body {
     background-color: #f8f8fb;
 }
 
-.container {
+.slim-container {
     max-width: 100% !important;
     padding-left: 10px;
     padding-right: 10px;
