@@ -276,5 +276,11 @@ body {
     background-color: #f8f8fb;
 }
 
+.container {
+    max-width: 100% !important;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
 </style>
 

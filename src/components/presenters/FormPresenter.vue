@@ -11,6 +11,7 @@
 
                     <h5 v-if="field.type == 'header'">{{ field.text }}</h5>
                     <form-group48 v-else
+                                  :check="field.type == 'checkbox'"
                                   :big="true"
                                   :required="field.required"
                                   :title="field.text" :key="i"
@@ -270,5 +271,8 @@ strong {
 .form-check {
      margin-top: 15px;
      margin-bottom: 15px;
+}
+.card-body {
+    padding: 1rem;
 }
 </style>
