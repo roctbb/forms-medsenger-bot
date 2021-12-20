@@ -3,73 +3,82 @@
         <error-block :errors="errors"/>
         <h3>{{ this.form.title }}</h3>
         <p v-html="br(form.patient_description)"></p>
-        <div v-for="(field, i) in form.fields" v-if="!field.show_if || answers[field.show_if]">
 
-            <h5 v-if="field.type == 'header'">{{ field.text }}</h5>
-            <form-group48 v-else
-                          :required="field.required"
-                          :title="field.text" :key="i"
-                          :description="field.description" :errors="field_errors[field.uid]">
-                <input type="number" min="field.params.min" max="field.params.max" step="1"
-                       class="form-control monitoring-input"
-                       :class="save_clicked && field.required &&
+        <div class="card" v-for="block in blocks">
+            <div class="card-body">
+
+                <div v-for="(field, i) in block" v-if="!field.show_if || answers[field.show_if]">
+
+                    <h5 v-if="field.type == 'header'">{{ field.text }}</h5>
+                    <form-group48 v-else
+                                  :big="true"
+                                  :required="field.required"
+                                  :title="field.text" :key="i"
+                                  :description="field.description" :errors="field_errors[field.uid]">
+                        <input type="number" min="field.params.min" max="field.params.max" step="1"
+                               class="form-control monitoring-input"
+                               :class="save_clicked && field.required &&
                        (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
-                       v-if="field.type == 'integer'" :required="field.required" v-model="answers[field.uid]"/>
-                <input type="number" min="field.params.min" max="field.params.max" step="0.01"
-                       class="form-control monitoring-input"
-                       :class="save_clicked && field.required &&
+                               v-if="field.type == 'integer'" :required="field.required" v-model="answers[field.uid]"/>
+                        <input type="number" min="field.params.min" max="field.params.max" step="0.01"
+                               class="form-control monitoring-input"
+                               :class="save_clicked && field.required &&
                        (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
-                       v-if="field.type == 'float'" :required="field.required" v-model="answers[field.uid]"/>
-                <input type="text" class="form-control monitoring-input" v-if="field.type == 'text'"
-                       :required="field.required"
-                       :class="save_clicked && field.required && !answers[field.uid] && answers[field.uid] !== 0 ? 'is-invalid' : ''"
-                       v-model="answers[field.uid]"/>
-                <input type="file" class="monitoring-input" v-if="field.type == 'file'"
-                       :required="field.required"
-                       v-bind:ref="'file_' + field.uid" v-on:change="submit_file(field)"/>
-                <textarea class="form-control monitoring-input" v-if="field.type == 'textarea'" :required="field.required"
-                          :class="save_clicked && field.required && !answers[field.uid] && answers[field.uid] !== 0 ? 'is-invalid' : ''"
-                          v-model="answers[field.uid]"></textarea>
-                <div v-if="field.type == 'checkbox'" style="width: 100%;"><input type="checkbox"
-                                                                                 v-model="answers[field.uid]"/></div>
+                               v-if="field.type == 'float'" :required="field.required" v-model="answers[field.uid]"/>
+                        <input type="text" class="form-control monitoring-input" v-if="field.type == 'text'"
+                               :required="field.required"
+                               :class="save_clicked && field.required && !answers[field.uid] && answers[field.uid] !== 0 ? 'is-invalid' : ''"
+                               v-model="answers[field.uid]"/>
+                        <input type="file" class="monitoring-input" v-if="field.type == 'file'"
+                               :required="field.required"
+                               v-bind:ref="'file_' + field.uid" v-on:change="submit_file(field)"/>
+                        <textarea class="form-control monitoring-input" v-if="field.type == 'textarea'" :required="field.required"
+                                  :class="save_clicked && field.required && !answers[field.uid] && answers[field.uid] !== 0 ? 'is-invalid' : ''"
+                                  v-model="answers[field.uid]"></textarea>
+                        <div v-if="field.type == 'checkbox'" style="width: 100%;"><input type="checkbox"
+                                                                                         v-model="answers[field.uid]"/></div>
 
-                <div v-if="field.type == 'radio'">
-                    <div class="form-check" v-for="(variant, j) in field.params.variants">
-                        <input class="form-check-input monitoring-input" type="radio"
-                               :id="'radio_' + i + '_' + j" :name="'radio_' + i"
-                               v-model="answers[field.uid]" :value="j">
-                        <label class="form-check-label" :for="'radio_' + i + '_' + j">{{ variant.text }}</label>
-                    </div>
-                </div>
-
-                <div v-if="field.type == 'scale'">
-                    <visual-analog-scale :params="field.params" :colors="field.params.colors">
-                        <div class="row">
-                            <div class="col-1 d-flex justify-content-center" v-for="(color, i) in field.params.colors">
-                                <input class="form-check-input monitoring-input" style="margin-left: 4px" type="radio"
-                                       :id="'radio_' + field.uid + '_' + i" :name="'radio_' + field.uid"
-                                       v-model="answers[field.uid]"
-                                       :value="(field.params.reversed ? -1 : 1) * i + field.params.start_from">
+                        <div v-if="field.type == 'radio'">
+                            <div class="form-check" v-for="(variant, j) in field.params.variants">
+                                <input class="form-check-input monitoring-input" type="radio"
+                                       :id="'radio_' + i + '_' + j" :name="'radio_' + i"
+                                       v-model="answers[field.uid]" :value="j">
+                                <label class="form-check-label" :for="'radio_' + i + '_' + j">{{ variant.text }}</label>
                             </div>
                         </div>
-                    </visual-analog-scale>
+
+                        <div v-if="field.type == 'scale'">
+                            <visual-analog-scale :params="field.params" :colors="field.params.colors">
+                                <div class="row">
+                                    <div class="col-1 d-flex justify-content-center" v-for="(color, i) in field.params.colors">
+                                        <input class="form-check-input monitoring-input" style="margin-left: 4px" type="radio"
+                                               :id="'radio_' + field.uid + '_' + i" :name="'radio_' + field.uid"
+                                               v-model="answers[field.uid]"
+                                               :value="(field.params.reversed ? -1 : 1) * i + field.params.start_from">
+                                    </div>
+                                </div>
+                            </visual-analog-scale>
+                        </div>
+
+                        <div v-if="field.type == 'date'">
+                            <date-picker :required="field.required" v-model="answers[field.uid]"
+                                         value-type="YYYY-MM-DD"></date-picker>
+                        </div>
+
+                        <div v-if="field.type == 'time'">
+                            <date-picker :required="field.required" v-model="answers[field.uid]" format="HH:mm" value-type="HH:mm"
+                                         type="time"></date-picker>
+                        </div>
+
+
+                    </form-group48>
+
                 </div>
+            </div>
 
-                <div v-if="field.type == 'date'">
-                    <date-picker :required="field.required" v-model="answers[field.uid]"
-                                 value-type="YYYY-MM-DD"></date-picker>
-                </div>
-
-                <div v-if="field.type == 'time'">
-                    <date-picker :required="field.required" v-model="answers[field.uid]" format="HH:mm" value-type="HH:mm"
-                                 type="time"></date-picker>
-                </div>
-
-
-            </form-group48>
         </div>
 
-        <button @click="save()" class="btn btn-success" :disabled="submitted || is_preview">Отправить ответ</button>
+        <button @click="save()" class="btn btn-success btn-lg" :disabled="submitted || is_preview">Отправить ответ</button>
 
 
     </div>
@@ -96,6 +105,7 @@ export default {
         return {
             form: {},
             answers: {},
+            blocks: [],
             errors: [],
             field_errors: {},
             submitted: false,
@@ -196,6 +206,20 @@ export default {
     },
     created() {
         this.form = this.data
+        this.blocks = []
+
+        let block = []
+
+        this.form.fields.forEach((item) => {
+            if (item.type == 'header' && block.length != 0) {
+                this.blocks.push(block)
+                block = []
+            }
+
+            block.push(item)
+        })
+        this.blocks.push(block)
+
         this.set_default()
     },
     mounted() {
@@ -208,5 +232,43 @@ export default {
 </script>
 
 <style scoped>
+.card {
+    margin-bottom: 15px;
+}
 
+h5 {
+    margin-bottom: 15px;
+}
+input[type=checkbox]
+{
+  /* Double-sized Checkboxes */
+  -ms-transform: scale(1.5); /* IE */
+  -moz-transform: scale(1.5); /* FF */
+  -webkit-transform: scale(1.5); /* Safari and Chrome */
+  -o-transform: scale(1.5); /* Opera */
+  transform: scale(1.5);
+  padding: 10px;
+}
+input[type=radio]
+{
+  /* Double-sized Checkboxes */
+  -ms-transform: scale(1.5); /* IE */
+  -moz-transform: scale(1.5); /* FF */
+  -webkit-transform: scale(1.5); /* Safari and Chrome */
+  -o-transform: scale(1.5); /* Opera */
+  transform: scale(1.5);
+  padding: 10px;
+}
+
+strong {
+    size: 1.02rem !important;
+}
+
+.form-check-label {
+    margin-left: 5px;
+}
+.form-check {
+     margin-top: 15px;
+     margin-bottom: 15px;
+}
 </style>

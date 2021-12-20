@@ -1,7 +1,8 @@
 <template>
     <div class="form-group form-group-sm row" :class="{'required': required}">
         <div class="col-md-4">
-            <strong>{{ title }}</strong>
+            <strong class="big" v-if="big">{{ title }}</strong>
+            <strong v-else>{{ title }}</strong>
         </div>
         <div class="col-md-8">
             <slot></slot>
@@ -16,13 +17,17 @@
 <script>
 export default {
     name: "FormGroup-4-8",
-    props: ['title', 'description', 'required', 'errors']
+    props: ['title', 'description', 'required', 'errors', 'big']
 }
 </script>
 
 <style scoped>
 strong {
     font-size: 0.9rem;
+}
+
+strong.big {
+    font-size: 1rem;
 }
 
 .form-group.required strong:after {
