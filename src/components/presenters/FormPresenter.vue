@@ -266,7 +266,7 @@ strong {
 }
 
 .form-check-label {
-    margin-left: 5px;
+    margin-left: 0.5rem;
 }
 .form-check {
      margin-top: 15px;
