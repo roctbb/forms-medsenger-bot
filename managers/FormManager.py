@@ -382,7 +382,7 @@ class FormManager(Manager):
             form.fields = data.get('fields')
             form.has_integral_evaluation = bool(data.get('has_integral_evaluation'))
             form.integral_evaluation = data.get('integral_evaluation')
-            form.categories = data.get('categories')
+            form.categories = '|'.join(set(data.get('categories').split('|')))
             form.template_id = data.get('template_id')
             form.warning_days = data.get('warning_days')
             form.instant_report = bool(data.get('instant_report'))
