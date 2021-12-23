@@ -1,6 +1,7 @@
 import time
 from datetime import datetime
 
+from config import DYNAMIC_CACHE
 from helpers import log
 from managers.Manager import Manager
 from models import Patient, Contract, Medicine
@@ -95,7 +96,8 @@ class MedicineManager(Manager):
 
         self.log_done("form_{}".format(medicine_id), contract_id)
 
-        self.medsenger_api.update_cache(contract_id)
+        if DYNAMIC_CACHE:
+            self.medsenger_api.update_cache(contract_id)
 
         return True
 

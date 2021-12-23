@@ -2,6 +2,8 @@ import json
 import time
 from copy import copy
 from datetime import datetime
+
+from config import DYNAMIC_CACHE
 from helpers import log
 from managers.Manager import Manager
 from models import Patient, Contract, Form, ActionRequest
@@ -286,7 +288,8 @@ class FormManager(Manager):
         if result:
             self.log_done("form_{}".format(form.id), contract_id)
 
-        self.medsenger_api.update_cache(contract_id)
+        if DYNAMIC_CACHE:
+            self.medsenger_api.update_cache(contract_id)
 
         return result
 
@@ -424,7 +427,8 @@ class FormManager(Manager):
                 if form.timetable.get('send_on_init'):
                     self.run(form)
 
-            self.medsenger_api.update_cache(contract.id)
+            if DYNAMIC_CACHE:
+                self.medsenger_api.update_cache(contract.id)
 
             return form
         except Exception as e:

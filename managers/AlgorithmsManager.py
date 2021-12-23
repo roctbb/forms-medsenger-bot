@@ -3,6 +3,7 @@ import time
 import uuid
 from copy import copy, deepcopy
 from datetime import datetime, timedelta
+from config import DYNAMIC_CACHE
 
 from sqlalchemy.orm.attributes import flag_modified, flag_dirty
 
@@ -29,7 +30,8 @@ class AlgorithmsManager(Manager):
 
         self.__commit__()
 
-        self.medsenger_api.update_cache(contract.id)
+        if DYNAMIC_CACHE:
+            self.medsenger_api.update_cache(contract.id)
 
     def attach(self, template_id, contract, setup=None):
         algorithm = self.get(template_id)
@@ -90,7 +92,8 @@ class AlgorithmsManager(Manager):
 
         self.__commit__()
 
-        self.medsenger_api.update_cache(contract.id)
+        if DYNAMIC_CACHE:
+            self.medsenger_api.update_cache(contract.id)
 
         return id
 
@@ -640,7 +643,8 @@ class AlgorithmsManager(Manager):
             except Exception as e:
                 log(e, False)
 
-        self.medsenger_api.update_cache(contract_id)
+        if DYNAMIC_CACHE:
+            self.medsenger_api.update_cache(contract_id)
 
         return fired
 
@@ -796,8 +800,8 @@ class AlgorithmsManager(Manager):
 
                 self.__commit__()
 
-
-            self.medsenger_api.update_cache(contract.id)
+            if DYNAMIC_CACHE:
+                self.medsenger_api.update_cache(contract.id)
 
             return algorithm
         except Exception as e:
