@@ -29,7 +29,7 @@
                        (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
                                v-if="field.type == 'float' && field.category != 'temperature'" :required="field.required" v-model="answers[field.uid]"/>
 
-                        <input type="number" min="field.params.min" max="field.params.max" step="0.01"
+                        <input type="tel" min="field.params.min" max="field.params.max" step="0.01"
                                class="form-control monitoring-input"
                                :class="save_clicked && field.required &&
                        (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
@@ -123,7 +123,13 @@ export default {
             errors: [],
             field_errors: {},
             submitted: false,
-            save_clicked: false
+            save_clicked: false,
+            hexTokens: {
+                C: {
+                    pattern: /\.|\,/
+                }
+            }
+
         }
     },
     methods: {
@@ -253,25 +259,25 @@ export default {
 h5 {
     margin-bottom: 15px;
 }
-input[type=checkbox]
-{
-  /* Double-sized Checkboxes */
-  -ms-transform: scale(1.3); /* IE */
-  -moz-transform: scale(1.3); /* FF */
-  -webkit-transform: scale(1.3); /* Safari and Chrome */
-  -o-transform: scale(1.3); /* Opera */
-  transform: scale(1.3);
-  padding: 10px;
+
+input[type=checkbox] {
+    /* Double-sized Checkboxes */
+    -ms-transform: scale(1.3); /* IE */
+    -moz-transform: scale(1.3); /* FF */
+    -webkit-transform: scale(1.3); /* Safari and Chrome */
+    -o-transform: scale(1.3); /* Opera */
+    transform: scale(1.3);
+    padding: 10px;
 }
-input[type=radio]
-{
-  /* Double-sized Checkboxes */
-  -ms-transform: scale(1.3); /* IE */
-  -moz-transform: scale(1.3); /* FF */
-  -webkit-transform: scale(1.3); /* Safari and Chrome */
-  -o-transform: scale(1.3); /* Opera */
-  transform: scale(1.3);
-  padding: 10px;
+
+input[type=radio] {
+    /* Double-sized Checkboxes */
+    -ms-transform: scale(1.3); /* IE */
+    -moz-transform: scale(1.3); /* FF */
+    -webkit-transform: scale(1.3); /* Safari and Chrome */
+    -o-transform: scale(1.3); /* Opera */
+    transform: scale(1.3);
+    padding: 10px;
 }
 
 strong {
@@ -281,10 +287,12 @@ strong {
 .form-check-label {
     margin-left: 0.5rem;
 }
+
 .form-check {
-     margin-top: 15px;
-     margin-bottom: 15px;
+    margin-top: 15px;
+    margin-bottom: 15px;
 }
+
 .card-body {
     padding: 1rem;
 }
