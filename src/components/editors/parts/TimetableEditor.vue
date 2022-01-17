@@ -82,6 +82,7 @@ export default {
                 this.timetable.points = JSON.parse(this.backup[this.mode])
             } else {
                 Event.fire('clear-time-points')
+                this.timetable.points = [];
                 this.add_time_point();
             }
 
