@@ -7,6 +7,10 @@
                    v-model="field.text"/>
         </form-group48>
 
+        <form-group48 title="Описание раздела" v-if="field.type == 'header'">
+            <input class="form-control form-control-sm" v-model="field.description"/>
+        </form-group48>
+
         <div v-if="field.type != 'header'">
             <form-group48 title="Тип">
                 <select @change="clear_params()"

@@ -244,8 +244,8 @@ export default {
             this.form.fields = this.form.fields.map(prepare_field);
 
             let validate_field = (field) => {
-                if (!field.text) return true;
                 if (field.type == 'header') return false;
+                if (!field.text) return true;
 
                 if (!Object.keys(this.field_types).includes(field.type)) return true;
                 if (['integer', 'float'].includes(field.type)) {
