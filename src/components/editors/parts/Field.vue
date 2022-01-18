@@ -55,7 +55,7 @@
         <div v-if="field.type != 'header'">
             <hr>
 
-            <div v-if="field.type == 'integer' && is_admin">
+            <div v-if="['integer', 'range'].includes(field.type) && is_admin">
                 <div class="form-group row">
                     <div class="col-md-4">
                         <strong>Ограничения</strong>

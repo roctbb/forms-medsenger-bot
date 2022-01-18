@@ -16,14 +16,14 @@
                                   :required="field.required"
                                   :title="field.text" :key="i"
                                   :description="field.description" :errors="field_errors[field.uid]">
-                        <input type="number" min="field.params.min" max="field.params.max" step="1"
+                        <input type="number" :min="field.params.min" :max="field.params.max" step="1"
                                class="form-control monitoring-input"
                                :class="save_clicked && field.required &&
                        (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
                                v-if="field.type == 'integer'" :required="field.required" v-model="answers[field.uid]"/>
 
 
-                        <input type="number" min="field.params.min" max="field.params.max" step="0.01"
+                        <input type="number" :min="field.params.min" :max="field.params.max" step="0.01"
                                class="form-control monitoring-input"
                                :class="save_clicked && field.required &&
                        (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
@@ -75,6 +75,10 @@
                                          type="time"></date-picker>
                         </div>
 
+                        <input type="range" :min="field.params.min" :max="field.params.max" step="1"
+                               class="form-control monitoring-input"
+                               :class="save_clicked && field.required && (!answers[field.uid] && answers[field.uid] !== 0) ? 'is-invalid' : ''"
+                               v-if="field.type == 'range'" :required="field.required" v-model="answers[field.uid]"/>
 
                     </form-group48>
 

@@ -272,6 +272,7 @@ Vue.mixin({
                 date: "Дата",
                 time: "Время",
                 file: "Файл",
+                range: "Ползунок"
             },
             current_contract_id: window.CONTRACT_ID,
             weekdays: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
@@ -286,7 +287,8 @@ Vue.mixin({
                 date: ['date'],
                 time: ['string'],
                 file: ['file'],
-                scale: ['integer']
+                scale: ['integer'],
+                range: ['integer']
             },
             images: {
                 form: window.LOCAL_HOST + '/static/images/icons8-fill-in-form-48.png',
