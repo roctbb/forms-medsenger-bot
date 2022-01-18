@@ -9,10 +9,10 @@
 
                 <div v-for="(field, i) in block" v-if="!field.show_if || answers[field.show_if]">
 
-                    <h5 v-if="field.type == 'header'">{{ field.text }}</h5>
+                    <h5 v-if="field.type == 'header' && field.text">{{ field.text }}</h5>
                     <p v-html="br(field.description)" v-if="field.type == 'header' && field.description"></p>
 
-                    <form-group48 v-else
+                    <form-group48 v-if="field.type != 'header'"
                                   :check="field.type == 'checkbox'"
                                   :big="true"
                                   :required="field.required"
