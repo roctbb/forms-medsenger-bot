@@ -355,6 +355,9 @@ class AlgorithmsManager(Manager):
         if action['type'] == 'change_step':
             self.change_step(algorithm, action['params']['target'])
 
+        if action['type'] == 'set_info_materials':
+            self.medsenger_api.set_info_materials(contract_id, action['params']['materials'])
+
         if action['type'] == 'order':
             order = action['params'].get('order')
             agent_id = action['params'].get('agent_id')
