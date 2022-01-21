@@ -16,6 +16,7 @@
                 <option value="attach_medicine">назначение лекарства</option>
                 <option value="detach_medicine">отмена лекарства</option>
                 <option v-if="is_admin" value="script">выполнить скрипт</option>
+                <option v-if="is_admin" value="set_info_materials">задать список информационных материалов</option>
                 <!-- назначение/отключения мониторинга/лекарства/алгоритма / order -->
             </select>
             <small class="text-muted"><button class="btn btn-sm btn-default" @click="remove()">Удалить</button></small>
@@ -27,7 +28,11 @@
             </select>
         </div>
 
-         <div class="col-md-9" v-if="['script'].includes(action.type)">
+         <div class="col-md-9" v-if="['set_info_materials'].includes(action.type)">
+            <textarea class="form-control form-control-sm" v-model="action.params.materials"></textarea>
+        </div>
+
+        <div class="col-md-9" v-if="['script'].includes(action.type)">
             <textarea class="form-control form-control-sm" v-model="action.params.code"></textarea>
         </div>
 
