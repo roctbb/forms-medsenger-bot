@@ -4,98 +4,101 @@
             <h5 v-if="!form.id">Создание опросника</h5>
             <h5 v-if="form.id">Настройка опросника "{{ form.title }}" </h5>
 
-            <error-block :errors="errors"/>
+            <timetable-editor :data="form.timetable" :timetable_save_clicked="this.timetable_save_clicked">&nbsp;<a v-if="form.id"
+                                                                                                                    class="btn btn-success btn-sm"
+                                                                                                                    @click="save()">Сохранить</a>
+            </timetable-editor>
+            <div v-show="!tt_only">
+                <card title="Параметры опросника">
+                    <form-group48 title="Название опросника">
+                        <input class="form-control form-control-sm"
+                               :class="this.save_clicked && !form.title ? 'is-invalid' : ''"
+                               v-model="form.title"/>
+                    </form-group48>
 
-            <timetable-editor :data="form.timetable" :timetable_save_clicked="this.timetable_save_clicked">&nbsp;<a v-if="form.id" class="btn btn-success btn-sm" @click="save()">Сохранить</a></timetable-editor>
-            <card title="Параметры опросника">
-                <form-group48 title="Название опросника">
-                    <input class="form-control form-control-sm"
-                           :class="this.save_clicked && !form.title ? 'is-invalid' : ''"
-                           v-model="form.title"/>
-                </form-group48>
+                    <form-group48 title="Описание для пациента">
+                        <textarea class="form-control form-control-sm" v-model="form.patient_description"></textarea>
+                    </form-group48>
 
-                <form-group48 title="Описание для пациента">
-                    <textarea class="form-control form-control-sm" v-model="form.patient_description"></textarea>
-                </form-group48>
+                    <form-group48 title="Краткое описание для врача">
+                        <textarea class="form-control form-control-sm" v-model="form.doctor_description"></textarea>
+                    </form-group48>
 
-                <form-group48 title="Краткое описание для врача">
-                    <textarea class="form-control form-control-sm" v-model="form.doctor_description"></textarea>
-                </form-group48>
+                    <form-group48 v-if="is_admin" title="Приветственное сообщение">
+                        <textarea class="form-control form-control-sm" v-model="form.init_text"></textarea>
+                    </form-group48>
 
-                <form-group48 v-if="is_admin" title="Приветственное сообщение">
-                    <textarea class="form-control form-control-sm" v-model="form.init_text"></textarea>
-                </form-group48>
+                    <form-group48 title="Пациент может заполнить опросник в произвольное время">
+                        <input class="form-check" type="checkbox" v-model="form.show_button"/>
+                    </form-group48>
 
-                <form-group48 title="Пациент может заполнить опросник в произвольное время">
-                    <input class="form-check" type="checkbox" v-model="form.show_button"/>
-                </form-group48>
+                    <form-group48 v-if="form.show_button" title="Название опросника для кнопки">
+                        <input class="form-control form-control-sm"
+                               :class="this.save_clicked && !form.button_title ? 'is-invalid' : ''"
+                               v-model="form.button_title"/>
+                    </form-group48>
 
-                <form-group48 v-if="form.show_button" title="Название опросника для кнопки">
-                    <input class="form-control form-control-sm"
-                           :class="this.save_clicked && !form.button_title ? 'is-invalid' : ''"
-                           v-model="form.button_title"/>
-                </form-group48>
+                    <form-group48 title="Текст для кнопки в сообщении" v-if="is_admin">
+                        <input class="form-control form-control-sm" v-model="form.custom_title"/>
+                    </form-group48>
 
-                <form-group48 title="Текст для кнопки в сообщении" v-if="is_admin">
-                    <input class="form-control form-control-sm" v-model="form.custom_title"/>
-                </form-group48>
+                    <form-group48 title="Текст внутри сообщения" v-if="is_admin">
+                        <input class="form-control form-control-sm" v-model="form.custom_text"/>
+                    </form-group48>
 
-                <form-group48 title="Текст внутри сообщения" v-if="is_admin">
-                    <input class="form-control form-control-sm" v-model="form.custom_text"/>
-                </form-group48>
+                    <form-group48 v-if="is_admin && (empty(form.id) || form.is_template)" title="ID связанного алгоритма">
+                        <input class="form-control form-control-sm" v-model="form.algorithm_id"/>
+                    </form-group48>
 
-                <form-group48 v-if="is_admin && (empty(form.id) || form.is_template)" title="ID связанного алгоритма">
-                    <input class="form-control form-control-sm" v-model="form.algorithm_id"/>
-                </form-group48>
+                    <form-group48 v-if="is_admin && (empty(form.id) || form.is_template)" title="Категория шаблона">
+                        <input class="form-control form-control-sm" value="Общее" v-model="form.template_category"/>
+                    </form-group48>
 
-                <form-group48 v-if="is_admin && (empty(form.id) || form.is_template)" title="Категория шаблона">
-                    <input class="form-control form-control-sm" value="Общее" v-model="form.template_category"/>
-                </form-group48>
+                    <form-group48 title="Уведомить, если пациент не заполнят опросник">
+                        <input class="form-check" type="checkbox" @change="warning_change()" v-model="form.warning_enabled"/>
+                    </form-group48>
 
-                <form-group48 title="Уведомить, если пациент не заполнят опросник">
-                    <input class="form-check" type="checkbox" @change="warning_change()" v-model="form.warning_enabled"/>
-                </form-group48>
+                    <form-group48 v-if="form.warning_enabled" title="Прислать уведомление о пропусках через">
+                        <input class="form-control form-control-sm"
+                               :class="this.save_clicked && form.warning_days < 1 ? 'is-invalid' : ''"
+                               type="number" min="1" max="200" step="1" v-model="form.warning_days"/>
+                        <small class="text-muted">дней</small>
+                    </form-group48>
 
-                <form-group48 v-if="form.warning_enabled" title="Прислать уведомление о пропусках через">
-                    <input class="form-control form-control-sm"
-                           :class="this.save_clicked && form.warning_days < 1 ? 'is-invalid' : ''"
-                           type="number" min="1" max="200" step="1" v-model="form.warning_days"/>
-                    <small class="text-muted">дней</small>
-                </form-group48>
+                    <form-group48 title="Сразу же присылать ответы врачу" v-if="is_admin">
+                        <input class="form-check" type="checkbox" v-model="form.instant_report"/>
+                    </form-group48>
 
-                <form-group48 title="Сразу же присылать ответы врачу" v-if="is_admin">
-                    <input class="form-check" type="checkbox" v-model="form.instant_report"/>
-                </form-group48>
+                    <form-group48 title="Отправить при подключении" v-if="is_admin">
+                        <input class="form-check" type="checkbox" v-model="form.timetable.send_on_init"/>
+                    </form-group48>
 
-                <form-group48 title="Отправить при подключении" v-if="is_admin">
-                    <input class="form-check" type="checkbox" v-model="form.timetable.send_on_init"/>
-                </form-group48>
+                    <form-group48 v-if="is_admin" title="Показывать шаблон клиникам (JSON)">
+                        <input class="form-control form-control-sm" type="text" v-model="form.clinics"/>
+                    </form-group48>
 
-                <form-group48 v-if="is_admin" title="Показывать шаблон клиникам (JSON)">
-                    <input class="form-control form-control-sm" type="text" v-model="form.clinics"/>
-                </form-group48>
+                    <form-group48 v-if="is_admin" title="Спрятать шаблон у клиник (JSON)">
+                        <input class="form-control form-control-sm" type="text" v-model="form.exclude_clinics"/>
+                    </form-group48>
 
-                <form-group48 v-if="is_admin" title="Спрятать шаблон у клиник (JSON)">
-                    <input class="form-control form-control-sm" type="text" v-model="form.exclude_clinics"/>
-                </form-group48>
+                    <form-group48 title="Текст после успешного заполнения (если не сработал алгоритм)">
+                        <textarea class="form-control form-control-sm" v-model="form.thanks_text"></textarea>
+                    </form-group48>
 
-                <form-group48 title="Текст после успешного заполнения (если не сработал алгоритм)">
-                    <textarea class="form-control form-control-sm" v-model="form.thanks_text"></textarea>
-                </form-group48>
+                    <form-group48 title="Интегральная оценка результатов" v-if="is_admin">
+                        <input class="form-check" type="checkbox" @change="add_integral_evaluation()"
+                               v-model="form.has_integral_evaluation"/>
+                    </form-group48>
+                </card>
+                <integral-evaluation :data="form.integral_evaluation" :save_clicked="save_clicked"
+                                     v-if="form.has_integral_evaluation"></integral-evaluation>
 
-                <form-group48 title="Интегральная оценка результатов" v-if="is_admin">
-                    <input class="form-check" type="checkbox" @change="add_integral_evaluation()"
-                           v-model="form.has_integral_evaluation"/>
-                </form-group48>
-            </card>
-            <integral-evaluation :data="form.integral_evaluation" :save_clicked="save_clicked"
-                                 v-if="form.has_integral_evaluation"></integral-evaluation>
-
-            <hr>
-            <fields-editor v-if="form" :form="form" :fields="form.fields" :fields_save_clicked="fields_save_clicked"/>
+                <hr>
+                <fields-editor v-if="form" :form="form" :fields="form.fields" :fields_save_clicked="fields_save_clicked"/>
+            </div>
         </div>
 
-         <error-block :errors="errors"/>
+        <error-block :errors="errors"/>
 
         <button class="btn btn-danger" @click="go_back()">Вернуться назад</button>
         <button class="btn btn-success" @click="save()">Сохранить <span v-if="form.is_template"> шаблон</span></button>
@@ -336,7 +339,8 @@ export default {
             backup: "",
             save_clicked: false,
             timetable_save_clicked: [false],
-            fields_save_clicked: []
+            fields_save_clicked: [],
+            tt_only: false
         }
     },
     mounted() {
@@ -357,6 +361,7 @@ export default {
         });
 
         Event.listen('navigate-to-create-form-page', () => {
+            this.tt_only = false
             this.form = this.create_empty_form()
 
             this.save_clicked = false
@@ -368,6 +373,7 @@ export default {
         });
 
         Event.listen('navigate-to-edit-form-page', form => {
+            this.tt_only = false
             this.form = form
 
             this.save_clicked = false
@@ -390,6 +396,10 @@ export default {
             this.backup = JSON.stringify(form)
             this.$forceUpdate()
         });
+
+        Event.listen('edit-form-tt-only', () => {
+            this.tt_only = true
+        })
 
         // Обработка добавления времени
         Event.listen('add-time-point', () => {

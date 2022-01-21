@@ -152,6 +152,11 @@ export default {
             this.state = 'algorithm-manager'
             Event.fire('navigate-to-edit-algorithm-page', algorithm);
         });
+        Event.listen('edit-timetable', (data) => {
+            this.state = 'form-manager'
+            Event.fire('navigate-to-edit-form-page', data);
+            Event.fire('edit-form-tt-only');
+        });
         Event.listen('load-graph', (params) => {
             this.state = 'graph-presenter'
         });
