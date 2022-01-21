@@ -446,7 +446,12 @@ export default {
             // save values
             if (changed_algorithms.size) {
                 this.axios.post(this.url('/api/settings/algorithms'), [...changed_algorithms])
-                    .then(response => this.errors = ['Сохранено'])
+                    .then(response => {
+                        this.errors = ['Сохранено']
+                        this.params.backup.forEach((param, i) => {
+                            param.value = this.params.edited[i]
+                        })
+                    })
                     .catch(err => this.errors = ['Ошибка сохранения']);
 
             }
