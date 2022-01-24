@@ -40,7 +40,7 @@
                     <small v-if="form.sent">Заполнен {{ form.done }} раз(а) / отправлен {{ form.sent }} раз(а) за последний месяц</small>
                     <small v-else>Пока не отправлялось</small><br>
                     <div v-if="form.contract_id == current_contract_id">
-                        <a href="#" @click="edit_timetable(form)">Редактировать расписание</a>
+                        <a href="#" @click="edit_timetable(form)">Изменить расписание</a>
                         <a href="#" @click="edit_form(form)">Редактировать</a>
                         <a href="#" @click="delete_form(form)">Удалить</a>
                         <a target="_blank" :href="preview_form_url(form)">Просмотр</a>
