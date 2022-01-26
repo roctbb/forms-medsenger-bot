@@ -219,7 +219,6 @@
                     <a href="#" v-if="!is_attached(form)" @click="attach_form(form)">Подключить</a>
                     <small v-else class="text-muted">Опросник подключен</small>
 
-                    <a href="#" @click="edit_timetable(form)">Редактировать расписание</a>
                     <a href="#" v-if="is_admin" @click="edit_form(form)">Редактировать</a>
                     <a href="#" v-if="is_admin" @click="delete_form(form)">Удалить</a>
                     <a target="_blank" :href="preview_form_url(form)">Просмотр</a>
