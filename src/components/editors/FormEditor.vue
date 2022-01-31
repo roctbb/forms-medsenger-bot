@@ -368,7 +368,6 @@ export default {
             this.timetable_save_clicked = [false]
             this.fields_save_clicked = []
 
-            console.log("create", this.form)
             this.backup = JSON.stringify(this.form)
         });
 
