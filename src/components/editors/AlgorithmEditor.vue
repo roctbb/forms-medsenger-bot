@@ -403,6 +403,8 @@ export default {
             this.algorithm.steps.forEach(step => {
                 step.conditions.forEach(condition => {
                     condition.criteria = condition.criteria.map((L) => L.map(prepare_criteria))
+                    condition.positive_actions = condition.positive_actions.map(prepare_action)
+                    condition.negative_actions = condition.negative_actions.map(prepare_action)
                 })
             })
 
