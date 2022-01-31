@@ -361,7 +361,7 @@ export default {
                 if (action.type == 'order') {
                     console.log("preparing order action...", action.params.order_params, typeof action.params.order_params)
                     action.params.agent_id = parseInt(action.params.agent_id)
-                    if (action.params.order_params && action.params.order_params instanceof String) {
+                    if (action.params.order_params) {
                         action.params.order_params = JSON.parse(action.params.order_params);
                         console.log("now it is ", action.params.order_params)
                     }
