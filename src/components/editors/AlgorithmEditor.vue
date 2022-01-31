@@ -405,6 +405,13 @@ export default {
 
             this.algorithm.steps.forEach(step => {
                 step.conditions.forEach(condition => {
+
+                    if (step.timeout_actions) {
+                        step.timeout_actions = step.timeout_actions.map(prepare_action)
+                    } else {
+                        step.timeout_actions = []
+                    }
+
                     condition.criteria = condition.criteria.map((L) => L.map(prepare_criteria))
                     condition.positive_actions = condition.positive_actions.map(prepare_action)
                     condition.negative_actions = condition.negative_actions.map(prepare_action)
@@ -424,7 +431,6 @@ export default {
             }
 
 
-
             let action_validator = (action) => {
                 if (action.type == 'record' && this.empty(action.params.value)) return true;
                 if ((action.type == 'patient_message' || action.type == 'doctor_message') && this.empty(action.params.text)) return true;
@@ -433,20 +439,6 @@ export default {
 
                 return false;
             }
-
-            this.algorithm.steps.forEach(step => {
-                if (step.timeout_actions) {
-                    step.timeout_actions = step.timeout_actions.map(prepare_action)
-                } else {
-                    step.timeout_actions = []
-                }
-
-
-                step.conditions.forEach(condition => {
-                    condition.positive_actions = condition.positive_actions.map(prepare_action)
-                    condition.negative_actions = condition.negative_actions.map(prepare_action)
-                })
-            })
 
             has_errors = this.algorithm.steps.some(step => {
                 step.conditions.some(condition => condition.positive_actions.filter(action_validator).length > 0);
@@ -539,8 +531,7 @@ export default {
             this.copy(this.algorithm, algorithm)
 
             this.algorithm.attach_date = moment().format('YYYY-MM-DD')
-            if (algorithm.attach_date && algorithm.detach_date)
-            {
+            if (algorithm.attach_date && algorithm.detach_date) {
                 let attach = moment(algorithm.attach_date, "YYYY-MM-DD")
                 let detach = moment(algorithm.detach_date, "YYYY-MM-DD")
                 let len = moment.duration(detach.diff(attach)).asDays()
