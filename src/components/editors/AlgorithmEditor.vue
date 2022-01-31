@@ -359,10 +359,13 @@ export default {
                     if (category.type == 'float') action.params.value = parseFloat(action.params.value)
                 }
                 if (action.type == 'order') {
+                    console.log("preparing order action...")
                     action.params.agent_id = parseInt(action.params.agent_id)
                     if (action.params.order_params && action.params.order_params instanceof String) {
                         action.params.order_params = JSON.parse(action.params.order_params);
+                        console.log("now it is ", action.params.order_params)
                     }
+
                 }
                 return action;
             }
