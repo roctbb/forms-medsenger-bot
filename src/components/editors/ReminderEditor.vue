@@ -161,7 +161,7 @@ export default {
             this.timetable_validated = [false]
         },
         process_save_error: function (response) {
-            console.log(response)
+
             this.errors.push('Ошибка сохранения');
         },
     },

@@ -553,7 +553,7 @@ export default {
             this.algorithm.template_id = algorithm.id;
 
             if (!this.empty(this.algorithm.setup)) {
-                console.log(this.algorithm.setup)
+
                 this.algorithm.steps.map(step => step.conditions.map(condition => {
                     condition.criteria.forEach((block) => {
                         block.forEach(c => {

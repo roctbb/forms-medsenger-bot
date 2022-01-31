@@ -121,7 +121,6 @@ export default {
     created() {
         this.timetable = this.data
         this.mode = this.timetable.mode
-        console.log("got timetable", this.timetable)
     }
 }
 </script>

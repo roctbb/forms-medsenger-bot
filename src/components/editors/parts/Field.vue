@@ -235,18 +235,10 @@ export default {
     },
     methods: {
         clear_params: function () {
-            console.log(this.backup)
-
-            console.log('set backup for', this.field.type)
             this.backup[this.field.type] = JSON.stringify(this.field.params)
-            console.log('old mode is', this.field.type)
-            console.log(this.backup)
-
             this.field.type = this.mode
-            console.log('new mode is', this.mode)
 
             if (this.backup[this.mode]) {
-                console.log('got backup', this.backup[this.mode])
                 this.field.params = JSON.parse(this.backup[this.mode])
             } else {
                 this.field.params = {};
@@ -273,7 +265,6 @@ export default {
             Event.fire('remove-field', this.pkey)
         },
         update_vas_params: function () {
-            console.log(`Вопрос ${this.pkey + 1}`, this.field.params)
             this.field.params.colors = this.field.params.tmp_colors.toString().split(',')
             this.field.params.start_from = parseInt(this.field.params.start_from.toString())
             this.$forceUpdate()

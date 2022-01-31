@@ -147,7 +147,6 @@ export default {
             this.save_clicked = false
         },
         process_save_error: function (response) {
-            console.log(response)
             this.errors.push('Ошибка сохранения');
         },
         warning_change: function ()

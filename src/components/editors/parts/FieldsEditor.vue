@@ -33,7 +33,6 @@ export default {
         return {}
     },
     created() {
-        console.log(this.form)
         Event.listen('remove-field', (i) => this.remove_field(i));
     },
     methods: {
