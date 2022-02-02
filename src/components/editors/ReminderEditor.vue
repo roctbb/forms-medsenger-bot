@@ -94,7 +94,7 @@ export default {
             let detach_date = moment().add(7, 'days').format('YYYY-MM-DD')
             let timetable =  this.empty_timetable()
             timetable.points[0].hour = 10
-            timetable.points[0].minute = 0
+            timetable.points[0].minute = '00'
             return {
                 type: 'patient',
                 text: '',
