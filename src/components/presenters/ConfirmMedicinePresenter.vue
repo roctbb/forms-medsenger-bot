@@ -82,7 +82,7 @@ export default {
     methods: {
         save: function (medicine) {
             this.errors = []
-            console.log(medicine)
+
             if (medicine.verify_dose) {
                 Event.fire('verify-dose', medicine)
             } else {
@@ -118,8 +118,7 @@ export default {
         this.medicines.sort((a, b) => {
             return a.title < b.title ? -1 : a.title > b.title ? 1 : 0
         })
-        console.log(!this.custom && this.medicines.length)
-        console.log(this.medicines.length)
+
         this.custom_medicine = {
             title: '',
             dose: '',

@@ -138,7 +138,6 @@ export default {
 
             if (this.check()) {
                 this.submitted = true
-                console.log(this.answers)
                 this.axios.post(this.url('/api/form/' + this.form.id), this.answers).then(r => Event.fire('form-done')).catch(r => {
                     this.errors.push('Ошибка сохранения')
                     this.submitted = false
@@ -205,7 +204,7 @@ export default {
                     this.field_errors[field.uid] = "Готовим файл к загрузке...";
 
                     this.toBase64(file).then((base64) => {
-                        console.log("file is ready")
+
 
                         this.answers[field.uid] = {
                             name: filename,

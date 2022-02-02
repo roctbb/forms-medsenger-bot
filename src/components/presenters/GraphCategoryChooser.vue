@@ -88,8 +88,6 @@ export default {
         })
       })
 
-      console.log("custom", custom)
-
       let not_custom = plottable.filter((category) => {
         return !this.groups.some((group) => {
           return group.categories.includes(category.name)

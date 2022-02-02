@@ -81,7 +81,7 @@ export default {
         beforeOpen(event) {
             this.algorithm = event.params.algorithm;
             this.algorithm.setup = {}
-            console.log(this.fillable_fields);
+
             this.fillable_fields.forEach(f => {
                 this.algorithm.setup[f.value_code] = f.value
             })

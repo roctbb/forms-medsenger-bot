@@ -271,7 +271,7 @@ export default {
             }
 
             if (this.form.fields.filter(validate_field).length > 0) {
-                console.log(this.form.fields.filter(validate_field))
+
                 this.errors.push('Проверьте корректность вопросов')
             }
 
@@ -303,7 +303,7 @@ export default {
         },
         process_save_answer: function (response) {
             let is_new = this.empty(this.form.id)
-            console.log(response)
+
 
             this.form.id = response.data.id
             if (is_new) {
@@ -368,7 +368,6 @@ export default {
             this.timetable_save_clicked = [false]
             this.fields_save_clicked = []
 
-            console.log("create", this.form)
             this.backup = JSON.stringify(this.form)
         });
 
