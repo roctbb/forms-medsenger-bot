@@ -73,7 +73,7 @@
                     <small v-else>Пока не отправлялось</small><br>
                     <div v-if="medicine.contract_id == current_contract_id">
                         <a href="#" @click="edit_medicine(medicine)">Редактировать</a>
-                        <a href="#" @click="delete_medicine(medicine)">Удалить</a>
+                        <a href="#" @click="delete_medicine(medicine)">Отменить</a>
                     </div>
                     <div v-else>
                         <small>Добавлен в другом контракте.</small>
@@ -92,6 +92,9 @@
                     <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
                     <small>Назначено: {{ medicine.prescribed_at }}</small><br>
                     <small>Отменено: {{ medicine.canceled_at }}</small><br>
+                    <div v-if="medicine.contract_id == current_contract_id">
+                        <a href="#" @click="resume_medicine(medicine)">Возобновить</a>
+                    </div>
 
                 </card>
             </div>
@@ -549,6 +552,22 @@ export default {
         attach_medicine: function (medicine) {
             Event.fire('attach-medicine', medicine)
         },
+        resume_medicine: function (medicine) {
+            this.$confirm(
+                {
+                    message: `Вы уверены, что хотите возобновить препарат ` + medicine.title + `?`,
+                    button: {
+                        no: 'Нет',
+                        yes: 'Да, возобновить'
+                    },
+                    callback: confirm => {
+                        if (confirm) {
+                            this.axios.post(this.url('/api/settings/resume_medicine'), medicine).then(this.process_resume_medicine_answer);
+                        }
+                    }
+                }
+            )
+        },
         create_form: function () {
             Event.fire('navigate-to-create-form-page')
         },
@@ -589,7 +608,7 @@ export default {
                     message: `Вы уверены, что хотите отменить препарат ` + medicine.title + `?`,
                     button: {
                         no: 'Нет',
-                        yes: 'Да, удалить'
+                        yes: 'Да, отменить'
                     },
                     callback: confirm => {
                         if (confirm) {
@@ -665,6 +684,17 @@ export default {
 
                 this.patient.medicines = this.patient.medicines.filter(m => m.id != response.data.deleted_id)
                 this.templates.medicines = this.templates.medicines.filter(m => m.id != response.data.deleted_id)
+            }
+        },
+        process_resume_medicine_answer: function (response) {
+            if (response.data.resumed_id) {
+                let medicine = this.patient.canceled_medicines.find(m => m.id == response.data.resumed_id)
+                if (medicine) {
+                    medicine.canceled_at = null
+                    this.patient.medicines.push(medicine);
+                }
+
+                this.patient.canceled_medicines = this.patient.canceled_medicines.filter(m => m.id != response.data.resumed_id)
             }
         },
         process_delete_algorithm_answer: function (response) {

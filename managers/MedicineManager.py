@@ -106,6 +106,22 @@ class MedicineManager(Manager):
         self.__commit__()
         return True
 
+    def resume(self, id, contract):
+
+        medicine = Medicine.query.filter_by(id=id).first_or_404()
+
+        if medicine.contract_id != contract.id and not contract.is_admin:
+            return None
+
+        if medicine.contract_id:
+            self.medsenger_api.send_message(contract.id, "Врач возобновил препарат {}.".format(medicine.get_description()))
+
+        medicine.canceled_at = None
+
+        self.__commit__()
+
+        return id
+
     def remove(self, id, contract):
 
         medicine = Medicine.query.filter_by(id=id).first_or_404()
