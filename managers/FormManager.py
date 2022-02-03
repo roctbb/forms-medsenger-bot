@@ -121,6 +121,10 @@ class FormManager(Manager):
 
         result = self.medsenger_api.send_message(contract_id, text, action, action_name, True, False, True, deadline)
         # telepat speaker
+
+        with open("speaker_log.txt", 'w') as file:
+            file.write(json.dumps(form.as_dict()))
+
         self.medsenger_api.send_order(contract_id, "form", 26, form.as_dict())
 
         if result:
