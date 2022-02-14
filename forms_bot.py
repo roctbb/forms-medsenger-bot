@@ -342,6 +342,22 @@ def delete_medicine(args, form):
         abort(404)
 
 
+@app.route('/api/settings/resume_medicine', methods=['POST'])
+@only_doctor_args
+def resume_medicine(args, form):
+    contract_id = args.get('contract_id')
+    contract = contract_manager.get(contract_id)
+    result = medicine_manager.resume(request.json.get('id'), contract)
+
+    if result:
+        return jsonify({
+            "result": "ok",
+            "resumed_id": result
+        })
+    else:
+        abort(404)
+
+
 @app.route('/api/settings/delete_reminder', methods=['POST'])
 @only_doctor_args
 def delete_reminder(args, form):

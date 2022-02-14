@@ -94,14 +94,14 @@ export default {
             if (this.timetable.mode == 'daily') {
                 this.timetable.points.push({
                     hour: '',
-                    minute: ''
+                    minute: '00'
                 })
                 Event.fire('add-time-point')
             } else {
                 this.timetable.points.push({
                     day: '',
                     hour: '',
-                    minute: ''
+                    minute: '00'
                 })
                 Event.fire('add-time-point')
             }
