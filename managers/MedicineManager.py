@@ -88,7 +88,7 @@ class MedicineManager(Manager):
         medicine.filled_timestamp = int(time.time())
 
         if params is None:
-            params = {"medicine_id": medicine_id}
+            params = {"medicine_id": medicine_id, 'dose': medicine.dose}
         else:
             params.update({"medicine_id": medicine_id})
 
