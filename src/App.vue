@@ -3,10 +3,11 @@
         <vue-confirm-dialog></vue-confirm-dialog>
         <loading v-if="state == 'loading'"/>
         <div v-else>
-            <div v-if="mode == 'settings' || mode == 'medicine-manager'">
+            <div v-if="mode == 'settings' || mode == 'medicine-chooser'">
                 <dashboard-header :patient="patient"/>
                 <div class="container" style="margin-top: 15px;">
                     <dashboard :patient="patient" :templates="templates" v-show="state == 'dashboard'"/>
+                    <medicine-manager :patient="patient" :templates="templates" v-show="state == 'medicine-chooser'"/>
                     <form-editor v-show="state == 'form-manager'"/>
                     <medicine-editor v-show="state == 'medicine-manager'"/>
                     <reminder-editor v-show="state == 'reminder-manager'"/>
@@ -19,7 +20,7 @@
                 <div class="container" style="margin-top: 15px;">
                     <confirm-medicine-presenter :data="patient.medicines" v-if="state == 'confirm-medicine'"/>
                     <reminder-confirmer :data="reminder" v-if="state == 'confirm-reminder'"></reminder-confirmer>
-                    <medicines-list-presenter :data="patient.medicines" v-if="state == 'medicines-list'"/>
+                    <medicines-list :data="patient.medicines" v-if="state == 'medicines-list'"/>
                     <dose-verifier :data="medicine" v-if="state == 'verify-dose'"/>
                     <graph-category-chooser :data="available_categories" v-if="state == 'graph-category-chooser'"/>
                     <action-done v-if="state == 'done'"></action-done>
@@ -53,15 +54,17 @@ import ConfirmMedicinePresenter from "./components/presenters/ConfirmMedicinePre
 import DoseVerifier from "./components/presenters/DoseVerifier";
 import ReminderEditor from "./components/editors/ReminderEditor";
 import ReminderConfirmer from "./components/presenters/ReminderConfirmer";
-import MedicinesListPresenter from "./components/presenters/MedicinesListPresenter";
+import MedicinesList from "./components/managers/MedicineList";
+import MedicineManager from "./components/managers/MedicineManager";
 
 
 export default {
     name: 'app',
     components: {
+        MedicineManager,
         ReminderConfirmer,
         ReminderEditor,
-        MedicinesListPresenter,
+        MedicinesList,
         DoseVerifier,
         ConfirmMedicinePresenter,
         LoadError,
@@ -92,8 +95,8 @@ export default {
         Event.listen('navigate-to-create-medicine-page', () => this.state = 'medicine-manager');
         Event.listen('navigate-to-create-reminder-page', () => this.state = 'reminder-manager');
         Event.listen('navigate-to-create-algorithm-page', () => this.state = 'algorithm-manager');
-        Event.listen('back-to-dashboard', () => this.state = 'dashboard');
-        Event.listen('home', () => this.state = 'dashboard');
+        Event.listen('back-to-dashboard', () => this.state = this.mode == 'settings' ? 'dashboard' : 'medicine-chooser');
+        Event.listen('home', () => this.state = this.mode == 'settings' ? 'dashboard' : 'medicine-chooser');
         Event.listen('form-done', () => this.state = 'done');
         Event.listen('confirm-medicine-done', () => this.state = 'done');
         Event.listen('confirm-reminder-done', () => this.state = 'done');
@@ -108,7 +111,7 @@ export default {
 
         });
         Event.listen('medicine-created', (data) => {
-            this.state = 'dashboard'
+            this.state = this.mode == 'settings' ? 'dashboard' : 'medicine-chooser'
             if (!data.medicine.is_template) {
                 Event.fire('dashboard-to-main');
                 this.patient.medicines.push(data.medicine)
@@ -196,8 +199,9 @@ export default {
             if (this.mode == 'verify-dose') {
                 this.axios.get(this.url('/api/medicine/' + this.object_id)).then(this.process_load_answer);
             }
-            if (this.mode == 'medicine-manager') {
+            if (this.mode == 'medicine-chooser') {
                 this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
+                this.axios.get(this.url('/api/settings/get_templates')).then(response => this.templates = response.data);
             }
             if (this.mode == 'medicines-list') {
                 this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
@@ -240,9 +244,9 @@ export default {
                 this.state = 'verify-dose'
             }
 
-            if (this.mode == 'medicine-manager') {
+            if (this.mode == 'medicine-chooser') {
                 this.patient = response.data;
-                Event.fire('navigate-to-create-medicine-page')
+                this.state = 'medicine-chooser'
             }
 
             if (this.mode == 'graph') {

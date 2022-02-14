@@ -24,7 +24,7 @@
 import Card from "../common/Card";
 
 export default {
-    name: "MedicinesListPresenter",
+    name: "MedicineList",
     components: {Card},
     props: {
         data: {

@@ -687,8 +687,10 @@ export default {
     },
     mounted() {
         Event.listen('dashboard-to-main', () => {
-            this.state = 'main'
-            this.update_params()
+            if (window.PAGE == 'settings') {
+                this.state = 'main'
+                this.update_params()
+            }
         });
 
         Event.listen('home', () => {

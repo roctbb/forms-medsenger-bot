@@ -567,7 +567,7 @@ def enable_notifications(args, form, medicine_id):
 @verify_args
 def medicine_editor_page(args, form):
     contract = contract_manager.get(args.get('contract_id'))
-    return get_ui('medicine-manager', contract, medsenger_api.get_categories())
+    return get_ui('medicine-chooser', contract, medsenger_api.get_categories())
 
 
 @app.route('/medicines-list', methods=['GET'])

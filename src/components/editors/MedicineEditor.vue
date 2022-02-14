@@ -171,11 +171,8 @@ export default {
         }
     },
     created() {
-        if (window.PAGE == 'medicine-manager') {
-            this.medicine = this.create_empty_medicine()
-        }
-        /*this.medicine = undefined;
-        this.backup = JSON.stringify(this.medicine)*/
+        this.medicine = undefined;
+        this.backup = JSON.stringify(this.medicine)
     },
     mounted() {
         Event.listen('attach-medicine', (medicine) => {
