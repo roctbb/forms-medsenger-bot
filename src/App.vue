@@ -16,9 +16,8 @@
                 </div>
             </div>
             <div v-if="mode == 'form' || mode == 'done' || mode == 'graph' || mode == 'confirm-reminder' ||
-                       mode == 'confirm-medicine' || mode == 'verify-dose' || mode == 'medicines-list'">
+                       mode == 'verify-dose' || mode == 'medicines-list'">
                 <div class="container" style="margin-top: 15px;">
-                    <confirm-medicine-presenter :data="patient.medicines" v-if="state == 'confirm-medicine'"/>
                     <reminder-confirmer :data="reminder" v-if="state == 'confirm-reminder'"></reminder-confirmer>
                     <medicines-list :data="patient.medicines" v-if="state == 'medicines-list'"/>
                     <dose-verifier :data="medicine" v-if="state == 'verify-dose'"/>
@@ -50,7 +49,6 @@ import ActionDone from "./components/presenters/ActionDone";
 import GraphCategoryChooser from "./components/presenters/GraphCategoryChooser";
 import GraphPresenter from "./components/presenters/GraphPresenter";
 import LoadError from "./components/presenters/LoadError";
-import ConfirmMedicinePresenter from "./components/presenters/ConfirmMedicinePresenter";
 import DoseVerifier from "./components/presenters/DoseVerifier";
 import ReminderEditor from "./components/editors/ReminderEditor";
 import ReminderConfirmer from "./components/presenters/ReminderConfirmer";
@@ -66,7 +64,6 @@ export default {
         ReminderEditor,
         MedicinesList,
         DoseVerifier,
-        ConfirmMedicinePresenter,
         LoadError,
         GraphPresenter,
         GraphCategoryChooser,
@@ -96,6 +93,7 @@ export default {
         Event.listen('navigate-to-create-reminder-page', () => this.state = 'reminder-manager');
         Event.listen('navigate-to-create-algorithm-page', () => this.state = 'algorithm-manager');
         Event.listen('back-to-dashboard', () => this.state = this.mode == 'settings' ? 'dashboard' : 'medicine-chooser');
+        Event.listen('back-to-medicine-list', () => this.state = 'medicines-list');
         Event.listen('home', () => this.state = this.mode == 'settings' ? 'dashboard' : 'medicine-chooser');
         Event.listen('form-done', () => this.state = 'done');
         Event.listen('confirm-medicine-done', () => this.state = 'done');
@@ -190,9 +188,6 @@ export default {
             if (this.mode == 'form') {
                 this.axios.get(this.url('/api/form/' + this.object_id)).then(this.process_load_answer).catch(this.process_load_error);
             }
-            if (this.mode == 'confirm-medicine') {
-                this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
-            }
             if (this.mode == 'confirm-reminder') {
                 this.axios.get(this.url('/api/reminder/' + this.object_id)).then(this.process_load_answer);
             }
@@ -222,11 +217,6 @@ export default {
             if (this.mode == 'form') {
                 this.form = response.data;
                 this.state = 'form-presenter'
-            }
-
-            if (this.mode == 'confirm-medicine') {
-                this.patient = response.data;
-                this.state = 'confirm-medicine'
             }
 
             if (this.mode == 'confirm-reminder') {

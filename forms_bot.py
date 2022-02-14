@@ -174,9 +174,7 @@ def actions(data):
     forms = filter(lambda f: f.show_button, contract.forms)
 
     actions = [{'link': 'form/{}'.format(form.id), 'type': 'patient', 'name': form.button_title} for form in forms]
-
-    if len(contract.medicines):
-        actions.append({'link': '/medicines-list', 'type': 'patient', 'name': 'Назначенные лекарства'})
+    actions.append({'link': '/medicines-list', 'type': 'patient', 'name': 'Лекарства'})
 
     return jsonify(actions)
 
@@ -591,13 +589,6 @@ def medicine_editor_page(args, form):
 def medicines_list_page(args, form):
     contract = contract_manager.get(args.get('contract_id'))
     return get_ui('medicines-list', contract, medsenger_api.get_categories())
-
-
-@app.route('/confirm-medicine', methods=['GET'])
-@verify_args
-def medicines_page(args, form):
-    contract = contract_manager.get(args.get('contract_id'))
-    return get_ui('confirm-medicine', contract, medsenger_api.get_categories())
 
 
 @app.route('/api/confirm-medicine', methods=['POST'])
