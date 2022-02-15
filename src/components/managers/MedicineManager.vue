@@ -1,81 +1,87 @@
 <template>
-    <div v-if="state == 'main'">
-        <h5>Лекарства</h5>
-
-        <div class="row">
-            <card v-for="(medicine, i) in patient.medicines" :key="'medicine' + medicine.id" :image="images.medicine"
-                  class="col-lg-3 col-md-4">
-                <h6>{{ medicine.title }}</h6>
-                <small>{{ medicine.rules }}</small><br>
-                <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
-                <small v-if="medicine.sent">Подтверждено {{ medicine.done }} раз(а) / отправлено {{ medicine.sent }}
-                    раз(а) за последний месяц</small>
-                <small v-else>Пока не отправлялось</small><br>
-                <div v-if="medicine.contract_id == current_contract_id">
-                    <a href="#" @click="edit_medicine(medicine)">Редактировать</a>
-                    <a href="#" @click="delete_medicine(medicine)">Отменить</a>
-                </div>
-                <div v-else>
-                    <small>Добавлен в другом контракте.</small>
-                </div>
-
-                <small v-if="!empty(medicine.template_id)" class="text-muted">ID шаблона: {{
-                        medicine.template_id
-                    }}</small>
-
-            </card>
-
-            <card v-for="(medicine, i) in patient.canceled_medicines" :key="'canceled_medicine' + medicine.id"
-                  :image="images.canceled_medicine"
-                  class="col-lg-3 col-md-4 text-muted">
-                <h6>{{ medicine.title }}</h6>
-                <small>{{ medicine.rules }}</small><br>
-                <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
-                <small>Назначено: {{ medicine.prescribed_at }}</small><br>
-                <small>Отменено: {{ medicine.canceled_at }}</small><br>
-                <div v-if="medicine.contract_id == current_contract_id">
-                    <a href="#" @click="resume_medicine(medicine)">Возобновить</a>
-                </div>
-            </card>
-        </div>
-
-        <button class="btn btn-primary btn-sm" @click="create_medicine()">Назначить лекарство
-        </button>
-
-        <button v-if="is_admin" class="btn btn-info btn-sm" @click="state = 'templates'">Управление
-            шаблонами
-        </button>
-    </div>
-    <div v-else-if="state == 'templates'">
-        <h3>Шаблоны лекарств</h3>
-
-        <div class="alert alert-info" role="alert">
-            <p>Выберите лекарство или создайте новое.</p>
-        </div>
-
-        <div class="row">
-            <card v-for="(medicine, i) in templates.medicines" :key="'medicine_template_' + medicine.id"
-                  :image="images.medicine"
-                  class="col-lg-3 col-md-4">
-                <h6>{{ medicine.title }}</h6>
-                <small>{{ medicine.rules }}</small><br>
-                <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
-                <a href="#" @click="attach_medicine(medicine)">Подключить</a>
-                <a href="#" v-if="is_admin" @click="edit_medicine(medicine)">Редактировать</a>
-                <a href="#" v-if="is_admin" @click="delete_medicine(medicine)">Удалить</a>
-
-                <br>
-
-                <small class="text-muted">ID: {{ medicine.id }}</small>
-            </card>
-            <div v-if="!templates.medicines.length" class="col-md-12">
-                <p style="margin-bottom: 15px;">Список шаблонов пуст.</p>
+    <div>
+        <div v-if="state == 'main'">
+            <h3>Лекарства</h3>
+            <div class="alert alert-info" role="alert">
+                <p>Форма создания лекарства расположена внизу страницы.</p>
             </div>
 
-        </div>
+            <div class="row">
+                <card v-for="(medicine, i) in patient.medicines" :key="'medicine' + medicine.id"
+                      :image="images.medicine"
+                      class="col-lg-3 col-md-4">
+                    <h6>{{ medicine.title }}</h6>
+                    <small>{{ medicine.rules }}</small><br>
+                    <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
+                    <small v-if="medicine.sent">Подтверждено {{ medicine.done }} раз(а) / отправлено {{ medicine.sent }}
+                        раз(а) за последний месяц</small>
+                    <small v-else>Пока не отправлялось</small><br>
+                    <div v-if="medicine.contract_id == current_contract_id">
+                        <a href="#" @click="edit_medicine(medicine)">Редактировать</a>
+                        <a href="#" @click="delete_medicine(medicine)">Отменить</a>
+                    </div>
+                    <div v-else>
+                        <small>Добавлен в другом контракте.</small>
+                    </div>
 
-        <button class="btn btn-primary btn-sm" @click="create_medicine()">Добавить</button>
-        <button class="btn btn-danger btn-sm" @click="state = 'main'">Назад</button>
+                    <small v-if="!empty(medicine.template_id)" class="text-muted">ID шаблона: {{
+                            medicine.template_id
+                        }}</small>
+
+                </card>
+
+                <card v-for="(medicine, i) in patient.canceled_medicines" :key="'canceled_medicine' + medicine.id"
+                      :image="images.canceled_medicine"
+                      class="col-lg-3 col-md-4 text-muted">
+                    <h6>{{ medicine.title }}</h6>
+                    <small>{{ medicine.rules }}</small><br>
+                    <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
+                    <small>Назначено: {{ medicine.prescribed_at }}</small><br>
+                    <small>Отменено: {{ medicine.canceled_at }}</small><br>
+                    <div v-if="medicine.contract_id == current_contract_id">
+                        <a href="#" @click="resume_medicine(medicine)">Возобновить</a>
+                    </div>
+                </card>
+            </div>
+
+            <button v-if="is_admin" class="btn btn-info btn-sm" @click="state = 'templates'">Управление
+                шаблонами
+            </button>
+        </div>
+        <div v-else-if="state == 'templates'">
+            <h3>Шаблоны лекарств</h3>
+
+            <div class="alert alert-info" role="alert">
+                <p>Выберите лекарство или создайте новое.</p>
+            </div>
+
+            <div class="row">
+                <card v-for="(medicine, i) in templates.medicines" :key="'medicine_template_' + medicine.id"
+                      :image="images.medicine"
+                      class="col-lg-3 col-md-4">
+                    <h6>{{ medicine.title }}</h6>
+                    <small>{{ medicine.rules }}</small><br>
+                    <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
+                    <a href="#" @click="attach_medicine(medicine)">Подключить</a>
+                    <a href="#" v-if="is_admin" @click="edit_medicine(medicine)">Редактировать</a>
+                    <a href="#" v-if="is_admin" @click="delete_medicine(medicine)">Удалить</a>
+
+                    <br>
+
+                    <small class="text-muted">ID: {{ medicine.id }}</small>
+                </card>
+                <div v-if="!templates.medicines.length" class="col-md-12">
+                    <p style="margin-bottom: 15px;">Список шаблонов пуст.</p>
+                </div>
+
+            </div>
+
+            <button class="btn btn-danger btn-sm" @click="state = 'main'">Назад</button>
+
+        </div>
+        <hr>
+        <h5>Назначить лекарство</h5>
+        <medicine-editor/>
 
     </div>
 
@@ -85,10 +91,11 @@
 import Card from "../common/Card";
 import ErrorBlock from "../common/ErrorBlock";
 import * as moment from "moment/moment";
+import MedicineEditor from "../editors/MedicineEditor";
 
 export default {
     name: "MedicineManager",
-    components: {ErrorBlock, Card},
+    components: {MedicineEditor, ErrorBlock, Card},
     props: {
         patient: {
             required: true
@@ -109,9 +116,6 @@ export default {
     methods: {
         attach_medicine: function (medicine) {
             Event.fire('attach-medicine', medicine)
-        },
-        create_medicine: function () {
-            Event.fire('navigate-to-create-medicine-page')
         },
         edit_medicine: function (medicine) {
             Event.fire('edit-medicine', medicine)
@@ -173,7 +177,14 @@ export default {
         }
     },
     mounted() {
+        Event.fire('create-medicine-editor')
+
         Event.listen('home', () => {
+            this.state = 'main'
+            Event.fire('create-medicine-editor')
+        });
+
+        Event.listen('medicine-created', () => {
             this.state = 'main'
         });
     }

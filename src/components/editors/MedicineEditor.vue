@@ -190,6 +190,12 @@ export default {
             this.$forceUpdate()
         });
 
+        Event.listen('create-medicine-editor', () => {
+            this.show_button = false
+            this.medicine = this.create_empty_medicine()
+            this.backup = JSON.stringify(this.medicine)
+        });
+
         Event.listen('navigate-to-create-medicine-page', () => {
             this.show_button = true
             this.medicine = this.create_empty_medicine()
