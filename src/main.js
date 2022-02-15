@@ -105,7 +105,7 @@ Vue.mixin({
                 mode: 'daily',
                 points: [{
                     hour: '',
-                    minute: ''
+                    minute: '00'
                 }]
             }
         },
