@@ -65,7 +65,7 @@ def init(data):
     contract = contract_manager.add(contract_id, clinic_id)
 
     params = data.get('params')
-    print(params)
+
     if params:
         forms = params.get('forms')
         exclude_algorithms = params.get('exclude_algorithms', "").split(',')
@@ -174,7 +174,6 @@ def actions(data):
     forms = filter(lambda f: f.show_button, contract.forms)
 
     actions = [{'link': 'form/{}'.format(form.id), 'type': 'patient', 'name': form.button_title} for form in forms]
-    actions.append({'link': '/medicines-list', 'type': 'patient', 'name': 'Лекарства'})
 
     return jsonify(actions)
 

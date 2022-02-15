@@ -163,7 +163,6 @@ class Medicine(db.Model, Compliance):
 
     def get_description(self, tt=False):
         medicine_description = "«{}»".format(self.title)
-        print(self.dose)
         if self.dose is not None:
             medicine_description += " {}".format(self.dose)
         if self.rules and not tt:
