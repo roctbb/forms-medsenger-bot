@@ -22,7 +22,7 @@
                         уведомления</a>
                 </div>
                 <div v-else>
-                    <strong>Принимается при необходимости.</strong>
+                    <small><strong>Принимается при необходимости.</strong></small>
                 </div>
             </card>
         </div>
