@@ -39,4 +39,8 @@ export default {
     font-size: 0.75rem;
 
 }
+
+.card-title {
+    margin-bottom: 1.5rem;
+}
 </style>
