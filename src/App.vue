@@ -320,6 +320,7 @@ body {
 
 h5, h4, h3 {
     color: #006c88;
+    margin-bottom: 15px;
 }
 
 strong {

@@ -1,6 +1,6 @@
 <template>
     <div v-if="state == 'main'">
-        <h5>Лекарства</h5>
+        <h3>Назначенные препараты</h3>
 
         <div class="row">
             <card v-for="(medicine, i) in patient.medicines" :key="'medicine' + medicine.id" :image="images.medicine"
@@ -10,7 +10,7 @@
                 <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
                 <small v-if="medicine.sent">Подтверждено {{ medicine.done }} раз(а) / отправлено {{ medicine.sent }}
                     раз(а) за последний месяц</small>
-                <small v-else>Пока не отправлялось</small><br>
+                <small v-else>Пока не отправлялось</small><br><br>
                 <div v-if="medicine.contract_id == current_contract_id">
                     <a href="#" @click="edit_medicine(medicine)">Редактировать</a>
                     <a href="#" @click="delete_medicine(medicine)">Отменить</a>
@@ -40,7 +40,7 @@
             </card>
         </div>
 
-        <button class="btn btn-primary btn-sm" @click="create_medicine()">Назначить лекарство
+        <button class="btn btn-primary" @click="create_medicine()">Назначить лекарство
         </button>
 
     </div>
@@ -149,5 +149,11 @@ export default {
 </script>
 
 <style scoped>
+small {
+    font-size: 90%;
+}
 
+.card a {
+    font-size: 90%;
+}
 </style>

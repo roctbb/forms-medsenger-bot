@@ -1,6 +1,6 @@
 <template>
     <div v-if="medicine">
-
+        <h5>Назначить новое лекарство</h5>
         <error-block :errors="errors"/>
         <div class="form row">
             <div class="col-lg-6">
@@ -40,14 +40,12 @@
             </div>
         </div>
 
-        <div class="text-center">
             <button v-if="show_button" class="btn btn-danger" @click="go_back()">Назад</button>
             <button class="btn btn-success" @click="save()">Сохранить <span
                 v-if="medicine.is_template"> шаблон</span></button>
             <button v-if="!medicine.id && is_admin" class="btn btn-primary" @click="save(true)">Сохранить как
                 шаблон
             </button>
-        </div>
 
     </div>
 </template>
