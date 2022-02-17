@@ -21,6 +21,9 @@
                     <a href="#" v-if="medicine.notifications_disabled" @click="enable_notifications(medicine)">Включить
                         уведомления</a>
                 </div>
+                <div v-else>
+                    <strong>Принимается при необходимости.</strong>
+                </div>
             </card>
         </div>
         <button class="btn btn-primary" @click="custom = true">Другое лекарство</button>
