@@ -318,7 +318,7 @@ body {
     margin-bottom: 7px;
 }
 
-h5 {
+h5, h4, h3 {
     color: #006c88;
 }
 
