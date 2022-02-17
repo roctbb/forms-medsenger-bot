@@ -219,8 +219,12 @@
                     <h6>{{ form.title }}</h6>
                     <small>{{ form.doctor_description }}</small><br>
                     <small><i>{{ tt_description(form.timetable) }}</i></small><br>
+                    <small v-if="form.algorithm_id"><b>Связанный алгоритм:</b>
+                        {{ find_algorithm(form.algorithm_id).title }}</small>
+
+                    <br>
                     <a href="#" v-if="!is_attached(form)" @click="attach_form(form)">Подключить</a>
-                    <small v-else class="text-muted">Опросник подключен</small>
+                    <small v-else class="text-muted">Опросник подключен<br></small>
 
                     <a href="#" v-if="is_admin" @click="edit_form(form)">Редактировать</a>
                     <a href="#" v-if="is_admin" @click="delete_form(form)">Удалить</a>
@@ -230,10 +234,6 @@
                         <a href="#" @click="send_now(form)">Отправить сейчас</a>
                     </div>
 
-                    <small v-if="form.algorithm_id"><b>Связанный алгоритм:</b>
-                        {{ find_algorithm(form.algorithm_id).title }}</small>
-
-                    <br>
 
                     <small class="text-muted">ID: {{ form.id }}</small>
                 </card>

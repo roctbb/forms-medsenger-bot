@@ -14,7 +14,7 @@
         <div v-if="timetable.mode != 'manual'">
             <hr>
             <div class="form-group row" v-for="(timepoint, index) in timetable.points">
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div v-if="timetable.mode == 'weekly'">
                         <small class="text-muted">День недели</small>
                         <select class="form-control form-control-sm" v-model="timepoint.day">
@@ -43,17 +43,20 @@
                            :class="timetable_save_clicked[index] && ((!timepoint.minute && timepoint.minute !== 0) || timepoint.minute < 0 || timepoint.minute > 59) ? 'is-invalid' : ''"
                            v-model="timepoint.minute"/>
                 </div>
-                <div class="col-md-3"><br>
-                    <a class="btn btn-sm btn-default" @click="remove_time_point(index)"
+                <div class="col-md-2"><br>
+                    <a @click="remove_time_point(index)"
                        v-if="timetable.points.length > 1">Удалить</a>
                 </div>
             </div>
 
-            <a class="btn btn-primary btn-sm" @click="add_time_point()">Добавить время</a><slot></slot>
+            <div class="text-center" style="margin-top: 15px;">
+                <a class="btn btn-primary btn-sm" @click="add_time_point()">Добавить время</a>
+                <slot></slot>
+            </div>
 
         </div>
         <div v-else>
-          <slot></slot>
+            <slot></slot>
         </div>
     </card>
 </template>

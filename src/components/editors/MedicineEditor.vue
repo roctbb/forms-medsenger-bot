@@ -2,47 +2,52 @@
     <div v-if="medicine">
 
         <error-block :errors="errors"/>
-        <div class="form">
-            <card title="Описание лекарства">
-                <form-group48 title="Название">
-                    <input class="form-control form-control-sm"
-                           :class="this.save_clicked && !medicine.title ? 'is-invalid' : ''"
-                           v-model="medicine.title"/>
-                </form-group48>
+        <div class="form row">
+            <div class="col-lg-6">
+                <card title="Описание лекарства">
+                    <form-group48 title="Название">
+                        <input class="form-control form-control-sm"
+                               :class="this.save_clicked && !medicine.title ? 'is-invalid' : ''"
+                               v-model="medicine.title"/>
+                    </form-group48>
 
-                <form-group48 title="Дозировка">
-                    <textarea class="form-control form-control-sm" v-model="medicine.dose"></textarea>
-                </form-group48>
+                    <form-group48 title="Дозировка">
+                        <textarea class="form-control form-control-sm" v-model="medicine.dose"></textarea>
+                    </form-group48>
 
-                <form-group48 title="Правила приема">
-                    <textarea class="form-control form-control-sm" v-model="medicine.rules"></textarea>
-                </form-group48>
+                    <form-group48 title="Правила приема">
+                        <textarea class="form-control form-control-sm" v-model="medicine.rules"></textarea>
+                    </form-group48>
 
-                <form-group48 title="Разрешить пациенту регулировать дозировку">
-                    <input class="form-check" type="checkbox" v-model="medicine.verify_dose"/>
-                </form-group48>
+                    <form-group48 title="Разрешить пациенту регулировать дозировку">
+                        <input class="form-check" type="checkbox" v-model="medicine.verify_dose"/>
+                    </form-group48>
 
-                <form-group48 title="Уведомить, если пациент не заполнят опросник">
-                    <input class="form-check" type="checkbox" @change="warning_change()" v-model="medicine.warning_enabled"/>
-                </form-group48>
+                    <form-group48 title="Уведомить, если пациент не заполнят опросник">
+                        <input class="form-check" type="checkbox" @change="warning_change()" v-model="medicine.warning_enabled"/>
+                    </form-group48>
 
-                <form-group48 v-if="medicine.warning_enabled" title="Прислать уведомление о пропусках через">
-                    <input class="form-control form-control-sm"
-                           :class="this.save_clicked && medicine.warning_days < 0 ? 'is-invalid' : ''"
-                           type="number" min="1" max="200" step="1" v-model="medicine.warning_days"/>
-                    <small class="text-muted">дней</small>
-                </form-group48>
-            </card>
-
-            <timetable-editor v-bind:data="medicine.timetable" :timetable_save_clicked="timetable_save_clicked"/>
+                    <form-group48 v-if="medicine.warning_enabled" title="Прислать уведомление о пропусках через">
+                        <input class="form-control form-control-sm"
+                               :class="this.save_clicked && medicine.warning_days < 0 ? 'is-invalid' : ''"
+                               type="number" min="1" max="200" step="1" v-model="medicine.warning_days"/>
+                        <small class="text-muted">дней</small>
+                    </form-group48>
+                </card>
+            </div>
+            <div class="col-lg-6">
+                <timetable-editor v-bind:data="medicine.timetable" :timetable_save_clicked="timetable_save_clicked"/>
+            </div>
         </div>
 
-        <button v-if="show_button" class="btn btn-danger" @click="go_back()">Назад</button>
-        <button class="btn btn-success" @click="save()">Сохранить <span
-            v-if="medicine.is_template"> шаблон</span></button>
-        <button v-if="!medicine.id && is_admin" class="btn btn-primary" @click="save(true)">Сохранить как
-            шаблон
-        </button>
+        <div class="text-center">
+            <button v-if="show_button" class="btn btn-danger" @click="go_back()">Назад</button>
+            <button class="btn btn-success" @click="save()">Сохранить <span
+                v-if="medicine.is_template"> шаблон</span></button>
+            <button v-if="!medicine.id && is_admin" class="btn btn-primary" @click="save(true)">Сохранить как
+                шаблон
+            </button>
+        </div>
 
     </div>
 </template>
@@ -149,13 +154,10 @@ export default {
         process_save_error: function (response) {
             this.errors.push('Ошибка сохранения');
         },
-        warning_change: function ()
-        {
-            if (this.medicine.warning_enabled)
-            {
+        warning_change: function () {
+            if (this.medicine.warning_enabled) {
                 this.medicine.warning_days = 7
-            }
-            else {
+            } else {
                 this.medicine.warning_days = 0
             }
         }
@@ -206,13 +208,12 @@ export default {
             this.show_button = true
             this.medicine = medicine
 
-            if (this.medicine.warning_days > 0)
-            {
+            if (this.medicine.warning_days > 0) {
                 this.medicine.warning_enabled = true;
             }
 
             if (this.medicine.timetable.points) {
-                for (let i of  this.medicine.timetable.points.keys()) {
+                for (let i of this.medicine.timetable.points.keys()) {
                     this.$set(this.timetable_save_clicked, i, false)
                 }
             }
