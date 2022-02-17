@@ -5,7 +5,7 @@
         <div v-else>
             <dashboard-header :patient="patient" v-if="mode == 'settings'"/>
 
-            <div class="container slim-container" v-if="state == 'form-presenter'">
+            <div class="container slim-container" style="margin-top: 15px;" v-if="state == 'form-presenter'">
                 <form-presenter :data="form" v-if="state == 'form-presenter'"/>
             </div>
             <div class="container" style="margin-top: 15px;" v-else>
@@ -295,7 +295,7 @@ body {
 
 .card {
 
-    border-color: rgba(0,108,136, 0.3);
+    border-color: rgba(0,108,136, 0.5);
 }
 
 .btn-primary, .btn-primary:active, .btn-primary:hover, .btn-primary:focus {
@@ -311,6 +311,19 @@ body {
 .btn-danger, .btn-danger:active, .btn-danger:hover, .btn-danger:focus {
     border-color: #ff5763;
     background-color: #ff5763;
+}
+
+.btn {
+    margin-top: 7px;
+    margin-bottom: 7px;
+}
+
+h5 {
+    color: #006c88;
+}
+
+strong {
+    font-weight: 500;
 }
 
 </style>
