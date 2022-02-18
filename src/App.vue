@@ -3,36 +3,29 @@
         <vue-confirm-dialog></vue-confirm-dialog>
         <loading v-if="state == 'loading'"/>
         <div v-else>
-            <div v-if="mode == 'settings' || mode == 'medicine-chooser'">
-                <dashboard-header :patient="patient"/>
-                <div class="container" style="margin-top: 15px;">
-                    <dashboard :patient="patient" :templates="templates" v-show="state == 'dashboard'"/>
-                    <medicine-manager :patient="patient" :templates="templates" v-show="state == 'medicine-chooser'"/>
-                    <form-editor v-show="state == 'form-manager'"/>
-                    <medicine-editor v-show="state == 'medicine-manager'"/>
-                    <reminder-editor v-show="state == 'reminder-manager'"/>
-                    <algorithm-editor v-show="state == 'algorithm-manager'"/>
-                    <action-done v-if="state == 'done'"></action-done>
-                </div>
-            </div>
-            <div v-if="mode == 'form' || mode == 'done' || mode == 'graph' || mode == 'confirm-reminder' ||
-                       mode == 'verify-dose' || mode == 'medicines-list'">
-                <div class="container" style="margin-top: 15px;">
-                    <reminder-confirmer :data="reminder" v-if="state == 'confirm-reminder'"></reminder-confirmer>
-                    <medicines-list :data="patient.medicines" v-if="state == 'medicines-list'"/>
-                    <dose-verifier :data="medicine" v-if="state == 'verify-dose'"/>
-                    <graph-category-chooser :data="available_categories" v-if="state == 'graph-category-chooser'"/>
-                    <action-done v-if="state == 'done'"></action-done>
-                    <load-error v-if="state == 'load-error'"></load-error>
-                </div>
-                <div class="container slim-container" v-if="state == 'form-presenter'">
-                    <form-presenter :data="form" v-if="state == 'form-presenter'"/>
-                </div>
+            <dashboard-header :patient="patient" v-if="mode == 'settings' && dashboard_parts.length == 0"/>
 
-                <graph-presenter v-show="state == 'graph-presenter'" :patient="patient"/>
+            <div class="container slim-container" style="margin-top: 15px;" v-if="state == 'form-presenter'">
+                <form-presenter :data="form" v-if="state == 'form-presenter'"/>
+            </div>
+            <div class="container" style="margin-top: 15px;" v-else>
+                <dashboard :patient="patient" :templates="templates" v-show="state == 'dashboard'" :parts="dashboard_parts"/>
+                <form-editor v-show="state == 'form-manager'"/>
+                <medicine-editor v-show="state == 'medicine-manager'"/>
+                <reminder-editor v-show="state == 'reminder-manager'"/>
+                <algorithm-editor v-show="state == 'algorithm-manager'"/>
+                <action-done v-if="state == 'done'"></action-done>
+
+                <reminder-confirmer :data="reminder" v-if="state == 'confirm-reminder'"></reminder-confirmer>
+                <medicines-list :data="patient.medicines" v-if="state == 'medicines-list'"/>
+                <dose-verifier :data="medicine" v-if="state == 'verify-dose'"/>
+                <graph-category-chooser :data="available_categories" v-if="state == 'graph-category-chooser'"/>
+                <load-error v-if="state == 'load-error'"></load-error>
             </div>
 
+            <graph-presenter v-show="state == 'graph-presenter'" :patient="patient"/>
         </div>
+
     </div>
 </template>
 
@@ -53,13 +46,11 @@ import DoseVerifier from "./components/presenters/DoseVerifier";
 import ReminderEditor from "./components/editors/ReminderEditor";
 import ReminderConfirmer from "./components/presenters/ReminderConfirmer";
 import MedicinesList from "./components/managers/MedicineList";
-import MedicineManager from "./components/managers/MedicineManager";
 
 
 export default {
     name: 'app',
     components: {
-        MedicineManager,
         ReminderConfirmer,
         ReminderEditor,
         MedicinesList,
@@ -265,16 +256,22 @@ export default {
     margin-top: 60px;
 }
 
+.container {
+    max-width: 95%;
+}
+
 h1, h2 {
     font-weight: normal;
 }
 
 a {
-    color: #42b983;
+    color: #006c88;
+    font-weight: bold;
 }
 
 body {
-    background-color: #f8f8fb;
+    background-color: #fcfcfc;
+    font-family: Roboto;
 }
 
 @media screen and (max-width: 900px) {
@@ -285,6 +282,58 @@ body {
     }
 }
 
+.col, .col-1, .col-10, .col-11, .col-12, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-auto, .col-lg, .col-lg-1, .col-lg-10, .col-lg-11, .col-lg-12, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-auto, .col-md, .col-md-1, .col-md-10, .col-md-11, .col-md-12, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-auto, .col-sm, .col-sm-1, .col-sm-10, .col-sm-11, .col-sm-12, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-auto, .col-xl, .col-xl-1, .col-xl-10, .col-xl-11, .col-xl-12, .col-xl-2, .col-xl-3, .col-xl-4, .col-xl-5, .col-xl-6, .col-xl-7, .col-xl-8, .col-xl-9, .col-xl-auto {
+    padding-right: 5px;
+    padding-left: 5px;
+}
+.row {
+    margin: 5px -5px;
+}
+
+.card {
+
+    border-color: rgba(0,108,136, 0.5);
+}
+
+.btn-primary, .btn-primary:active, .btn-primary:hover, .btn-primary:focus {
+    border-color: #006c88;
+    background-color: #006c88;
+}
+
+.btn-success, .btn-success:active, .btn-success:hover, .btn-success:focus  {
+    border-color: #24a8b4;
+    background-color: #24a8b4;
+}
+
+.btn-danger, .btn-danger:active, .btn-danger:hover, .btn-danger:focus {
+    border-color: #ff5763;
+    background-color: #ff5763;
+}
+
+.btn {
+    margin-top: 7px;
+    margin-bottom: 7px;
+}
+
+h5, h4, h3 {
+    color: #006c88;
+    margin-bottom: 15px;
+    margin-top: 15px;
+}
+
+strong {
+    font-weight: 500;
+}
+
+input[type=checkbox] {
+    /* Double-sized Checkboxes */
+    -ms-transform: scale(1.2); /* IE */
+    -moz-transform: scale(1.2); /* FF */
+    -webkit-transform: scale(1.2); /* Safari and Chrome */
+    -o-transform: scale(1.2); /* Opera */
+    transform: scale(1.2);
+    margin: 10px;
+}
 
 </style>
 

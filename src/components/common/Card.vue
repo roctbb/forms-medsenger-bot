@@ -29,7 +29,7 @@ export default {
 
 <style scoped>
 .card {
-    margin-bottom: 15px;
+    margin-bottom: 5px;
     background-repeat: no-repeat;
     background-position: right bottom;
     background-size: 55px;
@@ -38,5 +38,9 @@ export default {
 .card a {
     font-size: 0.75rem;
 
+}
+
+.card-title {
+    margin-bottom: 1.5rem;
 }
 </style>

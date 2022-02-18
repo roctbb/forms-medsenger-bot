@@ -9,6 +9,7 @@ import sys, os
 
 DATACACHE = {}
 
+
 def gts():
     now = datetime.now()
     return now.strftime("%Y-%m-%d %H:%M:%S - ")
@@ -79,9 +80,10 @@ def verify_json(func):
     return wrapper
 
 
-def get_ui(page, contract, categories='[]', object_id=None, is_preview=False):
+def get_ui(page, contract, categories='[]', object_id=None, is_preview=False, dashboard_parts=[]):
     return render_template('index.html', page=page, object_id=object_id, contract_id=contract.id, api_host=MAIN_HOST.replace('8001', '8000'), local_host=LOCALHOST, agent_token=contract.agent_token,
-                           agent_id=AGENT_ID, categories=json.dumps(categories), is_admin=str(bool(contract.is_admin)).lower(), lc=dir_last_updated('static'), clinic_id=contract.clinic_id, is_preview=str(is_preview).lower())
+                           agent_id=AGENT_ID, categories=json.dumps(categories), is_admin=str(bool(contract.is_admin)).lower(), lc=dir_last_updated('static'), clinic_id=contract.clinic_id,
+                           is_preview=str(is_preview).lower(), dashboard_parts=json.dumps(dashboard_parts))
 
 
 def delayed(delay, f, args):
@@ -172,7 +174,6 @@ def get_step(algorithm, step=None):
 
 
 def generate_timetable(start, end, times):
-
     if times < 1:
         return {
             "mode": "manual"
@@ -202,12 +203,14 @@ def generate_timetable(start, end, times):
 
     return timetable
 
+
 def timezone_now(zone=None):
     if zone:
         tz = timezone(zone)
     else:
         tz = timezone('Europe/Moscow')
     return datetime.now(tz)
+
 
 def localize(d, zone=None):
     if zone:

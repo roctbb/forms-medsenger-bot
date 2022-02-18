@@ -305,7 +305,8 @@ Vue.mixin({
             },
             is_admin: window.IS_ADMIN,
             clinic_id: window.CLINIC_ID,
-            is_preview: window.IS_PREVIEW
+            is_preview: window.IS_PREVIEW,
+            dashboard_parts: window.DASHBOARD_PARTS
         }
     }
 })

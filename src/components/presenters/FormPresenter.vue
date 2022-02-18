@@ -17,16 +17,16 @@
                                   :big="true"
                                   :required="field.required"
                                   :title="field.text" :key="i"
-                                  :description="field.description" :errors="field_errors[field.uid]">
+                                  :description="field.description" :errors="field_errors[field.uid]" style="margin-top: 15px; margin-bottom: 15px;">
                         <input type="number" :min="field.params.min" :max="field.params.max" step="1"
-                               class="form-control monitoring-input"
+                               class="form-control monitoring-input" @input="fieldTransformer(field)"
                                :class="save_clicked && field.required &&
                        (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
                                v-if="field.type == 'integer'" :required="field.required" v-model="answers[field.uid]"/>
 
 
                         <input type="number" :min="field.params.min" :max="field.params.max" step="0.01"
-                               class="form-control monitoring-input"
+                               class="form-control monitoring-input"  @input="fieldTransformer(field)"
                                :class="save_clicked && field.required &&
                        (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
                                v-if="field.type == 'float'" :required="field.required" v-model="answers[field.uid]"/>
@@ -221,6 +221,14 @@ export default {
 
             }
         },
+        fieldTransformer: function (field) {
+            console.log(field);
+            if (field.category == 'temperature') {
+                if (this.answers[field.uid] > 100) {
+                    this.answers[field.uid] /= 10;
+                }
+            }
+        }
     },
     created() {
         this.form = this.data
@@ -260,21 +268,21 @@ h5 {
 
 input[type=checkbox] {
     /* Double-sized Checkboxes */
-    -ms-transform: scale(1.3); /* IE */
-    -moz-transform: scale(1.3); /* FF */
-    -webkit-transform: scale(1.3); /* Safari and Chrome */
-    -o-transform: scale(1.3); /* Opera */
-    transform: scale(1.3);
+    -ms-transform: scale(1.4); /* IE */
+    -moz-transform: scale(1.4); /* FF */
+    -webkit-transform: scale(1.4); /* Safari and Chrome */
+    -o-transform: scale(1.4); /* Opera */
+    transform: scale(1.4);
     padding: 10px;
 }
 
 input[type=radio] {
     /* Double-sized Checkboxes */
-    -ms-transform: scale(1.3); /* IE */
-    -moz-transform: scale(1.3); /* FF */
-    -webkit-transform: scale(1.3); /* Safari and Chrome */
-    -o-transform: scale(1.3); /* Opera */
-    transform: scale(1.3);
+    -ms-transform: scale(1.4); /* IE */
+    -moz-transform: scale(1.4); /* FF */
+    -webkit-transform: scale(1.4); /* Safari and Chrome */
+    -o-transform: scale(1.4); /* Opera */
+    transform: scale(1.4);
     padding: 10px;
 }
 
