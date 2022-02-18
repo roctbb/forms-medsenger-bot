@@ -270,11 +270,11 @@ def forms_editor_page(args, form):
     return get_ui('settings', contract, medsenger_api.get_categories(), dashboard_parts=['forms', 'algorithms'])
 
 
-@app.route('/notification-manager', methods=['GET'])
+@app.route('/reminder-manager', methods=['GET'])
 @verify_args
 def notification_editor_page(args, form):
     contract = contract_manager.get(args.get('contract_id'))
-    return get_ui('settings', contract, medsenger_api.get_categories(), dashboard_parts=['notifications'])
+    return get_ui('settings', contract, medsenger_api.get_categories(), dashboard_parts=['reminders'])
 
 
 @app.route('/medicines-list', methods=['GET'])

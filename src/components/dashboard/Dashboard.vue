@@ -4,7 +4,7 @@
         <div v-if="state == 'main'">
 
             <h6 v-if="patient.month_compliance[0]" class="badge badge-info">Общая комплаентность за месяц: {{ Math.round(100 * patient.month_compliance[1] / patient.month_compliance[0]) }}%</h6>
-            <div v-if="dashboard_parts.length == 0 || parts.includes('forms')">
+            <div v-if="parts.length == 0 || parts.includes('forms')">
                 <div style="margin-right: -15px;" v-if="params.backup && params.backup.length">
                     <input class="btn btn-block btn-outline-info" type="button" data-toggle="collapse" aria-expanded="false"
                            value="Настройка параметров уведомлений" data-target="#collapse" aria-controls="collapse">
@@ -30,7 +30,7 @@
                 </div>
             </div>
 
-            <div v-if="dashboard_parts.length == 0 || parts.includes('forms')">
+            <div v-if="parts.length == 0 || parts.includes('forms')">
                 <h4>Опросники</h4>
 
                 <div class="row">
@@ -61,7 +61,7 @@
                 <button class="btn btn-primary btn-sm" @click="state = 'form_templates'">Добавить опросник</button>
             </div>
 
-            <div v-if="dashboard_parts.length == 0 || parts.includes('meds')">
+            <div v-if="parts.length == 0 || parts.includes('meds')">
                 <h4>Назначенные препараты</h4>
 
                 <div class="row">
@@ -109,7 +109,7 @@
 
             </div>
 
-            <div v-if="dashboard_parts.length == 0 || parts.includes('reminders')">
+            <div v-if="parts.length == 0 || parts.includes('reminders')">
                 <h4>Напоминания</h4>
 
                 <div class="row">
@@ -155,7 +155,7 @@
 
             </div>
 
-            <div v-if="dashboard_parts.length == 0 || parts.includes('algorithms')">
+            <div v-if="parts.length == 0 || parts.includes('algorithms')">
                 <h4>Алгоритмы</h4>
 
                 <div class="row">
@@ -183,7 +183,7 @@
 
             </div>
 
-            <div style="margin-top: 15px;" class="alert alert-info" role="alert" v-if="dashboard_parts.length == 0">
+            <div style="margin-top: 15px;" class="alert alert-info" role="alert" v-if="parts.length == 0">
                 <p>Этот интеллектуальный агент умеет отправлять пациенту произвольные опросники по расписанию и
                     напоминать о приеме лекарств. Вся введенная пациентом информация сохраняется в медицинской карте
                     Medsenger, ее можно посмотреть в виде списка по датам или на графиках, а в разделе "алгоритмы" можно
