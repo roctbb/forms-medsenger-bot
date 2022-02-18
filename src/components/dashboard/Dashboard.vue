@@ -3,7 +3,7 @@
         <algorithm-settings/>
         <div v-if="state == 'main'">
 
-            <h6 v-if="patient.month_compliance[0]" class="badge badge-info">Общая комплаентность за месяц: {{ Math.round(100 * patient.month_compliance[1] / patient.month_compliance[0]) }}%</h6>
+            <h6 v-if="parts.length == 0 && patient.month_compliance[0]" class="badge badge-info">Общая комплаентность за месяц: {{ Math.round(100 * patient.month_compliance[1] / patient.month_compliance[0]) }}%</h6>
             <div v-if="parts.length == 0 || parts.includes('forms')">
                 <div style="margin-right: -15px;" v-if="params.backup && params.backup.length">
                     <input class="btn btn-block btn-outline-info" type="button" data-toggle="collapse" aria-expanded="false"
