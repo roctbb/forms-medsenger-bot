@@ -54,6 +54,15 @@ class MedicineManager(Manager):
             self.db.session.add(new_medicine)
             self.__commit__()
 
+            params = {
+                'obj_id': new_medicine.id,
+                'action': 'attach',
+                'object_type': 'medicine',
+                'description': new_medicine.get_description(True, False)
+            }
+            self.medsenger_api.add_record(contract.id, 'doctor_action',
+                                          'Назначен препарат "{}".'.format(new_medicine.title), params=params)
+
             return medicine
         else:
             return False
@@ -115,6 +124,14 @@ class MedicineManager(Manager):
 
         if medicine.contract_id:
             self.medsenger_api.send_message(contract.id, "Врач возобновил препарат {}.".format(medicine.get_description()))
+            params = {
+                'obj_id': medicine.id,
+                'action': 'resume',
+                'object_type': 'medicine',
+                'description': medicine.get_description(True, False)
+            }
+            self.medsenger_api.add_record(contract.id, 'doctor_action',
+                                          'Возобновлен препарат "{}".'.format(medicine.title), params=params)
 
         medicine.canceled_at = None
 
@@ -131,6 +148,14 @@ class MedicineManager(Manager):
 
         if medicine.contract_id:
             self.medsenger_api.send_message(contract.id, "Врач отменил препарат {}.".format(medicine.get_description()))
+            params = {
+                'obj_id': medicine.id,
+                'action': 'cancel',
+                'object_type': 'medicine',
+                'description': medicine.get_description(True, False)
+            }
+            self.medsenger_api.add_record(contract.id, 'doctor_action',
+                                          'Отменен препарат "{}".'.format(medicine.title), params=params)
 
         medicine.canceled_at = datetime.now()
 
@@ -198,6 +223,15 @@ class MedicineManager(Manager):
                                                     action, medicine.get_description(True),
                                                     " Мы будем автоматически присылать напоминания об этом." if
                                                     medicine.timetable['mode'] != "manual" else ''))
+                params = {
+                    'obj_id': medicine.id,
+                    'action': 'create' if is_new else 'edit',
+                    'object_type': 'medicine',
+                    'description': medicine.get_description(True, False)
+                }
+                action = 'Назначен препарат' if is_new else 'Изменены параметры приема препарата'
+                self.medsenger_api.add_record(contract.id, 'doctor_action',
+                                              '{} "{}".'.format(action, medicine.title), params=params)
 
             if not medicine_id:
                 self.db.session.add(medicine)

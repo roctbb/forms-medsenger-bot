@@ -38,8 +38,17 @@ class FormManager(Manager):
         Form.query.filter_by(id=id).delete()
 
         self.__commit__()
-
         self.medsenger_api.update_cache(contract.id)
+
+        if not form.is_template:
+            params = {
+                'obj_id': form.id,
+                'action': 'delete',
+                'object_type': 'form',
+                'description': form.doctor_description
+            }
+            self.medsenger_api.add_record(contract.id, 'doctor_action',
+                                          'Отменен опросник "{}".'.format(form.title), params=params)
 
         return id
 
@@ -89,6 +98,17 @@ class FormManager(Manager):
             if new_form.timetable.get('send_on_init'):
                 self.db.session.refresh(new_form)
                 self.run(new_form)
+
+            params = {
+                'obj_id': new_form.id,
+                'action': 'attach',
+                'object_type': 'form',
+                'description': form.doctor_description,
+                'template_id': template_id
+            }
+            self.medsenger_api.add_record(contract.id, 'doctor_action',
+                                          'Назначен опросник "{}".'.format(form.title), params=params)
+
             return new_form
         else:
             return False
@@ -430,6 +450,16 @@ class FormManager(Manager):
 
             if DYNAMIC_CACHE:
                 self.medsenger_api.update_cache(contract.id)
+
+            if not form_id and not data.get('is_template'):
+                params = {
+                    'obj_id': form.id,
+                    'action': 'create',
+                    'object_type': 'form',
+                    'description': form.doctor_description
+                }
+                self.medsenger_api.add_record(contract.id, 'doctor_action',
+                                              'Назначен опросник "{}".'.format(form.title), params=params)
 
             return form
         except Exception as e:

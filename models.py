@@ -161,8 +161,8 @@ class Medicine(db.Model, Compliance):
         else:
             return '{} раз(а) в месяц'.format(len(self.timetable['points']))
 
-    def get_description(self, tt=False):
-        medicine_description = "«{}»".format(self.title)
+    def get_description(self, tt=False, title=True):
+        medicine_description = "«{}»".format(self.title) if title else 'Дозировка: '
         if self.dose is not None:
             medicine_description += " {}".format(self.dose)
         if self.rules and not tt:
