@@ -3,14 +3,13 @@
         <vue-confirm-dialog></vue-confirm-dialog>
         <loading v-if="state == 'loading'"/>
         <div v-else>
-            <dashboard-header :patient="patient" v-if="mode == 'settings'"/>
+            <dashboard-header :patient="patient" v-if="mode == 'settings' && dashboard_parts.length == 0"/>
 
             <div class="container slim-container" style="margin-top: 15px;" v-if="state == 'form-presenter'">
                 <form-presenter :data="form" v-if="state == 'form-presenter'"/>
             </div>
             <div class="container" style="margin-top: 15px;" v-else>
-                <dashboard :patient="patient" :templates="templates" v-show="state == 'dashboard'"/>
-                <medicine-manager :patient="patient" :templates="templates" v-show="state == 'medicine-chooser'"/>
+                <dashboard :patient="patient" :templates="templates" v-show="state == 'dashboard'" :parts="dashboard_parts"/>
                 <form-editor v-show="state == 'form-manager'"/>
                 <medicine-editor v-show="state == 'medicine-manager'"/>
                 <reminder-editor v-show="state == 'reminder-manager'"/>
@@ -47,13 +46,11 @@ import DoseVerifier from "./components/presenters/DoseVerifier";
 import ReminderEditor from "./components/editors/ReminderEditor";
 import ReminderConfirmer from "./components/presenters/ReminderConfirmer";
 import MedicinesList from "./components/managers/MedicineList";
-import MedicineManager from "./components/managers/MedicineManager";
 
 
 export default {
     name: 'app',
     components: {
-        MedicineManager,
         ReminderConfirmer,
         ReminderEditor,
         MedicinesList,
@@ -321,10 +318,21 @@ body {
 h5, h4, h3 {
     color: #006c88;
     margin-bottom: 15px;
+    margin-top: 15px;
 }
 
 strong {
     font-weight: 500;
+}
+
+input[type=checkbox] {
+    /* Double-sized Checkboxes */
+    -ms-transform: scale(1.2); /* IE */
+    -moz-transform: scale(1.2); /* FF */
+    -webkit-transform: scale(1.2); /* Safari and Chrome */
+    -o-transform: scale(1.2); /* Opera */
+    transform: scale(1.2);
+    margin: 10px;
 }
 
 </style>

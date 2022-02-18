@@ -256,6 +256,34 @@ def medicine_page(args, form, medicine_id):
     return get_ui('done', contract, [])
 
 
+@app.route('/medicine-manager', methods=['GET'])
+@verify_args
+def medicine_editor_page(args, form):
+    contract = contract_manager.get(args.get('contract_id'))
+    return get_ui('settings', contract, medsenger_api.get_categories(), dashboard_parts=['meds'])
+
+
+@app.route('/form-manager', methods=['GET'])
+@verify_args
+def forms_editor_page(args, form):
+    contract = contract_manager.get(args.get('contract_id'))
+    return get_ui('settings', contract, medsenger_api.get_categories(), dashboard_parts=['forms', 'algorithms'])
+
+
+@app.route('/notification-manager', methods=['GET'])
+@verify_args
+def notification_editor_page(args, form):
+    contract = contract_manager.get(args.get('contract_id'))
+    return get_ui('settings', contract, medsenger_api.get_categories(), dashboard_parts=['notifications'])
+
+
+@app.route('/medicines-list', methods=['GET'])
+@verify_args
+def medicines_list_page(args, form):
+    contract = contract_manager.get(args.get('contract_id'))
+    return get_ui('medicines-list', contract, medsenger_api.get_categories())
+
+
 # settings api
 @app.route('/api/settings/get_patient', methods=['GET'])
 @only_doctor_args
@@ -551,6 +579,7 @@ def get_medicine(args, form, medicine_id):
 
     return jsonify(medicine.as_dict())
 
+
 @app.route('/api/medicine/<medicine_id>/disable_notifications', methods=['POST'])
 @verify_args
 def disable_notifications(args, form, medicine_id):
@@ -563,6 +592,7 @@ def disable_notifications(args, form, medicine_id):
 
     return jsonify(medicine.as_dict())
 
+
 @app.route('/api/medicine/<medicine_id>/enable_notifications', methods=['POST'])
 @verify_args
 def enable_notifications(args, form, medicine_id):
@@ -574,20 +604,6 @@ def enable_notifications(args, form, medicine_id):
     db.session.commit()
 
     return jsonify(medicine.as_dict())
-
-
-@app.route('/medicine-manager', methods=['GET'])
-@verify_args
-def medicine_editor_page(args, form):
-    contract = contract_manager.get(args.get('contract_id'))
-    return get_ui('medicine-chooser', contract, medsenger_api.get_categories())
-
-
-@app.route('/medicines-list', methods=['GET'])
-@verify_args
-def medicines_list_page(args, form):
-    contract = contract_manager.get(args.get('contract_id'))
-    return get_ui('medicines-list', contract, medsenger_api.get_categories())
 
 
 @app.route('/api/confirm-medicine', methods=['POST'])
