@@ -835,7 +835,7 @@ class AlgorithmsManager(Manager):
             if not data.get('is_template'):
                 params = {
                     'obj_id': algorithm.id,
-                    'action': 'create',
+                    'action': 'edit' if algorithm_id else 'create',
                     'object_type': 'algorithm',
                     'algorithm_params': algorithm.get_params()
                 }
