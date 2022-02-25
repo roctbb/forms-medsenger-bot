@@ -30,6 +30,16 @@ class AlgorithmsManager(Manager):
 
         self.__commit__()
 
+        params = {
+            'obj_id': list(map(lambda a: a.id, algorithms)),
+            'action': 'detach',
+            'object_type': 'algorithm',
+            'algorithm_titles': list(map(lambda a: a.title, algorithms))
+        }
+
+        self.medsenger_api.add_record(contract.id, 'doctor_action',
+                                      'Отключены алгоритмы', params=params)
+
         if DYNAMIC_CACHE:
             self.medsenger_api.update_cache(contract.id)
 
@@ -44,6 +54,13 @@ class AlgorithmsManager(Manager):
             if setup:
                 for step in algorithm.steps:
                     for condition in step['conditions']:
+                        for block in condition['criteria']:
+                            for criteria in block:
+                                if criteria.get('ask_value') and setup.get(criteria['value_code']):
+                                    criteria['value'] = setup.get(criteria['value_code'])
+
+                if algorithm.common_conditions:
+                    for index, condition in enumerate(algorithm.common_conditions):
                         for block in condition['criteria']:
                             for criteria in block:
                                 if criteria.get('ask_value') and setup.get(criteria['value_code']):
@@ -72,6 +89,15 @@ class AlgorithmsManager(Manager):
             self.__commit__()
             self.db.session.refresh(new_algorithm)
 
+            params = {
+                'obj_id': new_algorithm.id,
+                'action': 'attach',
+                'object_type': 'algorithm',
+                'params': new_algorithm.get_params()
+            }
+            self.medsenger_api.add_record(contract.id, 'doctor_action',
+                                          'Подключен алгоритм "{}"'.format(new_algorithm.title), params=params)
+
             return True
         else:
             return False
@@ -79,6 +105,13 @@ class AlgorithmsManager(Manager):
     def clear(self, contract):
         Algorithm.query.filter_by(contract_id=contract.id).delete()
         self.__commit__()
+        params = {
+            'action': 'clear',
+            'object_type': 'algorithm'
+        }
+        self.medsenger_api.add_record(contract.id, 'doctor_action',
+                                      'Отключены все алгоритмы.', params=params)
+
         return True
 
     def remove(self, id, contract):
@@ -91,6 +124,15 @@ class AlgorithmsManager(Manager):
         Algorithm.query.filter_by(id=id).delete()
 
         self.__commit__()
+
+        params = {
+            'obj_id': algorithm.id,
+            'action': 'detach',
+            'object_type': 'algorithm'
+        }
+
+        self.medsenger_api.add_record(contract.id, 'doctor_action',
+                                      'Отключен алгоритм "{}".'.format(algorithm.title), params=params)
 
         if DYNAMIC_CACHE:
             self.medsenger_api.update_cache(contract.id)
@@ -789,6 +831,17 @@ class AlgorithmsManager(Manager):
                 self.db.session.add(algorithm)
 
             self.__commit__()
+
+            if not data.get('is_template'):
+                params = {
+                    'obj_id': algorithm.id,
+                    'action': 'create',
+                    'object_type': 'algorithm',
+                    'algorithm_params': algorithm.get_params()
+                }
+                self.medsenger_api.add_record(contract.id, 'doctor_action',
+                                              '{} алгоритм "{}".'.format('Изменен' if algorithm_id else 'Подключен',
+                                                                         algorithm.title), params=params)
 
             if algorithm.contract_id == contract.id:
 

@@ -381,6 +381,33 @@ class Algorithm(db.Model):
 
         return new_algorithm
 
+    def get_params(self):
+        algorithm_params = []
+
+        for step in self.steps:
+            for condition in step['conditions']:
+                for block in condition['criteria']:
+                    for criteria in block:
+                        if criteria.get('ask_value'):
+                            algorithm_params.append({
+                                'code': criteria['value_code'],
+                                'name': criteria['value_name'],
+                                'value': criteria['value']
+                            })
+
+        if self.common_conditions:
+            for index, condition in enumerate(self.common_conditions):
+                for block in condition['criteria']:
+                    for criteria in block:
+                        if criteria.get('ask_value'):
+                            algorithm_params.append({
+                                'code': criteria['value_code'],
+                                'name': criteria['value_name'],
+                                'value': criteria['value']
+                            })
+
+        return algorithm_params
+
 
 class ActionRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)

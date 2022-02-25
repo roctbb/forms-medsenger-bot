@@ -30,7 +30,7 @@ export default {
     },
     computed: {
         fillable_fields: function () {
-            if (!this.algorithm || !this.algorithm.steps) {
+            if (!this.algorithm || (!this.algorithm.steps && !this.algorithm.common_conditions)) {
                 return []
             }
 
@@ -38,15 +38,26 @@ export default {
             let codes = new Set();
 
             this.algorithm.steps.map(step => step.conditions.map(condition => {
-                    condition.criteria.forEach((block) => {
-                        block.forEach(c => {
-                            if (c.ask_value == true && !codes.has(c.value_code)) {
-                                fields.push(c);
-                                codes.add(c.value_code);
-                            }
-                        })
+                condition.criteria.forEach((block) => {
+                    block.forEach(c => {
+                        if (c.ask_value == true && !codes.has(c.value_code)) {
+                            fields.push(c);
+                            codes.add(c.value_code);
+                        }
                     })
-                }))
+                })
+            }))
+
+            this.algorithm.common_conditions.map(condition => {
+                condition.criteria.forEach((block) => {
+                    block.forEach(c => {
+                        if (c.ask_value == true && !codes.has(c.value_code)) {
+                            fields.push(c);
+                            codes.add(c.value_code);
+                        }
+                    })
+                })
+            })
 
             return fields;
         }
@@ -56,8 +67,7 @@ export default {
             this.$modal.hide('algorithm-settings')
         },
         attach: function () {
-            if (this.check())
-            {
+            if (this.check()) {
                 Event.fire('attach-algorithm', this.algorithm)
                 this.close()
             }
@@ -71,8 +81,7 @@ export default {
 
             this.fillable_fields.map(prepare_field)
 
-            if (this.fillable_fields.filter(f => this.empty(this.algorithm.setup[f.value_code])).length > 0)
-            {
+            if (this.fillable_fields.filter(f => this.empty(this.algorithm.setup[f.value_code])).length > 0) {
                 this.errors.push('Заполните все поля!')
                 return false
             }
@@ -92,9 +101,9 @@ export default {
 </script>
 
 <style scoped>
- .container {
-     padding-top: 15px;
-     padding-bottom: 15px;
- }
+.container {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
 
 </style>

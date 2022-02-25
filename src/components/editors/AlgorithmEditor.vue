@@ -553,6 +553,16 @@ export default {
                     })
                 }))
 
+                this.algorithm.common_conditions.map(condition => {
+                    condition.criteria.forEach((block) => {
+                        block.forEach(c => {
+                            if (c.ask_value == true) {
+                                c.value = algorithm.setup[c.value_code]
+                            }
+                        })
+                    })
+                })
+
                 this.algorithm.setup = undefined
             }
 
