@@ -1,5 +1,5 @@
 <template>
-    <modal height="auto" name="algorithm-settings" @before-open="beforeOpen">
+    <modal height="auto" :width="mobile ? '95%' : '600px'" name="algorithm-settings" @before-open="beforeOpen">
         <div class="container">
             <h5>Настройка параметров алгоритма {{ algorithm.title }}</h5>
             <error-block :errors="errors"></error-block>
