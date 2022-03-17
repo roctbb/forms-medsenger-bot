@@ -158,7 +158,7 @@ class FormManager(Manager):
 
                 self.medsenger_api.send_message(form.contract_id,
                                                 "Пациент не заполнял опросник {} уже {} дней.".format(form.title,
-                                                                                                      form.warning_days), only_doctor=True, need_answer=True)
+                                                                                                      form.warning_days), only_doctor=True, need_answer=False)
                 self.__commit__()
 
     def __integral_result_report__(self, contract_id, form, integral_result):
