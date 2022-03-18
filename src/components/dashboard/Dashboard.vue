@@ -50,7 +50,7 @@
                         <div v-else>
                             <small>Добавлен в другом контракте.</small>
                         </div>
-                        <div v-if="form.contract_id == this.current_contract_id || form.template_id">
+                        <div v-if="form.contract_id == current_contract_id || form.template_id">
                             <a href="#" @click="send_now(form)">Отправить сейчас</a>
                         </div>
                         <small v-if="!empty(form.template_id)" class="text-muted">ID шаблона: {{ form.template_id }}</small>
