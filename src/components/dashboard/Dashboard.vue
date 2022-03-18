@@ -50,7 +50,7 @@
                         <div v-else>
                             <small>Добавлен в другом контракте.</small>
                         </div>
-                        <div>
+                        <div v-if="form.contract_id == this.current_contract_id || form.template_id">
                             <a href="#" @click="send_now(form)">Отправить сейчас</a>
                         </div>
                         <small v-if="!empty(form.template_id)" class="text-muted">ID шаблона: {{ form.template_id }}</small>
@@ -527,6 +527,12 @@ export default {
                 this.$alert("Опросник отправлен!");
             }
 
+            let id = form.id
+
+            if (form.contract_id != this.current_contract_id) {
+                id = form.template_id
+            }
+
             this.$confirm(
                 {
                     message: `Отправить опросник ` + form.title + ` пациенту прямо сейчас?`,
@@ -536,7 +542,7 @@ export default {
                     },
                     callback: confirm => {
                         if (confirm) {
-                            this.axios.get(this.url('/api/send_form/' + form.id)).then(alert);
+                            this.axios.get(this.url('/api/send_form/' + id)).then(alert);
                         }
                     }
                 }
