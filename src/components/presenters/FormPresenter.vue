@@ -156,6 +156,9 @@ export default {
                 }
                 if (field.type == 'float') {
                     this.answers[field.uid] = parseFloat(this.answers[field.uid])
+
+                    console.log(field.uid)
+                    console.log(this.answers)
                 }
 
                 if (field.show_if && !this.answers[field.show_if]) {
