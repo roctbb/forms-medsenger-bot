@@ -147,6 +147,8 @@ export default {
             }
         },
         check: function () {
+            console.log(this.answers)
+
             let prepare_field = (field, i) => {
                 if (this.empty(this.answers[field.uid])) {
                     return;
@@ -155,12 +157,7 @@ export default {
                     this.answers[field.uid] = parseInt(this.answers[field.uid])
                 }
                 if (field.type == 'float') {
-                    console.log(this.answers)
-
                     this.answers[field.uid] = parseFloat(this.answers[field.uid])
-
-                    console.log(field.uid)
-                    console.log(this.answers)
                 }
 
                 if (field.show_if && !this.answers[field.show_if]) {
@@ -227,7 +224,6 @@ export default {
             }
         },
         fieldTransformer: function (field) {
-            console.log(field);
             if (field.category == 'temperature') {
                 if (this.answers[field.uid] > 100) {
                     this.answers[field.uid] /= 10;
