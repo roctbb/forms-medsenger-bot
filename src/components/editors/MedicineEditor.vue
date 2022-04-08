@@ -23,7 +23,7 @@
                         <input class="form-check" type="checkbox" v-model="medicine.verify_dose"/>
                     </form-group48>
 
-                    <form-group48 title="Уведомить, если пациент не заполнят опросник">
+                    <form-group48 title="Уведомить, если пациент не отмечает прием">
                         <input class="form-check" type="checkbox" @change="warning_change()" v-model="medicine.warning_enabled"/>
                     </form-group48>
 
@@ -40,12 +40,12 @@
             </div>
         </div>
 
-            <button v-if="show_button" class="btn btn-danger" @click="go_back()">Назад</button>
-            <button class="btn btn-success" @click="save()">Сохранить <span
-                v-if="medicine.is_template"> шаблон</span></button>
-            <button v-if="!medicine.id && is_admin" class="btn btn-primary" @click="save(true)">Сохранить как
-                шаблон
-            </button>
+        <button v-if="show_button" class="btn btn-danger" @click="go_back()">Назад</button>
+        <button class="btn btn-success" @click="save()">Сохранить <span
+            v-if="medicine.is_template"> шаблон</span></button>
+        <button v-if="!medicine.id && is_admin" class="btn btn-primary" @click="save(true)">Сохранить как
+            шаблон
+        </button>
 
     </div>
 </template>
@@ -89,7 +89,10 @@ export default {
         },
         create_empty_medicine: function () {
             return {
-                timetable: this.empty_timetable()
+                timetable: {
+                    mode: 'manual',
+                    points: []
+                }
             };
         },
 
