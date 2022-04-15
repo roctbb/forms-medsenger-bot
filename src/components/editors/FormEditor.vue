@@ -168,6 +168,7 @@ export default {
             return {
                 offset: 0,
                 groups_enabled: false,
+                dont_send_to_doctor: false,
                 results: [{
                     value: 0,
                     description: "",
@@ -224,12 +225,12 @@ export default {
                             }
                         })
 
-                        if (this.form.integral_evaluation.groups.filter(group => !group.description || isNaN(group.value)).length > 0) {
+                        if (!this.form.integral_evaluation.dont_send_to_doctor && this.form.integral_evaluation.groups.filter(group => !group.description || isNaN(group.value)).length > 0) {
                             this.errors.push('Проверьте корректность групп интеграционной оценки')
                         }
                     }
 
-                    if (this.form.integral_evaluation.results.filter(res => !res.description || isNaN(res.value)).length > 0) {
+                    if (!this.form.integral_evaluation.dont_send_to_doctor && this.form.integral_evaluation.results.filter(res => !res.description || isNaN(res.value)).length > 0) {
                         this.errors.push('Проверьте корректность результатов интеграционной оценки')
                     }
                 } else {

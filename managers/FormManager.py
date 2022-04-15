@@ -162,16 +162,17 @@ class FormManager(Manager):
                 self.__commit__()
 
     def __integral_result_report__(self, contract_id, form, integral_result):
-        text = '<strong>Результат интегральной оценки опросника "{}"</strong>:<br>{}'.format(form.title, integral_result['result'])
-
-        if form.integral_evaluation.get('groups_enabled'):
-            text += '<br><br>Общая сумма баллов - {}<br><ul>'.format(integral_result['params']['score'])
-            for group in integral_result['params']['group_scores'].keys():
-                text += '<li>{} - {}</li>'.format(group, integral_result['params']['group_scores'][group])
-            text += '</ul>'
-
         urgent = integral_result['params'].get('urgent', False)
-        self.medsenger_api.send_message(contract_id, text, only_doctor=True, is_urgent=urgent)
+        if not form.integral_evaluation.get('dont_send_to_doctor', False):
+            text = '<strong>Результат интегральной оценки опросника "{}"</strong>:<br>{}'.format(form.title, integral_result['result'])
+
+            if form.integral_evaluation.get('groups_enabled'):
+                text += '<br><br>Общая сумма баллов - {}<br><ul>'.format(integral_result['params']['score'])
+                for group in integral_result['params']['group_scores'].keys():
+                    text += '<li>{} - {}</li>'.format(group, integral_result['params']['group_scores'][group])
+                text += '</ul>'
+
+            self.medsenger_api.send_message(contract_id, text, only_doctor=True, is_urgent=urgent)
 
         if integral_result['params'].get('message', None):
             self.medsenger_api.send_message(contract_id, integral_result['params'].get('message'), only_patient=True, is_urgent=urgent)

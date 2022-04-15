@@ -8,6 +8,10 @@
                        v-model="integral_evaluation.offset"/>
             </form-group48>
 
+            <form-group48 title="Не отправлять результат врачу">
+                <input type="checkbox" class="form-check" v-model="integral_evaluation.dont_send_to_doctor">
+            </form-group48>
+
             <form-group48 title="Группы вопросов">
                 <input type="checkbox" class="form-check" v-model="integral_evaluation.groups_enabled"
                        @change="enable_groups()">
