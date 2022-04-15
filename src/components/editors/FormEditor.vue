@@ -170,7 +170,8 @@ export default {
                 groups_enabled: false,
                 results: [{
                     value: 0,
-                    description: ""
+                    description: "",
+                    message: ""
                 }]
             }
         },
@@ -208,6 +209,7 @@ export default {
                         return {
                             value: parseInt(res.value),
                             description: res.description,
+                            message: res.message,
                             urgent: res.urgent
                         }
                     })
@@ -245,11 +247,12 @@ export default {
                         field.category = field.params.variants.map(v => v.category).join('|')
                     }
                     if (this.form.has_integral_evaluation) {
-                        field.params.variants.forEach(variant => variant.weight = parseFloat(variant.weight))
+                        field.params.variants.forEach(variant =>
+                            variant.weight = this.empty(variant.weight) ? 0 : parseFloat(variant.weight))
                     }
                 }
                 if (field.type == 'checkbox' && this.form.has_integral_evaluation)
-                    field.weight = parseFloat(field.weight.toString())
+                    field.weight = this.empty(field.weight) ? 0 : parseFloat(field.weight.toString())
                 return field
             }
             this.form.fields = this.form.fields.map(prepare_field);

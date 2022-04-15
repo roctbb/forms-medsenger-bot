@@ -61,11 +61,16 @@
                                :class="save_clicked && empty(result.value) ? 'is-invalid' : ''"
                                v-model="result.value"/>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <small class="text-mutted">Описание результата, если сумма выше значения</small><br>
                         <input type="text"
                                :class="save_clicked && empty(result.description) ? 'is-invalid' : ''"
                                class="form-control form-control-sm" v-model="result.description"/>
+                    </div>
+
+                    <div class="col-md-3">
+                        <small class="text-mutted">Сообщение для пациента</small><br>
+                        <input type="text" class="form-control form-control-sm" v-model="result.message"/>
                     </div>
 
                     <div class="col-md-2"><br>
@@ -100,7 +105,7 @@ export default {
     props: ['data', 'save_clicked'],
     methods: {
         add_result: function () {
-            this.integral_evaluation.results.push({value: 0, description: "", urgent: false})
+            this.integral_evaluation.results.push({value: 0, description: "", meessage: "", urgent: false})
             this.$forceUpdate()
         },
         remove_result: function (i) {

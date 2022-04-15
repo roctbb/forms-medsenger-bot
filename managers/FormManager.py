@@ -173,9 +173,11 @@ class FormManager(Manager):
         urgent = integral_result['params'].get('urgent', False)
         self.medsenger_api.send_message(contract_id, text, only_doctor=True, is_urgent=urgent)
 
-        if urgent and form.integral_evaluation.get('warning_text'):
+        if integral_result['params'].get('message', None):
+            self.medsenger_api.send_message(contract_id, integral_result['params'].get('message'), only_patient=True, is_urgent=urgent)
+        elif urgent and form.integral_evaluation.get('warning_text'):
             self.medsenger_api.send_message(contract_id, form.integral_evaluation.get('warning_text'), only_patient=True, is_urgent=urgent)
-        if not urgent and form.integral_evaluation.get('ok_text'):
+        elif not urgent and form.integral_evaluation.get('ok_text'):
             self.medsenger_api.send_message(contract_id, form.integral_evaluation.get('ok_text'), only_patient=True, is_urgent=urgent)
 
     def __instant_report__(self, contract_id, form, report):
@@ -358,6 +360,7 @@ class FormManager(Manager):
             if res['value'] <= score:
                 result = '{} (баллов: {})'.format(res['description'], score)
                 custom_params['result'] = res['description']
+                custom_params['message'] = res.get('message', None)
                 custom_params['urgent'] = res.get('urgent', False)
                 custom_params['score'] = score
                 break
