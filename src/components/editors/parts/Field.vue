@@ -53,6 +53,11 @@
                         other.text
                     }}
                 </option>
+                <optgroup v-for="field in form.fields.filter(f => f.type == 'radio')" :label="field.text">
+                    <option v-for="(variant, i) in field.params.variants" :value="{uid: field.uid, ans: i}">
+                        {{ variant.text }}
+                    </option>
+                </optgroup>
             </select>
         </form-group48>
 
@@ -91,7 +96,8 @@
                 <form-group48 title="Значение при включении">
                     <input type="text" class="form-control form-control-sm" v-model="field.category_value"/>
                 </form-group48>
-                <form-group48 title="Вес" description="Добавляется, если галочка стоит" v-if="form.has_integral_evaluation">
+                <form-group48 title="Вес" description="Добавляется, если галочка стоит"
+                              v-if="form.has_integral_evaluation">
                     <input type="number" class="form-control form-control-sm" step="0.1" v-model="field.weight"/>
                 </form-group48>
             </div>
@@ -144,7 +150,8 @@
                                 v-model="variant.category">
                             <option value="none">Не сохранять ответ</option>
 
-                            <optgroup v-for="(group, name) in group_by(category_list, 'subcategory')" v-bind:label="name">
+                            <optgroup v-for="(group, name) in group_by(category_list, 'subcategory')"
+                                      v-bind:label="name">
                                 <option v-for="category in group" :value="category.name">{{ category.description }}
                                 </option>
                             </optgroup>
@@ -211,7 +218,9 @@
             </div>
         </div>
         <a v-if="field.type == 'radio'" class="btn btn-primary btn-sm" @click="add_variant()">Добавить вариант</a>
-        <a class="btn btn-danger btn-sm" @click="remove()">Удалить {{ field.type != 'header' ? 'вопрос' : 'заголовок' }}</a>
+        <a class="btn btn-danger btn-sm" @click="remove()">Удалить {{
+                field.type != 'header' ? 'вопрос' : 'заголовок'
+            }}</a>
 
     </card>
 </template>
@@ -251,7 +260,7 @@ export default {
                     this.field.params.tmp_colors = this.field.params.colors.toString()
                 }
             }
-
+            this.$forceUpdate()
         },
         add_variant: function () {
             this.field.params.variants.push({text: '', category: ''});

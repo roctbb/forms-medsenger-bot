@@ -4,9 +4,10 @@
             <h5 v-if="!form.id">Создание опросника</h5>
             <h5 v-if="form.id">Настройка опросника "{{ form.title }}" </h5>
 
-            <timetable-editor :data="form.timetable" :timetable_save_clicked="this.timetable_save_clicked">&nbsp;<a v-if="form.id"
-                                                                                                                    class="btn btn-success btn-sm"
-                                                                                                                    @click="save()">Сохранить</a>
+            <timetable-editor :data="form.timetable" :timetable_save_clicked="this.timetable_save_clicked">&nbsp;<a
+                v-if="form.id"
+                class="btn btn-success btn-sm"
+                @click="save()">Сохранить</a>
             </timetable-editor>
             <div v-show="!tt_only">
                 <card title="Параметры опросника">
@@ -46,7 +47,8 @@
                         <input class="form-control form-control-sm" v-model="form.custom_text"/>
                     </form-group48>
 
-                    <form-group48 v-if="is_admin && (empty(form.id) || form.is_template)" title="ID связанного алгоритма">
+                    <form-group48 v-if="is_admin && (empty(form.id) || form.is_template)"
+                                  title="ID связанного алгоритма">
                         <input class="form-control form-control-sm" v-model="form.algorithm_id"/>
                     </form-group48>
 
@@ -55,7 +57,8 @@
                     </form-group48>
 
                     <form-group48 title="Уведомить, если пациент не заполнят опросник">
-                        <input class="form-check" type="checkbox" @change="warning_change()" v-model="form.warning_enabled"/>
+                        <input class="form-check" type="checkbox" @change="warning_change()"
+                               v-model="form.warning_enabled"/>
                     </form-group48>
 
                     <form-group48 v-if="form.warning_enabled" title="Прислать уведомление о пропусках через">
@@ -94,7 +97,8 @@
                                      v-if="form.has_integral_evaluation"></integral-evaluation>
 
                 <hr>
-                <fields-editor v-if="form" :form="form" :fields="form.fields" :fields_save_clicked="fields_save_clicked"/>
+                <fields-editor v-if="form" :form="form" :fields="form.fields"
+                               :fields_save_clicked="fields_save_clicked"/>
             </div>
         </div>
 
@@ -197,33 +201,37 @@ export default {
                 this.form.warning_days = 0
             }
 
-            if (this.form.integral_evaluation) {
-                this.form.integral_evaluation.offset = parseInt(this.form.integral_evaluation.offset)
-                this.form.integral_evaluation.results = this.form.integral_evaluation.results.map(res => {
-                    return {
-                        value: parseInt(res.value),
-                        description: res.description,
-                        urgent: res.urgent
-                    }
-                })
-
-                if (this.form.integral_evaluation.groups_enabled) {
-                    this.form.integral_evaluation.groups = this.form.integral_evaluation.groups.map(group => {
+            if (this.form.has_integral_evaluation) {
+                if (this.form.integral_evaluation) {
+                    this.form.integral_evaluation.offset = parseInt(this.form.integral_evaluation.offset)
+                    this.form.integral_evaluation.results = this.form.integral_evaluation.results.map(res => {
                         return {
-                            value: parseInt(group.value.toString()),
-                            questions: group.questions.toString().split(',')
-                                .map(q => parseInt(q)).filter(q => !isNaN(q)),
-                            description: group.description
+                            value: parseInt(res.value),
+                            description: res.description,
+                            urgent: res.urgent
                         }
                     })
 
-                    if (this.form.integral_evaluation.groups.filter(group => !group.description || isNaN(group.value)).length > 0) {
-                        this.errors.push('Проверьте корректность групп интеграционной оценки')
-                    }
-                }
+                    if (this.form.integral_evaluation.groups_enabled) {
+                        this.form.integral_evaluation.groups = this.form.integral_evaluation.groups.map(group => {
+                            return {
+                                value: parseInt(group.value.toString()),
+                                questions: group.questions.toString().split(',')
+                                    .map(q => parseInt(q)).filter(q => !isNaN(q)),
+                                description: group.description
+                            }
+                        })
 
-                if (this.form.integral_evaluation.results.filter(res => !res.description || isNaN(res.value)).length > 0) {
-                    this.errors.push('Проверьте корректность результатов интеграционной оценки')
+                        if (this.form.integral_evaluation.groups.filter(group => !group.description || isNaN(group.value)).length > 0) {
+                            this.errors.push('Проверьте корректность групп интеграционной оценки')
+                        }
+                    }
+
+                    if (this.form.integral_evaluation.results.filter(res => !res.description || isNaN(res.value)).length > 0) {
+                        this.errors.push('Проверьте корректность результатов интеграционной оценки')
+                    }
+                } else {
+                    this.errors.push('Проверьте корректность интеграционной оценки')
                 }
             }
 
