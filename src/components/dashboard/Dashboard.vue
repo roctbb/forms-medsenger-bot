@@ -529,11 +529,8 @@ export default {
 
             let id = form.id
 
-            if (form.contract_id != this.current_contract_id) {
+            if (form.contract_id != this.current_contract_id && form.template_id) {
                 id = form.template_id
-            }
-            else {
-                id = form.id;
             }
 
             this.$confirm(
