@@ -532,6 +532,9 @@ export default {
             if (form.contract_id != this.current_contract_id) {
                 id = form.template_id
             }
+            else {
+                id = form.id;
+            }
 
             this.$confirm(
                 {
