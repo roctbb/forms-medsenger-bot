@@ -239,6 +239,7 @@ class FormManager(Manager):
                 elif field['type'] == 'checkbox':
                     category = field['category']
                     value = field.get('category_value')
+                    report.append((field.get('text'), 'Да'))
 
                     if category == 'none':
                         continue
