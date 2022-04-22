@@ -7,7 +7,8 @@
         <div class="card" v-for="block in blocks">
             <div class="card-body">
 
-                <div v-for="(field, i) in block" v-if="!field.show_if || answers[field.show_if]">
+                <div v-for="(field, i) in block"
+                     v-if="!field.show_if || answers[field.show_if] || field.show_if.uid  && answers[field.show_if.uid] == field.show_if.ans">
 
                     <h5 v-if="field.type == 'header' && field.text">{{ field.text }}</h5>
                     <p v-html="br(field.description)" v-if="field.type == 'header' && field.description"></p>
@@ -17,7 +18,8 @@
                                   :big="true"
                                   :required="field.required"
                                   :title="field.text" :key="i"
-                                  :description="field.description" :errors="field_errors[field.uid]" style="margin-top: 15px; margin-bottom: 15px;">
+                                  :description="field.description" :errors="field_errors[field.uid]"
+                                  style="margin-top: 15px; margin-bottom: 15px;">
                         <input type="number" :min="field.params.min" :max="field.params.max" step="1"
                                class="form-control monitoring-input" @input="fieldTransformer(field)"
                                :class="save_clicked && field.required &&
@@ -26,7 +28,7 @@
 
 
                         <input type="number" :min="field.params.min" :max="field.params.max" step="0.01"
-                               class="form-control monitoring-input"  @input="fieldTransformer(field)"
+                               class="form-control monitoring-input" @input="fieldTransformer(field)"
                                :class="save_clicked && field.required &&
                        (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
                                v-if="field.type == 'float'" :required="field.required" v-model="answers[field.uid]"/>
@@ -39,17 +41,19 @@
                         <input type="file" class="monitoring-input" v-if="field.type == 'file'"
                                :required="field.required"
                                v-bind:ref="'file_' + field.uid" v-on:change="submit_file(field)"/>
-                        <textarea class="form-control monitoring-input" v-if="field.type == 'textarea'" :required="field.required"
+                        <textarea class="form-control monitoring-input" v-if="field.type == 'textarea'"
+                                  :required="field.required"
                                   :class="save_clicked && field.required && !answers[field.uid] && answers[field.uid] !== 0 ? 'is-invalid' : ''"
                                   v-model="answers[field.uid]"></textarea>
-                        <div v-if="field.type == 'checkbox'" style="width: 100%;"><input type="checkbox"
-                                                                                         v-model="answers[field.uid]"/></div>
+                        <div v-if="field.type == 'checkbox'" style="width: 100%;">
+                            <input type="checkbox" v-model="answers[field.uid]"/>
+                        </div>
 
                         <div v-if="field.type == 'radio'">
                             <div class="form-check" v-for="(variant, j) in field.params.variants">
                                 <input class="form-check-input monitoring-input" type="radio"
                                        :id="'radio_' + i + '_' + j" :name="'radio_' + i"
-                                       v-model="answers[field.uid]" :value="j">
+                                       v-model="answers[field.uid]" :value="j" @change="$forceUpdate()">
                                 <label class="form-check-label" :for="'radio_' + i + '_' + j">{{ variant.text }}</label>
                             </div>
                         </div>
@@ -57,8 +61,10 @@
                         <div v-if="field.type == 'scale'">
                             <visual-analog-scale :params="field.params" :colors="field.params.colors">
                                 <div class="row">
-                                    <div class="col-1 d-flex justify-content-center" v-for="(color, i) in field.params.colors">
-                                        <input class="form-check-input monitoring-input" style="margin-left: 4px" type="radio"
+                                    <div class="col-1 d-flex justify-content-center"
+                                         v-for="(color, i) in field.params.colors">
+                                        <input class="form-check-input monitoring-input" style="margin-left: 4px"
+                                               type="radio"
                                                :id="'radio_' + field.uid + '_' + i" :name="'radio_' + field.uid"
                                                v-model="answers[field.uid]"
                                                :value="(field.params.reversed ? -1 : 1) * i + field.params.start_from">
@@ -73,7 +79,8 @@
                         </div>
 
                         <div v-if="field.type == 'time'">
-                            <date-picker :required="field.required" v-model="answers[field.uid]" format="HH:mm" value-type="HH:mm"
+                            <date-picker :required="field.required" v-model="answers[field.uid]" format="HH:mm"
+                                         value-type="HH:mm"
                                          type="time"></date-picker>
                         </div>
 
@@ -91,7 +98,9 @@
 
         <error-block :errors="errors"/>
 
-        <button style="margin-bottom: 20px;" @click="save()" class="btn btn-success btn-lg" :disabled="submitted || is_preview">Отправить ответ</button>
+        <button style="margin-bottom: 20px;" @click="save()" class="btn btn-success btn-lg"
+                :disabled="submitted || is_preview">Отправить ответ
+        </button>
 
 
     </div>
@@ -160,7 +169,11 @@ export default {
                     this.answers[field.uid] = parseFloat(this.answers[field.uid])
                 }
 
-                if (field.show_if && !this.answers[field.show_if]) {
+                if (typeof (field.show_if) == 'string' && !this.answers[field.show_if]) {
+                    this.answers[field.uid] = undefined;
+                }
+
+                if (typeof (field.show_if) == 'object' && this.answers[field.show_if.uid] != field.show_if.ans) {
                     this.answers[field.uid] = undefined;
                 }
             }
