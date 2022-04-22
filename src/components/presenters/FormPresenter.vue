@@ -1,6 +1,5 @@
 <template>
     <div @click="blur()">
-        <error-block :errors="errors"/>
         <h3>{{ this.form.title }}</h3>
         <p v-html="br(form.patient_description)"></p>
 
@@ -9,7 +8,6 @@
 
                 <div v-for="(field, i) in block"
                      v-if="!field.show_if || answers[field.show_if] || field.show_if.uid  && answers[field.show_if.uid] == field.show_if.ans">
-
                     <h5 v-if="field.type == 'header' && field.text">{{ field.text }}</h5>
                     <p v-html="br(field.description)" v-if="field.type == 'header' && field.description"></p>
 
@@ -169,12 +167,12 @@ export default {
                     this.answers[field.uid] = parseFloat(this.answers[field.uid])
                 }
 
-                if (typeof (field.show_if) == 'string' && !this.answers[field.show_if]) {
-                    this.answers[field.uid] = undefined;
-                }
-
-                if (typeof (field.show_if) == 'object' && this.answers[field.show_if.uid] != field.show_if.ans) {
-                    this.answers[field.uid] = undefined;
+                if (field.show_if) {
+                    if (typeof (field.show_if) == 'string' && !this.answers[field.show_if]) {
+                        this.answers[field.uid] = undefined;
+                    } else if (typeof (field.show_if) == 'object' && this.answers[field.show_if.uid] != field.show_if.ans) {
+                        this.answers[field.uid] = undefined;
+                    }
                 }
             }
 
