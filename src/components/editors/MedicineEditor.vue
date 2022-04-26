@@ -46,6 +46,12 @@
         <button v-if="!medicine.id && is_admin" class="btn btn-primary" @click="save(true)">Сохранить как
             шаблон
         </button>
+        <button v-if="!medicine.id && !is_admin" class="btn btn-primary" @click="save(true, 'doctor')">Сохранить как шаблон
+            для себя
+        </button>
+        <button v-if="!medicine.id && !is_admin" class="btn btn-primary" @click="save(true, 'clinic')">Сохранить как шаблон
+            для клиники
+        </button>
 
     </div>
 </template>
@@ -64,6 +70,9 @@ export default {
     props: {
         data: {
             required: false,
+        },
+        patient: {
+            required: false
         }
     },
     methods: {
@@ -119,7 +128,7 @@ export default {
                 this.$set(this.timetable_save_clicked, i, true)
             }
         },
-        save: function (is_template) {
+        save: function (is_template, template_mode) {
             this.show_validation()
             if (this.check()) {
                 this.errors = []
@@ -127,6 +136,14 @@ export default {
                 if (is_template || this.medicine.is_template) {
                     this.medicine.contract_id = undefined
                     this.medicine.is_template = true;
+
+                    if (template_mode) {
+                        this.medicine.doctor_id = this.patient.info.doctor_id
+                        if (template_mode == 'clinic') {
+                            this.medicine.clinic_id = this.patient.info.clinic_id
+                        }
+                    }
+
                 }
 
                 this.axios.post(this.url('/api/settings/medicine'), this.medicine).then(this.process_save_answer).catch(this.process_save_error);

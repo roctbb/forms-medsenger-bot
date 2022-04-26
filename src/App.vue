@@ -10,8 +10,8 @@
             </div>
             <div class="container" style="margin-top: 15px;" v-else>
                 <dashboard :patient="patient" :templates="templates" v-show="state == 'dashboard'" :parts="dashboard_parts"/>
-                <form-editor v-show="state == 'form-manager'"/>
-                <medicine-editor v-show="state == 'medicine-manager'"/>
+                <form-editor :patient="patient" v-show="state == 'form-manager'"/>
+                <medicine-editor :patient="patient" v-show="state == 'medicine-manager'"/>
                 <reminder-editor v-show="state == 'reminder-manager'"/>
                 <algorithm-editor v-show="state == 'algorithm-manager'"/>
                 <action-done v-if="state == 'done'"></action-done>

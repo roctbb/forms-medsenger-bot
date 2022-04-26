@@ -213,6 +213,9 @@ class MedicineManager(Manager):
 
             if data.get('is_template') or medicine.is_template:
                 medicine.is_template = True
+                if not contract.is_admin:
+                    medicine.doctor_id = data.get('doctor_id')
+                    medicine.clinic_id = data.get('clinic_id')
             else:
                 medicine.patient_id = contract.patient_id
                 medicine.contract_id = contract.id

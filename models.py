@@ -107,6 +107,9 @@ class Medicine(db.Model, Compliance):
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=True)
     contract_id = db.Column(db.Integer, db.ForeignKey('contract.id', ondelete="CASCADE"), nullable=True)
 
+    doctor_id = db.Column(db.Integer, nullable=True)
+    clinic_id = db.Column(db.Integer, nullable=True)
+
     title = db.Column(db.String(255), nullable=True)
     rules = db.Column(db.Text, nullable=True)
     dose = db.Column(db.Text, nullable=True)
@@ -136,6 +139,8 @@ class Medicine(db.Model, Compliance):
             "id": self.id,
             "contract_id": self.contract_id,
             "patient_id": self.patient_id,
+            "doctor_id": self.doctor_id,
+            "clinic_id": self.clinic_id,
             "title": self.title,
             "rules": self.rules,
             "dose": self.dose,
@@ -206,6 +211,9 @@ class Form(db.Model, Compliance):
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=True)
     contract_id = db.Column(db.Integer, db.ForeignKey('contract.id', ondelete="CASCADE"), nullable=True)
 
+    doctor_id = db.Column(db.Integer, nullable=True)
+    clinic_id = db.Column(db.Integer, nullable=True)
+
     title = db.Column(db.String(255), nullable=True)
     doctor_description = db.Column(db.Text, nullable=True)
     patient_description = db.Column(db.Text, nullable=True)
@@ -252,6 +260,8 @@ class Form(db.Model, Compliance):
             "id": self.id,
             "contract_id": self.contract_id,
             "patient_id": self.patient_id,
+            "doctor_id": self.doctor_id,
+            "clinic_id": self.clinic_id,
             "title": self.title,
             "doctor_description": self.doctor_description,
             "patient_description": self.patient_description,

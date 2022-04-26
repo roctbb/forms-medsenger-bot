@@ -230,8 +230,8 @@
                     <a href="#" v-if="!is_attached(form)" @click="attach_form(form)">Подключить</a>
                     <small v-else class="text-muted">Опросник подключен<br></small>
 
-                    <a href="#" v-if="is_admin" @click="edit_form(form)">Редактировать</a>
-                    <a href="#" v-if="is_admin" @click="delete_form(form)">Удалить</a>
+                    <a href="#" v-if="is_admin || patient.info.doctor_id == form.doctor_id" @click="edit_form(form)">Редактировать</a>
+                    <a href="#" v-if="is_admin || patient.info.doctor_id == form.doctor_id" @click="delete_form(form)">Удалить</a>
                     <a target="_blank" :href="preview_form_url(form)">Просмотр</a>
 
                     <div>
@@ -259,14 +259,14 @@
             </div>
 
             <div class="row">
-                <card v-for="(medicine, i) in templates.medicines" :key="'medicine_template_' + medicine.id" :image="images.medicine"
+                <card v-for="(medicine, i) in templates.medicines.filter(show_medicine)" :key="'medicine_template_' + medicine.id" :image="images.medicine"
                       class="col-lg-3 col-md-4">
                     <h6>{{ medicine.title }}</h6>
                     <small>{{ medicine.rules }}</small><br>
                     <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
                     <a href="#" @click="attach_medicine(medicine)">Подключить</a>
-                    <a href="#" v-if="is_admin" @click="edit_medicine(medicine)">Редактировать</a>
-                    <a href="#" v-if="is_admin" @click="delete_medicine(medicine)">Удалить</a>
+                    <a href="#" v-if="is_admin || patient.info.doctor_id == medicine.doctor_id" @click="edit_medicine(medicine)">Редактировать</a>
+                    <a href="#" v-if="is_admin || patient.info.doctor_id == medicine.doctor_id" @click="delete_medicine(medicine)">Удалить</a>
 
                     <br>
 
@@ -719,11 +719,27 @@ export default {
         show_form: function (form) {
             if (!form.title.toLowerCase().includes(this.search_query.toLowerCase())) return false
             if (this.is_admin) return true
+            if (form.clinic_id) {
+                return form.clinic_id == this.patient.info.clinic_id
+            }
+            if (form.doctor_id) {
+                return form.doctor_id == this.patient.info.doctor_id
+            }
             if (form.clinics) {
                 return form.clinics.includes(this.clinic_id);
             }
             if (form.exclude_clinics) {
                 return !form.exclude_clinics.includes(this.clinic_id);
+            }
+            return true;
+        },
+        show_medicine: function (medicine) {
+            if (this.is_admin) return true
+            if (medicine.clinic_id) {
+                return medicine.clinic_id == this.patient.info.clinic_id
+            }
+            if (medicine.doctor_id) {
+                return medicine.doctor_id == this.patient.info.doctor_id
             }
             return true;
         }

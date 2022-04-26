@@ -415,11 +415,15 @@ class FormManager(Manager):
             form.warning_days = data.get('warning_days')
             form.instant_report = bool(data.get('instant_report'))
 
-            if data.get('is_template') and contract.is_admin:
+            if data.get('is_template'):
                 form.is_template = True
                 form.template_category = data.get('template_category')
-                form.clinics = data.get('clinics')
-                form.exclude_clinics = data.get('exclude_clinics')
+                if contract.is_admin:
+                    form.clinics = data.get('clinics')
+                    form.exclude_clinics = data.get('exclude_clinics')
+                else:
+                    form.doctor_id = data.get('doctor_id')
+                    form.clinic_id = data.get('clinic_id')
             else:
                 form.patient_id = contract.patient_id
                 form.contract_id = contract.id
