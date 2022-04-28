@@ -240,6 +240,8 @@
 
 
                     <small class="text-muted">ID: {{ form.id }}</small>
+                    <small class="text-muted" v-if="is_admin && form.doctor_id">Doctor ID: {{ form.doctor_id }}</small>
+                    <small class="text-muted" v-if="is_admin && form.clinic_id">Clinic ID: {{ form.doctor_id }}</small>
                 </card>
                 <div v-if="!templates.forms.length" class="col-md-12">
                     <p style="margin-bottom: 15px;">Список шаблонов пуст.</p>
@@ -271,6 +273,8 @@
                     <br>
 
                     <small class="text-muted">ID: {{ medicine.id }}</small>
+                    <small class="text-muted" v-if="is_admin && medicine.doctor_id">Doctor ID: {{ medicine.doctor_id }}</small>
+                    <small class="text-muted" v-if="is_admin && medicine.clinic_id">Clinic ID: {{ medicine.doctor_id }}</small>
                 </card>
                 <div v-if="!templates.medicines.length" class="col-md-12">
                     <p style="margin-bottom: 15px;">Список шаблонов пуст.</p>
