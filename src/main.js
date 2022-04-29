@@ -286,7 +286,7 @@ Vue.mixin({
                 date: ['date'],
                 time: ['string'],
                 file: ['file'],
-                scale: ['integer'],
+                scale: ['integer', 'string'],
                 range: ['integer']
             },
             images: {

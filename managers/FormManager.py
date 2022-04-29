@@ -284,7 +284,13 @@ class FormManager(Manager):
                         except:
                             pass
 
-                    if field['type'] in ['textarea', 'text'] and field.get('prefix'):
+                    print(field.get('params', {}))
+                    if field['type'] == 'scale' and field.get('category_value'):
+                        if not params.get('symptom_group'):
+                            params.update({'symptom_group': field.get('category_value')})
+                        params.update({'grade': abs(answers[field['uid']] - field['params']['start_from']) / len(field['params']['colors'])})
+                        packet.append((category, "{} - {}".format(field.get('category_value'), answers[field['uid']]), params))
+                    elif field['type'] in ['textarea', 'text'] and field.get('prefix'):
                         packet.append((category, "{}{}".format(field.get('prefix'), answers[field['uid']]), params))
                     else:
                         packet.append((category, answers[field['uid']], params))
