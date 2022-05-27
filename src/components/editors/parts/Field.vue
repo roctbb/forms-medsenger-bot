@@ -190,19 +190,29 @@
                 </div>
             </div>
 
+            <!-- Шкала -->
             <div v-if="field.type == 'scale'">
+                <div v-if="category && category.type == 'string'">
+                    <form-group48 title="Пояснение в медкарте">
+                        <input type="text" class="form-control form-control-sm"
+                               :class="save_clicked && empty(field.category_value) ? 'is-invalid' : ''"
+                               v-model="field.category_value"/>
+                    </form-group48>
+                </div>
+
                 <form-group48 title="Цвета (через запятую)">
                     <input type="text" class="form-control form-control-sm" v-model="field.params.tmp_colors"
-                           @change="update_vas_params()"/>
+                           @input="update_vas_params()"/>
                 </form-group48>
 
                 <form-group48 title="Начинать с">
                     <input type="number" class="form-control form-control-sm" v-model="field.params.start_from"
-                           @change="update_vas_params()">
+                           @input="update_vas_params()">
                 </form-group48>
 
                 <form-group48 title="Числа по убыванию">
-                    <input type="checkbox" class="form-check" v-model="field.params.reversed">
+                    <input type="checkbox" class="form-check" v-model="field.params.reversed"
+                           @change="update_vas_params()">
                 </form-group48>
 
                 <form-group48 title="Предпросмотр шкалы" description="Шкала будет выглядеть так">
@@ -240,6 +250,11 @@ export default {
             mode: 'integer',
             field: {},
             backup: {}
+        }
+    },
+    computed: {
+        category() {
+            return this.category_list.filter(c => c.name == this.field.category)[0]
         }
     },
     methods: {
