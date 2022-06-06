@@ -230,7 +230,7 @@ def fullfill_message(text, contract_id, medsenger_api):
             if not v:
                 break
 
-        return text.replace(a, v)
+        return text.replace(a, str(v))
 
     keys = {
         'CONTRACT_DAYS': 'days',
