@@ -7,7 +7,7 @@ from config import DYNAMIC_CACHE
 
 from sqlalchemy.orm.attributes import flag_modified, flag_dirty
 
-from helpers import log, generate_description, DATACACHE, timezone_now, localize
+from helpers import log, generate_description, DATACACHE, timezone_now, localize, fullfill_message
 from managers.ContractsManager import ContractManager
 from managers.FormManager import FormManager
 from managers.Manager import Manager
@@ -446,7 +446,7 @@ class AlgorithmsManager(Manager):
             else:
                 action_deadline = None
 
-            self.medsenger_api.send_message(contract_id, action['params']['text'] + report,
+            self.medsenger_api.send_message(contract_id, fullfill_message(action['params']['text'] + report, contract_id, self.medsenger_api),
                                             only_doctor=True, action_name=action_name, action_link=action_link,
                                             is_urgent=action['params'].get('is_urgent'),
                                             need_answer=action['params'].get('need_answer'),

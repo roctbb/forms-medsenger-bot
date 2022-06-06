@@ -218,3 +218,33 @@ def localize(d, zone=None):
     else:
         tz = timezone('Europe/Moscow')
     return tz.localize(d)
+
+
+def fullfill_message(text, contract_id, medsenger_api):
+    def fullfill(text, info, a, b):
+        L = b.split('.')
+        v = info
+        for c in L:
+            v = v.get(c)
+
+            if not v:
+                break
+
+        return text.replace(a, v)
+
+    keys = {
+        'CONTRACT_DAYS': 'days',
+        'PATIENT_NAME': 'name',
+        'DOCTOR_NAME': 'doctor_name',
+        'SCENARIO_NAME': 'scenario.name'
+    }
+
+    info = None
+
+    for key in keys:
+        if key in text:
+            if not info:
+                info = medsenger_api.get_patient_info(contract_id)
+            text = fullfill(text, info, key, keys[key])
+
+    return text
