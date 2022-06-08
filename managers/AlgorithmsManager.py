@@ -143,9 +143,14 @@ class AlgorithmsManager(Manager):
         return Algorithm.query.filter_by(is_template=True).all()
 
     def clear_cache(self, contract_id):
+        to_del = []
+
         for A in DATACACHE:
             if A[2] == contract_id:
-                del DATACACHE[A]
+                to_del.append(A)
+
+        for k in to_del:
+            del DATACACHE[k]
 
     def get_from_cache(self, A):
         if A in DATACACHE:
