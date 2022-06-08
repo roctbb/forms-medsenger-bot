@@ -142,6 +142,11 @@ class AlgorithmsManager(Manager):
     def get_templates(self):
         return Algorithm.query.filter_by(is_template=True).all()
 
+    def clear_cache(self, contract_id):
+        for A in DATACACHE:
+            if A[2] == contract_id:
+                del DATACACHE[A]
+
     def get_from_cache(self, A):
         if A in DATACACHE:
             t, answer = DATACACHE[A]
@@ -753,6 +758,8 @@ class AlgorithmsManager(Manager):
         if not fired and form.thanks_text:
             self.medsenger_api.send_message(contract.id, text=form.thanks_text, only_patient=True,
                                             action_deadline=time.time() + 60 * 60)
+
+        self.clear_cache(contract.id)
 
     def hook(self, contract, category_names):
         patient = contract.patient
