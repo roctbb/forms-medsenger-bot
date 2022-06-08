@@ -664,6 +664,8 @@ class AlgorithmsManager(Manager):
                                                       algorithm=algorithm), block)))
                 for block in criteria])
 
+            print(descriptions)
+
             if result:
                 if not condition.get('skip_additions'):
                     for addition in additions:
