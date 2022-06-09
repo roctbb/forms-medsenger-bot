@@ -15,6 +15,7 @@
                 <option value="detach_algorithm">отключение алгоритма</option>
                 <option value="attach_medicine">назначение лекарства</option>
                 <option value="detach_medicine">отмена лекарства</option>
+                <option value="patient_public_attachment">найти и отправить файл пациенту</option>
                 <option v-if="is_admin" value="script">выполнить скрипт</option>
                 <option v-if="is_admin" value="set_info_materials">задать список информационных материалов</option>
                 <!-- назначение/отключения мониторинга/лекарства/алгоритма / order -->
@@ -46,7 +47,14 @@
             <small class="text-muted">Нужен ответ?</small>
         </div>
 
-        <div class="col-md-5" v-if="['doctor_message', 'patient_message'].includes(action.type)">
+        <div class="col-md-3" v-if="action.type == 'patient_public_attachment'">
+            <input type="text" class="form-control form-control-sm"
+                   :class="this.save_clicked && !action.params.criteria ? 'is-invalid' : ''"
+                   v-model="action.params.criteria">
+            <small class="text-muted">Критерий</small>
+        </div>
+
+        <div class="col-md-5" v-if="['doctor_message', 'patient_message', 'patient_public_attachment'].includes(action.type)">
             <textarea class="form-control form-control-sm"
                       :class="this.save_clicked && !action.params.text ? 'is-invalid' : ''"
                       v-model="action.params.text"></textarea>

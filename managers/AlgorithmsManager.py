@@ -426,6 +426,21 @@ class AlgorithmsManager(Manager):
 
             self.medsenger_api.send_order(contract_id, order, agent_id, params)
 
+        if action['type'] == 'patient_public_attachment':
+            criteria = action['params'].get('criteria')
+            comment = action['params'].get('text')
+            info = self.medsenger_api.get_patient_info(contract_id)
+
+            attachments = []
+
+            for file in info['public_attachments']:
+                if criteria in file.get('name').lower():
+                    attachments.append({'public_attachment_id': file.get('id')})
+
+            self.medsenger_api.send_message(contract_id, comment,
+                                            only_patient=True,
+                                            action_deadline=int(time.time()) + 60 * 60)
+
         if action['type'] == 'patient_message':
             if action['params'].get('add_action'):
                 action_name = action['params'].get('action_name')
