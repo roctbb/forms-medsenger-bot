@@ -439,7 +439,7 @@ class AlgorithmsManager(Manager):
 
             self.medsenger_api.send_message(contract_id, comment,
                                             only_patient=True,
-                                            action_deadline=int(time.time()) + 60 * 60)
+                                            action_deadline=int(time.time()) + 60 * 60, attachments=attachments)
 
         if action['type'] == 'patient_message':
             if action['params'].get('add_action'):
