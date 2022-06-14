@@ -198,7 +198,7 @@ def get_params(args, data):
 @verify_json
 def compliance(data):
     contract = contract_manager.get(data.get('contract_id'))
-    sent, done = contract.patient.count_month_compliance()
+    sent, done = contract.patient.count_week_compliance()
     return jsonify({"sent": sent, "done": done})
 
 

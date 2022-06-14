@@ -13,6 +13,9 @@ class Compliance:
     def current_month_compliance(self, action=None):
         return self.count_compliance(action, start_date=datetime.now().replace(day=1, minute=0, hour=0, second=0))
 
+    def current_week_compliance(self, action=None):
+        return self.count_compliance(action, start_date=datetime.now() - timedelta(days=7))
+
     def count_compliance(self, action=None, start_date=None, end_date=None):
         if not action:
             if isinstance(self, Form):
@@ -58,6 +61,15 @@ class Patient(db.Model):
     def count_month_compliance(self):
         def sum_compliance(compliance, object):
             sent, done = object.current_month_compliance()
+            compliance[0] += sent
+            compliance[1] += done
+            return compliance
+
+        return reduce(sum_compliance, list(self.forms) + list(self.medicines), [0, 0])
+
+    def count_week_compliance(self):
+        def sum_compliance(compliance, object):
+            sent, done = object.current_week_compliance()
             compliance[0] += sent
             compliance[1] += done
             return compliance
