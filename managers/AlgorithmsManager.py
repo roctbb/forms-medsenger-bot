@@ -437,9 +437,10 @@ class AlgorithmsManager(Manager):
                 if criteria in file.get('name').lower():
                     attachments.append({'public_attachment_id': file.get('id')})
 
-            self.medsenger_api.send_message(contract_id, comment,
-                                            only_patient=True,
-                                            action_deadline=int(time.time()) + 60 * 60, attachments=attachments)
+            if attachments:
+                self.medsenger_api.send_message(contract_id, comment,
+                                                only_patient=True,
+                                                action_deadline=int(time.time()) + 60 * 60, attachments=attachments)
 
         if action['type'] == 'patient_message':
             if action['params'].get('add_action'):
