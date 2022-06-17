@@ -183,6 +183,8 @@ def generate_contract_description(contract):
     else:
         description += 'Лекарств пока не назначено. <br>'
 
+    return description
+
 
 def get_step(algorithm, step=None):
     if not step:
