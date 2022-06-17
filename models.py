@@ -262,6 +262,19 @@ class Form(db.Model, Compliance):
 
     init_text = db.Column(db.Text, nullable=True)
 
+    def timetable_description(self):
+        if self.timetable['mode'] == 'daily':
+            return '{} раз(а) в день'.format(len(self.timetable['points']))
+        elif self.timetable['mode'] == 'weekly':
+            return '{} раз(а) в неделю'.format(len(self.timetable['points']))
+        elif self.timetable['mode'] == 'manual':
+            return 'заполняется вручную или присылается алгоритмом'
+        else:
+            return '{} раз(а) в месяц'.format(len(self.timetable['points']))
+
+    def get_description(self):
+        return f"{self.title} ({self.timetable_description()})"
+
     def as_dict(self):
         if self.contract_id:
             sent, done = self.current_month_compliance()

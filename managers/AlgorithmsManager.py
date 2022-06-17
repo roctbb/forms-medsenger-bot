@@ -7,7 +7,7 @@ from config import DYNAMIC_CACHE
 
 from sqlalchemy.orm.attributes import flag_modified, flag_dirty
 
-from helpers import log, generate_description, DATACACHE, timezone_now, localize, fullfill_message
+from helpers import log, generate_event_description, DATACACHE, timezone_now, localize, fullfill_message
 from managers.ContractsManager import ContractManager
 from managers.FormManager import FormManager
 from managers.Manager import Manager
@@ -366,7 +366,7 @@ class AlgorithmsManager(Manager):
                         if objects:
                             current_answer = objects[i]
 
-                        description = generate_description(criteria, lvalue, rvalue, category_names, current_answer)
+                        description = generate_event_description(criteria, lvalue, rvalue, category_names, current_answer)
 
                         if not criteria.get('hide_in_description'):
                             descriptions.append(description)
@@ -398,7 +398,7 @@ class AlgorithmsManager(Manager):
                 return True
             return False
 
-    def run_action(self, action, contract_id, descriptions, algorithm):
+    def run_action(self, action, contract, descriptions, algorithm):
         report = ""
         if action['params'].get('send_report') and descriptions:
             report = '<br><br><strong>События:</strong><ul>' + ''.join(
@@ -408,7 +408,7 @@ class AlgorithmsManager(Manager):
             self.change_step(algorithm, action['params']['target'])
 
         if action['type'] == 'set_info_materials':
-            self.medsenger_api.set_info_materials(contract_id, action['params']['materials'])
+            self.medsenger_api.set_info_materials(contract.id, action['params']['materials'])
 
         if action['type'] == 'order':
             order = action['params'].get('order')
@@ -424,12 +424,12 @@ class AlgorithmsManager(Manager):
 
                 params["message"] = params.get("message", "") + report
 
-            self.medsenger_api.send_order(contract_id, order, agent_id, params)
+            self.medsenger_api.send_order(contract.id, order, agent_id, params)
 
         if action['type'] == 'patient_public_attachment':
             criteria = action['params'].get('criteria')
             comment = action['params'].get('text')
-            info = self.medsenger_api.get_patient_info(contract_id)
+            info = self.medsenger_api.get_patient_info(contract.id)
 
             attachments = []
 
@@ -438,7 +438,7 @@ class AlgorithmsManager(Manager):
                     attachments.append({'public_attachment_id': file.get('id')})
 
             if attachments:
-                self.medsenger_api.send_message(contract_id, comment,
+                self.medsenger_api.send_message(contract.id, comment,
                                                 only_patient=True,
                                                 action_deadline=int(time.time()) + 60 * 60, attachments=attachments)
 
@@ -461,7 +461,7 @@ class AlgorithmsManager(Manager):
             if is_warning:
                 is_urgent = "warning"
 
-            self.medsenger_api.send_message(contract_id, action['params']['text'] + report,
+            self.medsenger_api.send_message(contract.id, action['params']['text'] + report,
                                             only_patient=True, action_name=action_name, action_link=action_link,
                                             is_urgent=is_urgent,
                                             action_deadline=action_deadline)
@@ -484,7 +484,7 @@ class AlgorithmsManager(Manager):
             if is_warning:
                 is_urgent = "warning"
 
-            self.medsenger_api.send_message(contract_id, fullfill_message(action['params']['text'] + report, contract_id, self.medsenger_api),
+            self.medsenger_api.send_message(contract.id, fullfill_message(action['params']['text'] + report, contract, self.medsenger_api),
                                             only_doctor=True, action_name=action_name, action_link=action_link,
                                             is_urgent=is_urgent,
                                             need_answer=action['params'].get('need_answer'),
@@ -493,17 +493,17 @@ class AlgorithmsManager(Manager):
             category_name = action['params'].get('category')
             value = action['params'].get('value')
 
-            self.medsenger_api.add_record(contract_id, category_name, value)
+            self.medsenger_api.add_record(contract.id, category_name, value)
 
         if action['type'] == 'medicine':
             name = action['params'].get('medicine_name')
             rules = action['params'].get('medicine_rules')
 
-            self.medsenger_api.send_message(contract_id,
+            self.medsenger_api.send_message(contract.id,
                                             'Внимание! В соответствие с алгоритмом, Вам требуется дополнительное принять препарат {}.<br>Комментарий: {}.'.format(
                                                 name, rules), only_patient=True,
                                             is_urgent="warning")
-            self.medsenger_api.send_message(contract_id,
+            self.medsenger_api.send_message(contract.id,
                                             'Внимание! В соответствие с алгоритмом, пациенту отправлена просьба принять препарат {}.<br>Комментарий: {}.'.format(
                                                 name, rules), only_doctor=True,
                                             is_urgent="warning")
@@ -513,21 +513,20 @@ class AlgorithmsManager(Manager):
             contract_manager = ContractManager(self.medsenger_api, self.db)
             medicine_manager = MedicineManager(self.medsenger_api, self.db)
 
-            contract = contract_manager.get(contract_id)
             template_id = int(action['params'].get('template_id'))
 
             if action['type'] == 'form':
                 form = form_manager.get(template_id)
 
                 if form:
-                    form_manager.run(form, False, contract_id)
+                    form_manager.run(form, False, contract.id)
 
             if action['type'] == 'attach_form':
                 form = form_manager.get(template_id)
 
                 if form:
                     form_manager.attach(template_id, contract)
-                    self.medsenger_api.send_message(contract_id,
+                    self.medsenger_api.send_message(contract.id,
                                                     'Опросник {} автоматически подключен.'.format(form.title),
                                                     only_doctor=True)
 
@@ -536,7 +535,7 @@ class AlgorithmsManager(Manager):
 
                 if form:
                     form_manager.detach(template_id, contract)
-                    self.medsenger_api.send_message(contract_id,
+                    self.medsenger_api.send_message(contract.id,
                                                     'Опросник {} автоматически отключен.'.format(form.title),
                                                     only_doctor=True)
 
@@ -545,7 +544,7 @@ class AlgorithmsManager(Manager):
 
                 if algorithm:
                     self.attach(template_id, contract)
-                    self.medsenger_api.send_message(contract_id,
+                    self.medsenger_api.send_message(contract.id,
                                                     'Алгоритм {} автоматически подключен.'.format(algorithm.title),
                                                     only_doctor=True)
 
@@ -554,7 +553,7 @@ class AlgorithmsManager(Manager):
 
                 if algorithm:
                     self.detach(template_id, contract)
-                    self.medsenger_api.send_message(contract_id,
+                    self.medsenger_api.send_message(contract.id,
                                                     'Алгоритм {} автоматически отключен.'.format(algorithm.title),
                                                     only_doctor=True)
 
@@ -566,7 +565,7 @@ class AlgorithmsManager(Manager):
                     # self.medsenger_api.send_message(contract_id, 'Вам назначен препарат {} ({} / {}).'.format(
                     #    medicine.title, medicine.rules, medicine.timetable_description()),
                     #                               only_patient=True)
-                    self.medsenger_api.send_message(contract_id,
+                    self.medsenger_api.send_message(contract.id,
                                                     'Внимание! Препарат {} ({} / {}) назначен автоматически.'.format(
                                                         medicine.title, medicine.rules,
                                                         medicine.timetable_description()),
@@ -578,10 +577,10 @@ class AlgorithmsManager(Manager):
                 if medicine:
                     medicine_manager.detach(template_id, contract)
 
-                    self.medsenger_api.send_message(contract_id, 'Препарат {} ({} / {}) отменен.'.format(
+                    self.medsenger_api.send_message(contract.id, 'Препарат {} ({} / {}) отменен.'.format(
                         medicine.title, medicine.rules, medicine.timetable_description()),
                                                     only_patient=True)
-                    self.medsenger_api.send_message(contract_id,
+                    self.medsenger_api.send_message(contract.id,
                                                     'Внимание! Препарат {} ({} / {}) отменен автоматически.'.format(
                                                         medicine.title, medicine.rules,
                                                         medicine.timetable_description()),
@@ -640,7 +639,7 @@ class AlgorithmsManager(Manager):
                 condition['last_fired'] = int(time.time())
             if any(any(criteria['left_mode'] == 'step_init' for criteria in block) for block in condition['criteria']):
                 for action in condition['positive_actions']:
-                    self.run_action(action, algorithm.contract.id, [], algorithm)
+                    self.run_action(action, algorithm.contract, [], algorithm)
         self.__commit__()
 
     def check_timeouts(self, app):
@@ -663,16 +662,16 @@ class AlgorithmsManager(Manager):
     def timeout(self, algorithm):
         current_step = self.get_step(algorithm)
         algorithm.timeout_at = 0
-        contract_id = algorithm.contract_id
+        contract = algorithm.contract
 
         for action in current_step['timeout_actions']:
-            self.run_action(action, contract_id, [], algorithm)
+            self.run_action(action, contract, [], algorithm)
 
         self.__commit__()
 
     def run(self, algorithm):
         current_step = self.get_step(algorithm)
-        contract_id = algorithm.contract_id
+        contract = algorithm.contract
         fired = False
 
         additional_conditions = []
@@ -698,7 +697,7 @@ class AlgorithmsManager(Manager):
 
             result = any([all(
                 list(
-                    map(lambda x: self.check_criteria(x, contract_id, additions, descriptions, category_names,
+                    map(lambda x: self.check_criteria(x, contract.id, additions, descriptions, category_names,
                                                       algorithm=algorithm), block)))
                 for block in criteria])
 
@@ -707,7 +706,7 @@ class AlgorithmsManager(Manager):
             if result:
                 if not condition.get('skip_additions'):
                     for addition in additions:
-                        self.medsenger_api.send_addition(contract_id, addition['id'], {
+                        self.medsenger_api.send_addition(contract.id, addition['id'], {
                             "algorithm_id": algorithm.id,
                             "comment": addition["comment"]
                         })
@@ -715,11 +714,11 @@ class AlgorithmsManager(Manager):
 
                 if not bypass:
                     for action in condition.get('positive_actions', []):
-                        self.run_action(action, contract_id, descriptions, algorithm)
+                        self.run_action(action, contract, descriptions, algorithm)
                     condition['last_fired'] = int(time.time())
             else:
                 for action in condition.get('negative_actions', []):
-                    self.run_action(action, contract_id, descriptions, algorithm)
+                    self.run_action(action, contract, descriptions, algorithm)
         if fired:
             try:
                 flag_modified(algorithm, "steps")
@@ -729,7 +728,7 @@ class AlgorithmsManager(Manager):
                 log(e, False)
 
         if DYNAMIC_CACHE:
-            self.medsenger_api.update_cache(contract_id)
+            self.medsenger_api.update_cache(contract.id)
 
         return fired
 
@@ -811,14 +810,14 @@ class AlgorithmsManager(Manager):
                 if any(
                     any(criteria['category'] == 'init' for criteria in block) for block in condition['criteria']):
                     for action in condition['positive_actions']:
-                        self.run_action(action, contract.id, [], algorithm)
+                        self.run_action(action, contract, [], algorithm)
 
         for step in algorithm.steps:
             for condition in step['conditions']:
                 if any(
                     any(criteria['category'] == 'init' for criteria in block) for block in condition['criteria']):
                     for action in condition['positive_actions']:
-                        self.run_action(action, contract.id, [], algorithm)
+                        self.run_action(action, contract, [], algorithm)
 
     def check_init_timeouts(self, algorithm, contract):
         if algorithm.common_conditions:

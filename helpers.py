@@ -97,7 +97,7 @@ def dir_last_updated(folder):
                    for f in files))
 
 
-def generate_description(criteria, l_value, r_value, category_names, current_answer):
+def generate_event_description(criteria, l_value, r_value, category_names, current_answer):
     if criteria.get('left_mode') == 'value' and criteria.get('right_mode') == 'value' and criteria.get('sign') in ['equal', 'contains'] and current_answer:
         if not current_answer.get('params', {}).get('type'):
             return ""
@@ -162,6 +162,27 @@ def generate_description(criteria, l_value, r_value, category_names, current_ans
 
     return comment
 
+def generate_contract_description(contract):
+    description = ""
+
+    if contract.forms:
+        description += 'Назначены опросники:<br> - '
+        for form in contract.forms:
+            description += '<br> - '.join(form.get_description())
+
+        description += '<br><br>'
+    else:
+        description += 'Опросников пока не назначено. <br>'
+
+    if contract.medicines:
+        description += 'Назначены лекарства:<br> - '
+        for medicine in contract.medicines:
+            description += '<br> - '.join(medicine.get_description())
+
+        description += '<br><br>'
+    else:
+        description += 'Лекарств пока не назначено. <br>'
+
 
 def get_step(algorithm, step=None):
     if not step:
@@ -220,7 +241,7 @@ def localize(d, zone=None):
     return tz.localize(d)
 
 
-def fullfill_message(text, contract_id, medsenger_api):
+def fullfill_message(text, contract, medsenger_api):
     def fullfill(text, info, a, b):
         L = b.split('.')
         v = info
@@ -236,7 +257,7 @@ def fullfill_message(text, contract_id, medsenger_api):
         'CONTRACT_DAYS': 'days',
         'PATIENT_NAME': 'name',
         'DOCTOR_NAME': 'doctor_name',
-        'SCENARIO_NAME': 'scenario.name'
+        'SCENARIO_NAME': 'scenario.name',
     }
 
     info = None
@@ -244,7 +265,11 @@ def fullfill_message(text, contract_id, medsenger_api):
     for key in keys:
         if key in text:
             if not info:
-                info = medsenger_api.get_patient_info(contract_id)
+                info = medsenger_api.get_patient_info(contract)
             text = fullfill(text, info, key, keys[key])
 
+    if 'CONTRACT_DESCRIPTION' in text:
+        text = text.replace('CONTRACT_DESCRIPTION', generate_contract_description(contract))
+
     return text
+
