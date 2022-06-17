@@ -201,6 +201,11 @@ def compliance(data):
     sent, done = contract.patient.count_week_compliance()
     return jsonify({"sent": sent, "done": done})
 
+@app.route('/message', methods=['POST'])
+@verify_json
+def message(data):
+    return "ok"
+
 
 # settings and views
 
