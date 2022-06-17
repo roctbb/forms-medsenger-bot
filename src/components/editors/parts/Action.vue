@@ -39,7 +39,10 @@
 
         <div class="col-md-2" v-if="['doctor_message', 'patient_message'].includes(action.type)">
             <input type="checkbox" v-model="action.params.is_urgent">
-            <small class="text-muted">Срочное?</small>
+            <small class="text-muted">Срочное?</small><br>
+
+            <input type="checkbox" v-model="action.params.is_warning">
+            <small class="text-muted">Предупреждение?</small><br>
         </div>
 
         <div class="col-md-2" v-if="action.type == 'doctor_message'">

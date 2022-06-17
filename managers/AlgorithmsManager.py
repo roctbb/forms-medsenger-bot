@@ -455,9 +455,15 @@ class AlgorithmsManager(Manager):
             else:
                 action_deadline = None
 
+            is_urgent = action['params'].get('is_urgent')
+            is_warning = action['params'].get('is_warning')
+
+            if is_warning:
+                is_urgent = "warning"
+
             self.medsenger_api.send_message(contract_id, action['params']['text'] + report,
                                             only_patient=True, action_name=action_name, action_link=action_link,
-                                            is_urgent=action['params'].get('is_urgent'),
+                                            is_urgent=is_urgent,
                                             action_deadline=action_deadline)
         if action['type'] == 'doctor_message':
             if action['params'].get('add_action'):
@@ -472,9 +478,15 @@ class AlgorithmsManager(Manager):
             else:
                 action_deadline = None
 
+            is_urgent = action['params'].get('is_urgent')
+            is_warning = action['params'].get('is_warning')
+
+            if is_warning:
+                is_urgent = "warning"
+
             self.medsenger_api.send_message(contract_id, fullfill_message(action['params']['text'] + report, contract_id, self.medsenger_api),
                                             only_doctor=True, action_name=action_name, action_link=action_link,
-                                            is_urgent=action['params'].get('is_urgent'),
+                                            is_urgent=is_urgent,
                                             need_answer=action['params'].get('need_answer'),
                                             action_deadline=action_deadline)
         if action['type'] == 'record':
@@ -490,11 +502,11 @@ class AlgorithmsManager(Manager):
             self.medsenger_api.send_message(contract_id,
                                             'Внимание! В соответствие с алгоритмом, Вам требуется дополнительное принять препарат {}.<br>Комментарий: {}.'.format(
                                                 name, rules), only_patient=True,
-                                            is_urgent=True)
+                                            is_urgent="warning")
             self.medsenger_api.send_message(contract_id,
                                             'Внимание! В соответствие с алгоритмом, пациенту отправлена просьба принять препарат {}.<br>Комментарий: {}.'.format(
                                                 name, rules), only_doctor=True,
-                                            is_urgent=True)
+                                            is_urgent="warning")
         if action['type'] in ['form', 'attach_form', 'detach_form', 'attach_algorithm', 'detach_algorithm',
                               'attach_medicine', 'detach_medicine']:
             form_manager = FormManager(self.medsenger_api, self.db)

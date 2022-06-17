@@ -109,7 +109,7 @@ export default {
     props: ['data', 'save_clicked'],
     methods: {
         add_result: function () {
-            this.integral_evaluation.results.push({value: 0, description: "", meessage: "", urgent: false})
+            this.integral_evaluation.results.push({value: 0, description: "", message: "", urgent: false})
             this.$forceUpdate()
         },
         remove_result: function (i) {
