@@ -177,9 +177,9 @@ def generate_contract_description(contract):
         description += 'Назначены лекарства:<br> - '
         description += '<br> - '.join(map(lambda x:x.get_description(), contract.medicines))
 
-        description += '<br><br>'
+        description += '<br>'
     else:
-        description += 'Лекарств пока не назначено. <br>'
+        description += 'Лекарств пока не назначено. '
 
     return description
 
