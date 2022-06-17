@@ -167,8 +167,7 @@ def generate_contract_description(contract):
 
     if contract.forms:
         description += 'Назначены опросники:<br> - '
-        for form in contract.forms:
-            description += '<br> - '.join(form.get_description())
+        description += '<br> - '.join(map(lambda x:x.get_description(), contract.forms))
 
         description += '<br><br>'
     else:
@@ -176,8 +175,7 @@ def generate_contract_description(contract):
 
     if contract.medicines:
         description += 'Назначены лекарства:<br> - '
-        for medicine in contract.medicines:
-            description += '<br> - '.join(medicine.get_description())
+        description += '<br> - '.join(map(lambda x:x.get_description(), contract.medicines))
 
         description += '<br><br>'
     else:
