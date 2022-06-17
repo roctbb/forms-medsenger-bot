@@ -265,7 +265,7 @@ def fullfill_message(text, contract, medsenger_api):
     for key in keys:
         if key in text:
             if not info:
-                info = medsenger_api.get_patient_info(contract)
+                info = medsenger_api.get_patient_info(contract.id)
             text = fullfill(text, info, key, keys[key])
 
     if 'CONTRACT_DESCRIPTION' in text:
