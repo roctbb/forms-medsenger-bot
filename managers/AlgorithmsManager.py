@@ -1,8 +1,13 @@
 import json
+import re
 import time
 import uuid
 from copy import copy, deepcopy
 from datetime import datetime, timedelta
+
+import medsenger_api
+import requests
+
 from config import DYNAMIC_CACHE
 
 from sqlalchemy.orm.attributes import flag_modified, flag_dirty
@@ -441,6 +446,22 @@ class AlgorithmsManager(Manager):
                 self.medsenger_api.send_message(contract.id, comment,
                                                 only_patient=True,
                                                 action_deadline=int(time.time()) + 60 * 60, attachments=attachments)
+
+        if action['type'] == 'send_file_by_link':
+            link = action['params'].get('link')
+
+            if link:
+                try:
+                    answer = requests.get(link)
+                    if "Content-Disposition" in answer.headers.keys():
+                        fname = re.findall("filename=(.+)", answer.headers["Content-Disposition"])[0]
+                    else:
+                        fname = link.split("/")[-1]
+
+                    self.medsenger_api.send_message(contract.id, '', only_patient=True, attachments=[medsenger_api.prepare_binary(fname, answer.content)])
+
+                except Exception as e:
+                    log(e, False)
 
         if action['type'] == 'patient_message':
             if action['params'].get('add_action'):

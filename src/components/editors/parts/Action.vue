@@ -16,6 +16,7 @@
                 <option value="attach_medicine">назначение лекарства</option>
                 <option value="detach_medicine">отмена лекарства</option>
                 <option value="patient_public_attachment">найти и отправить файл пациенту</option>
+                <option value="send_file_by_link">отправить как файл</option>
                 <option v-if="is_admin" value="script">выполнить скрипт</option>
                 <option v-if="is_admin" value="set_info_materials">задать список информационных материалов</option>
                 <!-- назначение/отключения мониторинга/лекарства/алгоритма / order -->
@@ -48,6 +49,13 @@
         <div class="col-md-2" v-if="action.type == 'doctor_message'">
             <input type="checkbox" v-model="action.params.need_answer">
             <small class="text-muted">Нужен ответ?</small>
+        </div>
+
+        <div class="col-md-8" v-if="action.type == 'send_file_by_link'">
+            <input type="text" class="form-control form-control-sm"
+                   :class="this.save_clicked && !action.params.criteria ? 'is-invalid' : ''"
+                   v-model="action.params.link">
+            <small class="text-muted">Ссылка</small>
         </div>
 
         <div class="col-md-3" v-if="action.type == 'patient_public_attachment'">
