@@ -449,6 +449,7 @@ class AlgorithmsManager(Manager):
 
         if action['type'] == 'send_file_by_link':
             link = action['params'].get('link')
+            text = action['params'].get('text')
 
             if link:
                 try:
@@ -458,7 +459,7 @@ class AlgorithmsManager(Manager):
                     else:
                         fname = link.split("/")[-1]
 
-                    self.medsenger_api.send_message(contract.id, '', only_patient=True, attachments=[medsenger_api.prepare_binary(fname, answer.content)])
+                    self.medsenger_api.send_message(contract.id, text, only_patient=True, attachments=[medsenger_api.prepare_binary(fname, answer.content)])
 
                 except Exception as e:
                     log(e, False)

@@ -51,7 +51,12 @@
             <small class="text-muted">Нужен ответ?</small>
         </div>
 
-        <div class="col-md-8" v-if="action.type == 'send_file_by_link'">
+        <div class="col-md-4" v-if="action.type == 'send_file_by_link'">
+            <input type="text" class="form-control form-control-sm"
+                   :class="this.save_clicked && !action.params.criteria ? 'is-invalid' : ''"
+                   v-model="action.params.text">
+            <small class="text-muted">Комментарий</small>
+
             <input type="text" class="form-control form-control-sm"
                    :class="this.save_clicked && !action.params.criteria ? 'is-invalid' : ''"
                    v-model="action.params.link">
