@@ -49,7 +49,20 @@ def status(data):
 @app.route('/order', methods=['POST'])
 @verify_json
 def order(data):
-    pass
+    contract_id = data.get('contract_id')
+    contract = contract_manager.get(contract_id)
+
+    if data['order'] == 'need_conclusion':
+        medicines = list(filter(lambda m: not m.canceled_at, contract.medicines))
+        medicines = list(map(lambda m: m.title + (f' {m.dose}' if m.dose else ''), medicines))
+        canceled_medicines = list(filter(lambda m: m.canceled_at, contract.medicines))
+        canceled_medicines = list(map(lambda m: m.title + (f' {m.dose}' if m.dose else ''), canceled_medicines))
+        params = {
+            'medicines': medicines,
+            'canceled_medicines': canceled_medicines
+        }
+        medsenger_api.send_order(contract.id, 'add_params', RECORDS_AGENT_ID, params)
+        return 'ok'
 
 
 # contract management api
