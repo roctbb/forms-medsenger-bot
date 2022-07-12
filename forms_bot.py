@@ -64,6 +64,7 @@ def order(data):
         }
         medsenger_api.send_order(contract.id, 'conclusion_params', None, params)
         return 'ok'
+    return "not found"
 
 
 # contract management api
