@@ -57,11 +57,12 @@ def order(data):
         medicines = list(map(lambda m: m.title + (f' {m.dose}' if m.dose else ''), medicines))
         canceled_medicines = list(filter(lambda m: m.canceled_at, contract.medicines))
         canceled_medicines = list(map(lambda m: m.title + (f' {m.dose}' if m.dose else ''), canceled_medicines))
+
         params = {
             'medicines': medicines,
             'canceled_medicines': canceled_medicines
         }
-        medsenger_api.send_order(contract.id, 'add_params', RECORDS_AGENT_ID, params)
+        medsenger_api.send_order(contract.id, 'conclusion_params', None, params)
         return 'ok'
 
 
