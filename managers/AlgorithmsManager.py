@@ -430,9 +430,9 @@ class AlgorithmsManager(Manager):
 
             if params.get('attach_medicines'):
                 medicines = list(filter(lambda m: not m.canceled_at, contract.medicines))
-                medicines = list(map(lambda m: m.title + f' {m.dose}' if m.dose else '', medicines))
+                medicines = list(map(lambda m: m.title + (f' {m.dose}' if m.dose else ''), medicines))
                 canceled_medicines = list(filter(lambda m: m.canceled_at, contract.medicines))
-                canceled_medicines = list(map(lambda m: m.title + f' {m.dose}' if m.dose else '', canceled_medicines))
+                canceled_medicines = list(map(lambda m: m.title + (f' {m.dose}' if m.dose else ''), canceled_medicines))
                 params.update({
                     'medicines': medicines,
                     'canceled_medicines': canceled_medicines
