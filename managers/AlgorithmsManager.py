@@ -420,12 +420,13 @@ class AlgorithmsManager(Manager):
             agent_id = action['params'].get('agent_id')
             params = deepcopy(action['params'].get('order_params', {}))
 
-            if action['params'].get('send_report') or params.get('attach_medicines'):
-                if isinstance(params, str):
-                    try:
-                        params = json.loads(params)
-                    except:
-                        params = {}
+            # fixme я сильно не уверена в этом
+            # if action['params'].get('send_report'):
+            if isinstance(params, str):
+                try:
+                    params = json.loads(params)
+                except:
+                    params = {}
 
             if params.get('attach_medicines'):
                 medicines = list(filter(lambda m: not m.canceled_at, contract.medicines))
