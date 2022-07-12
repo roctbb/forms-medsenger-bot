@@ -420,13 +420,24 @@ class AlgorithmsManager(Manager):
             agent_id = action['params'].get('agent_id')
             params = deepcopy(action['params'].get('order_params', {}))
 
-            if action['params'].get('send_report'):
+            if action['params'].get('send_report') or params.get('attach_medicines'):
                 if isinstance(params, str):
                     try:
                         params = json.loads(params)
                     except:
                         params = {}
 
+            if params.get('attach_medicines'):
+                medicines = list(filter(lambda m: not m.canceled_at, contract.medicines))
+                medicines = list(map(lambda m: f'{m.title} {m.dose}', medicines))
+                canceled_medicines = list(filter(lambda m: m.canceled_at, contract.medicines))
+                canceled_medicines = list(map(lambda m: f'{m.title} {m.dose}', canceled_medicines))
+                params.update({
+                    'medicines': medicines,
+                    'canceled_medicines': canceled_medicines
+                })
+
+            if action['params'].get('send_report'):
                 params["message"] = params.get("message", "") + report
 
             self.medsenger_api.send_order(contract.id, order, agent_id, params)

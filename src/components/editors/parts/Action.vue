@@ -208,7 +208,13 @@ export default {
 
         if (this.action.type == 'order' && this.action.params.order_params)
         {
+            // fixme кажется эта строка все ломает
             this.action.params.order_params = JSON.stringify(this.action.params.order_params)
+
+            if (this.isJsonString(this.action.params.order_params)) {
+                console.log(1)
+                this.action.params.order_params = JSON.parse(this.action.params.order_params)
+            }
         }
     }
 }
