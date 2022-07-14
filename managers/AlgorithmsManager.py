@@ -742,7 +742,8 @@ class AlgorithmsManager(Manager):
 
                 if not bypass:
                     for action in condition.get('positive_actions', []):
-                        has_message_to_patient = has_message_to_patient or self.run_action(action, contract, descriptions, algorithm)
+                        has_message = self.run_action(action, contract, descriptions, algorithm)
+                        has_message_to_patient = has_message_to_patient or has_message
                     condition['last_fired'] = int(time.time())
             else:
                 for action in condition.get('negative_actions', []):
