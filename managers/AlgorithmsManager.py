@@ -421,31 +421,18 @@ class AlgorithmsManager(Manager):
             agent_id = action['params'].get('agent_id')
             params = deepcopy(action['params'].get('order_params', {}))
 
-            # fixme я сильно не уверена в этом
-            # if action['params'].get('send_report'):
-            if isinstance(params, str):
-                try:
-                    params = json.loads(params)
-                except:
-                    params = {}
-
-            if params.get('attach_medicines'):
-                medicines = list(filter(lambda m: not m.canceled_at, contract.medicines))
-                medicines = list(map(lambda m: m.title + (f' {m.dose}' if m.dose else ''), medicines))
-                canceled_medicines = list(filter(lambda m: m.canceled_at, contract.medicines))
-                canceled_medicines = list(map(lambda m: m.title + (f' {m.dose}' if m.dose else ''), canceled_medicines))
-                params.update({
-                    'medicines': medicines,
-                    'canceled_medicines': canceled_medicines
-                })
-
             if action['params'].get('send_report'):
+                if isinstance(params, str):
+                    try:
+                        params = json.loads(params)
+                    except:
+                        params = {}
+
                 params["message"] = params.get("message", "") + report
 
             self.medsenger_api.send_order(contract.id, order, agent_id, params)
 
         if action['type'] == 'patient_public_attachment':
-            has_message_to_patient = True
             criteria = action['params'].get('criteria')
             comment = action['params'].get('text')
             info = self.medsenger_api.get_patient_info(contract.id)
@@ -457,12 +444,12 @@ class AlgorithmsManager(Manager):
                     attachments.append({'public_attachment_id': file.get('id')})
 
             if attachments:
+                has_message_to_patient = True
                 self.medsenger_api.send_message(contract.id, comment,
                                                 only_patient=True,
                                                 action_deadline=int(time.time()) + 60 * 60, attachments=attachments)
 
         if action['type'] == 'send_file_by_link':
-            has_message_to_patient = True
             link = action['params'].get('link')
             text = action['params'].get('text')
 
@@ -473,7 +460,7 @@ class AlgorithmsManager(Manager):
                         fname = re.findall("filename=(.+)", answer.headers["Content-Disposition"])[0]
                     else:
                         fname = link.split("/")[-1]
-
+                    has_message_to_patient = True
                     self.medsenger_api.send_message(contract.id, text, only_patient=True, attachments=[medsenger_api.prepare_binary(fname, answer.content)])
 
                 except Exception as e:
