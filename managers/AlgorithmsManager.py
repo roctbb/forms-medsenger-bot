@@ -404,6 +404,7 @@ class AlgorithmsManager(Manager):
             return False
 
     def run_action(self, action, contract, descriptions, algorithm):
+        has_message_to_patient = False
         report = ""
         if action['params'].get('send_report') and descriptions:
             report = '<br><br><strong>События:</strong><ul>' + ''.join(
@@ -432,6 +433,7 @@ class AlgorithmsManager(Manager):
             self.medsenger_api.send_order(contract.id, order, agent_id, params)
 
         if action['type'] == 'patient_public_attachment':
+            has_message_to_patient = True
             criteria = action['params'].get('criteria')
             comment = action['params'].get('text')
             info = self.medsenger_api.get_patient_info(contract.id)
@@ -448,6 +450,7 @@ class AlgorithmsManager(Manager):
                                                 action_deadline=int(time.time()) + 60 * 60, attachments=attachments)
 
         if action['type'] == 'send_file_by_link':
+            has_message_to_patient = True
             link = action['params'].get('link')
             text = action['params'].get('text')
 
@@ -465,6 +468,7 @@ class AlgorithmsManager(Manager):
                     log(e, False)
 
         if action['type'] == 'patient_message':
+            has_message_to_patient = True
             if action['params'].get('add_action'):
                 action_name = action['params'].get('action_name')
                 action_link = action['params'].get('action_link')
@@ -538,6 +542,7 @@ class AlgorithmsManager(Manager):
             template_id = int(action['params'].get('template_id'))
 
             if action['type'] == 'form':
+                has_message_to_patient = True
                 form = form_manager.get(template_id)
 
                 if form:
@@ -615,6 +620,7 @@ class AlgorithmsManager(Manager):
                 exec(action['params']['code'])
             except Exception as e:
                 log(e)
+        return has_message_to_patient
 
     def get_step(self, algorithm, step=None):
         if not step:
@@ -695,6 +701,7 @@ class AlgorithmsManager(Manager):
         current_step = self.get_step(algorithm)
         contract = algorithm.contract
         fired = False
+        has_message_to_patient = False
 
         additional_conditions = []
         if algorithm.common_conditions:
@@ -736,7 +743,7 @@ class AlgorithmsManager(Manager):
 
                 if not bypass:
                     for action in condition.get('positive_actions', []):
-                        self.run_action(action, contract, descriptions, algorithm)
+                        has_message_to_patient = has_message_to_patient or self.run_action(action, contract, descriptions, algorithm)
                     condition['last_fired'] = int(time.time())
             else:
                 for action in condition.get('negative_actions', []):
@@ -752,7 +759,7 @@ class AlgorithmsManager(Manager):
         if DYNAMIC_CACHE:
             self.medsenger_api.update_cache(contract.id)
 
-        return fired
+        return fired, has_message_to_patient
 
     def search_params(self, contract):
         params = {}
@@ -805,11 +812,13 @@ class AlgorithmsManager(Manager):
                             patient.algorithms)
 
         fired = False
-        for algorithm in algorithms:
-            result = self.run(algorithm)
-            fired = fired or result
+        has_message_to_patient = False
 
-        if not fired and form.thanks_text:
+        for algorithm in algorithms:
+            result, has_message = self.run(algorithm)
+            has_message_to_patient = has_message_to_patient or has_message
+
+        if not has_message_to_patient and form.thanks_text:
             self.medsenger_api.send_message(contract.id, text=form.thanks_text, only_patient=True,
                                             action_deadline=time.time() + 60 * 60)
 
