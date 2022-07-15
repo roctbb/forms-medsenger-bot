@@ -44,6 +44,10 @@
                 <input type="checkbox" class="form-check" v-model="field.required">
             </form-group48>
 
+            <form-group48 title="Не включать в оценку?" v-if="form.has_integral_evaluation">
+                <input type="checkbox" class="form-check" v-model="field.exclude_weight">
+            </form-group48>
+
         </div>
         <form-group48 title="Показывать если...">
             <select class="form-control form-control-sm" v-model="field.show_if">
@@ -97,7 +101,7 @@
                     <input type="text" class="form-control form-control-sm" v-model="field.category_value"/>
                 </form-group48>
                 <form-group48 title="Вес" description="Добавляется, если галочка стоит"
-                              v-if="form.has_integral_evaluation">
+                              v-if="form.has_integral_evaluation && !field.exclude_weight">
                     <input type="number" class="form-control form-control-sm" step="0.1" v-model="field.weight"/>
                 </form-group48>
             </div>
@@ -169,7 +173,7 @@
                                :class="save_clicked && empty(variant.text) ? 'is-invalid' : ''"
                                class="form-control form-control-sm" v-model="variant.text"/>
                     </div>
-                    <div class="col-md-2" v-if="form.has_integral_evaluation">
+                    <div class="col-md-2" v-if="form.has_integral_evaluation && !field.exclude_weight">
                         <small class="text-mutted">Вес</small><br>
                         <input type="number" step="0.1"
                                :class="save_clicked && empty(variant.weight) ? 'is-invalid' : ''"
@@ -278,7 +282,10 @@ export default {
             this.$forceUpdate()
         },
         add_variant: function () {
-            this.field.params.variants.push({text: '', category: ''});
+            let variant = {text: '', category: ''}
+            if (this.form.has_integral_evaluation && !this.field.exclude_weight)
+                variant.weight = 0
+            this.field.params.variants.push(variant);
             this.$forceUpdate()
         },
         remove_variant: function (j) {

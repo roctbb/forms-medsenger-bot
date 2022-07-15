@@ -175,6 +175,7 @@ export default {
         },
         empty_integral_evaluation: function () {
             return {
+                category: 'none',
                 offset: 0,
                 groups_enabled: false,
                 dont_send_to_doctor: false,
@@ -230,7 +231,8 @@ export default {
                                 value: parseInt(group.value.toString()),
                                 questions: group.questions.toString().split(',')
                                     .map(q => parseInt(q)).filter(q => !isNaN(q)),
-                                description: group.description
+                                description: group.description,
+                                category: group.category
                             }
                         })
 

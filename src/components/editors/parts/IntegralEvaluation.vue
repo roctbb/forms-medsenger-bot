@@ -2,6 +2,21 @@
     <div v-if="integral_evaluation">
         <card title="Интегральная оценка">
 
+            <form-group48 title="Код категории">
+                <select class="form-control form-control-sm"
+                        :class="save_clicked && empty(integral_evaluation.category) ? 'is-invalid' : ''"
+                        v-model="integral_evaluation.category">
+                    <option value="none">Не сохранять ответ</option>
+
+                    <optgroup
+                        v-for="(group, name) in group_by(category_list.filter(c => ['float', 'integer'].includes(c.type)), 'subcategory')"
+                        v-bind:label="name">
+                        <option v-for="category in group" :value="category.name">{{ category.description }}
+                        </option>
+                    </optgroup>
+                </select>
+            </form-group48>
+
             <form-group48 title="Сдвиг">
                 <input type="number" class="form-control form-control-sm"
                        :class="save_clicked && empty(integral_evaluation.offset) ? 'is-invalid' : ''"
@@ -26,6 +41,22 @@
                                    :class="save_clicked && empty(group.description) ? 'is-invalid' : ''"
                                    class="form-control form-control-sm" v-model="group.description"/>
                         </div>
+
+                        <div class="col-md-3">
+                            <small class="text-mutted">Категория</small><br>
+                            <select class="form-control form-control-sm"
+                                    v-model="group.category">
+                                <option value="none">Не сохранять ответ</option>
+
+                                <optgroup
+                                    v-for="(group, name) in group_by(category_list.filter(c => ['float', 'integer'].includes(c.type)), 'subcategory')"
+                                    v-bind:label="name">
+                                    <option v-for="category in group" :value="category.name">{{ category.description }}
+                                    </option>
+                                </optgroup>
+                            </select>
+                        </div>
+
                         <div class="col-md-3">
                             <small class="text-mutted">Номера вопросов</small><br>
                             <input type="text"
@@ -33,13 +64,13 @@
                                    class="form-control form-control-sm" v-model="group.questions"/>
                         </div>
 
-                        <div class="col-md-2">
+                        <div class="col-md-1">
                             <small class="text-mutted">Значение</small><br>
                             <input type="number" class="form-control form-control-sm"
                                    :class="save_clicked && empty(group.value) ? 'is-invalid' : ''"
                                    v-model="group.value"/>
                         </div>
-                        <div class="col-md-2"><br>
+                        <div class="col-md-1"><br>
                             <a class="btn btn-default btn-sm" v-if="integral_evaluation.groups.length > 1"
                                @click="remove_group(i)">Удалить</a>
                         </div>
@@ -117,7 +148,7 @@ export default {
             this.$forceUpdate()
         },
         add_group: function () {
-            this.integral_evaluation.groups.push({value: 0, description: "", questions: []})
+            this.integral_evaluation.groups.push({value: 0, description: "", questions: [], category: 'none'})
             this.$forceUpdate()
         },
         remove_group: function (i) {

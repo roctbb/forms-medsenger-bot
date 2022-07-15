@@ -158,13 +158,16 @@ class FormManager(Manager):
 
                 self.medsenger_api.send_message(form.contract_id,
                                                 "Пациент не заполнял опросник {} уже {} дней.".format(form.title,
-                                                                                                      form.warning_days), only_doctor=True, need_answer=False)
+                                                                                                      form.warning_days),
+                                                only_doctor=True, need_answer=False)
                 self.__commit__()
 
     def __integral_result_report__(self, contract_id, form, integral_result):
         urgent = integral_result['params'].get('urgent', False)
         if not form.integral_evaluation.get('dont_send_to_doctor', False):
-            text = '<strong>Результат интегральной оценки опросника "{}"</strong>:<br>{}'.format(form.title, integral_result['result'])
+            text = '<strong>Результат интегральной оценки опросника "{}"</strong>:<br>{}'.format(form.title,
+                                                                                                 integral_result[
+                                                                                                     'result'])
 
             if form.integral_evaluation.get('groups_enabled'):
                 text += '<br><br>Общая сумма баллов - {}<br><ul>'.format(integral_result['params']['score'])
@@ -175,22 +178,28 @@ class FormManager(Manager):
             self.medsenger_api.send_message(contract_id, text, only_doctor=True, is_urgent=urgent)
 
         if integral_result['params'].get('message', None):
-            self.medsenger_api.send_message(contract_id, integral_result['params'].get('message'), only_patient=True, is_urgent=urgent)
+            self.medsenger_api.send_message(contract_id, integral_result['params'].get('message'), only_patient=True,
+                                            is_urgent=urgent)
         elif urgent and form.integral_evaluation.get('warning_text'):
-            self.medsenger_api.send_message(contract_id, form.integral_evaluation.get('warning_text'), only_patient=True, is_urgent=urgent)
+            self.medsenger_api.send_message(contract_id, form.integral_evaluation.get('warning_text'),
+                                            only_patient=True, is_urgent=urgent)
         elif not urgent and form.integral_evaluation.get('ok_text'):
-            self.medsenger_api.send_message(contract_id, form.integral_evaluation.get('ok_text'), only_patient=True, is_urgent=urgent)
+            self.medsenger_api.send_message(contract_id, form.integral_evaluation.get('ok_text'), only_patient=True,
+                                            is_urgent=urgent)
 
     def __instant_report__(self, contract_id, form, report):
         text = 'Пациент заполнил опросник "{}" и дал следующие ответы.<br><br>'.format(form.title)
-        text += '<ul>{}</ul>'.format(''.join(list(map(lambda line: '<li><strong>{}</strong>: {};</li>'.format(*line), report))))
+        text += '<ul>{}</ul>'.format(
+            ''.join(list(map(lambda line: '<li><strong>{}</strong>: {};</li>'.format(*line), report))))
 
         deadline = time.time() + 1 * 60 * 60
 
         self.medsenger_api.send_message(contract_id, text, only_doctor=True)
 
         if not form.thanks_text:
-            self.medsenger_api.send_message(contract_id, 'Спасибо за заполнение опросника "{}". Ответы отправлены вашему лечащему врачу.'.format(form.title), only_patient=True, action_deadline=deadline)
+            self.medsenger_api.send_message(contract_id,
+                                            'Спасибо за заполнение опросника "{}". Ответы отправлены вашему лечащему врачу.'.format(
+                                                form.title), only_patient=True, action_deadline=deadline)
 
     def submit(self, answers, form_id, contract_id):
         form = Form.query.filter_by(id=form_id).first_or_404()
@@ -209,7 +218,8 @@ class FormManager(Manager):
                     packet.append({"category_name": category, "value": comment, "files": [answers[field['uid']]]})
 
                     if field.get('params', {}).get('send_to_doctor'):
-                        self.medsenger_api.send_message(contract_id, '', send_from='patient', need_answer=False, attachments=[answers[field['uid']]])
+                        self.medsenger_api.send_message(contract_id, '', send_from='patient', need_answer=False,
+                                                        attachments=[answers[field['uid']]])
 
                 elif field['type'] == 'radio':
                     category = field['params']['variants'][answers[field['uid']]]['category']
@@ -288,16 +298,19 @@ class FormManager(Manager):
                     if field['type'] == 'scale' and field.get('category_value'):
                         if not params.get('symptom_group'):
                             params.update({'symptom_group': field.get('category_value')})
-                        params.update({'grade': abs(answers[field['uid']] - field['params']['start_from']) / len(field['params']['colors'])})
-                        packet.append((category, "{} - {}".format(field.get('category_value'), answers[field['uid']]), params))
+                        params.update({'grade': abs(answers[field['uid']] - field['params']['start_from']) / len(
+                            field['params']['colors'])})
+                        packet.append(
+                            (category, "{} - {}".format(field.get('category_value'), answers[field['uid']]), params))
                     elif field['type'] in ['textarea', 'text'] and field.get('prefix'):
                         packet.append((category, "{}{}".format(field.get('prefix'), answers[field['uid']]), params))
                     else:
                         packet.append((category, answers[field['uid']], params))
 
-        action_name = 'Заполнение опросника ID {} "{}"'.format(form.template_id if form.template_id else form_id, form.title)
+        action_name = 'Заполнение опросника ID {} "{}"'.format(form.template_id if form.template_id else form_id,
+                                                               form.title)
 
-        integral_result, integral_description, custom_params = self.get_integral_evaluation(answers, form)
+        integral_result, integral_description, custom_params = self.get_integral_evaluation(contract_id, answers, form)
         action_name += integral_description
 
         packet.append(('action', action_name, custom_params))
@@ -323,7 +336,7 @@ class FormManager(Manager):
 
         return result
 
-    def get_integral_evaluation(self, answers, form):
+    def get_integral_evaluation(self, contract_id, answers, form):
         result = None
         action_name = ''
         custom_params = {}
@@ -341,6 +354,8 @@ class FormManager(Manager):
         questions = filter(lambda f: f['type'] != 'header', form.fields)
 
         for (i, question) in enumerate(questions, start=1):
+            if question.get('exclude_weight'):
+                continue
             if question['uid'] in answers.keys():
                 ans_score = 0
 
@@ -378,10 +393,18 @@ class FormManager(Manager):
 
         action_name += ', результат интегральной оценки - {}'.format(result)
 
+        category = form.integral_evaluation.get('category')
+        if category != 'none':
+            self.medsenger_api.add_record(contract_id, category, score, params={'form_id': form.id})
+
         if form.integral_evaluation.get('groups_enabled'):
             custom_params['group_scores'] = group_scores
 
             for group in form.integral_evaluation['groups']:
+                category = group.get('category')
+                if category != 'none':
+                    self.medsenger_api.add_record(contract_id, category, group_scores[group['description']],
+                                                  params={'form_id': form.id})
                 if group_scores[group['description']] > group['value']:
                     action_name += ', сумма в группе превышает критическое значение'
                     custom_params['urgent'] = True
