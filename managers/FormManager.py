@@ -294,12 +294,12 @@ class FormManager(Manager):
                         except:
                             pass
 
-                    print(field.get('params', {}))
                     if field['type'] == 'scale' and field.get('category_value'):
                         if not params.get('symptom_group'):
                             params.update({'symptom_group': field.get('category_value')})
-                        params.update({'grade': abs(answers[field['uid']] - field['params']['start_from']) / len(
-                            field['params']['colors'])})
+                        max_value = max([(-1 if field['params'].get('reversed') else 1) * i + field['params']['start_from']
+                                   for i in range(len(field['params']['colors']))])
+                        params.update({'color': abs(answers[field['uid']] - field['params']['start_from']) / max_value})
                         packet.append(
                             (category, "{} - {}".format(field.get('category_value'), answers[field['uid']]), params))
                     elif field['type'] in ['textarea', 'text'] and field.get('prefix'):
