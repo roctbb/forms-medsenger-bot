@@ -286,7 +286,8 @@ class FormManager(Manager):
                         "question_iud": field['uid'],
                         "question_text": field.get('text'),
                         "answer": answers[field['uid']],
-                        "type": field['type']
+                        "type": field['type'],
+                        "map": field.get('params', {}).get('map')
                     }
 
                     if field.get('params', {}).get('custom_params'):
