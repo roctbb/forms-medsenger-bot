@@ -219,7 +219,7 @@
                            @change="update_vas_params()">
                 </form-group48>
 
-                <form-group48 title="Предпросмотр шкалы" description="Шкала будет выглядеть так">
+                <form-group48 title="Предпросмотр" description="Шкала будет выглядеть так">
                     <visual-analog-scale :params="field.params">
                         <div class="row">
                             <div class="col-1 d-flex justify-content-center" v-for="(color, i) in field.params.colors">
@@ -230,6 +230,29 @@
                     </visual-analog-scale>
                 </form-group48>
             </div>
+
+            <!-- Карта -->
+            <div v-if="field.type == 'map'">
+                <div v-if="category && category.type == 'string'">
+                    <form-group48 title="Пояснение в медкарте">
+                        <input type="text" class="form-control form-control-sm"
+                               :class="save_clicked && empty(field.category_value) ? 'is-invalid' : ''"
+                               v-model="field.category_value"/>
+                    </form-group48>
+                </div>
+
+                <form-group48 title="Тип">
+                    <select :class="save_clicked && empty(field.params.type) ? 'is-invalid' : ''"
+                            class="form-control form-control-sm" v-model="field.params.map">
+                        <option v-for="map in Object.entries(maps)" :value="map[0]">{{ map[1] }}</option>
+                    </select>
+                </form-group48>
+
+                <form-group48 title="Предпросмотр" description="Карта будет выглядеть так">
+                    <interactive-map :map="field.params.map"/>
+                </form-group48>
+            </div>
+
         </div>
         <a v-if="field.type == 'radio'" class="btn btn-primary btn-sm" @click="add_variant()">Добавить вариант</a>
         <a class="btn btn-danger btn-sm" @click="remove()">Удалить {{
@@ -244,10 +267,11 @@
 import Card from "../../common/Card";
 import FormGroup48 from "../../common/FormGroup-4-8";
 import VisualAnalogScale from "../../presenters/parts/VisualAnalogScale";
+import InteractiveMap from "../../presenters/parts/InteractiveMap";
 
 export default {
     name: "Field",
-    components: {VisualAnalogScale, FormGroup48, Card},
+    components: {InteractiveMap, VisualAnalogScale, FormGroup48, Card},
     props: ['data', 'pkey', 'form', 'save_clicked', 'num'],
     data() {
         return {

@@ -71,6 +71,10 @@
                             </visual-analog-scale>
                         </div>
 
+                        <div v-if="field.type == 'map'">
+                            <interactive-map :map="field.params.map" :uid="field.uid"/>
+                        </div>
+
                         <div v-if="field.type == 'date'">
                             <date-picker :required="field.required" v-model="answers[field.uid]"
                                          value-type="YYYY-MM-DD"></date-picker>
@@ -112,10 +116,11 @@ import DatePicker from 'vue2-datepicker';
 import 'vue2-datepicker/index.css';
 import 'vue2-datepicker/locale/ru';
 import VisualAnalogScale from "./parts/VisualAnalogScale";
+import InteractiveMap from "./parts/InteractiveMap";
 
 export default {
     name: "FormPresenter",
-    components: {VisualAnalogScale, ActionDone, FormGroup48, ErrorBlock, DatePicker},
+    components: {InteractiveMap, VisualAnalogScale, ActionDone, FormGroup48, ErrorBlock, DatePicker},
     props: {
         data: {
             required: false,
@@ -259,6 +264,10 @@ export default {
         this.blocks.push(block)
 
         this.set_default()
+
+        Event.listen('interactive-map-answer', data => {
+            this.answers[data.uid] = data.answer
+        })
     },
     mounted() {
         setTimeout(() => {

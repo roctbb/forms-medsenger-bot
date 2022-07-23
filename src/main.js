@@ -271,7 +271,8 @@ Vue.mixin({
                 date: "Дата",
                 time: "Время",
                 file: "Файл",
-                range: "Ползунок"
+                range: "Ползунок",
+                map: 'Интерактивная карта'
             },
             current_contract_id: window.CONTRACT_ID,
             weekdays: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
@@ -287,7 +288,8 @@ Vue.mixin({
                 time: ['string'],
                 file: ['file'],
                 scale: ['integer', 'string'],
-                range: ['integer']
+                range: ['integer'],
+                map: ['string']
             },
             images: {
                 form: window.LOCAL_HOST + '/static/images/icons8-fill-in-form-48.png',
@@ -302,6 +304,9 @@ Vue.mixin({
                 nothing_found: window.LOCAL_HOST + '/static/images/icons8-nothing-found-100.png',
                 graph: window.LOCAL_HOST + '/static/images/icons8-play-graph-report-48.png',
                 heatmap: window.LOCAL_HOST + '/static/images/icons8-heat-map-96.png',
+            },
+            maps: {
+                human: 'Тело человека',
             },
             is_admin: window.IS_ADMIN,
             clinic_id: window.CLINIC_ID,

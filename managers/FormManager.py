@@ -274,6 +274,28 @@ class FormManager(Manager):
                             pass
 
                     packet.append((category, value, params))
+                elif field['type'] == 'map':
+                    category = field['category']
+                    value = field.get('category_value', '') + ' ' + ', '.join(answers[field['uid']])
+                    report.append((field.get('text'), value))
+
+                    if category == 'none':
+                        continue
+
+                    params = {
+                        "question_iud": field['uid'],
+                        "question_text": field.get('text'),
+                        "answer": answers[field['uid']],
+                        "type": field['type']
+                    }
+
+                    if field.get('params', {}).get('custom_params'):
+                        try:
+                            params.update(json.loads(field.get('params', {}).get('custom_params')))
+                        except:
+                            pass
+
+                    packet.append((category, value, params))
                 else:
                     category = field['category']
                     report.append((field.get('text'), answers[field['uid']]))
