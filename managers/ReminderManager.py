@@ -187,7 +187,7 @@ class ReminderManager(Manager):
         if reminder.has_order:
             params = reminder.order_params if reminder.order_params else None
             agent_id = reminder.order_agent_id if reminder.order_agent_id else None
-            self.medsenger_api.send_order(reminder.contract_id, reminder.order, receiver_id=reminder.order_agent_id, params=reminder.order_params)
+            result = self.medsenger_api.send_order(reminder.contract_id, reminder.order, receiver_id=reminder.order_agent_id, params=reminder.order_params)
 
         if result:
             reminder.last_sent = datetime.now()
