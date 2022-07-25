@@ -35,10 +35,10 @@
 
                 <form-group48 title="Привязать приказ агенту" v-if="is_admin">
                     <input class="form-check" type="checkbox"
-                           v-model="reminder.add_order"/>
+                           v-model="reminder.has_order"/>
                 </form-group48>
 
-                <div v-if="reminder.add_order" class="form-group form-group-sm row">
+                <div v-if="reminder.has_order" class="form-group form-group-sm row">
                     <div class="col-md-2">
                         <input type="number" v-model="action.order_agent_id">
                         <small class="text-muted">ID агента</small>
@@ -121,7 +121,8 @@ export default {
                 text: '',
                 timetable: timetable,
                 attach_date: attach_date,
-                detach_date: detach_date
+                detach_date: detach_date,
+                has_order: false
             }
         },
         check: function () {
