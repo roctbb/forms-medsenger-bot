@@ -40,7 +40,7 @@
 
                 <div v-if="reminder.has_order" class="form-group form-group-sm row">
                     <div class="col-md-2">
-                        <input type="number" v-model="action.order_agent_id">
+                        <input type="number" v-model="reminder.order_agent_id">
                         <small class="text-muted">ID агента</small>
                     </div>
 
