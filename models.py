@@ -479,6 +479,11 @@ class Reminder(db.Model):
     canceled_at = db.Column(db.DateTime, nullable=True)
     hide_actions = db.Column(db.Boolean, default=False)
 
+    has_order = db.Column(db.Boolean, default=False)
+    order = db.Column(db.String(255), nullable=True)
+    order_params = db.Column(db.JSON, nullable=True)
+    order_agent_id = db.Column(db.Integer, nullable=True)
+
     def timetable_description(self):
         if self.timetable['mode'] == 'daily':
             description = '{} раз(а) в день'.format(len(self.timetable['points']))
@@ -505,6 +510,10 @@ class Reminder(db.Model):
             "is_template": self.is_template,
             "template_id": self.template_id,
             "hide_actions": self.hide_actions,
+            "has_order": self.has_order,
+            "order": self.order,
+            "order_params": self.order_params,
+            "order_agent_id": self.order_agent_id
         }
 
     def clone(self):
@@ -518,6 +527,11 @@ class Reminder(db.Model):
         new_reminder.detach_date = self.detach_date
         new_reminder.timetable = self.timetable
         new_reminder.hide_actions = self.hide_actions
+
+        new_reminder.has_order = self.has_order
+        new_reminder.order = self.order
+        new_reminder.order_params = self.order_params
+        new_reminder.order_agent_id = self.order_agent_id
 
         if self.is_template:
             new_reminder.template_id = self.id

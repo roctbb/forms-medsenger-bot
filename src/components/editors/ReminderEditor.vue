@@ -33,6 +33,27 @@
                            v-model="reminder.hide_actions"/>
                 </form-group48>
 
+                <form-group48 title="Привязать приказ агенту" v-if="is_admin">
+                    <input class="form-check" type="checkbox"
+                           v-model="reminder.add_order"/>
+                </form-group48>
+
+                <div v-if="reminder.add_order" class="form-group form-group-sm row">
+                    <div class="col-md-2">
+                        <input type="number" v-model="action.order_agent_id">
+                        <small class="text-muted">ID агента</small>
+                    </div>
+
+                    <div class="col-md-2">
+                        <input type="text" v-model="reminder.order">
+                        <small class="text-muted">order</small>
+                    </div>
+
+                    <div class="col-md-5"><textarea class="form-control form-control-sm" v-model="reminder.order_params"></textarea>
+                        <small class="text-muted">JSON параметры</small>
+                    </div>
+                </div>
+
             </card>
 
             <timetable-editor v-bind:data="reminder.timetable" :timetable_save_clicked="timetable_validated"/>
@@ -92,7 +113,7 @@ export default {
         create_empty_reminder: function () {
             let attach_date = moment().format('YYYY-MM-DD')
             let detach_date = moment().add(7, 'days').format('YYYY-MM-DD')
-            let timetable =  this.empty_timetable()
+            let timetable = this.empty_timetable()
             timetable.points[0].hour = 10
             timetable.points[0].minute = '00'
             return {
@@ -106,7 +127,7 @@ export default {
         check: function () {
             this.errors = [];
 
-            if (this.empty(this.reminder.text)) {
+            if (this.empty(this.reminder.text) && !this.add_order) {
                 this.errors.push('Заполните текст напоминания')
             }
 
@@ -116,6 +137,12 @@ export default {
 
             if (!this.verify_timetable(this.reminder.timetable)) {
                 this.errors.push('Проверьте корректность расписания')
+            }
+
+            if (this.add_order) {
+                if (this.empty(this.reminder.order_name)) {
+                    this.errors.push('Укажите приказ')
+                }
             }
 
             return this.errors.length == 0;
@@ -186,8 +213,7 @@ export default {
 
             this.reminder.attach_date = moment().format('YYYY-MM-DD')
             let len = 7
-            if (reminder.attach_date && reminder.detach_date)
-            {
+            if (reminder.attach_date && reminder.detach_date) {
                 let attach = moment(reminder.attach_date, "YYYY-MM-DD")
                 let detach = moment(reminder.detach_date, "YYYY-MM-DD")
                 len = moment.duration(detach.diff(attach)).asDays()
@@ -221,8 +247,7 @@ export default {
             this.$forceUpdate()
         });
     },
-    computed: {
-    }
+    computed: {}
 }
 </script>
 

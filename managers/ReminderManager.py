@@ -128,6 +128,14 @@ class ReminderManager(Manager):
             reminder.timetable = data.get('timetable')
             reminder.hide_actions = data.get('hide_actions')
 
+            if contract.is_admin:
+                reminder.has_order = data.get('has_order')
+
+            if reminder.has_order:
+                reminder.order = data.get('has_order')
+                reminder.order_params = data.get('order_params')
+                reminder.order_agent_id = data.get('order_agent_id')
+
             reminder.state = data.get('state', 'active')
 
             if data.get('is_template'):
@@ -162,18 +170,25 @@ class ReminderManager(Manager):
         action_name = None
         action_link = None
 
-        if not reminder.hide_actions:
-            action_name = 'Отметить действие'
-            action_link = 'reminder/{}'.format(reminder.id)
+        if reminder.text:
 
-        if reminder.type == 'patient':
-            result = self.medsenger_api.send_message(reminder.contract_id, reminder.text, action_name=action_name,
-                                                     action_onetime=True, action_big=False,
-                                                     action_link=action_link, only_patient=True)
-        if reminder.type == 'doctor':
-            result = self.medsenger_api.send_message(reminder.contract_id, reminder.text, action_name=action_name,
-                                                     action_onetime=True, action_big=False,
-                                                     action_link=action_link, only_doctor=True)
+            if not reminder.hide_actions:
+                action_name = 'Отметить действие'
+                action_link = 'reminder/{}'.format(reminder.id)
+
+            if reminder.type == 'patient':
+                result = self.medsenger_api.send_message(reminder.contract_id, reminder.text, action_name=action_name,
+                                                         action_onetime=True, action_big=False,
+                                                         action_link=action_link, only_patient=True)
+            if reminder.type == 'doctor':
+                result = self.medsenger_api.send_message(reminder.contract_id, reminder.text, action_name=action_name,
+                                                         action_onetime=True, action_big=False,
+                                                         action_link=action_link, only_doctor=True)
+        if reminder.has_order:
+            params = reminder.order_params if reminder.order_params else None
+            agent_id = reminder.order_agent_id if reminder.order_agent_id else None
+            self.medsenger_api.send_order(reminder.contract_id, reminder.order, receiver_id=reminder.order_agent_id, params=reminder.order_params)
+
         if result:
             reminder.last_sent = datetime.now()
             if commit:
