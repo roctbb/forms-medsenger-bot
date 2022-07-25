@@ -39,17 +39,18 @@
                 </form-group48>
 
                 <div v-if="reminder.has_order" class="form-group form-group-sm row">
-                    <div class="col-md-2">
-                        <input type="number" v-model="reminder.order_agent_id">
+                    <div class="col-md-3">
+                        <input class="form-control form-control-sm" type="number" v-model="reminder.order_agent_id">
                         <small class="text-muted">ID агента</small>
                     </div>
 
-                    <div class="col-md-2">
-                        <input type="text" v-model="reminder.order">
+                    <div class="col-md-3">
+                        <input class="form-control form-control-sm" type="text" v-model="reminder.order">
                         <small class="text-muted">order</small>
                     </div>
 
-                    <div class="col-md-5"><textarea class="form-control form-control-sm" v-model="reminder.order_params"></textarea>
+                    <div class="col-md-6">
+                        <textarea class="form-control form-control-sm" v-model="reminder.order_params"></textarea>
                         <small class="text-muted">JSON параметры</small>
                     </div>
                 </div>
