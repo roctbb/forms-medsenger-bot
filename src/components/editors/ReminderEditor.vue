@@ -129,7 +129,7 @@ export default {
         check: function () {
             this.errors = [];
 
-            if (this.empty(this.reminder.text) && !this.add_order) {
+            if (this.empty(this.reminder.text) && !this.has_order) {
                 this.errors.push('Заполните текст напоминания')
             }
 
