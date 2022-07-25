@@ -129,7 +129,7 @@ export default {
         check: function () {
             this.errors = [];
 
-            if (this.empty(this.reminder.text) && !this.has_order) {
+            if (this.empty(this.reminder.text) && !this.reminder.has_order) {
                 this.errors.push('Заполните текст напоминания')
             }
 
@@ -141,7 +141,7 @@ export default {
                 this.errors.push('Проверьте корректность расписания')
             }
 
-            if (this.add_order) {
+            if (this.reminder.has_order) {
                 if (this.empty(this.reminder.order_name)) {
                     this.errors.push('Укажите приказ')
                 }
