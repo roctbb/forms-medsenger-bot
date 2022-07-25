@@ -142,7 +142,7 @@ export default {
             }
 
             if (this.reminder.has_order) {
-                if (this.empty(this.reminder.order_name)) {
+                if (this.empty(this.reminder.order)) {
                     this.errors.push('Укажите приказ')
                 }
             }
