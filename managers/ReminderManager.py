@@ -132,7 +132,7 @@ class ReminderManager(Manager):
                 reminder.has_order = data.get('has_order')
 
             if reminder.has_order:
-                reminder.order = data.get('has_order')
+                reminder.order = data.get('order')
                 reminder.order_params = data.get('order_params')
                 reminder.order_agent_id = data.get('order_agent_id')
 
