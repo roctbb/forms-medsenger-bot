@@ -41,12 +41,14 @@ svg {
     height: 100%;
 }
 
-path:hover, circle:hover {
-    stroke: #24a8b4 !important;
-    stroke-width: 1px;
-    stroke-linejoin: round;
-    fill: #24a8b4 !important;
-    cursor: pointer;
+@media (hover: hover) and (pointer: fine) {
+    path:hover, circle:hover {
+        stroke: #24a8b4 !important;
+        stroke-width: 1px;
+        stroke-linejoin: round;
+        fill: #24a8b4 !important;
+        cursor: pointer;
+    }
 }
 
 #info-box {
