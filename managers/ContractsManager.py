@@ -10,8 +10,9 @@ class ContractManager(Manager):
     def add(self, contract_id, clinic_id):
         contract = Contract.query.filter_by(id=contract_id).first()
         patient_info = self.medsenger_api.get_patient_info(contract_id)
-
+        is_new = False
         if not contract:
+            is_new = True
             try:
                 patient_id = int(patient_info['id'])
             except:
@@ -32,7 +33,7 @@ class ContractManager(Manager):
 
         self.__commit__()
 
-        return contract
+        return contract, is_new
 
     def remove(self, contract_id):
         try:
