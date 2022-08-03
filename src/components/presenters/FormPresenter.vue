@@ -50,9 +50,9 @@
                         <div v-if="field.type == 'radio'">
                             <div class="form-check" v-for="(variant, j) in field.params.variants">
                                 <input class="form-check-input monitoring-input" type="radio"
-                                       :id="'radio_' + i + '_' + j" :name="'radio_' + i"
+                                       :id="'radio_' +  field.uid + '_' + j" :name="'radio_' +  field.uid + '_' + j"
                                        v-model="answers[field.uid]" :value="j" @change="$forceUpdate()">
-                                <label class="form-check-label" :for="'radio_' + i + '_' + j">{{ variant.text }}</label>
+                                <label class="form-check-label" :for="'radio_' +  field.uid + '_' + j">{{ variant.text }}</label>
                             </div>
                         </div>
 

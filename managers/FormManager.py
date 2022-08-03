@@ -174,6 +174,11 @@ class FormManager(Manager):
                 for group in integral_result['params']['group_scores'].keys():
                     text += '<li>{} - {}</li>'.format(group, integral_result['params']['group_scores'][group])
                 text += '</ul>'
+            elif integral_result['params']['group_scores']:
+                text += '<br><ul>'
+                for group in integral_result['params']['group_scores'].keys():
+                    text += '<li>{} - {}</li>'.format(group, integral_result['params']['group_scores'][group])
+                text += '</ul>'
 
             self.medsenger_api.send_message(contract_id, text, only_doctor=True, is_urgent=urgent)
 
@@ -377,9 +382,7 @@ class FormManager(Manager):
         questions = filter(lambda f: f['type'] != 'header', form.fields)
 
         for (i, question) in enumerate(questions, start=1):
-            if question.get('exclude_weight'):
-                continue
-            if question['uid'] in answers.keys():
+            if question['uid'] in answers.keys() and not question.get('exclude_weight'):
                 ans_score = 0
 
                 if question['type'] == 'radio':
@@ -390,12 +393,29 @@ class FormManager(Manager):
                 elif question['type'] == 'scale':
                     ans_score = answers[question['uid']]
 
-                score += ans_score
+                if form.integral_evaluation.get('script_enabled') and question.get('script_group'):
+                    gr = question.get('script_group')
+                    if gr in group_scores:
+                        group_scores[gr] += ans_score
+                    else:
+                        group_scores.update({gr: ans_score})
+                else:
+                    score += ans_score
 
                 if form.integral_evaluation.get('groups_enabled'):
                     for group in form.integral_evaluation['groups']:
                         if i in group['questions']:
                             group_scores[group['description']] += ans_score
+
+        if form.integral_evaluation.get('script_enabled') and form.integral_evaluation.get('script'):
+            try:
+                results = {}
+                exec(form.integral_evaluation.get('script'))
+                result = results['result']
+                action_name = results['action_name']
+                return result, action_name, custom_params
+            except Exception as e:
+                log(e)
 
         if score == 0:
             return result, action_name, custom_params

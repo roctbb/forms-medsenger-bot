@@ -67,7 +67,10 @@
 
         <div v-if="field.type != 'header'">
             <hr>
-
+            <form-group48 title="Код для скрипта"
+                          v-if="form.has_integral_evaluation && form.integral_evaluation.script_enabled && !field.exclude_weight">
+                <input type="text" class="form-control form-control-sm"v-model="field.script_group"/>
+            </form-group48>
             <div v-if="['integer', 'range'].includes(field.type) && is_admin">
                 <div class="form-group row">
                     <div class="col-md-4">
