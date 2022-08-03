@@ -77,7 +77,7 @@ def init(data):
     if not contract_id:
         abort(422)
 
-    contract = contract_manager.add(contract_id, clinic_id)
+    contract, is_new = contract_manager.add(contract_id, clinic_id)
 
     params = data.get('params')
 
@@ -86,9 +86,11 @@ def init(data):
         exclude_algorithms = params.get('exclude_algorithms', "").split(',')
 
         if forms:
-            form_manager.clear(contract)
-            algorithm_manager.clear(contract)
-            medicine_manager.clear(contract)
+
+            if not is_new:
+                form_manager.clear(contract)
+                algorithm_manager.clear(contract)
+                medicine_manager.clear(contract)
 
             for template_id in forms.split(','):
 
