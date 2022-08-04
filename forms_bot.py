@@ -1,4 +1,3 @@
-import datetime
 
 from manage import *
 from managers.AlgorithmsManager import AlgorithmsManager
@@ -169,7 +168,7 @@ def init(data):
 
                     if record_transformer == "week_to_date":
                         value = int(value)
-                        value = (datetime.datetime.now() - datetime.timedelta(days=min(0, (value - 1) * 7) + 3)).strftime('Y-m-d')
+                        value = (datetime.now() - timedelta(days=min(0, (value - 1) * 7) + 3)).strftime('Y-m-d')
 
 
                 medsenger_api.add_record(contract_id, record_category, value)
