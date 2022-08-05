@@ -290,9 +290,9 @@ class AlgorithmsManager(Manager):
                     rightc = right
 
                 try:
-                    rightc = right * multiplier + modifier
+                    rightc = rightc * multiplier + modifier
                 except:
-                    rightc = right
+                    pass
 
                 conditions.append((leftc, rightc, sign))
 
