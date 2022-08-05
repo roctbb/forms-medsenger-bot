@@ -272,29 +272,29 @@ class AlgorithmsManager(Manager):
 
         if "date_" in sign:
             for modifier in modifiers:
-                left = datetime.strptime(left, '%Y-%m-%d').date()
-                right = (datetime.strptime(right, '%Y-%m-%d') + timedelta(days=modifier)).date()
-                sign = sign.replace('date_', '')
+                leftc = datetime.strptime(left, '%Y-%m-%d').date()
+                rightc= (datetime.strptime(right, '%Y-%m-%d') + timedelta(days=modifier)).date()
+                signc = sign.replace('date_', '')
 
-                conditions.append((left, right, sign))
+                conditions.append((leftc, rightc, signc))
         else:
             for modifier in modifiers:
                 try:
-                    left = float(left)
+                    leftc = float(left)
                 except:
-                    pass
+                    leftc = left
 
                 try:
-                    right = float(right)
+                    rightc = float(right)
                 except:
-                    pass
+                    rightc = right
 
                 try:
-                    right = right * multiplier + modifier
+                    rightc = right * multiplier + modifier
                 except:
-                    pass
+                    rightc = right
 
-                conditions.append((left, right, sign))
+                conditions.append((leftc, rightc, sign))
 
         for left, right, sign in conditions:
             if sign == 'greater':
