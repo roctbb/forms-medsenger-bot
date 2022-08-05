@@ -258,46 +258,59 @@ class AlgorithmsManager(Manager):
         return self.save_to_cache(k, answer)
 
     def check_values(self, left, right, sign, modifier=0, multiplier=1):
+        modifiers = []
 
         try:
-            modifier = float(modifier)
+            if isinstance(modifier, str) and "|" in modifier:
+                modifiers = list(map(float, modifier.split('|')))
+            else:
+                modifiers = [float(modifier)]
         except:
-            modifier = 0
+            modifiers = [0]
+
+        conditions = []
 
         if "date_" in sign:
-            left = datetime.strptime(left, '%Y-%m-%d').date()
-            right = (datetime.strptime(right, '%Y-%m-%d') + timedelta(days=modifier)).date()
-            sign = sign.replace('date_', '')
+            for modifier in modifiers:
+                left = datetime.strptime(left, '%Y-%m-%d').date()
+                right = (datetime.strptime(right, '%Y-%m-%d') + timedelta(days=modifier)).date()
+                sign = sign.replace('date_', '')
+
+                conditions.append((left, right, sign))
         else:
-            try:
-                left = float(left)
-            except:
-                pass
+            for modifier in modifiers:
+                try:
+                    left = float(left)
+                except:
+                    pass
 
-            try:
-                right = float(right)
-            except:
-                pass
+                try:
+                    right = float(right)
+                except:
+                    pass
 
-            try:
-                right = right * multiplier + modifier
-            except:
-                pass
+                try:
+                    right = right * multiplier + modifier
+                except:
+                    pass
 
-        if sign == 'greater':
-            return left > right
-        if sign == 'less':
-            return left < right
-        if sign == 'greater_or_equal':
-            return left >= right
-        if sign == 'less_or_equal':
-            return left <= right
-        if sign == 'equal':
-            return left == right
-        if sign == 'not_equal':
-            return left != right
-        if sign == 'contains':
-            return right in left
+                conditions.append((left, right, sign))
+
+        for left, right, sign in conditions:
+            if sign == 'greater':
+                return left > right
+            if sign == 'less':
+                return left < right
+            if sign == 'greater_or_equal':
+                return left >= right
+            if sign == 'less_or_equal':
+                return left <= right
+            if sign == 'equal':
+                return left == right
+            if sign == 'not_equal':
+                return left != right
+            if sign == 'contains':
+                return right in left
 
         return False
 
