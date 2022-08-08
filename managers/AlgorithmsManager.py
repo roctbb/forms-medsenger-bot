@@ -299,7 +299,7 @@ class AlgorithmsManager(Manager):
                     pass
 
                 conditions.append((leftc, rightc, sign))
-        print(conditions)
+
         for left, right, sign in conditions:
             if sign == 'greater':
                 return left > right
@@ -322,8 +322,6 @@ class AlgorithmsManager(Manager):
                        is_init=False):
         category_name = criteria.get('category')
         mode = criteria.get('left_mode')
-
-        print(criteria)
 
         if mode == 'step_init':
             return False
@@ -378,7 +376,6 @@ class AlgorithmsManager(Manager):
                                                           dimension=dimension, times=criteria.get('right_times'),
                                                           offset_dim=offset_dim, offset_count=offset_count,
                                                           algorithm=algorithm)
-            print(right_values, left_values)
             if not right_values or not left_values:
                 return False
             found = False
@@ -413,7 +410,6 @@ class AlgorithmsManager(Manager):
 
                     if result:
                         found = True
-            print(found)
             return found
 
         else:
@@ -760,8 +756,6 @@ class AlgorithmsManager(Manager):
                     map(lambda x: self.check_criteria(x, contract.id, additions, descriptions, category_names,
                                                       algorithm=algorithm), block)))
                 for block in criteria])
-
-            print(descriptions)
 
             if result:
                 if not condition.get('skip_additions'):
