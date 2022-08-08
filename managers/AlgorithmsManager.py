@@ -72,14 +72,16 @@ class AlgorithmsManager(Manager):
                                     criteria['value'] = setup.get(criteria['value_code'])
                 if setup.get('algorithm_{}_attach_date'.format(template_id)):
                     try:
-                        new_algorithm.attach_date = datetime.strptime(setup.get('algorithm_{}_attach_date'.format(template_id)),
-                                                                      '%Y-%m-%d')
+                        new_algorithm.attach_date = datetime.strptime(
+                            setup.get('algorithm_{}_attach_date'.format(template_id)),
+                            '%Y-%m-%d')
                     except:
                         pass
                 if setup.get('algorithm_{}_detach_date'.format(template_id)):
                     try:
-                        new_algorithm.detach_date = datetime.strptime(setup.get('algorithm_{}_detach_date'.format(template_id)),
-                                                                      '%Y-%m-%d')
+                        new_algorithm.detach_date = datetime.strptime(
+                            setup.get('algorithm_{}_detach_date'.format(template_id)),
+                            '%Y-%m-%d')
                     except:
                         pass
 
@@ -87,8 +89,8 @@ class AlgorithmsManager(Manager):
             self.__commit__()
             self.db.session.refresh(new_algorithm)
 
-            self.check_inits(new_algorithm, contract)
             self.change_step(new_algorithm, new_algorithm.initial_step)
+            self.check_inits(new_algorithm, contract)
             self.check_init_timeouts(new_algorithm, contract)
 
             self.__commit__()
@@ -235,7 +237,9 @@ class AlgorithmsManager(Manager):
 
         if not values:
             answer = None, None
-        elif mode == 'value' and (time.time() - int(answer['values'][0].get('timestamp')) > 60 * 60 * 12 or time.time() - int(answer['values'][0].get('uploaded')) > 10):
+        elif mode == 'value' and (
+            time.time() - int(answer['values'][0].get('timestamp')) > 60 * 60 * 12 or time.time() - int(
+            answer['values'][0].get('uploaded')) > 10):
             answer = None, None
         elif mode == 'value' or mode == 'category_value':
             answer = values, objects
@@ -273,7 +277,7 @@ class AlgorithmsManager(Manager):
         if "date_" in sign:
             for modifier in modifiers:
                 leftc = datetime.strptime(left, '%Y-%m-%d').date()
-                rightc= (datetime.strptime(right, '%Y-%m-%d') + timedelta(days=modifier)).date()
+                rightc = (datetime.strptime(right, '%Y-%m-%d') + timedelta(days=modifier)).date()
                 signc = sign.replace('date_', '')
 
                 conditions.append((leftc, rightc, signc))
@@ -314,12 +318,16 @@ class AlgorithmsManager(Manager):
 
         return False
 
-    def check_criteria(self, criteria, contract_id, buffer, descriptions, category_names, algorithm=None, contract=None):
+    def check_criteria(self, criteria, contract_id, buffer, descriptions, category_names, algorithm=None, contract=None,
+                       is_init=False):
         category_name = criteria.get('category')
         mode = criteria.get('left_mode')
 
-        if mode in ['init', 'step_init']:
+        if mode == 'step_init':
             return False
+
+        if mode == 'init':
+            return is_init
 
         if mode != 'time':
             objects = None
@@ -330,7 +338,8 @@ class AlgorithmsManager(Manager):
             if dimension == 'hours':
                 left_values, objects = self.get_values(category_name, criteria['left_mode'], contract_id, dimension,
                                                        hours=criteria.get('left_hours'),
-                                                       offset_dim=offset_dim, offset_count=offset_count, algorithm=algorithm)
+                                                       offset_dim=offset_dim, offset_count=offset_count,
+                                                       algorithm=algorithm)
             else:
                 left_values, objects = self.get_values(category_name, criteria['left_mode'], contract_id, dimension,
                                                        times=criteria.get('left_times'), offset_dim=offset_dim,
@@ -349,20 +358,24 @@ class AlgorithmsManager(Manager):
                         right_values, _ = self.get_values(right_category, criteria['right_mode'], contract_id,
                                                           dimension,
                                                           hours=criteria.get('right_hours'),
-                                                          offset_dim=offset_dim, offset_count=offset_count, algorithm=algorithm)
+                                                          offset_dim=offset_dim, offset_count=offset_count,
+                                                          algorithm=algorithm)
                     else:
                         right_values, _ = self.get_values(right_category, criteria['right_mode'], contract_id,
                                                           dimension=dimension, times=criteria.get('right_times'),
-                                                          offset_dim=offset_dim, offset_count=offset_count, algorithm=algorithm)
+                                                          offset_dim=offset_dim, offset_count=offset_count,
+                                                          algorithm=algorithm)
                 else:
                     if dimension == 'hours':
                         right_values, _ = self.get_values(category_name, criteria['right_mode'], contract_id,
                                                           dimension=dimension, hours=criteria.get('right_hours'),
-                                                          offset_dim=offset_dim, offset_count=offset_count, algorithm=algorithm)
+                                                          offset_dim=offset_dim, offset_count=offset_count,
+                                                          algorithm=algorithm)
                     else:
                         right_values, _ = self.get_values(category_name, criteria['right_mode'], contract_id,
                                                           dimension=dimension, times=criteria.get('right_times'),
-                                                          offset_dim=offset_dim, offset_count=offset_count, algorithm=algorithm)
+                                                          offset_dim=offset_dim, offset_count=offset_count,
+                                                          algorithm=algorithm)
 
             if not right_values or not left_values:
                 return False
@@ -384,7 +397,8 @@ class AlgorithmsManager(Manager):
                         if objects:
                             current_answer = objects[i]
 
-                        description = generate_event_description(criteria, lvalue, rvalue, category_names, current_answer)
+                        description = generate_event_description(criteria, lvalue, rvalue, category_names,
+                                                                 current_answer)
 
                         if not criteria.get('hide_in_description'):
                             descriptions.append(description)
@@ -405,7 +419,8 @@ class AlgorithmsManager(Manager):
             add_hours = criteria.get('right_hours')
             sign = criteria.get('sign')
 
-            date_obj = localize(datetime.strptime(date, '%Y-%m-%d'), algorithm.contract.timezone) + timedelta(hours=add_hours)
+            date_obj = localize(datetime.strptime(date, '%Y-%m-%d'), algorithm.contract.timezone) + timedelta(
+                hours=add_hours)
             now_obj = timezone_now(algorithm.contract.timezone)
 
             if sign == 'equal' and 0 <= (now_obj - date_obj).total_seconds() < 60 * 60:
@@ -474,7 +489,8 @@ class AlgorithmsManager(Manager):
                     else:
                         fname = link.split("/")[-1]
                     has_message_to_patient = True
-                    self.medsenger_api.send_message(contract.id, text, only_patient=True, attachments=[medsenger_api.prepare_binary(fname, answer.content)])
+                    self.medsenger_api.send_message(contract.id, text, only_patient=True,
+                                                    attachments=[medsenger_api.prepare_binary(fname, answer.content)])
 
                 except Exception as e:
                     log(e, False)
@@ -522,7 +538,8 @@ class AlgorithmsManager(Manager):
             if is_warning:
                 is_urgent = "warning"
 
-            self.medsenger_api.send_message(contract.id, fullfill_message(action['params']['text'] + report, contract, self.medsenger_api),
+            self.medsenger_api.send_message(contract.id, fullfill_message(action['params']['text'] + report, contract,
+                                                                          self.medsenger_api),
                                             only_doctor=True, action_name=action_name, action_link=action_link,
                                             is_urgent=is_urgent,
                                             need_answer=action['params'].get('need_answer'),
@@ -841,7 +858,9 @@ class AlgorithmsManager(Manager):
         patient = contract.patient
 
         algorithms = list(
-            filter(lambda algorithm: any(map(lambda cat: cat in algorithm.categories.split('|'), category_names.split('|'))), patient.algorithms))
+            filter(lambda algorithm: any(
+                map(lambda cat: cat in algorithm.categories.split('|'), category_names.split('|'))),
+                   patient.algorithms))
 
         for algorithm in algorithms:
             self.run(algorithm)
@@ -849,17 +868,21 @@ class AlgorithmsManager(Manager):
         return True
 
     def check_inits(self, algorithm, contract):
-        if algorithm.common_conditions:
-            for condition in algorithm.common_conditions:
-                if any(
-                    any(criteria['category'] == 'init' for criteria in block) for block in condition['criteria']):
-                    for action in condition['positive_actions']:
-                        self.run_action(action, contract, [], algorithm)
+        category_names = {category['name']: category['description'] for category in
+                          self.medsenger_api.get_categories()}
 
-        for step in algorithm.steps:
-            for condition in step['conditions']:
-                if any(
-                    any(criteria['category'] == 'init' for criteria in block) for block in condition['criteria']):
+        if not algorithm.common_conditions:
+            algorithm.common_conditions = []
+
+        for condition in algorithm.common_conditions + self.get_step(algorithm):
+            if any(any(criteria['category'] == 'init' for criteria in block) for block in condition['criteria']):
+
+                result = any([all(
+                    list(
+                        map(lambda x: self.check_criteria(x, contract.id, [], [], category_names,
+                                                          algorithm=algorithm), block))) for block in condition])
+
+                if result:
                     for action in condition['positive_actions']:
                         self.run_action(action, contract, [], algorithm)
 
@@ -929,14 +952,12 @@ class AlgorithmsManager(Manager):
                                                                          algorithm.title), params=params)
 
             if algorithm.contract_id == contract.id:
-
-                self.check_inits(algorithm, contract)
-                self.check_init_timeouts(algorithm, contract)
-
                 if not algorithm.current_step:
                     algorithm.current_step = data.get('steps')[0].get('uid')
                     self.change_step(algorithm, algorithm.initial_step)
 
+                self.check_inits(algorithm, contract)
+                self.check_init_timeouts(algorithm, contract)
                 self.update_categories(algorithm)
 
                 self.__commit__()
