@@ -263,7 +263,7 @@ class AlgorithmsManager(Manager):
 
     def check_values(self, left, right, sign, modifier=0, multiplier=1):
         modifiers = []
-        print(left, right, sign, modifier)
+
         try:
             if isinstance(modifier, str) and "|" in modifier:
                 modifiers = list(map(float, modifier.split('|')))
@@ -299,7 +299,7 @@ class AlgorithmsManager(Manager):
                     pass
 
                 conditions.append((leftc, rightc, sign))
-        print(conditions)
+
         for left, right, sign in conditions:
             if sign == 'greater':
                 return left > right
