@@ -299,7 +299,7 @@ class AlgorithmsManager(Manager):
                     pass
 
                 conditions.append((leftc, rightc, sign))
-
+        print(conditions)
         for left, right, sign in conditions:
             if sign == 'greater':
                 return left > right
