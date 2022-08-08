@@ -96,7 +96,7 @@ def init(data):
 
                     if record_transformer == "week_to_date":
                         value = int(value)
-                        value = (datetime.now() - timedelta(days=min(0, (value - 1) * 7) + 3)).strftime('%Y-%m-%d')
+                        value = (datetime.now() - timedelta(days=((value - 1) * 7 + 3))).strftime('%Y-%m-%d')
 
                 medsenger_api.add_record(contract_id, record_category, value)
 
