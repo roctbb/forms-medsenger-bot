@@ -70,11 +70,11 @@ def verify_json(func):
         if request.json.get('api_key') != API_KEY:
             abort(401)
         # return func(request.json, *args, **kargs)
-        #try:
-        return func(request.json, *args, **kargs)
-        #except Exception as e:
-        #    log(e, True)
-        #    abort(500)
+        try:
+            return func(request.json, *args, **kargs)
+        except Exception as e:
+            log(e, True)
+            abort(500)
 
     wrapper.__name__ = func.__name__
     return wrapper

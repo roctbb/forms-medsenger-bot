@@ -877,14 +877,14 @@ class AlgorithmsManager(Manager):
         for condition in algorithm.common_conditions + self.get_step(algorithm).get('conditions', []):
             if any(any(criteria['category'] == 'init' for criteria in block) for block in condition['criteria']):
 
-                result = any([all(
-                    list(
-                        map(lambda x: self.check_criteria(x, contract.id, [], [], category_names,
-                                                          algorithm=algorithm), block))) for block in condition])
+                #result = any([all(
+                #    list(
+                #        map(lambda x: self.check_criteria(x, contract.id, [], [], category_names,
+                #                                          algorithm=algorithm), block))) for block in condition])
 
-                if result:
-                    for action in condition['positive_actions']:
-                        self.run_action(action, contract, [], algorithm)
+                #if result:
+                for action in condition['positive_actions']:
+                    self.run_action(action, contract, [], algorithm)
 
     def check_init_timeouts(self, algorithm, contract):
         if algorithm.common_conditions:
