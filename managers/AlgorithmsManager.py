@@ -323,6 +323,8 @@ class AlgorithmsManager(Manager):
         category_name = criteria.get('category')
         mode = criteria.get('left_mode')
 
+        print(criteria)
+
         if mode == 'step_init':
             return False
 
@@ -376,7 +378,7 @@ class AlgorithmsManager(Manager):
                                                           dimension=dimension, times=criteria.get('right_times'),
                                                           offset_dim=offset_dim, offset_count=offset_count,
                                                           algorithm=algorithm)
-
+            print(right_values, left_values)
             if not right_values or not left_values:
                 return False
             found = False
@@ -411,7 +413,7 @@ class AlgorithmsManager(Manager):
 
                     if result:
                         found = True
-
+            print(found)
             return found
 
         else:
