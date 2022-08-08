@@ -880,7 +880,7 @@ class AlgorithmsManager(Manager):
                 result = any([all(
                     list(
                         map(lambda x: self.check_criteria(x, contract.id, [], [], category_names,
-                                                          algorithm=algorithm), block))) for block in
+                                                          algorithm=algorithm, is_init=True), block))) for block in
                     condition['criteria']])
 
                 if result:
