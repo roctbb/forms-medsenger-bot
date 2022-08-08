@@ -874,8 +874,9 @@ class AlgorithmsManager(Manager):
         if not algorithm.common_conditions:
             algorithm.common_conditions = []
 
-        print(self.get_step(algorithm))
+        print(self.get_step(algorithm), type(self.get_step(algorithm)))
         for condition in algorithm.common_conditions + self.get_step(algorithm).get('conditions', []):
+            print("here")
             if any(any(criteria['category'] == 'init' for criteria in block) for block in condition['criteria']):
 
                 result = any([all(
