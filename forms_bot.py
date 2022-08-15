@@ -83,6 +83,26 @@ def init(data):
     params = data.get('params')
 
     if params:
+        custom_records = filter(lambda x: "record_" in x and params.get(x), params.keys())
+        for record_selector in custom_records:
+            parts = record_selector.lstrip("record_").split('|')
+
+            try:
+                record_category = parts[0]
+                value = params.get(record_selector)
+
+                if len(parts) == 2:
+                    record_transformer = parts[1]
+
+                    if record_transformer == "week_to_date":
+                        value = int(value)
+                        value = (datetime.now() - timedelta(days=((value - 1) * 7 + 3))).strftime('%Y-%m-%d')
+
+                medsenger_api.add_record(contract_id, record_category, value)
+
+            except Exception as e:
+                log(e)
+
         forms = params.get('forms')
         exclude_algorithms = params.get('exclude_algorithms', "").split(',')
 
@@ -153,28 +173,6 @@ def init(data):
                 algorithm_manager.attach(algorithm_id, contract)
             except Exception as e:
                 print(e)
-
-        custom_records = filter(lambda x: "record_" in x and params.get(x), params.keys())
-
-        for record_selector in custom_records:
-            parts = record_selector.lstrip("record_").split('|')
-
-            try:
-                record_category = parts[0]
-                value = params.get(record_selector)
-
-                if len(parts) == 2:
-                    record_transformer = parts[1]
-
-                    if record_transformer == "week_to_date":
-                        value = int(value)
-                        value = (datetime.now() - timedelta(days=min(0, (value - 1) * 7) + 3)).strftime('%Y-%m-%d')
-
-
-                medsenger_api.add_record(contract_id, record_category, value)
-
-            except Exception as e:
-                log(e)
 
     return "ok"
 
