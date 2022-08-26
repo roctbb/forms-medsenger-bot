@@ -174,7 +174,7 @@ class FormManager(Manager):
                 for group in integral_result['params']['group_scores'].keys():
                     text += '<li>{} - {}</li>'.format(group, integral_result['params']['group_scores'][group])
                 text += '</ul>'
-            elif integral_result['params']['group_scores']:
+            elif integral_result['params'].get('group_scores'):
                 text += '<br><ul>'
                 for group in integral_result['params']['group_scores'].keys():
                     text += '<li>{} - {}</li>'.format(group, integral_result['params']['group_scores'][group])
@@ -350,8 +350,8 @@ class FormManager(Manager):
         if form.instant_report:
             self.__instant_report__(contract_id, form, report)
 
-        if form.has_integral_evaluation:
-            integral_result = None if integral_result is None else {'result': integral_result, 'params': custom_params}
+        if form.has_integral_evaluation and integral_result:
+            integral_result = {'result': integral_result, 'params': custom_params}
             self.__integral_result_report__(contract_id, form, integral_result)
 
         result = bool(self.medsenger_api.add_records(contract_id, packet, params=params))
@@ -416,9 +416,6 @@ class FormManager(Manager):
                 return result, action_name, custom_params
             except Exception as e:
                 log(e)
-
-        if score == 0:
-            return result, action_name, custom_params
 
         score += form.integral_evaluation['offset']
 
