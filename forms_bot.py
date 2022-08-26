@@ -1,3 +1,4 @@
+
 from manage import *
 from managers.AlgorithmsManager import AlgorithmsManager
 from managers.ContractsManager import ContractManager
@@ -82,6 +83,26 @@ def init(data):
     params = data.get('params')
 
     if params:
+        custom_records = filter(lambda x: "record_" in x and params.get(x), params.keys())
+        for record_selector in custom_records:
+            parts = record_selector.lstrip("record_").split('|')
+
+            try:
+                record_category = parts[0]
+                value = params.get(record_selector)
+
+                if len(parts) == 2:
+                    record_transformer = parts[1]
+
+                    if record_transformer == "week_to_date":
+                        value = int(value)
+                        value = (datetime.now() - timedelta(days=((value - 1) * 7 + 3))).strftime('%Y-%m-%d')
+
+                medsenger_api.add_record(contract_id, record_category, value)
+
+            except Exception as e:
+                log(e)
+
         forms = params.get('forms')
         exclude_algorithms = params.get('exclude_algorithms', "").split(',')
 
@@ -217,6 +238,7 @@ def compliance(data):
     contract = contract_manager.get(data.get('contract_id'))
     sent, done = contract.patient.count_week_compliance()
     return jsonify({"sent": sent, "done": done})
+
 
 @app.route('/message', methods=['POST'])
 @verify_json
