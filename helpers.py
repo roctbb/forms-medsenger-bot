@@ -258,6 +258,7 @@ def fullfill_message(text, contract, medsenger_api):
         'PATIENT_NAME': 'name',
         'DOCTOR_NAME': 'doctor_name',
         'SCENARIO_NAME': 'scenario.name',
+        'DOCTOR_PHONE': 'doctor_phone'
     }
 
     info = None
