@@ -7,7 +7,7 @@
             <div class="card-body">
 
                 <div v-for="(field, i) in block"
-                     v-if="!field.show_if || answers[field.show_if] || field.show_if.uid  && answers[field.show_if.uid] == field.show_if.ans">
+                     v-if="show_field(field)">
                     <h5 v-if="field.type == 'header' && field.text">{{ field.text }}</h5>
                     <p v-html="br(field.description)" v-if="field.type == 'header' && field.description"></p>
 
@@ -173,9 +173,7 @@ export default {
                 }
 
                 if (field.show_if) {
-                    if (typeof (field.show_if) == 'string' && !this.answers[field.show_if]) {
-                        this.answers[field.uid] = undefined;
-                    } else if (typeof (field.show_if) == 'object' && this.answers[field.show_if.uid] != field.show_if.ans) {
+                    if (!this.show_field(field)) {
                         this.answers[field.uid] = undefined;
                     }
                 }
@@ -245,6 +243,20 @@ export default {
                     this.answers[field.uid] /= 10;
                 }
             }
+        },
+        show_field: function (field) {
+            if (field.show_if) {
+                if (this.answers[field.show_if] || field.show_if.uid  && this.answers[field.show_if.uid] == field.show_if.ans) {
+                    let f = this.form.fields.filter(f => {
+                        return field.show_if.uid && f.uid == field.show_if.uid ||
+                            field.show_if == f.uid
+                    })[0]
+                    return this.show_field(f)
+                }
+                return false
+            }
+            return true
+
         }
     },
     created() {
