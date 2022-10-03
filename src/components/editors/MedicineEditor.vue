@@ -6,9 +6,21 @@
             <div class="col-lg-6">
                 <card title="Описание лекарства">
                     <form-group48 title="Название">
+                        <vue-autosuggest
+                            class="form-control form-control-sm"
+                            :class="this.save_clicked && !medicine.title ? 'is-invalid' : ''"
+                            v-model="medicine.title"
+                            :suggestions="filteredOptions"
+                            :input-props="{class: 'form-control form-control-sm'}"
+                        >
+                            <div slot-scope="{suggestion}" style="display: flex; align-items: center;">
+                                <div>{{suggestion.item.title}}</div>
+                            </div>
+                        </vue-autosuggest>
+
                         <input class="form-control form-control-sm"
                                :class="this.save_clicked && !medicine.title ? 'is-invalid' : ''"
-                               v-model="medicine.title"/>
+                               v-model="medicine.title" @input=""/>
                     </form-group48>
 
                     <form-group48 title="Дозировка">
@@ -63,10 +75,11 @@ import FormGroup48 from "../common/FormGroup-4-8";
 import TimetableEditor from "./parts/TimetableEditor";
 import ErrorBlock from "../common/ErrorBlock";
 import * as moment from "moment/moment";
+import { VueAutosuggest } from 'vue-autosuggest';
 
 export default {
     name: "MedicineEditor",
-    components: {TimetableEditor, FormGroup48, Card, ErrorBlock},
+    components: {TimetableEditor, FormGroup48, Card, ErrorBlock, VueAutosuggest},
     props: {
         data: {
             required: false,
@@ -75,9 +88,28 @@ export default {
             required: false
         }
     },
+    computed: {
+        filteredOptions: function () {
+            return [
+                {
+                    data: this.suggestions.filter(option => {
+                        return option.name.toLowerCase().indexOf(this.query.toLowerCase()) > -1;
+                    })
+                }
+            ];
+        }
+    },
     methods: {
+        loadSuggetions: function () {
+            this.axios.get(this.url('/api/medicine-template'))
+                .then(response => {
+                    this.suggestions = response.data;
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        },
         go_back: function () {
-
             this.$confirm({
                 message: `Вы уверены? Внесенные изменения будут утеряны!`,
                 button: {
@@ -187,7 +219,8 @@ export default {
             backup: "",
             save_clicked: false,
             timetable_save_clicked: [false],
-            show_button: false
+            show_button: false,
+            suggestions: []
         }
     },
     created() {
@@ -195,6 +228,8 @@ export default {
         this.backup = JSON.stringify(this.medicine)
     },
     mounted() {
+        this.loadSuggetions()
+
         Event.listen('attach-medicine', (medicine) => {
             this.medicine = {}
             this.copy(this.medicine, medicine)

@@ -539,3 +539,20 @@ class Reminder(db.Model):
             new_reminder.template_id = self.template_id
 
         return new_reminder
+
+
+class MedicineClinicTemplate(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    clinic_id = db.Column(db.Integer, nullable=True)
+
+    title = db.Column(db.String(255), nullable=True)
+    rules = db.Column(db.Text, nullable=True)
+
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "clinic_id": self.clinic_id,
+            "title": self.title,
+            "rules": self.rules
+        }

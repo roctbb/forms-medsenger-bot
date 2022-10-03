@@ -6,6 +6,7 @@ from managers.FormManager import FormManager
 from managers.MedicineManager import MedicineManager
 from managers.ReminderManager import ReminderManager
 from managers.TimetableManager import TimetableManager
+from managers.MedicineTemplateManager import MedicineTemplateManager
 from medsenger_api import AgentApiClient
 from helpers import *
 from models import Form, Algorithm
@@ -17,6 +18,7 @@ medicine_manager = MedicineManager(medsenger_api, db)
 reminder_manager = ReminderManager(medsenger_api, db)
 timetable_manager = TimetableManager(medicine_manager, form_manager, reminder_manager, medsenger_api, db)
 algorithm_manager = AlgorithmsManager(medsenger_api, db)
+medicine_template_manager = MedicineTemplateManager(medsenger_api, db)
 
 
 @app.route('/')
@@ -666,6 +668,15 @@ def post_medicines(args, form):
             medsenger_api.finish_task(contract.id, contract.tasks['medicine-{}'.format(data['medicine'])])
 
     return get_ui('done', contract, [])
+
+
+@app.route('/api/medicine-template', methods=['GET'])
+@verify_args
+def get_medicine_template(args, form):
+    contract_id = int(args.get('contract_id'))
+    contract = contract_manager.get(contract_id)
+    medicines = medicine_template_manager.get_clinic_templates(contract.clinic_id)
+    return jsonify(medicines)
 
 
 with app.app_context():
