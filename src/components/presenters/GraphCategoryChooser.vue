@@ -54,6 +54,10 @@ export default {
         {
           "title": "Глюкоза",
           "categories": ['glukose', 'glukose_fasting'],
+        },
+        {
+          "title": "Спортивная форма",
+          "categories": ['appetite', 'readiness_for_training', 'performance', 'mood', 'sleep', 'health'],
         }
       ],
       heatmaps: [
