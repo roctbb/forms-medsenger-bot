@@ -541,7 +541,7 @@ class Reminder(db.Model):
         return new_reminder
 
 
-class MedicineClinicTemplate(db.Model):
+class MedicineTemplate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     clinic_id = db.Column(db.Integer, nullable=True)
