@@ -6,7 +6,7 @@
             <div class="col-lg-6">
                 <card title="Описание лекарства">
                     <form-group48 title="Название">
-                        <vue-bootstrap-typeahead
+                        <vue-typeahead-bootstrap
                             :inputClass="this.save_clicked && !medicine.title ? 'is-invalid form-control form-control-sm' : 'form-control form-control-sm'"
                             v-model="medicine.title" ref="typeahead"
                             :data="suggestions" :serializer="s => s.title" @hit="medicine = { ...$event} "/>
@@ -64,11 +64,11 @@ import FormGroup48 from "../common/FormGroup-4-8";
 import TimetableEditor from "./parts/TimetableEditor";
 import ErrorBlock from "../common/ErrorBlock";
 import * as moment from "moment/moment";
-import VueBootstrapTypeahead from 'vue-bootstrap-typeahead'
+import VueTypeaheadBootstrap from 'vue-typeahead-bootstrap';
 
 export default {
     name: "MedicineEditor",
-    components: {VueBootstrapTypeahead, TimetableEditor, FormGroup48, Card, ErrorBlock},
+    components: {VueTypeaheadBootstrap, TimetableEditor, FormGroup48, Card, ErrorBlock},
     props: {
         data: {
             required: false,
@@ -203,7 +203,7 @@ export default {
         }
     },
     created() {
-        this.medicine = undefined;
+        this.medicine = this.create_empty_medicine();
         this.backup = JSON.stringify(this.medicine)
     },
     mounted() {
