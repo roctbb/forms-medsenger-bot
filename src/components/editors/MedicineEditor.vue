@@ -9,8 +9,8 @@
                     <form-group48 title="Название">
                         <vue-bootstrap-typeahead
                             :inputClass="this.save_clicked && !medicine.title ? 'is-invalid form-control form-control-sm' : 'form-control form-control-sm'"
-                 
-                            :data="suggestions" :serializer="s => s.title" @input="medicine.title = $event" @hit="medicine = { ...$event} "/>
+                            v-model="medicine.title"
+                            :data="suggestions" :serializer="s => s.title" @hit="medicine = { ...$event} "/>
                     </form-group48>
 
                     <form-group48 title="Дозировка">
@@ -109,6 +109,7 @@ export default {
         },
         create_empty_medicine: function () {
             return {
+                title: "",
                 timetable: {
                     mode: 'manual',
                     points: []
