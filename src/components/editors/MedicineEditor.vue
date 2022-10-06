@@ -75,14 +75,19 @@ export default {
         },
         patient: {
             required: false
-        },
-        templates: {
-            required: false
         }
     },
     methods: {
+        loadSuggetions: function () {
+            this.axios.get(this.url('/api/medicine-template'))
+                .then(response => {
+                    this.suggestions = response.data;
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        },
         go_back: function () {
-
             this.$confirm({
                 message: `Вы уверены? Внесенные изменения будут утеряны!`,
                 button: {
@@ -192,7 +197,8 @@ export default {
             backup: "",
             save_clicked: false,
             timetable_save_clicked: [false],
-            show_button: false
+            show_button: false,
+            suggestions: []
         }
     },
     created() {
@@ -200,6 +206,8 @@ export default {
         this.backup = JSON.stringify(this.medicine)
     },
     mounted() {
+        this.loadSuggetions()
+
         Event.listen('attach-medicine', (medicine) => {
             this.medicine = {}
             this.copy(this.medicine, medicine)
