@@ -9,7 +9,7 @@
                         <vue-bootstrap-typeahead
                             :inputClass="this.save_clicked && !medicine.title ? 'is-invalid form-control form-control-sm' : 'form-control form-control-sm'"
                             v-model="medicine.title"
-                            :data="suggestions" :serializer="s => s.title" @hit="medicine = { ...$event} "/>
+                            :data="suggestions" :serializer="s => s.title" @input="medicine.title = $event" @hit="medicine = { ...$event} "/>
                     </form-group48>
 
                     <form-group48 title="Дозировка">
@@ -118,7 +118,7 @@ export default {
         check: function () {
             this.errors = [];
             if (this.empty(this.medicine.title)) {
-                this.errors.push('Укажите название опросника')
+                this.errors.push('Укажите название лекарства')
             }
 
             this.medicine.warning_days = parseInt(this.medicine.warning_days)
