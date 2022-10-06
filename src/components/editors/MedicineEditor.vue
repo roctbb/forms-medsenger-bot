@@ -2,6 +2,7 @@
     <div v-if="medicine">
         <h5>Назначить новое лекарство</h5>
         <error-block :errors="errors"/>
+{{ medicine }}
         <div class="form row">
             <div class="col-lg-6">
                 <card title="Описание лекарства">
