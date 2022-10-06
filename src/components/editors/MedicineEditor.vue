@@ -9,7 +9,7 @@
                         <vue-bootstrap-typeahead
                             :inputClass="this.save_clicked && !medicine.title ? 'is-invalid form-control form-control-sm' : 'form-control form-control-sm'"
                             v-model="medicine.title"
-                            :data="templates" :serializer="s => s.title" @hit="medicine = { ...$event} "/>
+                            :data="suggestions" :serializer="s => s.title" @hit="medicine = { ...$event} "/>
                     </form-group48>
 
                     <form-group48 title="Дозировка">

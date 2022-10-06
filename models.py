@@ -548,11 +548,13 @@ class MedicineTemplate(db.Model):
 
     title = db.Column(db.String(255), nullable=True)
     rules = db.Column(db.Text, nullable=True)
+    dose = db.Column(db.Text, nullable=True)
 
     def as_dict(self):
         return {
             "id": self.id,
             "clinic_id": self.clinic_id,
             "title": self.title,
-            "rules": self.rules
+            "rules": self.rules,
+            "dose": self.dose
         }

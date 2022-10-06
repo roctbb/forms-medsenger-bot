@@ -8,4 +8,4 @@ class MedicineTemplateManager(Manager):
 
     def get_clinic_templates(self, clinic_id):
         medicines = MedicineTemplate.query.filter_by(clinic_id=clinic_id).all()
-        return [medicine.to_dict() for medicine in medicines]
+        return [medicine.as_dict() for medicine in medicines]
