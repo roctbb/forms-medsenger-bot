@@ -8,7 +8,7 @@
                     <form-group48 title="Название">
                         <vue-bootstrap-typeahead
                             :inputClass="this.save_clicked && !medicine.title ? 'is-invalid form-control form-control-sm' : 'form-control form-control-sm'"
-                            v-model="medicine.title"
+                            v-model="medicine.title" ref="typeahead"
                             :data="suggestions" :serializer="s => s.title" @hit="medicine = { ...$event} "/>
                     </form-group48>
 
@@ -215,6 +215,8 @@ export default {
             this.medicine.id = undefined
             this.medicine.is_template = false;
             this.medicine.template_id = medicine.id;
+            this.$refs.typeahead.inputValue = medicine.title;
+
             this.save()
         });
 
@@ -239,6 +241,7 @@ export default {
         Event.listen('navigate-to-edit-medicine-page', medicine => {
             this.show_button = true
             this.medicine = medicine
+            this.$refs.typeahead.inputValue = medicine.title;
 
             if (this.medicine.warning_days > 0) {
                 this.medicine.warning_enabled = true;
