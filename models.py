@@ -553,7 +553,6 @@ class MedicineTemplate(db.Model):
 
     def as_dict(self):
         return {
-            "id": self.id,
             "clinic_id": self.clinic_id,
             "title": self.title,
             "rules": self.rules,
