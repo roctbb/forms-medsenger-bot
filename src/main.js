@@ -168,7 +168,11 @@ Vue.mixin({
         },
         copy: function (to, from) {
             Object.keys(from).forEach(k => {
-                to[k] = from[k]
+                if (typeof to[k] === 'object' && to[k] !== null && typeof from[k] === 'object' && from[k] !== null) {
+                    this.copy(to[k], from[k])
+                } else {
+                    to[k] = from[k]
+                }
             })
         },
         tt_description: function (timetable) {
