@@ -169,8 +169,10 @@ Vue.mixin({
         copy: function (to, from) {
             Object.keys(from).forEach(k => {
                 if (typeof to[k] === 'object' && to[k] !== null && typeof from[k] === 'object' && from[k] !== null) {
+                    console.log("copy ", k, " as object")
                     this.copy(to[k], from[k])
                 } else {
+                    console.log("copy ", k, " as value")
                     to[k] = from[k]
                 }
             })

@@ -556,6 +556,5 @@ class MedicineTemplate(db.Model):
             "clinic_id": self.clinic_id,
             "title": self.title,
             "rules": self.rules,
-            "dose": self.dose,
-            "timetable": self.timetable
+            "dose": self.dose
         }

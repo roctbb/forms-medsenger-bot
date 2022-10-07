@@ -9,7 +9,7 @@
                         <vue-typeahead-bootstrap
                             :inputClass="this.save_clicked && !medicine.title ? 'is-invalid form-control form-control-sm' : 'form-control form-control-sm'"
                             v-model="medicine.title" ref="typeahead"
-                            :data="suggestions" :serializer="s => s.title" @hit="copy(medicine, $event) "/>
+                            :data="suggestions" :serializer="s => s.title" @hit="medicine.title = $event.title; medicine.dose = $event.dose; medicine.rules = $event.rules; $forceUpdate()"/>
                     </form-group48>
 
                     <form-group48 title="Дозировка">
@@ -110,8 +110,8 @@ export default {
             return {
                 title: "",
                 timetable: {
-                    mode: 'manual',
-                    points: []
+                    mode: 'daily',
+                    points: [{'hour': '', 'minute': 0}]
                 }
             };
         },
@@ -203,8 +203,7 @@ export default {
         }
     },
     created() {
-        this.medicine = this.create_empty_medicine();
-        this.backup = JSON.stringify(this.medicine)
+        this.medicine = undefined;
     },
     mounted() {
         this.loadSuggetions()
@@ -216,6 +215,7 @@ export default {
             this.medicine.is_template = false;
             this.medicine.template_id = medicine.id;
             this.$refs.typeahead.inputValue = medicine.title;
+            this.backup = JSON.stringify(this.medicine)
 
             this.save()
         });
