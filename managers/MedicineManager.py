@@ -187,7 +187,9 @@ class MedicineManager(Manager):
 
         if result:
             medicine.last_sent = datetime.now()
-            medicine.asked_timestamp = time.time()
+
+            if not medicine.asked_timestamp:
+                medicine.asked_timestamp = time.time()
 
             if commit:
                 self.__commit__()

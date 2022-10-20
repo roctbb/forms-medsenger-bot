@@ -145,7 +145,9 @@ class FormManager(Manager):
 
         if result:
             form.last_sent = datetime.now()
-            form.asked_timestamp = time.time()
+
+            if not form.asked_timestamp:
+                form.asked_timestamp = time.time()
 
             if commit:
                 self.__commit__()
