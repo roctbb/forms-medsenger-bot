@@ -145,6 +145,7 @@ class FormManager(Manager):
 
         if result:
             form.last_sent = datetime.now()
+            form.asked_timestamp = time.time()
 
             if commit:
                 self.__commit__()
@@ -152,8 +153,8 @@ class FormManager(Manager):
         return result
 
     def check_warning(self, form):
-        if form.warning_days and form.warning_timestamp == 0:
-            if form.filled_timestamp and time.time() - form.filled_timestamp > 24 * 60 * 60 * form.warning_days:
+        if form.warning_days and form.warning_timestamp == 0 and form.asked_timestamp != 0:
+            if time.time() - form.asked_timestamp > 24 * 60 * 60 * form.warning_days:
                 form.warning_timestamp = int(time.time())
 
                 self.medsenger_api.send_message(form.contract_id,
@@ -209,6 +210,7 @@ class FormManager(Manager):
     def submit(self, answers, form_id, contract_id):
         form = Form.query.filter_by(id=form_id).first_or_404()
         form.warning_timestamp = 0
+        form.asked_timestamp = 0
         form.filled_timestamp = int(time.time())
 
         packet = []
