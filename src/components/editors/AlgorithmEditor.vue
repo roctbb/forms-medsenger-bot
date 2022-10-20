@@ -543,25 +543,29 @@ export default {
 
             if (!this.empty(this.algorithm.setup)) {
 
-                this.algorithm.steps.map(step => step.conditions.map(condition => {
-                    condition.criteria.forEach((block) => {
-                        block.forEach(c => {
-                            if (c.ask_value == true) {
-                                c.value = algorithm.setup[c.value_code]
-                            }
+                if (this.algorithm.steps && this.algorithm.steps.length != 0) {
+                    this.algorithm.steps.map(step => step.conditions.map(condition => {
+                        condition.criteria.forEach((block) => {
+                            block.forEach(c => {
+                                if (c.ask_value == true) {
+                                    c.value = algorithm.setup[c.value_code]
+                                }
+                            })
                         })
-                    })
-                }))
+                    }))
+                }
 
-                this.algorithm.common_conditions.map(condition => {
-                    condition.criteria.forEach((block) => {
-                        block.forEach(c => {
-                            if (c.ask_value == true) {
-                                c.value = algorithm.setup[c.value_code]
-                            }
+                if (this.algorithm.common_conditions && this.algorithm.common_conditions.length != 0) {
+                    this.algorithm.common_conditions.map(condition => {
+                        condition.criteria.forEach((block) => {
+                            block.forEach(c => {
+                                if (c.ask_value == true) {
+                                    c.value = algorithm.setup[c.value_code]
+                                }
+                            })
                         })
                     })
-                })
+                }
 
                 this.algorithm.setup = undefined
             }
