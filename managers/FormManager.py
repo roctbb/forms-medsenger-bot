@@ -155,7 +155,7 @@ class FormManager(Manager):
         return result
 
     def check_warning(self, form):
-        if form.warning_days and form.warning_timestamp == 0 and form.asked_timestamp != 0:
+        if form.warning_days and form.warning_timestamp == 0 and form.asked_timestamp:
             if time.time() - form.asked_timestamp > 24 * 60 * 60 * form.warning_days:
                 form.warning_timestamp = int(time.time())
 
