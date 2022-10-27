@@ -339,7 +339,6 @@
                 <div class="col-md-12"><h5>{{ name }}</h5></div>
                 <card v-for="(algorithm, i) in group" v-if="is_admin || !algorithm.clinics || algorithm.clinics.includes(clinic_id)" :key="'algorithm_' + algorithm.id" :image="images.algorithm"
                       class="col-lg-3 col-md-4">
-                    {{algorithm.clinics}} {{algorithm.clinics? algorithm.clinics.includes(clinic_id) : ''}} {{ clinic_id }}
                     <h6>{{ algorithm.title }}</h6>
                     <small>{{ algorithm.description }}</small><br>
                     <small v-html="alg_description(algorithm)"></small>
