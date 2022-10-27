@@ -329,7 +329,9 @@
             </div>
 
 
-            <div class="row" v-for="(group, name) in group_by(templates.algorithms.map((algorithms) => {
+            <div class="row" v-for="(group, name) in group_by(templates.algorithms.filter((algorithm) => {
+                return is_admin || !algorithm.clinics || algorithm.clinics.includes(clinic_id)
+            }).map((algorithms) => {
                 if (!algorithms.template_category) algorithms.template_category = 'Общее'
                 return algorithms
             }), 'template_category')">
@@ -337,6 +339,7 @@
                 <div class="col-md-12"><h5>{{ name }}</h5></div>
                 <card v-for="(algorithm, i) in group" v-if="is_admin || !algorithm.clinics || algorithm.clinics.includes(clinic_id)" :key="'algorithm_' + algorithm.id" :image="images.algorithm"
                       class="col-lg-3 col-md-4">
+                    {{algorithm.clinics}} {{algorithm.clinics? algorithm.clinics.includes(clinic_id) : ''}} {{ clinic_id }}
                     <h6>{{ algorithm.title }}</h6>
                     <small>{{ algorithm.description }}</small><br>
                     <small v-html="alg_description(algorithm)"></small>
