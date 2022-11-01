@@ -79,10 +79,10 @@ class MedicineManager(Manager):
         return medicine
 
     def check_warning(self, medicine):
-        if medicine.warning_days and medicine.warning_timestamp == 0:
-            time_from = medicine.filled_timestamp
+        if medicine.warning_days and medicine.warning_timestamp == 0 and medicine.asked_timestamp:
+            time_from = medicine.asked_timestamp
             if medicine.prescribed_at:
-                time_from = max(medicine.filled_timestamp, medicine.prescribed_at.timestamp())
+                time_from = max(medicine.asked_timestamp, medicine.prescribed_at.timestamp())
             if time.time() - time_from > 24 * 60 * 60 * medicine.warning_days:
                 medicine.warning_timestamp = int(time.time())
 
@@ -94,7 +94,10 @@ class MedicineManager(Manager):
     def submit(self, medicine_id, contract_id, params=None):
         medicine = self.get(medicine_id)
         medicine.warning_timestamp = 0
+        medicine.asked_timestamp = 0
         medicine.filled_timestamp = int(time.time())
+
+
 
         if params is None:
             params = {"medicine_id": medicine_id, 'dose': medicine.dose}
@@ -184,6 +187,9 @@ class MedicineManager(Manager):
 
         if result:
             medicine.last_sent = datetime.now()
+
+            if not medicine.asked_timestamp:
+                medicine.asked_timestamp = time.time()
 
             if commit:
                 self.__commit__()

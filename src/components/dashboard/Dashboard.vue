@@ -329,7 +329,9 @@
             </div>
 
 
-            <div class="row" v-for="(group, name) in group_by(templates.algorithms.map((algorithms) => {
+            <div class="row" v-for="(group, name) in group_by(templates.algorithms.filter((algorithm) => {
+                return is_admin || !algorithm.clinics || algorithm.clinics.includes(clinic_id)
+            }).map((algorithms) => {
                 if (!algorithms.template_category) algorithms.template_category = 'Общее'
                 return algorithms
             }), 'template_category')">

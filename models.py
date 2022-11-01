@@ -135,6 +135,7 @@ class Medicine(db.Model, Compliance):
     warning_days = db.Column(db.Integer, default=0)
     warning_timestamp = db.Column(db.Integer, default=0)
     filled_timestamp = db.Column(db.Integer, default=0)
+    asked_timestamp = db.Column(db.Integer, default=0)
 
     prescribed_at = db.Column(db.DateTime, server_default=db.func.now())
     canceled_at = db.Column(db.DateTime, nullable=True)
@@ -256,6 +257,7 @@ class Form(db.Model, Compliance):
     warning_days = db.Column(db.Integer, default=0)
     warning_timestamp = db.Column(db.Integer, default=0)
     filled_timestamp = db.Column(db.Integer, default=0)
+    asked_timestamp = db.Column(db.Integer, default=0)
 
     template_category = db.Column(db.String(512), default="Общее", nullable=True)
     instant_report = db.Column(db.Boolean, default=False, nullable=False, server_default='false')
@@ -549,10 +551,10 @@ class MedicineTemplate(db.Model):
     title = db.Column(db.String(255), nullable=True)
     rules = db.Column(db.Text, nullable=True)
     dose = db.Column(db.Text, nullable=True)
+    timetable = db.Column(db.JSON, nullable=True)
 
     def as_dict(self):
         return {
-            "id": self.id,
             "clinic_id": self.clinic_id,
             "title": self.title,
             "rules": self.rules,
