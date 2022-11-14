@@ -1,4 +1,3 @@
-
 from manage import *
 from managers.AlgorithmsManager import AlgorithmsManager
 from managers.ContractsManager import ContractManager
@@ -213,7 +212,8 @@ def actions(data):
     contract = contract_manager.get(data.get('contract_id'))
     forms = filter(lambda f: f.show_button, contract.forms)
 
-    actions = [{'link': 'form/{}'.format(form.id), 'type': 'patient', 'name': form.button_title} for form in forms]
+    actions = [{'link': 'form/{}'.format(form.id), 'type': 'patient', 'name': form.button_title, 'id': form.id} for form
+               in forms]
 
     return jsonify(actions)
 
@@ -555,7 +555,8 @@ def graph_data(args, form):
     dates = data.get('dates', None)
 
     answer = [(medsenger_api.get_records(contract_id, category_name) if dates is None
-               else medsenger_api.get_records(contract_id, category_name, time_from=dates['start'], time_to=dates['end']))
+               else medsenger_api.get_records(contract_id, category_name, time_from=dates['start'],
+                                              time_to=dates['end']))
               for category_name in group['categories']]
     answer = list(filter(lambda x: x is not None, answer))
 
