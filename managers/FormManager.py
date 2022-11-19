@@ -209,12 +209,7 @@ class FormManager(Manager):
                                             'Спасибо за заполнение опросника "{}". Ответы отправлены вашему лечащему врачу.'.format(
                                                 form.title), only_patient=True, action_deadline=deadline)
 
-    def submit(self, answers, form_id, contract_id):
-        form = Form.query.filter_by(id=form_id).first_or_404()
-        form.warning_timestamp = 0
-        form.asked_timestamp = 0
-        form.filled_timestamp = int(time.time())
-
+    def _extract_packet_and_report_from_form(self, contract_id, form, answers):
         packet = []
         report = []
 
@@ -229,7 +224,6 @@ class FormManager(Manager):
                     if field.get('params', {}).get('send_to_doctor'):
                         self.medsenger_api.send_message(contract_id, '', send_from='patient', need_answer=False,
                                                         attachments=[answers[field['uid']]])
-
                 elif field['type'] == 'radio':
                     category = field['params']['variants'][answers[field['uid']]]['category']
                     answer = field['params']['variants'][answers[field['uid']]].get('text')
@@ -249,8 +243,7 @@ class FormManager(Manager):
 
                     if field['params']['variants'][answers[field['uid']]].get('custom_params'):
                         try:
-                            params.update(
-                                json.loads(field['params']['variants'][answers[field['uid']]].get('custom_params')))
+                            params.update(json.loads(field['params']['variants'][answers[field['uid']]].get('custom_params')))
                         except:
                             pass
 
@@ -343,10 +336,20 @@ class FormManager(Manager):
                     else:
                         packet.append((category, answers[field['uid']], params))
 
-        action_name = 'Заполнение опросника ID {} "{}"'.format(form.template_id if form.template_id else form_id,
+        return packet, report
+
+    def submit(self, answers, form, contract_id):
+        form.warning_timestamp = 0
+        form.asked_timestamp = 0
+        form.filled_timestamp = int(time.time())
+
+        packet, report = self._extract_packet_and_report_from_form(contract_id, form, answers)
+
+
+        action_name = 'Заполнение опросника ID {} "{}"'.format(form.template_id if form.template_id else form.id,
                                                                form.title)
 
-        integral_result, integral_description, custom_params = self.get_integral_evaluation(contract_id, answers, form)
+        integral_result, integral_description, custom_params = self._get_integral_evaluation(contract_id, answers, form)
         action_name += integral_description
 
         packet.append(('action', action_name, custom_params))
@@ -370,9 +373,9 @@ class FormManager(Manager):
         if DYNAMIC_CACHE:
             self.medsenger_api.update_cache(contract_id)
 
-        return result
+        return True
 
-    def get_integral_evaluation(self, contract_id, answers, form):
+    def _get_integral_evaluation(self, contract_id, answers, form):
         result = None
         action_name = ''
         custom_params = {}

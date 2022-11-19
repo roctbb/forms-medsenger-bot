@@ -1,23 +1,7 @@
 from manage import *
-from managers.AlgorithmsManager import AlgorithmsManager
-from managers.ContractsManager import ContractManager
-from managers.FormManager import FormManager
-from managers.MedicineManager import MedicineManager
-from managers.ReminderManager import ReminderManager
-from managers.TimetableManager import TimetableManager
-from managers.MedicineTemplateManager import MedicineTemplateManager
-from medsenger_api import AgentApiClient
 from helpers import *
 from models import Form, Algorithm
-
-medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG)
-contract_manager = ContractManager(medsenger_api, db)
-form_manager = FormManager(medsenger_api, db)
-medicine_manager = MedicineManager(medsenger_api, db)
-reminder_manager = ReminderManager(medsenger_api, db)
-timetable_manager = TimetableManager(medicine_manager, form_manager, reminder_manager, medsenger_api, db)
-algorithm_manager = AlgorithmsManager(medsenger_api, db)
-medicine_template_manager = MedicineTemplateManager(medsenger_api, db)
+from tasks import tasks
 
 
 @app.route('/')
@@ -589,19 +573,14 @@ def post_form(args, form, form_id):
     if form.contract_id != contract_id and not form.is_template:
         abort(401)
 
-    if form_manager.submit(data, form_id, contract_id):
-        contract = contract_manager.get(contract_id)
-        algorithm_manager.examine(contract, form)
+    submit_chain = tasks.submit_form.s(True, data, form_id, contract_id)
+    submit_chain |= tasks.examine_form.s(form_id, contract_id)
+    submit_chain |= tasks.examine_contract_tasks.s(form_id, contract_id)
+    submit_chain.apply_async()
 
-        if contract.tasks and 'form-{}'.format(form_id) in contract.tasks:
-            medsenger_api.finish_task(contract.id, contract.tasks['form-{}'.format(form_id)])
-
-        return jsonify({
-            "result": "ok",
-        })
-    else:
-        abort(404)
-
+    return jsonify({
+        "result": "ok",
+    })
 
 @app.route('/api/send_form/<form_id>', methods=['GET'])
 @verify_args
@@ -684,7 +663,7 @@ with app.app_context():
     db.create_all()
 
 
-def tasks():
+def run_tasks():
     timetable_manager.run(app)
 
 

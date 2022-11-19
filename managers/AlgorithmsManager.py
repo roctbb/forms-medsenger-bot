@@ -849,6 +849,7 @@ class AlgorithmsManager(Manager):
                                             action_deadline=time.time() + 60 * 60)
 
         self.clear_cache(contract.id)
+        return True
 
     def hook(self, contract, category_names):
         patient = contract.patient
