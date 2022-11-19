@@ -166,15 +166,11 @@ def init(data):
 @verify_json
 def hook(data):
     contract_id = int(data.get('contract_id'))
-    contract = contract_manager.get(contract_id)
     category_names = data.get('category_names')
-
-    if algorithm_manager.hook(contract, category_names):
-        return jsonify({
-            "result": "ok",
-        })
-    else:
-        abort(500)
+    tasks.examine_hook.s(contract_id, category_names).apply_async()
+    return jsonify({
+        "result": "ok",
+    })
 
 
 @app.route('/remove', methods=['POST'])
@@ -581,6 +577,7 @@ def post_form(args, form, form_id):
     return jsonify({
         "result": "ok",
     })
+
 
 @app.route('/api/send_form/<form_id>', methods=['GET'])
 @verify_args

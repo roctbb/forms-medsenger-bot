@@ -31,3 +31,9 @@ def examine_contract_tasks(chain, form_id, contract_id):
         if contract.tasks and 'form-{}'.format(form_id) in contract.tasks:
             medsenger_api.finish_task(contract.id, contract.tasks['form-{}'.format(form_id)])
         return True
+
+@celery.task
+def examine_hook(contract_id, category_names):
+    with app.app_context():
+        contract = contract_manager.get(contract_id)
+        return algorithm_manager.hook(contract, category_names)
