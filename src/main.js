@@ -249,6 +249,12 @@ Vue.mixin({
                 return groups;
             }, {});
         },
+        swap: function (arr, i, j) {
+          let val = arr[i]
+          arr[i] = arr[j]
+          arr[j] = val
+          return arr
+        },
         toBase64: function (file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
