@@ -34,6 +34,14 @@ export default {
     },
     created() {
         Event.listen('remove-field', (i) => this.remove_field(i));
+        Event.listen('move-field-up', (i) => {
+            this.fields = this.swap(this.fields, i, i-1)
+            this.$forceUpdate()
+        })
+        Event.listen('move-field-down', (i) => {
+            this.fields = this.swap(this.fields, i, i+1)
+            this.$forceUpdate()
+        })
     },
     methods: {
         get_field_num: function (uid) {
