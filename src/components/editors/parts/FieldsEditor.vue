@@ -45,7 +45,7 @@ export default {
         Event.listen('duplicate-field', (i) => {
             let copy = {...this.fields[i]}
             copy.uid = this.uuidv4()
-            this.fields.splice(i, 0, copy);
+            this.fields.splice(i + 1, 0, copy);
             this.$forceUpdate()
         })
     },
