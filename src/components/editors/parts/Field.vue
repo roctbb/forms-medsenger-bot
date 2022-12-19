@@ -261,8 +261,9 @@
         <a class="btn btn-danger btn-sm" @click="remove()">Удалить {{
                 field.type != 'header' ? 'вопрос' : 'заголовок'
             }}</a>
-        <button class="btn btn-secondary btn-sm" style="font-size: 12px" v-if="pkey + 1 < form.fields.length" @click="move('down')">&#9660;</button>
-        <button class="btn btn-secondary btn-sm" style="font-size: 12px" v-if="pkey > 0" @click="move('up')">&#9650;</button>
+        <button class="btn btn-primary btn-sm" style="font-size: 12px" @click="duplicate()">Дублировать</button>
+        <button class="btn btn-sm" style="font-size: 12px" v-if="pkey + 1 < form.fields.length" @click="move('down')">&#9660;</button>
+        <button class="btn btn-sm" style="font-size: 12px" v-if="pkey > 0" @click="move('up')">&#9650;</button>
     </card>
 </template>
 
@@ -325,6 +326,9 @@ export default {
         },
         move: function (direction) {
             Event.fire('move-field-' + direction, this.pkey)
+        },
+        duplicate: function () {
+            Event.fire('duplicate-field', this.pkey)
         },
         update_vas_params: function () {
             this.field.params.colors = this.field.params.tmp_colors.toString().split(',')

@@ -42,6 +42,12 @@ export default {
             this.fields = this.swap(this.fields, i, i+1)
             this.$forceUpdate()
         })
+        Event.listen('duplicate-field', (i) => {
+            let copy = {...this.fields[i]}
+            copy.uid = this.uuidv4()
+            this.fields.splice(i, 0, copy);
+            this.$forceUpdate()
+        })
     },
     methods: {
         get_field_num: function (uid) {
