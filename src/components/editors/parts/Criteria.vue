@@ -6,6 +6,7 @@
                     <select class="form-control form-control-sm" v-model="criteria.left_mode">
                         <option value="value">текущее значение</option>
                         <option value="category_value">последнее значение</option>
+                        <option value="count" v-if="is_int() && !is_date()">количество за</option>
                         <option value="average" v-if="is_int() && !is_date()">среднее за</option>
                         <option value="sum" v-if="is_int() && !is_date()">сумма за</option>
                         <option value="difference" v-if="is_int() && !is_date()">разброс за</option>
@@ -13,26 +14,35 @@
                         <option value="init">активация контракта</option>
                         <option value="step_init">переход к ступени</option>
                     </select>
-                    <span class="text-muted"><button class="btn btn-sm btn-default" @click="remove()">Удалить</button></span>
+                    <span class="text-muted"><button class="btn btn-sm btn-default"
+                                                     @click="remove()">Удалить</button></span>
                 </div>
 
                 <!-- not time -->
-
-                <div class="col-md-2" v-if="!['value', 'category_value'].includes(criteria.left_mode) && !['time', 'init', 'step_init'].includes(criteria.left_mode)">
+                <div class="col-md-1"
+                     v-if="!['value', 'category_value'].includes(criteria.left_mode) && !['time', 'init', 'step_init'].includes(criteria.left_mode)">
                     <input class="form-control form-control-sm"
+                           type="number" min="0"
                            v-if="criteria.left_dimension == 'hours'"
                            :class="this.save_clicked && empty(criteria.left_hours) ? 'is-invalid' : ''"
                            v-model="criteria.left_hours">
                     <input class="form-control form-control-sm"
-                           v-if="criteria.left_dimension == 'times'"
+                           type="number" min="0"
+                           v-else-if="criteria.left_dimension == 'times'"
                            :class="this.save_clicked && empty(criteria.left_times) ? 'is-invalid' : ''"
                            v-model="criteria.left_times">
+                    <input class="form-control form-control-sm"
+                           type="number" min="0"
+                           :class="this.save_clicked && empty(criteria.left_for) ? 'is-invalid' : ''"
+                           v-model="criteria.left_for" v-else>
                     <select class="form-control form-control-sm" v-model="criteria.left_dimension">
+                        <option value="days">дней</option>
                         <option value="hours">часов</option>
                         <option value="times">раз</option>
                     </select>
                     <small class="text-muted">с отступом</small>
                     <input class="form-control form-control-sm"
+                           type="number" min="0"
                            :class="this.save_clicked && empty(criteria.left_offset) ? 'is-invalid' : ''"
                            v-model="criteria.left_offset">
                     <select class="form-control form-control-sm" v-model="criteria.left_offset_dimension">
@@ -41,6 +51,14 @@
                         <option value="times">раз</option>
                     </select>
                 </div>
+                <div class="col-md-1" v-if="criteria.left_mode == 'count'">
+                    <input class="form-control form-control-sm"
+                           :class="this.save_clicked && empty(criteria.check_value) ? 'is-invalid' : ''"
+                           v-model="criteria.check_value">
+                    <small data-v-554d70e7="" class="text-muted">значение</small>
+                </div>
+
+
                 <div class="col-md-3" v-if="!['time', 'init', 'step_init'].includes(criteria.left_mode)">
                     <select @change="category_changed()" class="form-control form-control-sm"
                             v-model="criteria.category">
@@ -83,13 +101,15 @@
                     <select class="form-control form-control-sm" v-model="criteria.right_mode">
                         <option value="value">фиксированное значение</option>
                         <option value="category_value">значение</option>
+                        <option value="count" v-if="is_int() && !is_date()">количество за</option>
                         <option value="average" v-if="is_int()">среднее за</option>
                         <option value="sum" v-if="is_int()">сумма за</option>
                         <option value="difference" v-if="is_int()">разброс за</option>
                     </select>
                 </div>
 
-                <div class="col-md-2" v-if="criteria.right_mode != 'value' && !['time', 'init', 'step_init'].includes(criteria.left_mode)">
+                <div class="col-md-2"
+                     v-if="criteria.right_mode != 'value' && !['time', 'init', 'step_init'].includes(criteria.left_mode)">
                     <select class="form-control form-control-sm"
                             v-model="criteria.right_category">
                         <optgroup label="Авто">
@@ -102,7 +122,9 @@
                         <optgroup
                             v-for="(group, name) in group_by(category_list, 'subcategory')"
                             v-bind:label="name">
-                            <option v-for="cat in group" v-if="category.type != 'date' && cat.type != 'date' || category.type == cat.type" :value="cat.name">{{ cat.description }}
+                            <option v-for="cat in group"
+                                    v-if="category.type != 'date' && cat.type != 'date' || category.type == cat.type"
+                                    :value="cat.name">{{ cat.description }}
                             </option>
                         </optgroup>
                     </select>
@@ -136,14 +158,16 @@
                 </div>
                 <div class="col-md-1" v-if="!['time', 'init', 'step_init'].includes(criteria.left_mode)">
 
-                    <input v-if="category.type != 'date' || criteria.right_mode != 'value'" class="form-control form-control-sm"
+                    <input v-if="category.type != 'date' || criteria.right_mode != 'value'"
+                           class="form-control form-control-sm"
                            :class="this.save_clicked && empty(criteria.value) ? 'is-invalid' : ''"
                            v-model="criteria.value">
                     <date-picker v-else v-model="criteria.value" value-type="YYYY-MM-DD"></date-picker>
                     <small class="text-muted" v-if="criteria.right_mode == 'value'">значение для сравнения</small>
                     <small class="text-muted" v-else>модификатор</small>
                 </div>
-                <div class="col-md-1" v-if="!['time', 'init', 'step_init'].includes(criteria.left_mode) && criteria.right_mode != 'value'">
+                <div class="col-md-1"
+                     v-if="!['time', 'init', 'step_init'].includes(criteria.left_mode) && criteria.right_mode != 'value'">
 
                     <input class="form-control form-control-sm"
                            :class="this.save_clicked && empty(criteria.multiplier) ? 'is-invalid' : ''"
@@ -186,7 +210,9 @@
                 </div>
             </div>
 
-            <div v-if="is_admin && criteria.left_mode !='init' && ['value', 'category_value'].includes(criteria.right_mode)" class="row">
+            <div
+                v-if="is_admin && criteria.left_mode !='init' && ['value', 'category_value'].includes(criteria.right_mode)"
+                class="row">
                 <div class="col-md-4">
                     <input type="checkbox" v-model="criteria.ask_value">
                     <small class="text-muted">Запросить при подключении шаблона?</small>
@@ -243,8 +269,7 @@ export default {
                     type: "date",
                     description: "Текущая дата"
                 }
-            }
-            else {
+            } else {
                 this.category = this.get_category(this.criteria.category)
             }
 
