@@ -88,8 +88,8 @@
 
                     <hr>
 
-                    <button class="btn btn-sm btn-danger" @click="remove_common_condition(algorithm, condition_index)">Удалить
-                        условие
+                    <button class="btn btn-sm btn-danger" @click="remove_common_condition(algorithm, condition_index)">
+                        Удалить условие
                     </button>
                 </card>
                 <button class="btn btn-sm btn-primary" @click="add_common_condition(algorithm)">Добавить условие

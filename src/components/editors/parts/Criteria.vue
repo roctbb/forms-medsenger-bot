@@ -52,6 +52,17 @@
                     </select>
                 </div>
                 <div class="col-md-1" v-if="criteria.left_mode == 'count'">
+                    <select class="form-control form-control-sm" v-model="criteria.left_sign">
+                        <option value="equal" v-if="!is_date()">=</option>
+                        <option value="contains" v-if="!is_int() && !is_date()">содержит</option>
+                        <option value="greater" v-if="is_int()">&gt;</option>
+                        <option value="less" v-if="is_int()">&lt;</option>
+                        <option value="not_equal" v-if="is_int()">!=</option>
+                        <option value="greater_or_equal" v-if="is_int()">&gt;=</option>
+                        <option value="less_or_equal" v-if="is_int()">&lt;=</option>
+                    </select>
+                </div>
+                <div class="col-md-1" v-if="criteria.left_mode == 'count'">
                     <input class="form-control form-control-sm"
                            :class="this.save_clicked && empty(criteria.check_value) ? 'is-invalid' : ''"
                            v-model="criteria.check_value">

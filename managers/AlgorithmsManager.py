@@ -179,7 +179,7 @@ class AlgorithmsManager(Manager):
         return value
 
     def get_values(self, category_name, mode, contract_id, dimension='hours', hours=1, times=1, algorithm=None,
-                   offset_dim='times', offset_count=0, check_value=None, zone=None):
+                   offset_dim='times', offset_count=0, check_value=None, sign=None, zone=None):
         k = (category_name, mode, contract_id, dimension, hours, times, offset_dim, offset_count)
         cached = self.get_from_cache(k)
         if cached != None:
@@ -250,7 +250,7 @@ class AlgorithmsManager(Manager):
         elif mode == 'delta':
             answer = [values[-1] - values[0]], None
         elif mode == 'count':
-            answer = [len([x for x in values if x == check_value])], None
+            answer = [len([x for x in values if self.check_values(x, check_value, sign)])], None
         elif mode == 'average':
             avg = sum(values) / len(values)
             answer = [round(avg, 2)], None
@@ -337,22 +337,23 @@ class AlgorithmsManager(Manager):
             offset_dim = criteria.get('left_offset_dimension', 'times')
             offset_count = criteria.get('left_offset', 0)
             check_value = criteria.get('check_value')
+            sign = criteria.get('left_sign')
 
             if dimension == 'hours':
                 left_values, objects = self.get_values(category_name, criteria['left_mode'], contract_id, dimension,
                                                        hours=criteria.get('left_hours'),
                                                        offset_dim=offset_dim, offset_count=offset_count,
-                                                       algorithm=algorithm, check_value=check_value)
+                                                       algorithm=algorithm, check_value=check_value, sign=sign)
             elif dimension == 'times':
                 left_values, objects = self.get_values(category_name, criteria['left_mode'], contract_id, dimension,
                                                        times=criteria.get('left_times'),
                                                        offset_dim=offset_dim, offset_count=offset_count,
-                                                       algorithm=algorithm, check_value=check_value)
+                                                       algorithm=algorithm, check_value=check_value, sign=sign)
             else:
                 left_values, objects = self.get_values(category_name, criteria['left_mode'], contract_id, 'hours',
                                                        hours=criteria.get('left_for') * 24,
                                                        offset_dim=offset_dim, offset_count=offset_count,
-                                                       algorithm=algorithm, check_value=check_value)
+                                                       algorithm=algorithm, check_value=check_value, sign=sign)
 
             if criteria['right_mode'] == 'value':
                 right_values = [criteria.get('value')]
