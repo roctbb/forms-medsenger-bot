@@ -69,7 +69,7 @@
             <hr>
             <form-group48 title="Код для скрипта"
                           v-if="form.has_integral_evaluation && form.integral_evaluation.script_enabled && !field.exclude_weight">
-                <input type="text" class="form-control form-control-sm"v-model="field.script_group"/>
+                <input type="text" class="form-control form-control-sm" v-model="field.script_group"/>
             </form-group48>
             <div v-if="['integer', 'range'].includes(field.type) && is_admin">
                 <div class="form-group row">
@@ -212,6 +212,19 @@
                            @input="update_vas_params()"/>
                 </form-group48>
 
+                <form-group48 title="Подписи">
+                    <div class="row">
+                        <div class="col">
+                            <input type="text" class="form-control form-control-sm" v-model="field.params.left_label"
+                                   @input="update_vas_params()"/>
+                        </div>
+                        <div class="col">
+                            <input type="text" class="form-control form-control-sm" v-model="field.params.right_label"
+                                   @input="update_vas_params()"/>
+                        </div>
+                    </div>
+                </form-group48>
+
                 <form-group48 title="Начинать с">
                     <input type="number" class="form-control form-control-sm" v-model="field.params.start_from"
                            @input="update_vas_params()">
@@ -267,7 +280,9 @@
                 field.type != 'header' ? 'вопрос' : 'заголовок'
             }}</a>
         <button class="btn btn-primary btn-sm" style="font-size: 12px" @click="duplicate()">Дублировать</button>
-        <button class="btn btn-sm" style="font-size: 12px" v-if="pkey + 1 < form.fields.length" @click="move('down')">&#9660;</button>
+        <button class="btn btn-sm" style="font-size: 12px" v-if="pkey + 1 < form.fields.length" @click="move('down')">
+            &#9660;
+        </button>
         <button class="btn btn-sm" style="font-size: 12px" v-if="pkey > 0" @click="move('up')">&#9650;</button>
     </card>
 </template>
