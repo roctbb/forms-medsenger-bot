@@ -215,10 +215,12 @@
                 <form-group48 title="Подписи">
                     <div class="row">
                         <div class="col">
+                            <small>справа </small>
                             <input type="text" class="form-control form-control-sm" v-model="field.params.left_label"
                                    @input="update_vas_params()"/>
                         </div>
                         <div class="col">
+                            <small>слева </small>
                             <input type="text" class="form-control form-control-sm" v-model="field.params.right_label"
                                    @input="update_vas_params()"/>
                         </div>

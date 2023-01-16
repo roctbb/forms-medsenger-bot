@@ -215,34 +215,40 @@ export default {
 
             if (this.form.has_integral_evaluation) {
                 if (this.form.integral_evaluation) {
-                    this.form.integral_evaluation.offset = parseInt(this.form.integral_evaluation.offset)
-                    this.form.integral_evaluation.results = this.form.integral_evaluation.results.map(res => {
-                        return {
-                            value: parseInt(res.value),
-                            description: res.description,
-                            message: res.message,
-                            urgent: res.urgent
-                        }
-                    })
+                    if (this.form.integral_evaluation.script_enabled) {
+                        if (!this.form.integral_evaluation.script)
+                            this.errors.push('Проверьте корректность скрипта интеграционной оценки')
+                    } else {
 
-                    if (this.form.integral_evaluation.groups_enabled) {
-                        this.form.integral_evaluation.groups = this.form.integral_evaluation.groups.map(group => {
+                        this.form.integral_evaluation.offset = parseInt(this.form.integral_evaluation.offset)
+                        this.form.integral_evaluation.results = this.form.integral_evaluation.results.map(res => {
                             return {
-                                value: parseInt(group.value.toString()),
-                                questions: group.questions.toString().split(',')
-                                    .map(q => parseInt(q)).filter(q => !isNaN(q)),
-                                description: group.description,
-                                category: group.category
+                                value: parseInt(res.value),
+                                description: res.description,
+                                message: res.message,
+                                urgent: res.urgent
                             }
                         })
 
-                        if (!this.form.integral_evaluation.dont_send_to_doctor && this.form.integral_evaluation.groups.filter(group => !group.description || isNaN(group.value)).length > 0) {
-                            this.errors.push('Проверьте корректность групп интеграционной оценки')
-                        }
-                    }
+                        if (this.form.integral_evaluation.groups_enabled) {
+                            this.form.integral_evaluation.groups = this.form.integral_evaluation.groups.map(group => {
+                                return {
+                                    value: parseInt(group.value.toString()),
+                                    questions: group.questions.toString().split(',')
+                                        .map(q => parseInt(q)).filter(q => !isNaN(q)),
+                                    description: group.description,
+                                    category: group.category
+                                }
+                            })
 
-                    if (!this.form.integral_evaluation.dont_send_to_doctor && this.form.integral_evaluation.results.filter(res => !res.description || isNaN(res.value)).length > 0) {
-                        this.errors.push('Проверьте корректность результатов интеграционной оценки')
+                            if (!this.form.integral_evaluation.dont_send_to_doctor && this.form.integral_evaluation.groups.filter(group => !group.description || isNaN(group.value)).length > 0) {
+                                this.errors.push('Проверьте корректность групп интеграционной оценки')
+                            }
+                        }
+
+                        if (!this.form.integral_evaluation.dont_send_to_doctor && this.form.integral_evaluation.results.filter(res => !res.description || isNaN(res.value)).length > 0) {
+                            this.errors.push('Проверьте корректность результатов интеграционной оценки')
+                        }
                     }
                 } else {
                     this.errors.push('Проверьте корректность интеграционной оценки')
