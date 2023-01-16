@@ -222,6 +222,11 @@
                            @change="update_vas_params()">
                 </form-group48>
 
+                <form-group48 title="Не показывать знак –">
+                    <input type="checkbox" class="form-check" v-model="field.params.abs"
+                           @change="update_vas_params()">
+                </form-group48>
+
                 <form-group48 title="Предпросмотр" description="Шкала будет выглядеть так">
                     <visual-analog-scale :params="field.params">
                         <div class="row">
