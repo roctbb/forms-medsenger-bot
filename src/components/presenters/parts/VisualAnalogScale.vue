@@ -1,10 +1,10 @@
 <template>
 <div style="margin-bottom: 20px">
     <div class="row" v-if="params.left_label || params.right_label">
-        <div  class="col-1 d-flex justify-content-center" v-if="params.left_label">
+        <div  class="col-2 d-flex justify-content-center" v-if="params.left_label">
             {{ params.left_label }}
         </div>
-        <div  :class="`col-1 offset-${params.colors.length - 2} d-flex justify-content-center`" v-if="params.right_label">
+        <div  :class="`col-2 offset-${params.colors.length - 3} d-flex justify-content-center`" v-if="params.right_label">
             {{ params.right_label }}
         </div>
     </div>
