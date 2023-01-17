@@ -1,7 +1,7 @@
 <template>
 <div style="margin-bottom: 20px">
     <div class="row" v-if="params.left_label || params.right_label">
-        <div  class="col-2 d-flex justify-content-center" v-if="params.left_label">
+        <div  class="col-2 d-flex text-nowrap justify-content-center" v-if="params.left_label">
             {{ params.left_label }}
         </div>
         <div  :class="`col-2 offset-${params.colors.length - 4} d-flex justify-content-center`" v-if="params.right_label">
@@ -9,7 +9,7 @@
         </div>
     </div>
     <div class="row" v-if="!isNaN(params.start_from)">
-        <div v-for="(color, index) in params.colors" class="col-1 d-flex justify-content-center">
+        <div v-for="(color, index) in params.colors" class="col-1 d-flex text-nowrap justify-content-center">
             {{ params.abs ? Math.abs((params.reversed ? -1 : 1) * index + params.start_from) : (params.reversed ? -1 : 1) * index + params.start_from }}
         </div>
     </div>
