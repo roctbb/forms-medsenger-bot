@@ -328,6 +328,7 @@ strong {
 }
 
 .form-check {
+    padding-left: 30px;
     margin-top: 15px;
     margin-bottom: 15px;
 }

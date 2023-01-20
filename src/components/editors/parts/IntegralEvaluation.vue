@@ -94,6 +94,7 @@
                 </div>
 
                 <h6>Результаты</h6>
+                <span>Сортировка в порядке убывания, входит верхняя граница</span>
 
                 <div v-for="(result, i) in integral_evaluation.results">
                     <div class="row">
@@ -108,7 +109,7 @@
                                    v-model="result.value"/>
                         </div>
                         <div class="col-md-3">
-                            <small class="text-mutted">Описание результата, если сумма выше значения</small><br>
+                            <small class="text-mutted">Результат, если оценка выше значения</small><br>
                             <input type="text"
                                    :class="save_clicked && empty(result.description) ? 'is-invalid' : ''"
                                    class="form-control form-control-sm" v-model="result.description"/>

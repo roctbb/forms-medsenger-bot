@@ -130,6 +130,7 @@ def generate_event_description(criteria, l_value, r_value, category_names, curre
         "difference": "Разность крайних значений ",
         "delta": "Разброс ",
         "average": "Среднее значение ",
+        "count": "Количество значений ",
         "max": "Максимальному значение ",
         "min": "Минимальное значение "
     }
@@ -138,6 +139,7 @@ def generate_event_description(criteria, l_value, r_value, category_names, curre
         "sum": "сумме",
         "difference": "разности крайних значений",
         "delta": "разбросу",
+        "count": "количеству значений",
         "average": "среднему значению",
         "max": "максимальному значению",
         "min": "минимальному значению"

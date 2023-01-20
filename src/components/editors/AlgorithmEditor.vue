@@ -15,7 +15,7 @@
 
                 <form-group48 v-if="is_admin && (empty(algorithm.id) || algorithm.is_template)"
                               title="Категория шаблона">
-                    <input class="form-control form-control-sm" value="Общее" v-model="algorithm.template_category"/>
+                    <input class="form-control form-control-sm" v-model="algorithm.template_category"/>
                 </form-group48>
 
                 <form-group48 v-if="is_admin" title="Показывать шаблон клиникам (JSON)">
@@ -88,8 +88,8 @@
 
                     <hr>
 
-                    <button class="btn btn-sm btn-danger" @click="remove_common_condition(algorithm, condition_index)">Удалить
-                        условие
+                    <button class="btn btn-sm btn-danger" @click="remove_common_condition(algorithm, condition_index)">
+                        Удалить условие
                     </button>
                 </card>
                 <button class="btn btn-sm btn-default" @click="add_common_condition(algorithm)">Добавить условие
@@ -309,9 +309,13 @@ export default {
                 if (criteria.left_mode != 'time' && criteria.left_mode != 'init') {
                     if (criteria.left_dimension == 'hours') {
                         if (!this.empty(criteria.left_hours)) criteria.left_hours = parseInt(criteria.left_hours)
-                    } else {
+                    } else if (criteria.left_dimension == 'times') {
                         if (!this.empty(criteria.left_times)) criteria.left_times = parseInt(criteria.left_times)
+                    } else {
+                        if (!this.empty(criteria.left_for)) criteria.left_for = parseInt(criteria.left_for)
                     }
+
+                    if (criteria.left_mode == 'count') criteria.check_value = parseInt(criteria.check_value)
 
                     if (criteria.right_dimension == 'hours') {
                         if (!this.empty(criteria.right_hours)) criteria.right_hours = parseInt(criteria.right_hours)
