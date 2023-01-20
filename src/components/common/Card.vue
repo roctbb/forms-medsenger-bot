@@ -40,7 +40,4 @@ export default {
 
 }
 
-.card-title {
-    margin-bottom: 1.5rem;
-}
 </style>

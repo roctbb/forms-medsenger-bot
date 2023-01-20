@@ -50,7 +50,7 @@
             </div>
 
             <div class="text-center" style="margin-top: 15px;">
-                <a class="btn btn-primary btn-sm" @click="add_time_point()">Добавить время</a>
+                <a class="btn btn-default btn-sm" @click="add_time_point()">Добавить время</a>
                 <slot></slot>
             </div>
 

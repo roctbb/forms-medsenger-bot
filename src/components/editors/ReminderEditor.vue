@@ -63,7 +63,7 @@
         <button v-if="show_button" class="btn btn-danger" @click="go_back()">Назад</button>
         <button class="btn btn-success" @click="save()">Сохранить <span
             v-if="reminder.is_template"> шаблон</span></button>
-        <button v-if="!reminder.id && is_admin" class="btn btn-primary" @click="save(true)">
+        <button v-if="!reminder.id && is_admin" class="btn btn-default" @click="save(true)">
             Сохранить как шаблон
         </button>
 

@@ -92,7 +92,7 @@
                         условие
                     </button>
                 </card>
-                <button class="btn btn-sm btn-primary" @click="add_common_condition(algorithm)">Добавить условие
+                <button class="btn btn-sm btn-default" @click="add_common_condition(algorithm)">Добавить условие
                 </button>
             </card>
 
@@ -165,7 +165,7 @@
                     </button>
                 </card>
 
-                <button class="btn btn-sm btn-primary" @click="add_condition(step)">Добавить условие</button>
+                <button class="btn btn-sm btn-default" @click="add_condition(step)">Добавить условие</button>
 
                 <hr>
 
@@ -173,13 +173,13 @@
 
                 <action class="alert alert-warning" v-for="(action, i) in step.timeout_actions" :algorithm="algorithm"
                         :data="action" :pkey="i" :parent="step.timeout_actions" :key="action.uid"></action>
-                <button class="btn btn-sm btn-primary" @click="add_action(step.timeout_actions)">Добавить</button>
+                <button class="btn btn-sm btn-default" @click="add_action(step.timeout_actions)">Добавить</button>
 
 
                 <button class="btn btn-sm btn-danger" @click="remove_step(step_index)">Удалить ступень</button>
             </card>
 
-            <button class="btn btn-sm btn-primary" @click="add_step()">Добавить ступень</button>
+            <button class="btn btn-sm btn-default" @click="add_step()">Добавить ступень</button>
 
         </div>
         <button class="btn btn-danger" @click="go_back()">Назад</button>

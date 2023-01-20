@@ -5,13 +5,13 @@
         <div v-if="main_page">
             <button class="btn btn-success btn-block" @click="set_state('done')">Подтвердить выполнение</button>
             <button class="btn btn-danger btn-block" @click="set_state('reject')">Отказаться от выполнения</button>
-            <button class="btn btn-primary btn-block" @click="remind_later()">Напомнить позже</button>
-            <button class="btn btn-primary btn-block" @click="set_state('stop')">Больше не напоминать</button>
+            <button class="btn btn-default btn-block" @click="remind_later()">Напомнить позже</button>
+            <button class="btn btn-default btn-block" @click="set_state('stop')">Больше не напоминать</button>
         </div>
         <div v-if="!main_page">
-            <button class="btn btn-primary btn-block" @click="set_reminder(1, 'hour')">Через 1 час</button>
-            <button class="btn btn-primary btn-block" @click="set_reminder(2, 'hour')">Через 2 часа</button>
-            <button class="btn btn-primary btn-block" @click="set_reminder(1, 'day')">Завтра</button>
+            <button class="btn btn-default btn-block" @click="set_reminder(1, 'hour')">Через 1 час</button>
+            <button class="btn btn-default btn-block" @click="set_reminder(2, 'hour')">Через 2 часа</button>
+            <button class="btn btn-default btn-block" @click="set_reminder(1, 'day')">Завтра</button>
             <button class="btn btn-danger" @click="remind_later()" style="margin-top: 15px;">Назад</button>
         </div>
     </div>

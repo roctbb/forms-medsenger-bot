@@ -36,7 +36,7 @@
                 <div class="row">
                     <card v-for="(form, i) in patient.forms" :key="'form' + form.id" class="col-lg-3 col-md-4"
                           :image="images.form">
-                        <h6>{{ form.title }}</h6>
+                        <strong class="card-title">{{ form.title }}</strong>
                         <small>{{ form.doctor_description }}</small><br>
                         <small><i>{{ tt_description(form.timetable) }}</i></small><br>
                         <small v-if="form.sent">Заполнен {{ form.done }} раз(а) / отправлен {{ form.sent }} раз(а) за последний месяц</small>
@@ -58,7 +58,7 @@
                     </card>
                 </div>
 
-                <button class="btn btn-primary btn-sm" @click="state = 'form_templates'">Добавить опросник</button>
+                <button class="btn btn-default btn-sm" @click="state = 'form_templates'">Добавить опросник</button>
             </div>
 
             <div v-if="parts.length == 0 || parts.includes('meds')">
@@ -67,7 +67,7 @@
                 <div class="row">
                     <card v-for="(medicine, i) in patient.medicines" :key="'medicine' + medicine.id" :image="images.medicine"
                           class="col-lg-3 col-md-4">
-                        <h6>{{ medicine.title }}</h6>
+                        <strong class="card-title">{{ medicine.title }}</strong>
                         <small>{{ medicine.rules }}</small><br>
                         <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
                         <small v-if="medicine.sent">Подтверждено {{ medicine.done }} раз(а) / отправлено {{ medicine.sent }} раз(а) за последний месяц</small>
@@ -88,7 +88,7 @@
 
                     <card v-for="(medicine, i) in patient.canceled_medicines" :key="'canceled_medicine' + medicine.id" :image="images.canceled_medicine"
                           class="col-lg-3 col-md-4 text-muted">
-                        <h6>{{ medicine.title }}</h6>
+                        <strong class="card-title">{{ medicine.title }}</strong>
                         <small>{{ medicine.rules }}</small><br>
                         <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
                         <small>Назначено: {{ medicine.prescribed_at }}</small><br>
@@ -100,7 +100,7 @@
                     </card>
                 </div>
 
-                <button class="btn btn-primary btn-sm" @click="create_medicine()">Назначить лекарство
+                <button class="btn btn-default btn-sm" @click="create_medicine()">Назначить лекарство
                 </button>
 
                 <button v-if="is_admin" class="btn btn-info btn-sm" @click="state = 'medicine_templates'">Управление
@@ -115,7 +115,7 @@
                 <div class="row">
                     <card v-for="(reminder, i) in patient.reminders" :key="'reminder_' + reminder.id" :image="images.reminder"
                           class="col-lg-3 col-md-4">
-                        <h6>Для {{ reminder.type == 'patient' ? 'пациента' : 'врача' }}</h6>
+                        <strong class="card-title">Для {{ reminder.type == 'patient' ? 'пациента' : 'врача' }}</strong>
                         <small> {{ reminder.text }} </small><br>
                         <small><i>{{ tt_description(reminder.timetable) }}</i></small><br>
                         <small>Начало: {{ reminder.attach_date }}</small><br>
@@ -134,7 +134,7 @@
                     </card>
                     <card v-for="(reminder, i) in patient.old_reminders" :key="'old_reminder_' + reminder.id" :image="images.old_reminder"
                           class="col-lg-3 col-md-4">
-                        <h6>Для {{ reminder.type == 'patient' ? 'пациента' : 'врача' }}</h6>
+                        <strong class="card-title">Для {{ reminder.type == 'patient' ? 'пациента' : 'врача' }}</strong>
                         <small> {{ reminder.text }} </small><br>
                         <small><i>{{ tt_description(reminder.timetable) }}</i></small><br>
                         <small>Начало: {{ reminder.attach_date }}</small><br>
@@ -149,7 +149,7 @@
                     </card>
                 </div>
 
-                <button class="btn btn-primary btn-sm" @click="create_reminder()">Создать напоминание</button>
+                <button class="btn btn-default btn-sm" @click="create_reminder()">Создать напоминание</button>
 
                 <button v-if="is_admin" class="btn btn-info btn-sm" @click="state = 'reminder_templates'">Управление шаблонами</button>
 
@@ -161,7 +161,7 @@
                 <div class="row">
                     <card v-for="(algorithm, i) in patient.algorithms" :key="'algorithm_' + algorithm.id" :image="images.algorithm"
                           class="col-lg-3 col-md-4">
-                        <h6>{{ algorithm.title }}</h6>
+                        <strong class="card-title">{{ algorithm.title }}</strong>
                         <small>{{ algorithm.description }}</small><br>
                         <small v-html="alg_description(algorithm)"></small>
                         <div v-if="algorithm.contract_id == current_contract_id">
@@ -179,7 +179,7 @@
                     </card>
                 </div>
 
-                <button class="btn btn-primary btn-sm" @click="state = 'algorithm_templates'">Добавить алгоритм</button>
+                <button class="btn btn-default btn-sm" @click="state = 'algorithm_templates'">Добавить алгоритм</button>
 
             </div>
 
@@ -220,7 +220,7 @@
 
                 <card v-for="(form, i) in group" :key="'form_template_' + form.id" class="col-lg-3 col-md-4"
                       :image="images.form">
-                    <h6>{{ form.title }}</h6>
+                    <strong class="card-title">{{ form.title }}</strong>
                     <small>{{ form.doctor_description }}</small><br>
                     <small><i>{{ tt_description(form.timetable) }}</i></small><br>
                     <small v-if="form.algorithm_id"><b>Связанный алгоритм:</b>
@@ -248,7 +248,7 @@
                 </div>
             </div>
 
-            <button class="btn btn-primary btn-sm" @click="create_form()">Добавить свой опросник</button>
+            <button class="btn btn-default btn-sm" @click="create_form()">Добавить свой опросник</button>
             <button class="btn btn-danger btn-sm" @click="state = 'main'">Назад</button>
 
         </div>
@@ -263,7 +263,7 @@
             <div class="row">
                 <card v-for="(medicine, i) in templates.medicines.filter(show_medicine)" :key="'medicine_template_' + medicine.id" :image="images.medicine"
                       class="col-lg-3 col-md-4">
-                    <h6>{{ medicine.title }}</h6>
+                    <strong class="card-title">{{ medicine.title }}</strong>
                     <small>{{ medicine.rules }}</small><br>
                     <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
                     <a href="#" @click="attach_medicine(medicine)">Подключить</a>
@@ -282,7 +282,7 @@
 
             </div>
 
-            <button class="btn btn-primary btn-sm" @click="create_medicine()">Добавить</button>
+            <button class="btn btn-default btn-sm" @click="create_medicine()">Добавить</button>
             <button class="btn btn-danger btn-sm" @click="state = 'main'">Назад</button>
 
         </div>
@@ -296,7 +296,7 @@
             <div class="row">
                 <card v-for="(reminder, i) in templates.reminders" :key="'reminder_template_' + reminder.id" :image="images.reminder"
                       class="col-lg-3 col-md-4">
-                    <h6>Для {{ reminder.type == 'both' ? 'всех' : (reminder.type == 'patient' ? 'пациента' : 'врача') }}</h6>
+                    <strong class="card-title">Для {{ reminder.type == 'both' ? 'всех' : (reminder.type == 'patient' ? 'пациента' : 'врача') }}</strong>
                     <small>{{ reminder.type == 'doctor' ? reminder.doctor_text : reminder.patient_text }}</small><br>
                     <small><i>{{ tt_description(reminder.timetable) }}</i></small><br>
                     <small><i>в течение {{ reminder_duration(reminder) }} дн.</i></small><br>
@@ -316,7 +316,7 @@
 
             </div>
 
-            <button class="btn btn-primary btn-sm" @click="create_reminder()">Добавить</button>
+            <button class="btn btn-default btn-sm" @click="create_reminder()">Добавить</button>
             <button class="btn btn-danger btn-sm" @click="state = 'main'">Назад</button>
 
         </div>
@@ -339,7 +339,7 @@
                 <div class="col-md-12"><h5>{{ name }}</h5></div>
                 <card v-for="(algorithm, i) in group" v-if="is_admin || !algorithm.clinics || algorithm.clinics.includes(clinic_id)" :key="'algorithm_' + algorithm.id" :image="images.algorithm"
                       class="col-lg-3 col-md-4">
-                    <h6>{{ algorithm.title }}</h6>
+                    <strong class="card-title">{{ algorithm.title }}</strong>
                     <small>{{ algorithm.description }}</small><br>
                     <small v-html="alg_description(algorithm)"></small>
                     <a href="#" v-if="need_filling(algorithm)" @click="setup_algorithm(algorithm)">Настроить и
@@ -359,7 +359,7 @@
             </div>
 
 
-            <button class="btn btn-primary btn-sm" @click="create_algorithm()">Добавить</button>
+            <button class="btn btn-default btn-sm" @click="create_algorithm()">Добавить</button>
             <button class="btn btn-danger btn-sm" @click="state = 'main'">Назад</button>
 
         </div>

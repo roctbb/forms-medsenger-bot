@@ -106,11 +106,11 @@
 
         <button class="btn btn-danger" @click="go_back()">Вернуться назад</button>
         <button class="btn btn-success" @click="save()">Сохранить <span v-if="form.is_template"> шаблон</span></button>
-        <button v-if="!form.id && is_admin" class="btn btn-primary" @click="save(true)">Сохранить как шаблон</button>
-        <button v-if="!form.id && !is_admin" class="btn btn-primary" @click="save(true, 'doctor')">Сохранить как шаблон
+        <button v-if="!form.id && is_admin" class="btn btn-default" @click="save(true)">Сохранить как шаблон</button>
+        <button v-if="!form.id && !is_admin" class="btn btn-default" @click="save(true, 'doctor')">Сохранить как шаблон
             для себя
         </button>
-        <button v-if="!form.id && !is_admin" class="btn btn-primary" @click="save(true, 'clinic')">Сохранить как шаблон
+        <button v-if="!form.id && !is_admin" class="btn btn-default" @click="save(true, 'clinic')">Сохранить как шаблон
             для клиники
         </button>
 

@@ -4,8 +4,8 @@
                :save_clicked="fields_save_clicked[i]"></field>
 
         <div class="row justify-content-md-center" style="column-gap: 5px; margin-bottom: 10px">
-            <a class="btn btn-primary btn-sm" @click="add_field()">Добавить вопрос</a>
-            <a class="btn btn-primary btn-sm" @click="add_header()">Добавить подзаголовок</a>
+            <a class="btn btn-default btn-sm" @click="add_field()">Добавить вопрос</a>
+            <a class="btn btn-default btn-sm" @click="add_header()">Добавить подзаголовок</a>
         </div>
     </div>
 </template>

@@ -5,12 +5,12 @@
             <div class="row">
                 <a class="btn btn-danger btn-sm" @click="select_graph()">Назад</a>
 
-                <button class="btn btn-primary btn-sm" @click="scroll_dates(true)">&#8592;</button>
+                <button class="btn btn-default btn-sm" @click="scroll_dates(true)">&#8592;</button>
 
                 <date-picker format="с YYYY-MM-DD" v-model="dates.range[0]" @change="select_dates()"></date-picker>
                 <date-picker format="по YYYY-MM-DD" v-model="dates.range[1]" @change="select_dates()"></date-picker>
 
-                <button class="btn btn-primary btn-sm" @click="scroll_dates(false)">&#8594;</button>
+                <button class="btn btn-default btn-sm" @click="scroll_dates(false)">&#8594;</button>
 
                 <select class="form-control form-control-sm col-2" v-model="dates.period" @change="select_period()">
                     <option :value="30">Месяц</option>
@@ -34,8 +34,8 @@
             </div>
 
             <div class="row" style="margin-left: 0; grid-column-gap: 3px;">
-                <button class="btn btn-primary btn-sm" @click="scroll_dates(true)">&#8592;</button>
-                <button class="btn btn-primary btn-sm" @click="scroll_dates(false)">&#8594;</button>
+                <button class="btn btn-default btn-sm" @click="scroll_dates(true)">&#8592;</button>
+                <button class="btn btn-default btn-sm" @click="scroll_dates(false)">&#8594;</button>
 
                 <select class="form-control form-control-sm col" style="margin-right: 15px;"
                         v-model="dates.period" @change="select_period()">

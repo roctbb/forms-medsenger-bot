@@ -257,7 +257,7 @@
             </div>
 
         </div>
-        <a v-if="field.type == 'radio'" class="btn btn-primary btn-sm" @click="add_variant()">Добавить вариант</a>
+        <a v-if="field.type == 'radio'" class="btn btn-default btn-sm" @click="add_variant()">Добавить вариант</a>
         <a class="btn btn-danger btn-sm" @click="remove()">Удалить {{
                 field.type != 'header' ? 'вопрос' : 'заголовок'
             }}</a>

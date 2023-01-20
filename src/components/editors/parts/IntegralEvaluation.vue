@@ -89,7 +89,7 @@
                         </div>
                     </div>
                     <br>
-                    <a class="btn btn-primary btn-sm" @click="add_group()">Добавить</a>
+                    <a class="btn btn-default btn-sm" @click="add_group()">Добавить</a>
                     <br>
                 </div>
 
@@ -126,7 +126,7 @@
                     </div>
                 </div>
                 <br>
-                <a class="btn btn-primary btn-sm" @click="add_result()">Добавить</a>
+                <a class="btn btn-default btn-sm" @click="add_result()">Добавить</a>
                 <br>
                 <form-group48 title="Сообщение пациенту, если результат критичен"
                               :description="'Будет отправлено, у результата стоит галочка' + integral_evaluation.groups_enabled ? ' или сумма в группе превышает ее значение' : ''">
