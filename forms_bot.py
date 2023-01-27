@@ -141,7 +141,7 @@ def init(data):
                 if form.algorithm_id and str(form.algorithm_id) not in exclude_algorithms:
                     algorithm_manager.attach(form.algorithm_id, contract, params)
             except Exception as e:
-                print(e)
+                log(e)
 
         custom_medicines = filter(lambda x: "medicine_" in x and params.get(x), params.keys())
         for custom_medicine in custom_medicines:
@@ -149,7 +149,7 @@ def init(data):
                 medicine_id = int(custom_medicine.split('_')[1])
                 medicine_manager.attach(medicine_id, contract, params.get('medicine_timetable_{}'.format(medicine_id)))
             except Exception as e:
-                print(e)
+                log(e)
 
         custom_algorithms = filter(lambda x: "algorithm_" in x and params.get(x), params.keys())
         for custom_algorithm in custom_algorithms:
