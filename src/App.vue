@@ -14,6 +14,7 @@
                 <medicine-editor :patient="patient" v-show="state == 'medicine-manager'"/>
                 <reminder-editor v-show="state == 'reminder-manager'"/>
                 <algorithm-editor v-show="state == 'algorithm-manager'"/>
+                <form-presenter v-show="state == 'form-preview-presenter'"/>
                 <action-done v-if="state == 'done'"></action-done>
 
                 <reminder-confirmer :data="reminder" v-if="state == 'confirm-reminder'"></reminder-confirmer>
@@ -131,6 +132,10 @@ export default {
         Event.listen('edit-form', (form) => {
             this.state = 'form-manager'
             Event.fire('navigate-to-edit-form-page', form);
+        });
+        Event.listen('preview-form', (form) => {
+            this.state = 'form-preview-presenter'
+            Event.fire('load-form-preview', form);
         });
         Event.listen('edit-medicine', (medicine) => {
             this.state = 'medicine-manager'
