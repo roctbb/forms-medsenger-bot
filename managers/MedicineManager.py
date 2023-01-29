@@ -97,7 +97,7 @@ class MedicineManager(Manager):
         medicine.asked_timestamp = 0
         medicine.filled_timestamp = int(time.time())
 
-
+        self.__commit__()
 
         if params is None:
             params = {"medicine_id": medicine_id, 'dose': medicine.dose}

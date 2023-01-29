@@ -343,6 +343,8 @@ class FormManager(Manager):
         form.asked_timestamp = 0
         form.filled_timestamp = int(time.time())
 
+        self.__commit__()
+
         packet, report = self._extract_packet_and_report_from_form(contract_id, form, answers)
 
 
