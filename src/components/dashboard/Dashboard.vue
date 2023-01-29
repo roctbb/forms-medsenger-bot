@@ -3,10 +3,12 @@
         <algorithm-settings/>
         <div v-if="state == 'main'">
 
-            <h6 v-if="parts.length == 0 && patient.month_compliance[0]" class="badge badge-info">Общая комплаентность за месяц: {{ Math.round(100 * patient.month_compliance[1] / patient.month_compliance[0]) }}%</h6>
+            <h6 v-if="parts.length == 0 && patient.month_compliance[0]" class="badge badge-info">Общая комплаентность за
+                месяц: {{ Math.round(100 * patient.month_compliance[1] / patient.month_compliance[0]) }}%</h6>
             <div v-if="parts.length == 0 || parts.includes('forms')">
                 <div style="margin-right: -15px;" v-if="params.backup && params.backup.length">
-                    <input class="btn btn-block btn-outline-info" type="button" data-toggle="collapse" aria-expanded="false"
+                    <input class="btn btn-block btn-outline-info" type="button" data-toggle="collapse"
+                           aria-expanded="false"
                            value="Настройка параметров уведомлений" data-target="#collapse" aria-controls="collapse">
                     <div class="collapse" id="collapse" style="font-size: 14px">
                         <div class="card card-body">
@@ -21,7 +23,9 @@
                                 <div>
                                     <button class="btn btn-success btn-sm" @click="save_params()">Сохранить</button>
                                 </div>
-                                <div class="alert alert-success" v-if="errors.length && errors[0] == 'Сохранено'" style="margin-top: 15px">Данные успешно сохранены.</div>
+                                <div class="alert alert-success" v-if="errors.length && errors[0] == 'Сохранено'"
+                                     style="margin-top: 15px">Данные успешно сохранены.
+                                </div>
                                 <error-block v-else :errors="errors"></error-block>
                             </div>
                             <span v-else class="text-center text-muted">Загрузка...</span>
@@ -39,13 +43,15 @@
                         <strong class="card-title">{{ form.title }}</strong>
                         <small>{{ form.doctor_description }}</small><br>
                         <small><i>{{ tt_description(form.timetable) }}</i></small><br>
-                        <small v-if="form.sent">Заполнен {{ form.done }} раз(а) / отправлен {{ form.sent }} раз(а) за последний месяц</small>
+                        <small v-if="form.sent">Заполнен {{ form.done }} раз(а) / отправлен {{ form.sent }} раз(а) за
+                            последний месяц</small>
                         <small v-else>Пока не отправлялось</small><br>
                         <div v-if="form.contract_id == current_contract_id">
                             <a href="#" @click="edit_timetable(form)">Изменить расписание</a>
                             <a href="#" @click="edit_form(form)">Редактировать</a>
                             <a href="#" @click="delete_form(form)">Удалить</a>
-                            <a target="_blank" :href="preview_form_url(form)">Просмотр</a>
+                            <a target="_blank" v-if="!mobile" :href="preview_form_url(form)">Просмотр</a>
+                            <a href="#" v-else @click="preview_form(form)">Просмотр</a>
                         </div>
                         <div v-else>
                             <small>Добавлен в другом контракте.</small>
@@ -53,7 +59,9 @@
                         <div v-if="form.contract_id == current_contract_id || form.template_id">
                             <a href="#" @click="send_now(form)">Отправить сейчас</a>
                         </div>
-                        <small v-if="!empty(form.template_id)" class="text-muted">ID шаблона: {{ form.template_id }}</small>
+                        <small v-if="!empty(form.template_id)" class="text-muted">ID шаблона: {{
+                                form.template_id
+                            }}</small>
                         <small v-else class="text-muted">ID опросника: {{ form.id }}</small>
                     </card>
                 </div>
@@ -65,12 +73,14 @@
                 <h4>Назначенные препараты</h4>
 
                 <div class="row">
-                    <card v-for="(medicine, i) in patient.medicines" :key="'medicine' + medicine.id" :image="images.medicine"
+                    <card v-for="(medicine, i) in patient.medicines" :key="'medicine' + medicine.id"
+                          :image="images.medicine"
                           class="col-lg-3 col-md-4">
                         <strong class="card-title">{{ medicine.title }}</strong>
                         <small>{{ medicine.rules }}</small><br>
                         <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
-                        <small v-if="medicine.sent">Подтверждено {{ medicine.done }} раз(а) / отправлено {{ medicine.sent }} раз(а) за последний месяц</small>
+                        <small v-if="medicine.sent">Подтверждено {{ medicine.done }} раз(а) / отправлено
+                            {{ medicine.sent }} раз(а) за последний месяц</small>
                         <small v-else>Пока не отправлялось</small><br>
                         <div v-if="medicine.contract_id == current_contract_id">
                             <a href="#" @click="edit_medicine(medicine)">Редактировать</a>
@@ -86,7 +96,8 @@
 
                     </card>
 
-                    <card v-for="(medicine, i) in patient.canceled_medicines" :key="'canceled_medicine' + medicine.id" :image="images.canceled_medicine"
+                    <card v-for="(medicine, i) in patient.canceled_medicines" :key="'canceled_medicine' + medicine.id"
+                          :image="images.canceled_medicine"
                           class="col-lg-3 col-md-4 text-muted">
                         <strong class="card-title">{{ medicine.title }}</strong>
                         <small>{{ medicine.rules }}</small><br>
@@ -113,7 +124,8 @@
                 <h4>Напоминания</h4>
 
                 <div class="row">
-                    <card v-for="(reminder, i) in patient.reminders" :key="'reminder_' + reminder.id" :image="images.reminder"
+                    <card v-for="(reminder, i) in patient.reminders" :key="'reminder_' + reminder.id"
+                          :image="images.reminder"
                           class="col-lg-3 col-md-4">
                         <strong class="card-title">Для {{ reminder.type == 'patient' ? 'пациента' : 'врача' }}</strong>
                         <small> {{ reminder.text }} </small><br>
@@ -132,7 +144,8 @@
                             ID шаблона: {{ reminder.template_id }}</small>
 
                     </card>
-                    <card v-for="(reminder, i) in patient.old_reminders" :key="'old_reminder_' + reminder.id" :image="images.old_reminder"
+                    <card v-for="(reminder, i) in patient.old_reminders" :key="'old_reminder_' + reminder.id"
+                          :image="images.old_reminder"
                           class="col-lg-3 col-md-4">
                         <strong class="card-title">Для {{ reminder.type == 'patient' ? 'пациента' : 'врача' }}</strong>
                         <small> {{ reminder.text }} </small><br>
@@ -151,7 +164,9 @@
 
                 <button class="btn btn-default btn-sm" @click="create_reminder()">Создать напоминание</button>
 
-                <button v-if="is_admin" class="btn btn-info btn-sm" @click="state = 'reminder_templates'">Управление шаблонами</button>
+                <button v-if="is_admin" class="btn btn-info btn-sm" @click="state = 'reminder_templates'">Управление
+                    шаблонами
+                </button>
 
             </div>
 
@@ -159,7 +174,8 @@
                 <h4>Алгоритмы</h4>
 
                 <div class="row">
-                    <card v-for="(algorithm, i) in patient.algorithms" :key="'algorithm_' + algorithm.id" :image="images.algorithm"
+                    <card v-for="(algorithm, i) in patient.algorithms" :key="'algorithm_' + algorithm.id"
+                          :image="images.algorithm"
                           class="col-lg-3 col-md-4">
                         <strong class="card-title">{{ algorithm.title }}</strong>
                         <small>{{ algorithm.description }}</small><br>
@@ -196,8 +212,11 @@
                     кнопку <i>назначить лекарство</i>.</p>
 
                 <ul>
-                    <li>Посмотреть все внесенные пациентом данные можно с помощью интеллектуального агента <strong>"Медкарта"</strong>.</li>
-                    <li>Посмотреть графики можно <a v-bind:href="url('graph')">здесь</a> (или с помощью кнопки <i>Действия -> Графики</i> в Medsenger).</li>
+                    <li>Посмотреть все внесенные пациентом данные можно с помощью интеллектуального агента <strong>"Медкарта"</strong>.
+                    </li>
+                    <li>Посмотреть графики можно <a v-bind:href="url('graph')">здесь</a> (или с помощью кнопки <i>Действия
+                        -> Графики</i> в Medsenger).
+                    </li>
                 </ul>
             </div>
 
@@ -209,7 +228,8 @@
                     вопросы.</p>
             </div>
 
-            <input type="text" v-model="search_query" class="form-control form-control-sm" style="margin-bottom: 5px;" placeholder="Поиск...">
+            <input type="text" v-model="search_query" class="form-control form-control-sm" style="margin-bottom: 5px;"
+                   placeholder="Поиск...">
 
             <div class="row" v-for="(group, name) in group_by(templates.forms.filter(show_form).map((form) => {
                 if (!form.template_category) form.template_category = 'Общее'
@@ -232,7 +252,8 @@
 
                     <a href="#" v-if="is_admin || patient.info.doctor_id == form.doctor_id" @click="edit_form(form)">Редактировать</a>
                     <a href="#" v-if="is_admin || patient.info.doctor_id == form.doctor_id" @click="delete_form(form)">Удалить</a>
-                    <a target="_blank" :href="preview_form_url(form)">Просмотр</a>
+                    <a target="_blank" v-if="!mobile" :href="preview_form_url(form)">Просмотр</a>
+                    <a href="#" v-else @click="preview_form(form)">Просмотр</a>
 
                     <div>
                         <a href="#" @click="send_now(form)">Отправить сейчас</a>
@@ -261,20 +282,27 @@
             </div>
 
             <div class="row">
-                <card v-for="(medicine, i) in templates.medicines.filter(show_medicine)" :key="'medicine_template_' + medicine.id" :image="images.medicine"
+                <card v-for="(medicine, i) in templates.medicines.filter(show_medicine)"
+                      :key="'medicine_template_' + medicine.id" :image="images.medicine"
                       class="col-lg-3 col-md-4">
                     <strong class="card-title">{{ medicine.title }}</strong>
                     <small>{{ medicine.rules }}</small><br>
                     <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
                     <a href="#" @click="attach_medicine(medicine)">Подключить</a>
-                    <a href="#" v-if="is_admin || patient.info.doctor_id == medicine.doctor_id" @click="edit_medicine(medicine)">Редактировать</a>
-                    <a href="#" v-if="is_admin || patient.info.doctor_id == medicine.doctor_id" @click="delete_medicine(medicine)">Удалить</a>
+                    <a href="#" v-if="is_admin || patient.info.doctor_id == medicine.doctor_id"
+                       @click="edit_medicine(medicine)">Редактировать</a>
+                    <a href="#" v-if="is_admin || patient.info.doctor_id == medicine.doctor_id"
+                       @click="delete_medicine(medicine)">Удалить</a>
 
                     <br>
 
                     <small class="text-muted">ID: {{ medicine.id }}</small>
-                    <small class="text-muted" v-if="is_admin && medicine.doctor_id">Doctor ID: {{ medicine.doctor_id }}</small>
-                    <small class="text-muted" v-if="is_admin && medicine.clinic_id">Clinic ID: {{ medicine.doctor_id }}</small>
+                    <small class="text-muted" v-if="is_admin && medicine.doctor_id">Doctor ID: {{
+                            medicine.doctor_id
+                        }}</small>
+                    <small class="text-muted" v-if="is_admin && medicine.clinic_id">Clinic ID: {{
+                            medicine.doctor_id
+                        }}</small>
                 </card>
                 <div v-if="!templates.medicines.length" class="col-md-12">
                     <p style="margin-bottom: 15px;">Список шаблонов пуст.</p>
@@ -294,9 +322,12 @@
             </div>
 
             <div class="row">
-                <card v-for="(reminder, i) in templates.reminders" :key="'reminder_template_' + reminder.id" :image="images.reminder"
+                <card v-for="(reminder, i) in templates.reminders" :key="'reminder_template_' + reminder.id"
+                      :image="images.reminder"
                       class="col-lg-3 col-md-4">
-                    <strong class="card-title">Для {{ reminder.type == 'both' ? 'всех' : (reminder.type == 'patient' ? 'пациента' : 'врача') }}</strong>
+                    <strong class="card-title">Для {{
+                            reminder.type == 'both' ? 'всех' : (reminder.type == 'patient' ? 'пациента' : 'врача')
+                        }}</strong>
                     <small>{{ reminder.type == 'doctor' ? reminder.doctor_text : reminder.patient_text }}</small><br>
                     <small><i>{{ tt_description(reminder.timetable) }}</i></small><br>
                     <small><i>в течение {{ reminder_duration(reminder) }} дн.</i></small><br>
@@ -337,7 +368,9 @@
             }), 'template_category')">
 
                 <div class="col-md-12"><h5>{{ name }}</h5></div>
-                <card v-for="(algorithm, i) in group" v-if="is_admin || !algorithm.clinics || algorithm.clinics.includes(clinic_id)" :key="'algorithm_' + algorithm.id" :image="images.algorithm"
+                <card v-for="(algorithm, i) in group"
+                      v-if="is_admin || !algorithm.clinics || algorithm.clinics.includes(clinic_id)"
+                      :key="'algorithm_' + algorithm.id" :image="images.algorithm"
                       class="col-lg-3 col-md-4">
                     <strong class="card-title">{{ algorithm.title }}</strong>
                     <small>{{ algorithm.description }}</small><br>
@@ -527,6 +560,9 @@ export default {
         },
         preview_form_url: function (form) {
             return this.url('/preview_form/' + form.id)
+        },
+        preview_form: function (form) {
+            Event.fire('preview-form', form)
         },
         send_now: function (form) {
             let alert = () => {
@@ -793,8 +829,6 @@ small {
 .card a {
     font-size: 90% !important;
 }
-
-
 
 
 </style>

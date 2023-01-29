@@ -130,7 +130,11 @@ def init(data):
         custom_forms = filter(lambda x: "form_" in x and params.get(x), params.keys())
         for custom_form in custom_forms:
             try:
-                form_id = int(custom_form.split('_')[1])
+                part = custom_form.split('_')[1]
+                if not part.isnumeric():
+                    continue
+
+                form_id = int(part)
 
                 form = form_manager.attach(form_id, contract, {
                     "timetable": params.get('form_timetable_{}'.format(form_id)),
@@ -141,20 +145,26 @@ def init(data):
                 if form.algorithm_id and str(form.algorithm_id) not in exclude_algorithms:
                     algorithm_manager.attach(form.algorithm_id, contract, params)
             except Exception as e:
-                print(e)
+                log(e)
 
         custom_medicines = filter(lambda x: "medicine_" in x and params.get(x), params.keys())
         for custom_medicine in custom_medicines:
             try:
-                medicine_id = int(custom_medicine.split('_')[1])
+                part = custom_medicine.split('_')[1]
+                if not part.isnumeric():
+                    continue
+                medicine_id = int(part)
                 medicine_manager.attach(medicine_id, contract, params.get('medicine_timetable_{}'.format(medicine_id)))
             except Exception as e:
-                print(e)
+                log(e)
 
         custom_algorithms = filter(lambda x: "algorithm_" in x and params.get(x), params.keys())
         for custom_algorithm in custom_algorithms:
             try:
-                algorithm_id = int(custom_algorithm.split('_')[1])
+                part = custom_algorithm.split('_')[1]
+                if not part.isnumeric():
+                    continue
+                algorithm_id = int(part)
                 algorithm_manager.attach(algorithm_id, contract)
             except Exception as e:
                 print(e)

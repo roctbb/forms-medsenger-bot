@@ -1,5 +1,10 @@
 <template>
     <div @click="blur()">
+
+        <button style="margin-bottom: 10px;" @click="back()" class="btn btn-danger btn-sm"
+                v-if="is_preview && mobile">Назад
+        </button>
+
         <h3>{{ this.form.title }}</h3>
         <p v-html="br(form.patient_description)"></p>
 
@@ -52,7 +57,9 @@
                                 <input class="form-check-input monitoring-input" type="radio"
                                        :id="'radio_' +  field.uid + '_' + j" :name="'radio_' +  field.uid + '_' + j"
                                        v-model="answers[field.uid]" :value="j" @change="$forceUpdate()">
-                                <label class="form-check-label" :for="'radio_' +  field.uid + '_' + j">{{ variant.text }}</label>
+                                <label class="form-check-label" :for="'radio_' +  field.uid + '_' + j">{{
+                                        variant.text
+                                    }}</label>
                             </div>
                         </div>
 
@@ -123,6 +130,9 @@ export default {
     components: {InteractiveMap, VisualAnalogScale, ActionDone, FormGroup48, ErrorBlock, DatePicker},
     props: {
         data: {
+            required: false,
+        },
+        preview: {
             required: false,
         }
     },
@@ -246,7 +256,7 @@ export default {
         },
         show_field: function (field) {
             if (field.show_if) {
-                if (this.answers[field.show_if] || field.show_if.uid  && this.answers[field.show_if.uid] == field.show_if.ans) {
+                if (this.answers[field.show_if] || field.show_if.uid && this.answers[field.show_if.uid] == field.show_if.ans) {
                     let f = this.form.fields.filter(f => {
                         return field.show_if.uid && f.uid == field.show_if.uid ||
                             field.show_if == f.uid
@@ -257,35 +267,52 @@ export default {
             }
             return true
 
+        },
+        back: function () {
+            Event.fire('back-to-dashboard');
+        },
+        load_form: function (form) {
+            if (form.fields === undefined) {
+                return;
+            }
+
+            this.form = form
+            this.blocks = []
+
+            let block = []
+
+            this.form.fields.forEach((item) => {
+                if (item.type == 'header' && block.length != 0) {
+                    this.blocks.push(block)
+                    block = []
+                }
+
+                block.push(item)
+            })
+            this.blocks.push(block)
+
+            this.set_default()
+
+            setTimeout(() => {
+                window.document.querySelector('input.monitoring-input').focus()
+            }, 300)
         }
     },
     created() {
-        this.form = this.data
-        this.blocks = []
-
-        let block = []
-
-        this.form.fields.forEach((item) => {
-            if (item.type == 'header' && block.length != 0) {
-                this.blocks.push(block)
-                block = []
-            }
-
-            block.push(item)
+        if (this.data) {
+            this.load_form(this.data)
+        }
+    },
+    mounted() {
+        Event.listen('load-form-preview', form => {
+            console.log("form preview", form)
+            this.is_preview = true
+            this.load_form(form)
         })
-        this.blocks.push(block)
-
-        this.set_default()
 
         Event.listen('interactive-map-answer', data => {
             this.answers[data.uid] = data.answer
         })
-    },
-    mounted() {
-        setTimeout(() => {
-            window.document.querySelector('input.monitoring-input').focus()
-        }, 300)
-
     }
 }
 </script>
