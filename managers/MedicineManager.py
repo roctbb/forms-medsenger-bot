@@ -106,7 +106,7 @@ class MedicineManager(Manager):
 
         self.medsenger_api.add_record(contract_id, 'medicine', medicine.title, params=params)
 
-        self.log_done("form_{}".format(medicine_id), contract_id)
+        self.log_done("medicine_{}".format(medicine_id), contract_id)
 
         if DYNAMIC_CACHE:
             self.medsenger_api.update_cache(contract_id)
