@@ -186,6 +186,14 @@
                     <small class="text-muted">мультипликатор</small>
                 </div>
 
+                <div class="col-md-1" v-if="criteria.left_mode == 'value'">
+                    <input
+                           class="form-control form-control-sm"
+                           :class="this.save_clicked && empty(criteria.should_occur) ? 'is-invalid' : ''"
+                           v-model="criteria.should_occur">
+                    <small class="text-muted">Сколько раз должно сработать?</small>
+                </div>
+
                 <!-- time -->
 
                 <div class="col-md-1" v-if="criteria.left_mode == 'time'">

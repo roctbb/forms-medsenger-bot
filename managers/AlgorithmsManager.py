@@ -332,7 +332,6 @@ class AlgorithmsManager(Manager):
             return is_init
 
         if mode != 'time':
-            objects = None
             dimension = criteria.get('left_dimension')
             offset_dim = criteria.get('left_offset_dimension', 'times')
             offset_count = criteria.get('left_offset', 0)
@@ -388,8 +387,9 @@ class AlgorithmsManager(Manager):
                                                           algorithm=algorithm)
             if not right_values or not left_values:
                 return False
-            found = False
 
+            occurred = 0
+            print(right_values, left_values)
             for i in range(len(left_values)):
                 lvalue = left_values[i]
 
@@ -419,8 +419,13 @@ class AlgorithmsManager(Manager):
                             })
 
                     if result:
-                        found = True
-            return found
+                        occurred += 1
+
+            should_occur = 1
+            if mode == "value" and criteria.get('should_occur') and criteria.get('should_occur').isnumeric():
+                should_occur = int(criteria.get('should_occur'))
+
+            return occurred >= should_occur
 
         else:
             date = criteria.get('value')
