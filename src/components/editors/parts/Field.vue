@@ -8,7 +8,7 @@
         </form-group48>
 
         <form-group48 title="Описание раздела" v-if="field.type == 'header'">
-            <input class="form-control form-control-sm" v-model="field.description"/>
+            <textarea class="form-control form-control-sm" v-model="field.description"></textarea>
         </form-group48>
 
         <div v-if="field.type != 'header'">
