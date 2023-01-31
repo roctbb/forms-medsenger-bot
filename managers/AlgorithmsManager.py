@@ -237,7 +237,7 @@ class AlgorithmsManager(Manager):
 
         if not values:
             answer = None, None
-        elif mode == 'value' and (
+        elif (mode == 'value' or mode == 'count') and (
             time.time() - int(answer['values'][0].get('timestamp')) > 60 * 60 * 12 or time.time() - int(
             answer['values'][0].get('uploaded')) > 10):
             answer = None, None
