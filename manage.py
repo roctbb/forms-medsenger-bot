@@ -1,8 +1,7 @@
 from celery import Celery
 from flask import Flask
 from models import db
-from flask_script import Manager
-from flask_migrate import Migrate, MigrateCommand
+from flask_migrate import Migrate
 from commands import MigrateLegacyStructure, ReinitTasks
 from sentry_sdk.integrations.flask import FlaskIntegration
 import sentry_sdk
@@ -38,10 +37,6 @@ celery = Celery(
     backend="redis://127.0.0.1:6379/0"
 )
 
-manager = Manager(app)
-manager.add_command('db', MigrateCommand)
-manager.add_command('migrate_to_complex_algs', MigrateLegacyStructure)
-manager.add_command('reinit_tasks', ReinitTasks)
 
 medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG)
 contract_manager = ContractManager(medsenger_api, db)
