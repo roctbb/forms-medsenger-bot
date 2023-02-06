@@ -2,7 +2,6 @@ from celery import Celery
 from flask import Flask
 from models import db
 from flask_migrate import Migrate
-from commands import MigrateLegacyStructure, ReinitTasks
 from sentry_sdk.integrations.flask import FlaskIntegration
 import sentry_sdk
 from managers.AlgorithmsManager import AlgorithmsManager

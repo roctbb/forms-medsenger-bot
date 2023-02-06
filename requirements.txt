@@ -1,7 +1,6 @@
 flask
 flask_sqlalchemy
 flask_migrate
-Flask-Script
 apscheduler
 psycopg2-binary
 requests
