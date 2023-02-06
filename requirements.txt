@@ -10,3 +10,4 @@ medsenger-api>=0.1.17
 pytz
 redis
 celery
+uwsgi
