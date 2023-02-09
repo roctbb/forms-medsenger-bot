@@ -1,8 +1,12 @@
 import Vue from 'vue'
 import App from './App.vue'
 import axios from "axios";
+import VueConfirmDialog from 'vue-confirm-dialog'
 import vmodal from 'vue-js-modal'
 import VueTheMask from 'vue-the-mask'
+
+Vue.use(VueConfirmDialog)
+Vue.component('vue-confirm-dialog', VueConfirmDialog.default)
 
 window.Event = new class {
     constructor() {
