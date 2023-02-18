@@ -303,7 +303,6 @@
             y="34.068066"
             id="text2353-7">
             <tspan
-                sodipodi:role="line"
                 id="tspan2351-2"
                 style="font-size:6.35px;text-align:center;text-anchor:middle;fill:#000000;stroke-width:0.264583"
                 x="63.266518"

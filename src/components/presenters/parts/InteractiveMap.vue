@@ -1,5 +1,5 @@
 <template>
-    <div v-if="map" style="margin: 5px">
+    <div v-if="map" class="map" style="margin: 5px">
         <human-map v-if="map == 'human'" :parts="parts" />
     </div>
 </template>
@@ -32,7 +32,7 @@ export default {
 </script>
 
 <style>
-svg {
+.map svg {
     display: block;
     position: absolute;
     top: 0;
