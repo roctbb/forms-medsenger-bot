@@ -566,7 +566,7 @@ export default {
         },
         send_now: function (form) {
             let alert = () => {
-                this.$alert("Опросник отправлен!");
+                window.alert("Опросник отправлен!");
             }
 
             let id = form.id
