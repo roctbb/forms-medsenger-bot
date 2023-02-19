@@ -261,6 +261,11 @@ def form_page(args, form, form_id):
     return get_ui('form', contract, medsenger_api.get_categories(), form_id)
 
 
+@app.route('/outsource_form/<form_id>', methods=['GET'])
+def outsource_form_page(form_id):
+    return get_ui('outsource-form', None, [], form_id)
+
+
 @app.route('/graph', methods=['GET'])
 @verify_args
 def graph_page(args, form):
@@ -569,6 +574,13 @@ def get_form(args, form, form_id):
     return jsonify(answer)
 
 
+@app.route('/api/outsource_form/<form_id>', methods=['GET'])
+def get_form_outsource(form_id):
+    form = form_manager.get(form_id)
+    answer = form.as_dict()
+    return jsonify(answer)
+
+
 @app.route('/api/form/<form_id>', methods=['POST'])
 @verify_args
 def post_form(args, form, form_id):
@@ -586,6 +598,18 @@ def post_form(args, form, form_id):
 
     return jsonify({
         "result": "ok",
+    })
+
+
+@app.route('/api/outsource_form/<form_id>', methods=['POST'])
+def post_outsource_form(form_id):
+    form = form_manager.get(form_id)
+    data = request.json
+
+    result, action_name, custom_params = form_manager.get_integral_evaluation(None, data, form)
+
+    return jsonify({
+        "result": custom_params,
     })
 
 

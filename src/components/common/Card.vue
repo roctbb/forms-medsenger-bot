@@ -33,11 +33,11 @@ export default {
     background-repeat: no-repeat;
     background-position: right bottom;
     background-size: 55px;
+    height: 95%;
 }
 
 .card a {
     font-size: 0.75rem;
-
 }
 
 </style>
