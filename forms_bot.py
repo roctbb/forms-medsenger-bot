@@ -392,11 +392,23 @@ def create_medicine(args, form):
         abort(422)
 
 
+@app.route('/api/settings/medicine_history', methods=['POST'])
+@only_doctor_args
+def edit_medicine_history(args, form):
+    form = medicine_manager.edit_history(request.json)
+
+    if form:
+        return jsonify(form.as_dict())
+    else:
+        abort(422)
+
+
 @app.route('/api/settings/delete_medicine', methods=['POST'])
 @only_doctor_args
 def delete_medicine(args, form):
     contract_id = args.get('contract_id')
     contract = contract_manager.get(contract_id)
+    medicine_manager.edit_history(request.json)
     result = medicine_manager.remove(request.json.get('id'), contract)
 
     if result:
@@ -413,6 +425,7 @@ def delete_medicine(args, form):
 def resume_medicine(args, form):
     contract_id = args.get('contract_id')
     contract = contract_manager.get(contract_id)
+    medicine_manager.edit_history(request.json)
     result = medicine_manager.resume(request.json.get('id'), contract)
 
     if result:

@@ -9,7 +9,8 @@
                         <vue-typeahead-bootstrap
                             :inputClass="this.save_clicked && !medicine.title ? 'is-invalid form-control form-control-sm' : 'form-control form-control-sm'"
                             v-model="medicine.title" ref="typeahead"
-                            :data="suggestions" :serializer="s => s.title" @hit="medicine.title = $event.title; medicine.dose = $event.dose; medicine.rules = $event.rules; $forceUpdate()"/>
+                            :data="suggestions" :serializer="s => s.title"
+                            @hit="medicine.title = $event.title; medicine.dose = $event.dose; medicine.rules = $event.rules; $forceUpdate()"/>
                     </form-group48>
 
                     <form-group48 title="Дозировка">
@@ -25,7 +26,8 @@
                     </form-group48>
 
                     <form-group48 title="Уведомить, если пациент не отмечает прием">
-                        <input class="form-check" type="checkbox" @change="warning_change()" v-model="medicine.warning_enabled"/>
+                        <input class="form-check" type="checkbox" @change="warning_change()"
+                               v-model="medicine.warning_enabled"/>
                     </form-group48>
 
                     <form-group48 v-if="medicine.warning_enabled" title="Прислать уведомление о пропусках через">
@@ -35,25 +37,20 @@
                         <small class="text-muted">дней</small>
                     </form-group48>
                 </card>
+                <button v-if="show_button" class="btn btn-danger" @click="go_back()">Назад</button>
+                <button class="btn btn-success" @click="save()">Сохранить <span
+                    v-if="medicine.is_template"> шаблон</span></button>
+                <button v-if="!medicine.id && is_admin" class="btn btn-default" @click="save(true)">Сохранить как шаблон
+                </button>
+                <button v-if="!medicine.id && !is_admin" class="btn btn-default" @click="save(true, 'doctor')">Сохранить как шаблон для себя
+                </button>
+                <button v-if="!medicine.id && !is_admin" class="btn btn-default" @click="save(true, 'clinic')">Сохранить как шаблон для клиники
+                </button>
             </div>
             <div class="col-lg-6">
                 <timetable-editor v-bind:data="medicine.timetable" :timetable_save_clicked="timetable_save_clicked"/>
             </div>
         </div>
-
-        <button v-if="show_button" class="btn btn-danger" @click="go_back()">Назад</button>
-        <button class="btn btn-success" @click="save()">Сохранить <span
-            v-if="medicine.is_template"> шаблон</span></button>
-        <button v-if="!medicine.id && is_admin" class="btn btn-default" @click="save(true)">Сохранить как
-            шаблон
-        </button>
-        <button v-if="!medicine.id && !is_admin" class="btn btn-default" @click="save(true, 'doctor')">Сохранить как шаблон
-            для себя
-        </button>
-        <button v-if="!medicine.id && !is_admin" class="btn btn-default" @click="save(true, 'clinic')">Сохранить как шаблон
-            для клиники
-        </button>
-
     </div>
 </template>
 
@@ -155,6 +152,33 @@ export default {
                         }
                     }
 
+                } else {
+                    let comment = this.medicine.dose ? `Дозировка: ${this.medicine.dose}` : ''
+                    comment += this.medicine.rules ? ` (${this.medicine.rules})` : ''
+                    if (this.medicine.timetable.mode == 'daily')
+                        comment += `\n${this.medicine.timetable.points.length} раз(а) в день`
+                    else if (this.medicine.timetable.mode == 'weekly')
+                        comment += `\n${this.medicine.timetable.points.length} раз(а) в неделю`
+                    else if (this.medicine.timetable.mode == 'monthly')
+                        comment += `\n${this.medicine.timetable.points.length} раз(а) в месяц`
+
+                    if (!this.medicine.prescription_history) {
+                        this.medicine.prescription_history = {
+                            day: this.medicine.id ? null : 1,
+                            current_period: this.medicine.timetable.periods_enabled ? 0 : null,
+                            records: [{
+                                description: this.medicine.id ? 'Изменены параметры' : 'Назначено',
+                                comment: comment,
+                                date: new Date().toLocaleDateString()
+                            }]
+                        }
+                    } else if (this.medicine.id) {
+                        this.medicine.prescription_history.records.push({
+                            description: 'Изменены параметры',
+                            comment: comment,
+                            date: new Date().toLocaleDateString()
+                        })
+                    }
                 }
 
                 this.axios.post(this.url('/api/settings/medicine'), this.medicine).then(this.process_save_answer).catch(this.process_save_error);
@@ -241,7 +265,8 @@ export default {
         Event.listen('navigate-to-edit-medicine-page', medicine => {
             this.show_button = true
             this.medicine = medicine
-            this.$refs.typeahead.inputValue = medicine.title;
+            if (this.$refs.typeahead)
+                this.$refs.typeahead.inputValue = medicine.title;
 
             if (this.medicine.warning_days > 0) {
                 this.medicine.warning_enabled = true;
