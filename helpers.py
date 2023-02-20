@@ -286,5 +286,7 @@ def fullfill_message(text, contract, medsenger_api):
     return text
 
 def clear_categories(categories_string):
-    return '|'.join(set(categories_string.strip('|').split('|')))
+    if categories_string:
+        return '|'.join(set(categories_string.strip('|').split('|')))
+    return categories_string
 
