@@ -160,7 +160,14 @@ export default {
 
             if (this.check()) {
                 this.submitted = true
-                this.axios.post(this.url('/api/form/' + this.form.id), this.answers).then(r => Event.fire('form-done')).catch(r => {
+                let url = this.page == 'outsource-form' ? ('/api/outsource_form/' + this.form.id) : this.url('/api/form/' + this.form.id)
+                this.axios.post(url, this.answers).then(r => {
+                    if (this.page == 'outsource-form') {
+                        Event.fire('outsource-form-done', r.data.result)
+                    } else {
+                        Event.fire('form-done')
+                    }
+                }).catch(r => {
                     this.errors.push('Ошибка сохранения')
                     this.submitted = false
                 });

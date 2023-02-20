@@ -126,6 +126,7 @@ class Medicine(db.Model, Compliance):
     rules = db.Column(db.Text, nullable=True)
     dose = db.Column(db.Text, nullable=True)
     timetable = db.Column(db.JSON, nullable=True)
+    prescription_history = db.Column(db.JSON, nullable=True)
     is_template = db.Column(db.Boolean, default=False)
     verify_dose = db.Column(db.Boolean, default=False)
     template_id = db.Column(db.Integer, db.ForeignKey('medicine.id', ondelete="set null"), nullable=True)
@@ -158,6 +159,7 @@ class Medicine(db.Model, Compliance):
             "rules": self.rules,
             "dose": self.dose,
             "timetable": self.timetable,
+            "prescription_history": self.prescription_history,
             "is_template": self.is_template,
             "notifications_disabled": self.notifications_disabled,
             "verify_dose": self.verify_dose,
@@ -246,7 +248,7 @@ class Form(db.Model, Compliance):
 
     is_template = db.Column(db.Boolean, default=False)
     template_id = db.Column(db.Integer, db.ForeignKey('form.id', ondelete="set null"), nullable=True)
-    categories = db.Column(db.String(512), nullable=True)
+    categories = db.Column(db.Text, nullable=True)
 
     algorithm_id = db.Column(db.Integer, db.ForeignKey('algorithm.id', ondelete="set null"), nullable=True)
     clinics = db.Column(db.JSON, nullable=True)
@@ -355,7 +357,7 @@ class Algorithm(db.Model):
     current_step = db.Column(db.String(128), nullable=True)
     timeout_at = db.Column(db.Integer, server_default="0")
 
-    categories = db.Column(db.String(512), nullable=True)
+    categories = db.Column(db.Text, nullable=True)
     is_template = db.Column(db.Boolean, default=False)
     template_id = db.Column(db.Integer, db.ForeignKey('algorithm.id', ondelete="set null"), nullable=True)
     attached_form = db.Column(db.Integer, nullable=True)

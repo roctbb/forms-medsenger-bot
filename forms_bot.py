@@ -261,6 +261,11 @@ def form_page(args, form, form_id):
     return get_ui('form', contract, medsenger_api.get_categories(), form_id)
 
 
+@app.route('/outsource_form/<form_id>', methods=['GET'])
+def outsource_form_page(form_id):
+    return get_ui('outsource-form', None, [], form_id)
+
+
 @app.route('/graph', methods=['GET'])
 @verify_args
 def graph_page(args, form):
@@ -387,11 +392,23 @@ def create_medicine(args, form):
         abort(422)
 
 
+@app.route('/api/settings/medicine_history', methods=['POST'])
+@only_doctor_args
+def edit_medicine_history(args, form):
+    form = medicine_manager.edit_history(request.json)
+
+    if form:
+        return jsonify(form.as_dict())
+    else:
+        abort(422)
+
+
 @app.route('/api/settings/delete_medicine', methods=['POST'])
 @only_doctor_args
 def delete_medicine(args, form):
     contract_id = args.get('contract_id')
     contract = contract_manager.get(contract_id)
+    medicine_manager.edit_history(request.json)
     result = medicine_manager.remove(request.json.get('id'), contract)
 
     if result:
@@ -408,6 +425,7 @@ def delete_medicine(args, form):
 def resume_medicine(args, form):
     contract_id = args.get('contract_id')
     contract = contract_manager.get(contract_id)
+    medicine_manager.edit_history(request.json)
     result = medicine_manager.resume(request.json.get('id'), contract)
 
     if result:
@@ -569,6 +587,13 @@ def get_form(args, form, form_id):
     return jsonify(answer)
 
 
+@app.route('/api/outsource_form/<form_id>', methods=['GET'])
+def get_form_outsource(form_id):
+    form = form_manager.get(form_id)
+    answer = form.as_dict()
+    return jsonify(answer)
+
+
 @app.route('/api/form/<form_id>', methods=['POST'])
 @verify_args
 def post_form(args, form, form_id):
@@ -586,6 +611,18 @@ def post_form(args, form, form_id):
 
     return jsonify({
         "result": "ok",
+    })
+
+
+@app.route('/api/outsource_form/<form_id>', methods=['POST'])
+def post_outsource_form(form_id):
+    form = form_manager.get(form_id)
+    data = request.json
+
+    result, action_name, custom_params = form_manager.get_integral_evaluation(None, data, form)
+
+    return jsonify({
+        "result": custom_params,
     })
 
 

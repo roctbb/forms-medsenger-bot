@@ -2,7 +2,8 @@
     <div v-if="integral_evaluation">
         <card title="Интегральная оценка">
             <form-group48 title="Оценивать с помощью скрипта">
-                <input type="checkbox" class="form-check" v-model="integral_evaluation.script_enabled" @change="$forceUpdate()">
+                <input type="checkbox" class="form-check" v-model="integral_evaluation.script_enabled"
+                       @change="$forceUpdate()">
             </form-group48>
 
             <div v-if="integral_evaluation.script_enabled">
@@ -35,6 +36,63 @@
                 <form-group48 title="Не отправлять результат врачу">
                     <input type="checkbox" class="form-check" v-model="integral_evaluation.dont_send_to_doctor">
                 </form-group48>
+
+                <form-group48 title="Сообщение пациенту, если результат критичен"
+                              :description="'Будет отправлено, у результата стоит галочка' + integral_evaluation.groups_enabled ? ' или сумма в группе превышает ее значение' : ''">
+                    <textarea class="form-control form-control-sm"
+                              v-model="integral_evaluation.warning_text"></textarea>
+                </form-group48>
+                <form-group48 title="Сообщение пациенту, если все в порядке">
+                    <textarea class="form-control form-control-sm"
+                              v-model="integral_evaluation.ok_text"></textarea>
+                </form-group48>
+
+                <hr>
+
+                <h6>Результаты</h6>
+                <span>Нижние границы в порядке убывания</span>
+
+                <div v-for="(result, i) in integral_evaluation.results">
+                    <div class="row">
+                        <div class="col-md-1">
+                            <small class="text-mutted">Критичность</small><br>
+                            <input type="checkbox" class="form-check" v-model="result.urgent"/>
+                        </div>
+                        <div class="col-md-1">
+                            <small class="text-mutted">Значение</small><br>
+                            <input type="number" class="form-control form-control-sm"
+                                   :class="save_clicked && empty(result.value) ? 'is-invalid' : ''"
+                                   v-model="result.value"/>
+                        </div>
+                        <div class="col">
+                            <small class="text-mutted">Результат</small><br>
+                            <input type="text"
+                                   :class="save_clicked && empty(result.description) ? 'is-invalid' : ''"
+                                   class="form-control form-control-sm" v-model="result.description"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-5">
+                            <small class="text-mutted">Сообщение для пациента</small><br>
+                            <textarea class="form-control form-control-sm" v-model="result.message"></textarea>
+                        </div>
+                        <div class="col-3">
+                            <small class="text-mutted">Действие (кнопка)</small><br>
+                            <input type="text" class="form-control form-control-sm" v-model="result.action"/>
+                        </div>
+                        <div class="col-3">
+                            <small class="text-mutted">Ссылка (кнопка)</small><br>
+                            <input type="text" class="form-control form-control-sm" v-model="result.url"/>
+                        </div>
+                        <div><br>
+                            <a class="btn btn-default btn-sm" v-if="integral_evaluation.results.length > 1"
+                               @click="remove_result(i)">Удалить</a>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <a class="btn btn-default btn-sm" @click="add_result()">Добавить</a>
+                <hr>
 
                 <form-group48 title="Группы вопросов">
                     <input type="checkbox" class="form-check" v-model="integral_evaluation.groups_enabled"
@@ -93,51 +151,6 @@
                     <br>
                 </div>
 
-                <h6>Результаты</h6>
-                <span>Сортировка в порядке убывания, входит верхняя граница</span>
-
-                <div v-for="(result, i) in integral_evaluation.results">
-                    <div class="row">
-                        <div class="col-md-2">
-                            <small class="text-mutted">Критичность</small><br>
-                            <input type="checkbox" class="form-check" v-model="result.urgent"/>
-                        </div>
-                        <div class="col-md-2">
-                            <small class="text-mutted">Значение</small><br>
-                            <input type="number" class="form-control form-control-sm"
-                                   :class="save_clicked && empty(result.value) ? 'is-invalid' : ''"
-                                   v-model="result.value"/>
-                        </div>
-                        <div class="col-md-3">
-                            <small class="text-mutted">Результат, если оценка выше значения</small><br>
-                            <input type="text"
-                                   :class="save_clicked && empty(result.description) ? 'is-invalid' : ''"
-                                   class="form-control form-control-sm" v-model="result.description"/>
-                        </div>
-
-                        <div class="col-md-3">
-                            <small class="text-mutted">Сообщение для пациента</small><br>
-                            <input type="text" class="form-control form-control-sm" v-model="result.message"/>
-                        </div>
-
-                        <div class="col-md-2"><br>
-                            <a class="btn btn-default btn-sm" v-if="integral_evaluation.results.length > 1"
-                               @click="remove_result(i)">Удалить</a>
-                        </div>
-                    </div>
-                </div>
-                <br>
-                <a class="btn btn-default btn-sm" @click="add_result()">Добавить</a>
-                <br>
-                <form-group48 title="Сообщение пациенту, если результат критичен"
-                              :description="'Будет отправлено, у результата стоит галочка' + integral_evaluation.groups_enabled ? ' или сумма в группе превышает ее значение' : ''">
-                    <textarea class="form-control form-control-sm"
-                              v-model="integral_evaluation.warning_text"></textarea>
-                </form-group48>
-                <form-group48 title="Сообщение пациенту, если все в порядке">
-                    <textarea class="form-control form-control-sm"
-                              v-model="integral_evaluation.ok_text"></textarea>
-                </form-group48>
             </div>
         </card>
     </div>

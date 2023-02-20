@@ -196,6 +196,21 @@ class MedicineManager(Manager):
 
         return result
 
+    def edit_history(self, data):
+        try:
+            medicine_id = data.get('id')
+            if not medicine_id:
+                return None
+            medicine = Medicine.query.filter_by(id=medicine_id).first_or_404()
+            medicine.prescription_history = data.get('prescription_history')
+            self.__commit__()
+
+            return medicine
+
+        except Exception as e:
+            log(e)
+            return None
+
     def create_or_edit(self, data, contract):
         try:
             is_new = True
@@ -212,6 +227,7 @@ class MedicineManager(Manager):
             medicine.rules = data.get('rules')
             medicine.dose = data.get('dose')
             medicine.timetable = data.get('timetable')
+            medicine.prescription_history = data.get('prescription_history')
             medicine.template_id = data.get('template_id')
             medicine.warning_days = data.get('warning_days')
             medicine.verify_dose = data.get('verify_dose', False)

@@ -226,7 +226,9 @@ export default {
                                 value: parseInt(res.value),
                                 description: res.description,
                                 message: res.message,
-                                urgent: res.urgent
+                                urgent: res.urgent,
+                                action: res.action,
+                                url: res.url
                             }
                         })
 

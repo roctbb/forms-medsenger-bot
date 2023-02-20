@@ -351,7 +351,7 @@ class FormManager(Manager):
         action_name = 'Заполнение опросника ID {} "{}"'.format(form.template_id if form.template_id else form.id,
                                                                form.title)
 
-        integral_result, integral_description, custom_params = self._get_integral_evaluation(contract_id, answers, form)
+        integral_result, integral_description, custom_params = self.get_integral_evaluation(contract_id, answers, form)
         action_name += integral_description
 
         packet.append(('action', action_name, custom_params))
@@ -377,7 +377,7 @@ class FormManager(Manager):
 
         return True
 
-    def _get_integral_evaluation(self, contract_id, answers, form):
+    def get_integral_evaluation(self, contract_id, answers, form):
         result = None
         action_name = ''
         custom_params = {}
@@ -439,6 +439,9 @@ class FormManager(Manager):
                 custom_params['message'] = res.get('message', None)
                 custom_params['urgent'] = res.get('urgent', False)
                 custom_params['score'] = score
+                if contract_id is None:
+                    custom_params['action'] = res.get('action', None)
+                    custom_params['url'] = res.get('url', None)
                 break
 
         if result is None:
@@ -447,7 +450,7 @@ class FormManager(Manager):
         action_name += ', результат интегральной оценки - {}'.format(result)
 
         category = form.integral_evaluation.get('category')
-        if category != 'none':
+        if category != 'none' and contract_id:
             self.medsenger_api.add_record(contract_id, category, score, params={'form_id': form.id})
 
         if form.integral_evaluation.get('groups_enabled'):
@@ -455,7 +458,7 @@ class FormManager(Manager):
 
             for group in form.integral_evaluation['groups']:
                 category = group.get('category')
-                if category != 'none':
+                if category != 'none' and contract_id:
                     self.medsenger_api.add_record(contract_id, category, group_scores[group['description']],
                                                   params={'form_id': form.id})
                 if group_scores[group['description']] > group['value']:

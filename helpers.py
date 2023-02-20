@@ -81,8 +81,13 @@ def verify_json(func):
 
 
 def get_ui(page, contract, categories='[]', object_id=None, is_preview=False, dashboard_parts=[]):
-    return render_template('index.html', page=page, object_id=object_id, contract_id=contract.id, api_host=MAIN_HOST.replace('8001', '8000'), local_host=LOCALHOST, agent_token=contract.agent_token,
-                           agent_id=AGENT_ID, categories=json.dumps(categories), is_admin=str(bool(contract.is_admin)).lower(), lc=dir_last_updated('static'), clinic_id=contract.clinic_id,
+    return render_template('index.html', page=page, object_id=object_id,
+                           contract_id=contract.id if contract else 'undefined',
+                           api_host=MAIN_HOST.replace('8001', '8000'), local_host=LOCALHOST,
+                           agent_token=contract.agent_token if contract else 'undefined',
+                           agent_id=AGENT_ID, categories=json.dumps(categories),
+                           is_admin=str(bool(contract.is_admin)).lower() if contract else 'false',
+                           lc=dir_last_updated('static'), clinic_id=contract.clinic_id if contract else 'undefined',
                            is_preview=str(is_preview).lower(), dashboard_parts=json.dumps(dashboard_parts))
 
 
@@ -98,12 +103,14 @@ def dir_last_updated(folder):
 
 
 def generate_event_description(criteria, l_value, r_value, category_names, current_answer):
-    if criteria.get('left_mode') == 'value' and criteria.get('right_mode') == 'value' and criteria.get('sign') in ['equal', 'contains'] and current_answer:
+    if criteria.get('left_mode') == 'value' and criteria.get('right_mode') == 'value' and criteria.get('sign') in [
+        'equal', 'contains'] and current_answer:
         if not current_answer.get('params', {}).get('type'):
             return ""
 
         if current_answer['params'].get('type') != 'checkbox':
-            return "<strong>{}</strong>: {}".format(current_answer['params']['question_text'], current_answer['params']['answer'])
+            return "<strong>{}</strong>: {}".format(current_answer['params']['question_text'],
+                                                    current_answer['params']['answer'])
         else:
             return "{}".format(current_answer['params']['answer'])
 
@@ -157,19 +164,21 @@ def generate_event_description(criteria, l_value, r_value, category_names, curre
     if criteria.get('right_mode') in ['value', 'category_value']:
         comment += "<strong>{}</strong>".format(criteria.get('value'))
     else:
-        comment += "{} за {} часа (ов) (<strong>{}</strong>)".format(right_modes[criteria.get('right_mode')], criteria.get('right_hours'), r_value)
+        comment += "{} за {} часа (ов) (<strong>{}</strong>)".format(right_modes[criteria.get('right_mode')],
+                                                                     criteria.get('right_hours'), r_value)
 
         if criteria.get('right_category'):
             comment += " '{}'".format(category_names.get(criteria.get('right_category')))
 
     return comment
 
+
 def generate_contract_description(contract):
     description = ""
 
     if contract.forms:
         description += 'Назначены опросники:<br> - '
-        description += '<br> - '.join(map(lambda x:x.get_description(), contract.forms))
+        description += '<br> - '.join(map(lambda x: x.get_description(), contract.forms))
 
         description += '<br><br>'
     else:
@@ -177,7 +186,7 @@ def generate_contract_description(contract):
 
     if contract.medicines:
         description += 'Назначены лекарства:<br> - '
-        description += '<br> - '.join(map(lambda x:x.get_description(), contract.medicines))
+        description += '<br> - '.join(map(lambda x: x.get_description(), contract.medicines))
 
         description += '<br>'
     else:

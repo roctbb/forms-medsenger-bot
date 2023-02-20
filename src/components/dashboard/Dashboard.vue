@@ -75,13 +75,59 @@
                 <div class="row">
                     <card v-for="(medicine, i) in patient.medicines" :key="'medicine' + medicine.id"
                           :image="images.medicine"
-                          class="col-lg-3 col-md-4">
+                          class="col-lg-6 col-md-6">
                         <strong class="card-title">{{ medicine.title }}</strong>
                         <small>{{ medicine.rules }}</small><br>
                         <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
                         <small v-if="medicine.sent">Подтверждено {{ medicine.done }} раз(а) / отправлено
                             {{ medicine.sent }} раз(а) за последний месяц</small>
                         <small v-else>Пока не отправлялось</small><br>
+                        <div v-if="medicine.prescription_history">
+                            <input class="btn btn-link btn-sm text-muted shadow-none" type="button"
+                                   data-toggle="collapse" style="padding: 0"
+                                   aria-expanded="false" value="История предписаний"
+                                   :data-target="`#collapse-medicine-${medicine.id}`"
+                                   :aria-controls="`collapse-medicine-${medicine.id}`">
+                            <div class="collapse" :id="`collapse-medicine-${medicine.id}`">
+                                <div class="card card-body"
+                                     style="background-color: transparent; border-color: transparent; padding: 0;">
+                                    <table class="table table-hover" style="font-size: small">
+                                        <colgroup>
+                                            <col span="1" style="width: 15%;">
+                                            <col span="1" style="width: 25%;">
+                                            <col span="1" style="width: 60%;">
+                                        </colgroup>
+
+                                        <thead>
+                                        <tr class="table-info">
+                                            <th scope="col">Дата</th>
+                                            <th scope="col">Состояние</th>
+                                            <th scope="col">Комментарий</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr v-for="record in medicine.prescription_history.records">
+                                            <th scope="row" style="text-align: left;">{{ record.date }}</th>
+                                            <td>{{ record.description }}</td>
+                                            <td>
+                                                <textarea class="form-control form-control-sm"
+                                                          v-model="record.comment"
+                                                          :disabled="medicine.contract_id != current_contract_id"></textarea>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                    <div>
+                                        <button class="btn btn-success btn-sm" :disabled="medicine.lock_btn"
+                                                @click="save_history(medicine)">
+                                            Сохранить
+                                        </button>
+                                        <br>
+                                        {{ medicine.response }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div v-if="medicine.contract_id == current_contract_id">
                             <a href="#" @click="edit_medicine(medicine)">Редактировать</a>
                             <a href="#" @click="delete_medicine(medicine)">Отменить</a>
@@ -98,12 +144,58 @@
 
                     <card v-for="(medicine, i) in patient.canceled_medicines" :key="'canceled_medicine' + medicine.id"
                           :image="images.canceled_medicine"
-                          class="col-lg-3 col-md-4 text-muted">
+                          class="col-lg-6 col-md-6 text-muted">
                         <strong class="card-title">{{ medicine.title }}</strong>
                         <small>{{ medicine.rules }}</small><br>
                         <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
-                        <small>Назначено: {{ medicine.prescribed_at }}</small><br>
                         <small>Отменено: {{ medicine.canceled_at }}</small><br>
+                        <div v-if="medicine.prescription_history">
+                            <input class="btn btn-link btn-sm text-muted shadow-none" type="button"
+                                   data-toggle="collapse" style="padding: 0"
+                                   aria-expanded="false" value="История предписаний"
+                                   :data-target="`#collapse-medicine-${medicine.id}`"
+                                   :aria-controls="`collapse-medicine-${medicine.id}`">
+                            <div class="collapse" :id="`collapse-medicine-${medicine.id}`">
+                                <div class="card card-body"
+                                     style="background-color: transparent; border-color: transparent; padding: 0;">
+                                    <table class="table table-hover" style="font-size: small">
+                                        <colgroup>
+                                            <col span="1" style="width: 15%;">
+                                            <col span="1" style="width: 25%;">
+                                            <col span="1" style="width: 60%;">
+                                        </colgroup>
+
+                                        <thead>
+                                        <tr class="table-info">
+                                            <th scope="col">Дата</th>
+                                            <th scope="col">Состояние</th>
+                                            <th scope="col">Комментарий</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr v-for="record in medicine.prescription_history.records">
+                                            <th scope="row" style="text-align: left;">{{ record.date }}</th>
+                                            <td>{{ record.description }}</td>
+                                            <td>
+                                                <textarea class="form-control form-control-sm"
+                                                          v-model="record.comment"
+                                                          :disabled="medicine.contract_id != current_contract_id"></textarea>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                    <div>
+                                        <button class="btn btn-success btn-sm" :disabled="medicine.lock_btn"
+                                                @click="save_history(medicine)">
+                                            Сохранить
+                                        </button>
+                                        <br>
+                                        {{ medicine.response }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div v-if="medicine.contract_id == current_contract_id">
                             <a href="#" @click="resume_medicine(medicine)">Возобновить</a>
                         </div>
@@ -566,7 +658,7 @@ export default {
         },
         send_now: function (form) {
             let alert = () => {
-                this.$alert("Опросник отправлен!");
+                window.alert("Опросник отправлен!");
             }
 
             let id = form.id
@@ -617,6 +709,12 @@ export default {
                     },
                     callback: confirm => {
                         if (confirm) {
+                            medicine.prescription_history.records.push({
+                                description: 'Возобновлен',
+                                comment: '',
+                                date: new Date().toLocaleDateString()
+                            })
+                            this.$forceUpdate()
                             this.axios.post(this.url('/api/settings/resume_medicine'), medicine).then(this.process_resume_medicine_answer);
                         }
                     }
@@ -667,6 +765,12 @@ export default {
                     },
                     callback: confirm => {
                         if (confirm) {
+                            medicine.prescription_history.records.push({
+                                description: 'Отменен',
+                                comment: '',
+                                date: new Date().toLocaleDateString()
+                            })
+                            this.$forceUpdate()
                             this.axios.post(this.url('/api/settings/delete_medicine'), medicine).then(this.process_delete_medicine_answer);
                         }
                     }
@@ -784,6 +888,20 @@ export default {
                 return medicine.doctor_id == this.patient.info.doctor_id
             }
             return true;
+        },
+        save_history: function (medicine) {
+            medicine.lock_btn = true
+            this.$forceUpdate()
+
+            this.axios.post(this.url('/api/settings/medicine_history'), medicine).then(r => {
+                medicine.response = 'Данные успешно сохранены.'
+                medicine.lock_btn = false
+                this.$forceUpdate()
+            }).catch(r => {
+                medicine.response = 'Ошибка сохранения'
+                medicine.lock_btn = false
+                this.$forceUpdate()
+            });
         }
     },
     mounted() {
