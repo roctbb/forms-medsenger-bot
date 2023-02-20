@@ -118,7 +118,8 @@
                                         </tbody>
                                     </table>
                                     <div>
-                                        <button class="btn btn-success btn-sm" @click="save_history(i)">
+                                        <button class="btn btn-success btn-sm" :disabled="medicine.lock_btn"
+                                                @click="save_history(medicine)">
                                             Сохранить
                                         </button>
                                         <br>
@@ -184,7 +185,8 @@
                                         </tbody>
                                     </table>
                                     <div>
-                                        <button class="btn btn-success btn-sm" @click="save_history(medicine)">
+                                        <button class="btn btn-success btn-sm" :disabled="medicine.lock_btn"
+                                                @click="save_history(medicine)">
                                             Сохранить
                                         </button>
                                         <br>
@@ -888,11 +890,16 @@ export default {
             return true;
         },
         save_history: function (medicine) {
+            medicine.lock_btn = true
+            this.$forceUpdate()
+
             this.axios.post(this.url('/api/settings/medicine_history'), medicine).then(r => {
                 medicine.response = 'Данные успешно сохранены.'
+                medicine.lock_btn = false
                 this.$forceUpdate()
             }).catch(r => {
                 medicine.response = 'Ошибка сохранения'
+                medicine.lock_btn = false
                 this.$forceUpdate()
             });
         }
