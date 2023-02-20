@@ -4,7 +4,7 @@ from functools import reduce
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import backref
-from helpers import get_step
+from helpers import get_step, clear_categories
 
 db = SQLAlchemy()
 
@@ -328,7 +328,7 @@ class Form(db.Model, Compliance):
         new_form.integral_evaluation = self.integral_evaluation
         new_form.timetable = self.timetable
         new_form.algorithm_id = self.algorithm_id
-        new_form.categories = self.categories
+        new_form.categories = clear_categories(self.categories)
         new_form.warning_days = self.warning_days
         new_form.instant_report = self.instant_report
 
@@ -399,7 +399,7 @@ class Algorithm(db.Model):
         new_algorithm.description = self.description
         new_algorithm.steps = self.steps
         new_algorithm.common_conditions = self.common_conditions
-        new_algorithm.categories = self.categories
+        new_algorithm.categories = clear_categories(self.categories)
         new_algorithm.attached_form = self.attached_form
         new_algorithm.initial_step = self.initial_step
         new_algorithm.attach_date = attach

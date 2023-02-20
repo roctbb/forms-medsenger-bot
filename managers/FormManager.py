@@ -4,7 +4,7 @@ from copy import copy
 from datetime import datetime
 
 from config import DYNAMIC_CACHE
-from helpers import log
+from helpers import log, clear_categories
 from managers.Manager import Manager
 from models import Patient, Contract, Form, ActionRequest
 from helpers import generate_timetable
@@ -492,7 +492,7 @@ class FormManager(Manager):
             form.fields = data.get('fields')
             form.has_integral_evaluation = bool(data.get('has_integral_evaluation'))
             form.integral_evaluation = data.get('integral_evaluation')
-            form.categories = '|'.join(set(data.get('categories').split('|')))
+            form.categories = clear_categories(data.get('categories'))
             form.template_id = data.get('template_id')
             form.warning_days = data.get('warning_days')
             form.instant_report = bool(data.get('instant_report'))

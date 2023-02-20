@@ -12,7 +12,8 @@ from config import DYNAMIC_CACHE
 
 from sqlalchemy.orm.attributes import flag_modified, flag_dirty
 
-from helpers import log, generate_event_description, DATACACHE, timezone_now, localize, fullfill_message
+from helpers import log, generate_event_description, DATACACHE, timezone_now, localize, fullfill_message, \
+    clear_categories
 from managers.ContractsManager import ContractManager
 from managers.FormManager import FormManager
 from managers.Manager import Manager
@@ -683,14 +684,21 @@ class AlgorithmsManager(Manager):
     def update_categories(self, algorithm):
         step = self.get_step(algorithm)
 
-        algorithm.categories = '|'.join(
-            map(lambda c: '|'.join(['|'.join(k['category'] for k in block) for block in c['criteria']]),
-                step['conditions']))
+        categories = []
+        conditions = []
+
+        if step and step.get('conditions'):
+            conditions += step['conditions']
 
         if algorithm.common_conditions:
-            algorithm.categories = '|'.join([algorithm.categories, '|'.join(
-                map(lambda c: '|'.join(['|'.join(k['category'] for k in block) for block in c['criteria']]),
-                    algorithm.common_conditions))])
+            conditions += algorithm.common_conditions
+
+        for condition in conditions:
+            for block in condition['criteria']:
+                for k in block:
+                    categories.append(k['category'])
+
+        algorithm.categories = "|".join(set(categories))
 
     def change_step(self, algorithm, step):
         new_step = self.get_step(algorithm, step)
@@ -920,7 +928,7 @@ class AlgorithmsManager(Manager):
             algorithm.steps = data.get('steps')
             algorithm.common_conditions = data.get('common_conditions')
             algorithm.description = data.get('description')
-            algorithm.categories = data.get('categories')
+            algorithm.categories = clear_categories(data.get('categories'))
             algorithm.template_id = data.get('template_id')
             algorithm.initial_step = data.get('steps')[0].get('uid')
 
