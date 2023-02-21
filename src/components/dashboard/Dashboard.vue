@@ -765,6 +765,10 @@ export default {
                     },
                     callback: confirm => {
                         if (confirm) {
+                            if (!medicine.prescription_history)
+                                medicine.prescription_history = {
+                                    records: []
+                                }
                             medicine.prescription_history.records.push({
                                 description: 'Отменен',
                                 comment: '',
