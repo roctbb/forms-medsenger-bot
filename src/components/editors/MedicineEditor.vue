@@ -238,7 +238,8 @@ export default {
             this.medicine.id = undefined
             this.medicine.is_template = false;
             this.medicine.template_id = medicine.id;
-            this.$refs.typeahead.inputValue = medicine.title;
+            if (this.$refs.typeahead)
+                this.$refs.typeahead.inputValue = medicine.title;
             this.backup = JSON.stringify(this.medicine)
 
             this.save()
