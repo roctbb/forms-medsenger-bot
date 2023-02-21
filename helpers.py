@@ -284,3 +284,9 @@ def fullfill_message(text, contract, medsenger_api):
         text = text.replace('CONTRACT_DESCRIPTION', generate_contract_description(contract))
 
     return text
+
+def clear_categories(categories_string):
+    if categories_string:
+        return '|'.join(set(categories_string.strip('|').split('|')))
+    return categories_string
+
