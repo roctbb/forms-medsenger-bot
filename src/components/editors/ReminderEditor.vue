@@ -61,9 +61,9 @@
         </div>
 
         <button v-if="show_button" class="btn btn-danger" @click="go_back()">Назад</button>
-        <button class="btn btn-success" @click="save()">Сохранить <span
+        <button :disabled="button_lock" class="btn btn-success" @click="save()">Сохранить <span
             v-if="reminder.is_template"> шаблон</span></button>
-        <button v-if="!reminder.id && is_admin" class="btn btn-default" @click="save(true)">
+        <button :disabled="button_lock" v-if="!reminder.id && is_admin" class="btn btn-default" @click="save(true)">
             Сохранить как шаблон
         </button>
 
@@ -167,7 +167,10 @@ export default {
                     this.reminder.is_template = true;
                 }
 
-                this.axios.post(this.url('/api/settings/reminder'), this.reminder).then(this.process_save_answer).catch(this.process_save_error);
+                if (!this.button_lock) {
+                    this.button_lock = true
+                    this.axios.post(this.url('/api/settings/reminder'), this.reminder).then(this.process_save_answer).catch(this.process_save_error);
+                }
             }
         },
         process_save_answer: function (response) {
@@ -185,12 +188,13 @@ export default {
             })
             else Event.fire('back-to-dashboard', this.reminder)
 
+            this.button_lock = false
             this.reminder = undefined
             this.validated = false
             this.timetable_validated = [false]
         },
         process_save_error: function (response) {
-
+            this.button_lock = false
             this.errors.push('Ошибка сохранения');
         },
     },
@@ -201,7 +205,8 @@ export default {
             backup: "",
             validated: false,
             timetable_validated: [false],
-            show_button: false
+            show_button: false,
+            button_lock: false
         }
     },
     created() {

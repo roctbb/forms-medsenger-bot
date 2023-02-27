@@ -183,9 +183,9 @@
 
         </div>
         <button class="btn btn-danger" @click="go_back()">Назад</button>
-        <button class="btn btn-success" @click="save()">Сохранить <span v-if="algorithm.is_template"> шаблон</span>
+        <button :disabled="button_lock" class="btn btn-success" @click="save()">Сохранить <span v-if="algorithm.is_template"> шаблон</span>
         </button>
-        <button class="btn btn-primary" v-if="!algorithm.id && is_admin" @click="save(true)">Сохранить как шаблон
+        <button :disabled="button_lock" class="btn btn-primary" v-if="!algorithm.id && is_admin" @click="save(true)">Сохранить как шаблон
         </button>
     </div>
 </template>
@@ -480,7 +480,10 @@ export default {
                     this.algorithm.is_template = true;
                 }
 
-                this.axios.post(this.url('/api/settings/algorithm'), this.algorithm).then(this.process_save_answer).catch(this.process_save_error);
+                if (!this.button_lock) {
+                    this.button_lock = true
+                    this.axios.post(this.url('/api/settings/algorithm'), this.algorithm).then(this.process_save_answer).catch(this.process_save_error);
+                }
             }
         },
         process_save_answer: function (response) {
@@ -494,11 +497,12 @@ export default {
 
             if (is_new) Event.fire('algorithm-created', response.data)
             else Event.fire('back-to-dashboard', response.data)
-
+            this.button_lock = false
             this.algorithm = undefined
         },
         process_save_error: function (response) {
-            this.errors.push('Ошибка сохранения');
+            this.button_lock = false
+            this.errors.push('Ошибка сохранения')
         },
         remove_action: function (index) {
             index[1].splice(index[0], 1);
@@ -523,6 +527,7 @@ export default {
             algorithm: undefined,
             backup: "",
             save_clicked: false,
+            button_lock: false,
             actions_save_clicked: [],
             criteria_save_clicked: []
         }
