@@ -4,7 +4,7 @@
             <h5 v-if="!form.id">Создание опросника</h5>
             <h5 v-if="form.id">Настройка опросника "{{ form.title }}" </h5>
 
-            <timetable-editor :data="form.timetable" :timetable_save_clicked="this.timetable_save_clicked">&nbsp;<a
+            <timetable-editor source="form" :data="form.timetable" :timetable_save_clicked="this.timetable_save_clicked">&nbsp;<a
                 v-if="form.id"
                 class="btn btn-success btn-sm"
                 @click="save()">Сохранить</a>

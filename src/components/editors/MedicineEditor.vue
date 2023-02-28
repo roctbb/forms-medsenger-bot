@@ -44,14 +44,17 @@
                         @click="save(true)">Сохранить как шаблон
                 </button>
                 <button :disabled="button_lock" v-if="!medicine.id && !is_admin" class="btn btn-default"
-                        @click="save(true, 'doctor')">Сохранить как шаблон для себя
+                        @click="save(true, 'doctor')">
+                    Сохранить как шаблон для себя
                 </button>
                 <button :disabled="button_lock" v-if="!medicine.id && !is_admin" class="btn btn-default"
-                        @click="save(true, 'clinic')">Сохранить как шаблон для клиники
+                        @click="save(true, 'clinic')">
+                    Сохранить как шаблон для клиники
                 </button>
             </div>
             <div class="col-lg-6">
-                <timetable-editor v-bind:data="medicine.timetable" :timetable_save_clicked="timetable_save_clicked"/>
+                <timetable-editor source="medicine" :data="medicine.timetable"
+                                  :timetable_save_clicked="timetable_save_clicked"/>
             </div>
         </div>
     </div>
@@ -156,8 +159,8 @@ export default {
                     }
 
                 } else {
-                    let comment = this.medicine.dose ? `Дозировка: ${this.medicine.dose}` : ''
-                    comment += this.medicine.rules ? ` (${this.medicine.rules})` : ''
+                    let comment = !this.empty(this.medicine.dose) ? `Дозировка: ${this.medicine.dose}` : ''
+                    comment += !this.empty(this.medicine.rules) ? ` (${this.medicine.rules})` : ''
                     if (this.medicine.timetable.mode == 'daily')
                         comment += `\n${this.medicine.timetable.points.length} раз(а) в день`
                     else if (this.medicine.timetable.mode == 'weekly')

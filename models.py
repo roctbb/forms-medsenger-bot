@@ -137,6 +137,7 @@ class Medicine(db.Model, Compliance):
     warning_timestamp = db.Column(db.Integer, default=0)
     filled_timestamp = db.Column(db.Integer, default=0)
     asked_timestamp = db.Column(db.Integer, default=0)
+    detach_date = db.Column(db.Date, nullable=True)
 
     prescribed_at = db.Column(db.DateTime, server_default=db.func.now())
     canceled_at = db.Column(db.DateTime, nullable=True)
@@ -165,6 +166,7 @@ class Medicine(db.Model, Compliance):
             "verify_dose": self.verify_dose,
             "template_id": self.template_id,
             "warning_days": self.warning_days,
+            "detach_date": self.detach_date.strftime('%Y-%m-%d') if self.detach_date else None,
             "prescribed_at": self.prescribed_at.strftime("%d.%m.%Y"),
             "canceled_at": self.canceled_at.strftime("%d.%m.%Y") if self.canceled_at else None,
             "sent": sent,

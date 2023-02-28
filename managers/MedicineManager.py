@@ -166,6 +166,38 @@ class MedicineManager(Manager):
 
         return id
 
+    def check_detach_dates(self, app):
+        with app.app_context():
+            medicines = list(Medicine.query.filter(
+                (Medicine.detach_date == datetime.now().date()) & (Medicine.is_template == False) & (Medicine.canceled_at == None)).all())
+
+            for medicine in medicines:
+                self.medsenger_api.send_message(medicine.contract_id,"Врач отменил препарат {}.".format(medicine.get_description()))
+                params = {
+                    'obj_id': medicine.id,
+                    'action': 'cancel',
+                    'object_type': 'medicine',
+                    'description': medicine.get_description(True, False)
+                }
+                self.medsenger_api.add_record(medicine.contract_id, 'doctor_action',
+                                              'Отменен препарат "{}".'.format(medicine.title), params=params)
+
+                record = {
+                    'description': 'Отменен',
+                    'comment': 'Автоматически',
+                    'date': datetime.now().strftime('%d.%m.%Y')
+                }
+
+                if medicine.prescription_history:
+                    history = medicine.prescription_history.copy()
+                    history['last_updated'] = datetime.now().timestamp()
+                    history['records'].append(record)
+                    medicine.prescription_history = history
+                else:
+                    medicine.prescription_history = {'records': [record]}
+                medicine.canceled_at = datetime.now()
+            self.__commit__()
+
     def log_request(self, medicine, contract_id=None, description=None):
         if not contract_id:
             contract_id = medicine.contract_id
@@ -241,6 +273,9 @@ class MedicineManager(Manager):
             else:
                 medicine.patient_id = contract.patient_id
                 medicine.contract_id = contract.id
+
+                detach_date = medicine.timetable.get('detach_date')
+                medicine.detach_date = datetime.strptime(detach_date, "%Y-%m-%d") if detach_date else None
 
                 action = 'назначил препарат' if is_new else 'изменил параметры приема препарата'
                 self.medsenger_api.send_message(contract.id,

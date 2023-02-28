@@ -55,8 +55,19 @@
             </div>
 
         </div>
-        <div v-else>
-            <slot></slot>
+        <div v-if="source == 'medicine'">
+            <hr>
+            <form-group48 title="Добавить дату отмены приема">
+                <input class="form-check" type="checkbox" v-model="timetable.detach_date_enabled" @change="$forceUpdate()"/>
+            </form-group48>
+            <div v-if="timetable.detach_date_enabled">
+                <form-group48 title="Дата отмены">
+                    <date-picker v-model="timetable.detach_date" value-type="YYYY-MM-DD"></date-picker>
+                </form-group48>
+            </div>
+            <div v-if="mode != 'manual'">
+                <slot></slot>
+            </div>
         </div>
     </card>
 </template>
@@ -64,15 +75,20 @@
 <script>
 import FormGroup48 from "../../common/FormGroup-4-8";
 import Card from "../../common/Card";
+import DatePicker from 'vue2-datepicker';
+
 
 export default {
     name: "TimetableEditor",
-    components: {FormGroup48, Card},
+    components: {FormGroup48, Card, DatePicker},
     props: {
         data: {
             required: true
         },
         timetable_save_clicked: {
+            required: true
+        },
+        source: {
             required: true
         }
     },

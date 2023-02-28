@@ -57,7 +57,7 @@
 
             </card>
 
-            <timetable-editor v-bind:data="reminder.timetable" :timetable_save_clicked="timetable_validated"/>
+            <timetable-editor source="reminder" :data="reminder.timetable" :timetable_save_clicked="timetable_validated"/>
         </div>
 
         <button v-if="show_button" class="btn btn-danger" @click="go_back()">Назад</button>
