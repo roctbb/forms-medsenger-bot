@@ -243,7 +243,8 @@ class FormManager(Manager):
 
                     if field['params']['variants'][answers[field['uid']]].get('custom_params'):
                         try:
-                            params.update(json.loads(field['params']['variants'][answers[field['uid']]].get('custom_params')))
+                            params.update(
+                                json.loads(field['params']['variants'][answers[field['uid']]].get('custom_params')))
                         except:
                             pass
 
@@ -326,8 +327,9 @@ class FormManager(Manager):
                     if field['type'] == 'scale' and field.get('category_value'):
                         if not params.get('symptom_group'):
                             params.update({'symptom_group': field.get('category_value')})
-                        max_value = max([(-1 if field['params'].get('reversed') else 1) * i + field['params']['start_from']
-                                   for i in range(len(field['params']['colors']))])
+                        max_value = max(
+                            [(-1 if field['params'].get('reversed') else 1) * i + field['params']['start_from']
+                             for i in range(len(field['params']['colors']))])
                         params.update({'color': abs(answers[field['uid']] - field['params']['start_from']) / max_value})
                         packet.append(
                             (category, "{} - {}".format(field.get('category_value'), answers[field['uid']]), params))
@@ -347,7 +349,6 @@ class FormManager(Manager):
 
         packet, report = self._extract_packet_and_report_from_form(contract_id, form, answers)
 
-
         action_name = 'Заполнение опросника ID {} "{}"'.format(form.template_id if form.template_id else form.id,
                                                                form.title)
 
@@ -360,6 +361,10 @@ class FormManager(Manager):
             "form_id": form.id
         }
 
+        timestamp = time.time()
+        if 'timestamp' in answers:
+            timestamp = answers['timestamp']
+
         if form.instant_report:
             self.__instant_report__(contract_id, form, report)
 
@@ -367,7 +372,7 @@ class FormManager(Manager):
             integral_result = {'result': integral_result, 'params': custom_params}
             self.__integral_result_report__(contract_id, form, integral_result)
 
-        result = bool(self.medsenger_api.add_records(contract_id, packet, params=params))
+        result = bool(self.medsenger_api.add_records(contract_id, packet, params=params, record_time=timestamp))
 
         if result:
             self.log_done("form_{}".format(form.id), contract_id)
