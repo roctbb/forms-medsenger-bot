@@ -1,6 +1,6 @@
 <template>
     <div class="form-group form-group-sm row" :class="{'required': required}">
-        <div class="col-md-4" :class="{'col-10': check}">
+        <div class="col-md-4" :class="{'col-10': check}" style="padding-top: 5px;">
             <strong :class="{'big': big}">{{ title }}</strong>
             <div v-if="description">
                 <span class="text-muted">{{ description }}</span>

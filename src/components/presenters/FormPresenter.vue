@@ -107,6 +107,18 @@
 
         <error-block :errors="errors"/>
 
+        <div class="card">
+            <div class="card-body">
+                <form-group48
+                    :big="true"
+                    :title="'Время заполнения'" :key="-1"
+                    style="margin-top: 15px; margin-bottom: 15px;">
+                    <date-picker v-model="fill_time" :minute-step="15" type="datetime" format="DD.MM.YYYY HH:mm" time-title-format="DD.MM.YYYY"
+                                 :disabled-date="date_invalid"></date-picker>
+                </form-group48>
+            </div>
+        </div>
+
         <button style="margin-bottom: 20px;" @click="save()" class="btn btn-success btn-lg"
                 :disabled="submitted || is_preview">Отправить ответ
         </button>
@@ -139,6 +151,7 @@ export default {
     data() {
         return {
             form: {},
+            fill_time: new Date(),
             answers: {},
             blocks: [],
             errors: [],
@@ -157,6 +170,12 @@ export default {
         save: function () {
             this.errors = []
             this.save_clicked = true
+
+            if (this.fill_time) {
+                this.answers.timestamp = Math.floor(this.fill_time / 1000)
+            } else {
+                this.answers.timestamp = Math.floor(new Date() / 1000)
+            }
 
             if (this.check()) {
                 this.submitted = true
@@ -286,6 +305,8 @@ export default {
             this.form = form
             this.blocks = []
 
+            this.fill_time = new Date()
+
             let block = []
 
             this.form.fields.forEach((item) => {
@@ -303,7 +324,8 @@ export default {
             setTimeout(() => {
                 window.document.querySelector('input.monitoring-input').focus()
             }, 300)
-        }
+        },
+        date_invalid: (date) => date > new Date() || date < new Date(new Date().getTime() - 7 * 24 * 3600 * 1000)
     },
     created() {
         if (this.data) {
