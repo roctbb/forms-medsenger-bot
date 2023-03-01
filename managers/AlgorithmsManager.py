@@ -239,7 +239,7 @@ class AlgorithmsManager(Manager):
         if not values:
             answer = None, None
         elif (mode == 'value' or mode == 'count') and (
-            time.time() - int(answer['values'][0].get('timestamp')) > 60 * 60 * 48 or time.time() - int(
+            time.time() - int(answer['values'][0].get('timestamp')) > 60 * 60 * 24 or time.time() - int(
             answer['values'][0].get('uploaded')) > 10):
             answer = None, None
         elif mode == 'value' or mode == 'category_value':
