@@ -121,6 +121,7 @@ class Medicine(db.Model, Compliance):
 
     doctor_id = db.Column(db.Integer, nullable=True)
     clinic_id = db.Column(db.Integer, nullable=True)
+    is_created_by_patient = db.Column(db.Boolean, default=False)
 
     title = db.Column(db.String(255), nullable=True)
     rules = db.Column(db.Text, nullable=True)
@@ -156,6 +157,7 @@ class Medicine(db.Model, Compliance):
             "patient_id": self.patient_id,
             "doctor_id": self.doctor_id,
             "clinic_id": self.clinic_id,
+            "is_created_by_patient": self.is_created_by_patient,
             "title": self.title,
             "rules": self.rules,
             "dose": self.dose,

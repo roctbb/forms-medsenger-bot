@@ -191,6 +191,12 @@ Vue.mixin({
                 return timetable.points.length + ' раз(а) в месяц.'
             }
         },
+        med_description: function (medicine) {
+            let description = !this.empty(medicine.dose) ? `Дозировка: ${medicine.dose}` : ''
+            description += !this.empty(medicine.rules) ? ` (${medicine.rules})` : ''
+            description += '\n' + this.tt_description(medicine.timetable)
+            return description
+        },
         alg_description: function (algorithm) {
             if (!algorithm.categories) return "";
 
@@ -252,10 +258,10 @@ Vue.mixin({
             }, {});
         },
         swap: function (arr, i, j) {
-          let val = arr[i]
-          arr[i] = arr[j]
-          arr[j] = val
-          return arr
+            let val = arr[i]
+            arr[i] = arr[j]
+            arr[j] = val
+            return arr
         },
         toBase64: function (file) {
             return new Promise((resolve, reject) => {

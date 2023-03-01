@@ -117,7 +117,7 @@
                                         </tr>
                                         </tbody>
                                     </table>
-                                    <div>
+                                    <div v-if="medicine.contract_id == current_contract_id">
                                         <button class="btn btn-success btn-sm" :disabled="medicine.lock_btn"
                                                 @click="save_history(medicine)">
                                             Сохранить
@@ -134,6 +134,9 @@
                         </div>
                         <div v-else>
                             <small>Добавлен в другом контракте.</small>
+                        </div>
+                        <div v-if="medicine.is_created_by_patient">
+                            <small>Добавлен пациентом.</small>
                         </div>
 
                         <small v-if="!empty(medicine.template_id)" class="text-muted">ID шаблона: {{
@@ -184,7 +187,7 @@
                                         </tr>
                                         </tbody>
                                     </table>
-                                    <div>
+                                    <div v-if="medicine.contract_id == current_contract_id">
                                         <button class="btn btn-success btn-sm" :disabled="medicine.lock_btn"
                                                 @click="save_history(medicine)">
                                             Сохранить
@@ -199,7 +202,10 @@
                         <div v-if="medicine.contract_id == current_contract_id">
                             <a href="#" @click="resume_medicine(medicine)">Возобновить</a>
                         </div>
-
+                        <div v-if="medicine.is_created_by_patient">
+                            <small>Добавлен пациентом.</small>
+                        </div>
+                        <br>
                     </card>
                 </div>
 

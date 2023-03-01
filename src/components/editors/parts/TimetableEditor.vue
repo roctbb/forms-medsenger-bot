@@ -65,9 +65,6 @@
                     <date-picker v-model="timetable.detach_date" value-type="YYYY-MM-DD"></date-picker>
                 </form-group48>
             </div>
-            <div v-if="mode != 'manual'">
-                <slot></slot>
-            </div>
         </div>
     </card>
 </template>

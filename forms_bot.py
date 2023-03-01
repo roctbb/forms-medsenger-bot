@@ -409,7 +409,7 @@ def delete_medicine(args, form):
     contract_id = args.get('contract_id')
     contract = contract_manager.get(contract_id)
     medicine_manager.edit_history(request.json)
-    result = medicine_manager.remove(request.json.get('id'), contract)
+    result = medicine_manager.remove(request.json.get('id'), contract, request.json.get('deleted_by_patient'))
 
     if result:
         return jsonify({

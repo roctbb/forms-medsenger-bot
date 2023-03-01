@@ -37,6 +37,12 @@
                         <small class="text-muted">дней</small>
                     </form-group48>
                 </card>
+            </div>
+            <div class="col-lg-6">
+                <timetable-editor source="medicine" :data="medicine.timetable"
+                                  :timetable_save_clicked="timetable_save_clicked"/>
+            </div>
+        </div>
                 <button v-if="show_button" class="btn btn-danger" @click="go_back()">Назад</button>
                 <button :disabled="button_lock" class="btn btn-success" @click="save()">Сохранить <span
                     v-if="medicine.is_template"> шаблон</span></button>
@@ -51,12 +57,6 @@
                         @click="save(true, 'clinic')">
                     Сохранить как шаблон для клиники
                 </button>
-            </div>
-            <div class="col-lg-6">
-                <timetable-editor source="medicine" :data="medicine.timetable"
-                                  :timetable_save_clicked="timetable_save_clicked"/>
-            </div>
-        </div>
     </div>
 </template>
 
@@ -159,29 +159,18 @@ export default {
                     }
 
                 } else {
-                    let comment = !this.empty(this.medicine.dose) ? `Дозировка: ${this.medicine.dose}` : ''
-                    comment += !this.empty(this.medicine.rules) ? ` (${this.medicine.rules})` : ''
-                    if (this.medicine.timetable.mode == 'daily')
-                        comment += `\n${this.medicine.timetable.points.length} раз(а) в день`
-                    else if (this.medicine.timetable.mode == 'weekly')
-                        comment += `\n${this.medicine.timetable.points.length} раз(а) в неделю`
-                    else if (this.medicine.timetable.mode == 'monthly')
-                        comment += `\n${this.medicine.timetable.points.length} раз(а) в месяц`
-
                     if (!this.medicine.prescription_history) {
                         this.medicine.prescription_history = {
-                            day: this.medicine.id ? null : 1,
-                            current_period: this.medicine.timetable.periods_enabled ? 0 : null,
                             records: [{
                                 description: this.medicine.id ? 'Изменены параметры' : 'Назначено',
-                                comment: comment,
+                                comment: this.med_description(this.medicine),
                                 date: new Date().toLocaleDateString()
                             }]
                         }
                     } else if (this.medicine.id) {
                         this.medicine.prescription_history.records.push({
                             description: 'Изменены параметры',
-                            comment: comment,
+                            comment:  this.med_description(this.medicine),
                             date: new Date().toLocaleDateString()
                         })
                     }
