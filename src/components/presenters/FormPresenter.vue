@@ -107,7 +107,7 @@
 
         <error-block :errors="errors"/>
 
-        <div class="card" v-for="block in blocks">
+        <div class="card">
             <div class="card-body">
                 <form-group48
                     :big="true"
