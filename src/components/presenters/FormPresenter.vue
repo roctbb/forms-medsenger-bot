@@ -114,7 +114,7 @@
                     :title="'Время заполнения'" :key="-1"
                     style="margin-top: 15px; margin-bottom: 15px;">
                     <date-picker v-model="fill_time" :minute-step="15" type="datetime" format="DD.MM.YYYY HH:mm" time-title-format="DD.MM.YYYY"
-                                 :disabled-date="date_valid"></date-picker>
+                                 :disabled-date="date_invalid"></date-picker>
                 </form-group48>
             </div>
         </div>
@@ -152,7 +152,6 @@ export default {
         return {
             form: {},
             fill_time: new Date(),
-            fill_after: undefined,
             answers: {},
             blocks: [],
             errors: [],
@@ -308,11 +307,6 @@ export default {
 
             this.fill_time = new Date()
 
-            this.fill_after = new Date()
-            this.fill_after.setDate(this.fill_after.getDate() - 7)
-
-            console.log(this.fill_before, this.fill_after)
-
             let block = []
 
             this.form.fields.forEach((item) => {
@@ -331,7 +325,7 @@ export default {
                 window.document.querySelector('input.monitoring-input').focus()
             }, 300)
         },
-        date_valid: (date) => date >= new Date() || date <= this.fill_after
+        date_invalid: (date) => date > new Date() || date < new Date(new Date().getTime() - 7 * 24 * 3600 * 1000)
     },
     created() {
         if (this.data) {
