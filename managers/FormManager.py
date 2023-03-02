@@ -5,6 +5,8 @@ from datetime import datetime
 
 from config import DYNAMIC_CACHE
 from helpers import log, clear_categories
+from managers.ContractsManager import ContractManager
+from managers.MedicineManager import MedicineManager
 from managers.Manager import Manager
 from models import Patient, Contract, Form, ActionRequest
 from helpers import generate_timetable
@@ -213,6 +215,10 @@ class FormManager(Manager):
         packet = []
         report = []
 
+        medicine_manager = MedicineManager(self.medsenger_api, self.db)
+        contract_manager = ContractManager(self.medsenger_api, self.db)
+        contract = contract_manager.get(contract_id)
+
         for field in form.fields:
             if field['uid'] in answers.keys():
                 if field['type'] == 'file':
@@ -311,7 +317,8 @@ class FormManager(Manager):
                     report.append((field.get('text'), answer))
 
                     for medicine in medicines:
-                        # todo тут надо как-то создавать лекарства
+                        if not medicine.get('id'):
+                            medicine_manager.create_or_edit(medicine, contract)
                         params = {
                             "question_iud": field['uid'],
                             "question_text": field.get('text'),

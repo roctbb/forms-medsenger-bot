@@ -347,6 +347,15 @@ export default {
             this.answers[field.uid].push({
                 title: '',
                 dose: '',
+                timetable: {mode: "manual", points: []},
+                prescription_history: {
+                    records: [{
+                        description: 'Добавлен пациентом',
+                        comment: 'При заполнении опросника ' + this.form.title,
+                        date: new Date().toLocaleDateString()
+                    }]
+                },
+                is_created_by_patient: true,
                 checked: true
             })
             this.$forceUpdate()
