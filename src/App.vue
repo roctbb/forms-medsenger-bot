@@ -6,7 +6,7 @@
             <dashboard-header :patient="patient" v-if="mode == 'settings' && dashboard_parts.length == 0"/>
 
             <div class="container slim-container" style="margin-top: 15px;" v-if="state == 'form-presenter' || mode == 'outsource-form'">
-                <form-presenter :data="form" v-if="state == 'form-presenter'"/>
+                <form-presenter :patient="patient" :data="form" v-if="state == 'form-presenter'"/>
                 <result-presenter :result="result" v-if="state == 'form-result'"/>
             </div>
             <div class="container" style="margin-top: 15px;" v-else>
@@ -189,6 +189,7 @@ export default {
                 this.axios.get(this.url('/api/settings/get_templates')).then(response => this.templates = response.data);
             }
             if (this.mode == 'form') {
+                this.axios.get(this.url('/api/settings/get_patient')).then(response => this.patient = response.data);
                 this.axios.get(this.url('/api/form/' + this.object_id)).then(this.process_load_answer).catch(this.process_load_error);
             }
             if (this.mode == 'outsource-form') {

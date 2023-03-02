@@ -24,8 +24,7 @@
                 <input class="form-control form-control-sm" v-model="field.description"/>
             </form-group48>
 
-            <form-group48 title="Код категории" v-if="field.type != 'radio'">
-
+            <form-group48 title="Код категории" v-if="!['radio', 'medicine_list'].includes(field.type)">
                 <select class="form-control form-control-sm"
                         :class="save_clicked && empty(field.category) ? 'is-invalid' : ''"
                         v-model="field.category">
@@ -276,7 +275,16 @@
                 </form-group48>
             </div>
 
+            <!-- Список лекарств -->
+            <div v-if="field.type == 'medicine_list'">
+                <form-group48 title="Пояснение в медкарте">
+                    <input type="text" class="form-control form-control-sm"
+                           :class="save_clicked && empty(field.category_value) ? 'is-invalid' : ''"
+                           v-model="field.category_value"/>
+                </form-group48>
+            </div>
         </div>
+
         <a v-if="field.type == 'radio'" class="btn btn-default btn-sm" @click="add_variant()">Добавить вариант</a>
         <a class="btn btn-danger btn-sm" @click="remove()">Удалить {{
                 field.type != 'header' ? 'вопрос' : 'заголовок'

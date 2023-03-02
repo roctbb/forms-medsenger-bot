@@ -98,6 +98,40 @@
                                :class="save_clicked && field.required && (!answers[field.uid] && answers[field.uid] !== 0) ? 'is-invalid' : ''"
                                v-if="field.type == 'range'" :required="field.required" v-model="answers[field.uid]"/>
 
+                        <div v-if="field.type == 'medicine_list'">
+                            <div v-for="(medicine, j) in answers[field.uid]">
+                                <div class="row">
+                                    <div class="form-check col-5" v-if="medicine.id">
+                                        <input class="form-check-input monitoring-input" type="checkbox"
+                                               style="margin: 5px -15px;"
+                                               :id="'radio_' +  field.uid + '_' + j"
+                                               :name="'radio_' +  field.uid + '_' + j"
+                                               v-model="medicine.checked" :value="j" @change="$forceUpdate()">
+                                        <label class="form-check-label" :for="'radio_' +  field.uid + '_' + j">{{
+                                                medicine.title
+                                            }}</label>
+                                    </div>
+                                    <div class="col-5" v-else>
+                                        <small>Название</small>
+                                        <input type="text" class="form-control monitoring-input"
+                                               v-model="medicine.title"/>
+                                    </div>
+                                    <div :class="`col${mobile ? '' : '-5'}`">
+                                        <small>Дозировка</small>
+                                        <input type="text" class="form-control monitoring-input"
+                                               v-model="medicine.dose"/>
+                                    </div>
+                                    <div v-if="!medicine.id" class="col-md-2">
+                                        <a class="btn btn-default btn-sm" :style="`margin-top: ${mobile ? 5 : 27}px;`"
+                                           @click="remove_medicine(field, j)">Удалить</a>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <br>
+                            <button class="btn btn-sm btn-secondary" @click="add_medicine(field)">Добавить</button>
+                        </div>
+
                     </form-group48>
 
                 </div>
@@ -113,7 +147,8 @@
                     :big="true"
                     :title="'Время заполнения'" :key="-1"
                     style="margin-top: 15px; margin-bottom: 15px;">
-                    <date-picker v-model="fill_time" :minute-step="15" type="datetime" format="DD.MM.YYYY HH:mm" time-title-format="DD.MM.YYYY"
+                    <date-picker v-model="fill_time" :minute-step="15" type="datetime" format="DD.MM.YYYY HH:mm"
+                                 time-title-format="DD.MM.YYYY"
                                  :disabled-date="date_invalid"></date-picker>
                 </form-group48>
             </div>
@@ -141,6 +176,9 @@ export default {
     name: "FormPresenter",
     components: {InteractiveMap, VisualAnalogScale, ActionDone, FormGroup48, ErrorBlock, DatePicker},
     props: {
+        patient: {
+            required: false
+        },
         data: {
             required: false,
         },
@@ -232,8 +270,19 @@ export default {
         },
         set_default: function () {
             let prepare_field = (field, i) => {
-                if (field.type == 'radio') {
+                if (field.type == 'radio' && field.required) {
                     this.answers[field.uid] = 0
+                }
+                if (field.type == 'medicine_list') {
+                    this.answers[field.uid] = Array.from(Array(this.patient.patient_medicines.length), (_, i) => {
+                        let med = {
+                            id: this.patient.patient_medicines[i].id,
+                            title: this.patient.patient_medicines[i].title,
+                            dose: this.patient.patient_medicines[i].dose,
+                            checked: false
+                        }
+                        return med
+                    })
                 }
             }
 
@@ -293,6 +342,18 @@ export default {
             }
             return true
 
+        },
+        add_medicine: function (field) {
+            this.answers[field.uid].push({
+                title: '',
+                dose: '',
+                checked: true
+            })
+            this.$forceUpdate()
+        },
+        remove_medicine: function (field, j) {
+            this.answers[field.uid].splice(j, 1);
+            this.$forceUpdate()
         },
         back: function () {
             Event.fire('back-to-dashboard');

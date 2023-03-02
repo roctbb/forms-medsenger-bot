@@ -304,6 +304,23 @@ class FormManager(Manager):
                             pass
 
                     packet.append((category, value, params))
+                if field['type'] == 'medicine_list':
+                    medicines = list(filter(lambda m: m['checked'] and m.get('title'), answers[field['uid']]))
+                    answer = ', '.join([medicine['title'] + ' ({})'.format(medicine['dose']) if medicine['dose'] else ''
+                                        for medicine in medicines])
+                    report.append((field.get('text'), answer))
+
+                    for medicine in medicines:
+                        # todo тут надо как-то создавать лекарства
+                        params = {
+                            "question_iud": field['uid'],
+                            "question_text": field.get('text'),
+                            "answer": answer,
+                            "type": field['type'],
+                            "medicine_id":  medicine.get('id'),
+                            "dose": medicine.get('dose')
+                        }
+                        packet.append(('medicine', medicine['title'], params))
                 else:
                     category = field['category']
                     report.append((field.get('text'), answers[field['uid']]))
