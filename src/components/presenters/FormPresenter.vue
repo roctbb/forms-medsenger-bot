@@ -274,7 +274,7 @@ export default {
                     this.answers[field.uid] = 0
                 }
                 if (field.type == 'medicine_list') {
-                    if (this.patient.patient_medicines.length) {
+                    if (this.patient.patient_medicines) {
                         this.answers[field.uid] = Array.from(Array(this.patient.patient_medicines.length), (_, i) => {
                             let med = {
                                 id: this.patient.patient_medicines[i].id,
