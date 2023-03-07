@@ -276,7 +276,7 @@ export default {
         }
     },
     created() {
-        this.medicines = this.data.filter(medicine => medicine.contract_id == this.current_contract_id)
+        this.medicines = this.data.filter(medicine => medicine.contract_id == this.current_contract_id || medicine.is_created_by_patient)
         this.medicines.sort((a, b) => {
             return a.title < b.title ? -1 : a.title > b.title ? 1 : 0
         })
