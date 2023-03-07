@@ -283,7 +283,12 @@ export default {
                         }
                         return med
                     })
-                    if (! this.answers[field.uid])  this.answers[field.uid] = []
+                    console.log(this.answers[field.uid])
+                    if (!this.answers[field.uid])  this.answers[field.uid] = [{
+                            title: '',
+                            dose: '',
+                            checked: true
+                        }]
                 }
             }
 
