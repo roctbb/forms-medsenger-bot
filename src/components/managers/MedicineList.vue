@@ -276,11 +276,15 @@ export default {
         }
     },
     created() {
-        this.medicines = this.data.filter(medicine => medicine.contract_id == this.current_contract_id || medicine.is_created_by_patient)
+        this.medicines = this.data.medicines.filter(medicine => medicine.contract_id == this.current_contract_id)
         this.medicines.sort((a, b) => {
             return a.title < b.title ? -1 : a.title > b.title ? 1 : 0
         })
 
+        this.patient_medicines = this.data.patient_medicines
+        this.patient_medicines.sort((a, b) => {
+            return a.title < b.title ? -1 : a.title > b.title ? 1 : 0
+        })
         this.clear()
 
         Event.listen('add-time-point', () => {

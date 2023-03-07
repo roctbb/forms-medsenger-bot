@@ -19,7 +19,7 @@
                 <action-done v-if="state == 'done'"/>
 
                 <reminder-confirmer :data="reminder" v-if="state == 'confirm-reminder'"/>
-                <medicines-list :data="patient.medicines" v-if="state == 'medicines-list'"/>
+                <medicines-list :data="patient" v-if="state == 'medicines-list'"/>
                 <dose-verifier :data="medicine" v-if="state == 'verify-dose'"/>
                 <graph-category-chooser :data="available_categories" v-if="state == 'graph-category-chooser'"/>
                 <load-error v-if="state == 'load-error'"/>
