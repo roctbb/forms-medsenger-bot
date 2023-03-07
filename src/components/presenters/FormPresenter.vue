@@ -283,6 +283,7 @@ export default {
                         }
                         return med
                     })
+                    if (! this.answers[field.uid])  this.answers[field.uid] = []
                 }
             }
 
