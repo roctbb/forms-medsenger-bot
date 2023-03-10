@@ -4,11 +4,10 @@
             Напоминания о плановом приеме препаратов приходят согласно расписанию. Если Вы уже отметили прием препарата
             с помощью кнопки в чате, повторно записывать прием не нужно.
         </div>
-        <div v-if="medicines.length">
+        <div v-if="medicines.length || patient_medicines.length">
             <h4>Назначения врача</h4>
             <div class="row">
-                <card v-for="(medicine, i) in medicines" v-if="!medicine.is_created_by_patient"
-                      :key="medicine.id" :image="images.medicine" class="col-lg-4 col-md-4">
+                <card v-for="(medicine, i) in medicines" :key="medicine.id" :image="images.medicine" class="col-lg-4 col-md-4">
                     <h5>{{ medicine.title }}</h5>
                     <small><strong>Назначенная дозировка: </strong> {{
                             medicine.dose ? medicine.dose : '-'
@@ -31,8 +30,7 @@
             </div>
             <h4>Другие препараты</h4>
             <div class="row">
-                <card v-for="(medicine, i) in medicines" v-if="medicine.is_created_by_patient"
-                      :key="medicine.id" :image="images.medicine" class="col-lg-4 col-md-4">
+                <card v-for="(medicine, i) in patient_medicines" :key="medicine.id" :image="images.medicine" class="col-lg-4 col-md-4">
                     <h5>{{ medicine.title }}</h5>
                     <small><strong>Дозировка: </strong> {{ medicine.dose ? medicine.dose : '-' }}</small><br>
                     <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
@@ -108,6 +106,7 @@ export default {
     data() {
         return {
             medicines: {},
+            patient_medicines: [],
             custom_medicine: {},
             validated: false,
             mode: 'list',
