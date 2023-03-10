@@ -245,7 +245,7 @@ export default {
                         this.axios.post(this.url('/api/settings/medicine'), this.custom_medicine)
                             .then(r => {
                                 if (!this.custom_medicine.id) {
-                                    this.medicines.push(this.custom_medicine)
+                                    this.patient_medicines.push(this.custom_medicine)
                                 }
                                 this.clear()
                                 this.button_lock = false
