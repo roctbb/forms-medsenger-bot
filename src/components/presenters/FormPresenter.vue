@@ -362,7 +362,8 @@ export default {
                     }]
                 },
                 is_created_by_patient: true,
-                checked: true
+                checked: true,
+                edited_by_patient: true
             })
             this.$forceUpdate()
         },
