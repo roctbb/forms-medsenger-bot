@@ -241,6 +241,7 @@ export default {
                                 date: new Date().toLocaleDateString()
                             }]
                         }
+                        this.custom_medicine.edited_by_patient = true
                         this.axios.post(this.url('/api/settings/medicine'), this.custom_medicine)
                             .then(r => {
                                 if (!this.custom_medicine.id) {
