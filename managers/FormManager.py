@@ -310,7 +310,7 @@ class FormManager(Manager):
                             pass
 
                     packet.append((category, value, params))
-                if field['type'] == 'medicine_list':
+                elif field['type'] == 'medicine_list':
                     medicines = list(filter(lambda m: m['checked'] and m.get('title'), answers[field['uid']]))
                     answer = ', '.join([medicine['title'] + ' ({})'.format(medicine['dose']) if medicine['dose'] else ''
                                         for medicine in medicines])
