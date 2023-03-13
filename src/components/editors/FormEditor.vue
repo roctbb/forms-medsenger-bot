@@ -303,7 +303,7 @@ export default {
                 if (field.type == 'scale') {
                     if (!field.params.colors.length) return true
                 }
-                if (!field.category) return true;
+                if (!field.category && field.type != 'medicine_list') return true;
             }
 
             if (this.form.fields.filter(validate_field).length > 0) {

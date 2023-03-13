@@ -274,15 +274,21 @@ export default {
                     this.answers[field.uid] = 0
                 }
                 if (field.type == 'medicine_list') {
-                    this.answers[field.uid] = Array.from(Array(this.patient.patient_medicines.length), (_, i) => {
-                        let med = {
-                            id: this.patient.patient_medicines[i].id,
-                            title: this.patient.patient_medicines[i].title,
-                            dose: this.patient.patient_medicines[i].dose,
-                            checked: false
-                        }
-                        return med
-                    })
+                    console.log(this.patient)
+                    if (this.patient.patient_medicines && this.patient.patient_medicines.length) {
+                        this.answers[field.uid] = Array.from(Array(this.patient.patient_medicines.length), (_, i) => {
+                            let med = {
+                                id: this.patient.patient_medicines[i].id,
+                                title: this.patient.patient_medicines[i].title,
+                                dose: this.patient.patient_medicines[i].dose,
+                                checked: false
+                            }
+                            return med
+                        })
+                    } else {
+                        this.answers[field.uid] = []
+                        this.add_medicine(field)
+                    }
                 }
             }
 
@@ -356,7 +362,8 @@ export default {
                     }]
                 },
                 is_created_by_patient: true,
-                checked: true
+                checked: true,
+                edited_by_patient: true
             })
             this.$forceUpdate()
         },

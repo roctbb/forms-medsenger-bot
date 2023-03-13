@@ -51,9 +51,10 @@ class Patient(db.Model):
             "month_compliance": self.count_month_compliance(),
             "contracts": [contract.as_dict() for contract in self.contracts],
             "forms": [form.as_dict() for form in self.forms],
-            "medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is None],
-            "canceled_medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is not None],
+            "medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is None and not medicine.is_created_by_patient],
+            "canceled_medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is not None and not medicine.is_created_by_patient],
             "patient_medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is None and medicine.is_created_by_patient],
+            "canceled_patient_medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is not None and medicine.is_created_by_patient],
             "reminders": sorted([reminder.as_dict() for reminder in self.reminders if reminder.canceled_at is None], key=lambda k: k["attach_date"]),
             "old_reminders": sorted([reminder.as_dict() for reminder in self.reminders if reminder.canceled_at is not None], key=lambda k: k["attach_date"], reverse=True),
             "algorithms": [algorithm.as_dict() for algorithm in self.algorithms]

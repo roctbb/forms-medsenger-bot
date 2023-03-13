@@ -277,11 +277,6 @@
 
             <!-- Список лекарств -->
             <div v-if="field.type == 'medicine_list'">
-                <form-group48 title="Пояснение в медкарте">
-                    <input type="text" class="form-control form-control-sm"
-                           :class="save_clicked && empty(field.category_value) ? 'is-invalid' : ''"
-                           v-model="field.category_value"/>
-                </form-group48>
             </div>
         </div>
 

@@ -5,12 +5,14 @@
         <div v-else>
             <dashboard-header :patient="patient" v-if="mode == 'settings' && dashboard_parts.length == 0"/>
 
-            <div class="container slim-container" style="margin-top: 15px;" v-if="state == 'form-presenter' || mode == 'outsource-form'">
+            <div class="container slim-container" style="margin-top: 15px;"
+                 v-if="state == 'form-presenter' || mode == 'outsource-form'">
                 <form-presenter :patient="patient" :data="form" v-if="state == 'form-presenter'"/>
                 <result-presenter :result="result" v-if="state == 'form-result'"/>
             </div>
             <div class="container" style="margin-top: 15px;" v-else>
-                <dashboard :patient="patient" :templates="templates" v-show="state == 'dashboard'" :parts="dashboard_parts"/>
+                <dashboard :patient="patient" :templates="templates" v-show="state == 'dashboard'"
+                           :parts="dashboard_parts"/>
                 <form-editor :patient="patient" v-show="state == 'form-manager'"/>
                 <medicine-editor :patient="patient" v-show="state == 'medicine-manager'"/>
                 <reminder-editor v-show="state == 'reminder-manager'"/>
@@ -19,7 +21,7 @@
                 <action-done v-if="state == 'done'"/>
 
                 <reminder-confirmer :data="reminder" v-if="state == 'confirm-reminder'"/>
-                <medicines-list :data="patient.medicines" v-if="state == 'medicines-list'"/>
+                <medicines-list :data="patient" v-if="state == 'medicines-list'"/>
                 <dose-verifier :data="medicine" v-if="state == 'verify-dose'"/>
                 <graph-category-chooser :data="available_categories" v-if="state == 'graph-category-chooser'"/>
                 <load-error v-if="state == 'load-error'"/>
@@ -174,7 +176,8 @@ export default {
         Event.listen('outsource-form-done', (result) => {
             this.result = result
             this.state = 'form-result'
-        });    },
+        });
+    },
     methods: {
         load: function () {
             this.mode = window.PAGE
@@ -185,12 +188,16 @@ export default {
             }
 
             if (this.mode == 'settings') {
-                this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
-                this.axios.get(this.url('/api/settings/get_templates')).then(response => this.templates = response.data);
+                this.axios.get(this.url('/api/settings/get_templates')).then(response => {
+                    this.templates = response.data
+                    this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
+                });
             }
             if (this.mode == 'form') {
-                this.axios.get(this.url('/api/settings/get_patient')).then(response => this.patient = response.data);
-                this.axios.get(this.url('/api/form/' + this.object_id)).then(this.process_load_answer).catch(this.process_load_error);
+                this.axios.get(this.url('/api/settings/get_patient')).then(response => {
+                    this.patient = response.data
+                    this.axios.get(this.url('/api/form/' + this.object_id)).then(this.process_load_answer).catch(this.process_load_error);
+                });
             }
             if (this.mode == 'outsource-form') {
                 this.axios.get('/api/outsource_form/' + this.object_id).then(this.process_load_answer).catch(this.process_load_error);
@@ -202,8 +209,10 @@ export default {
                 this.axios.get(this.url('/api/medicine/' + this.object_id)).then(this.process_load_answer);
             }
             if (this.mode == 'medicine-chooser') {
-                this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
-                this.axios.get(this.url('/api/settings/get_templates')).then(response => this.templates = response.data);
+                this.axios.get(this.url('/api/settings/get_templates')).then(response => {
+                    this.templates = response.data
+                    this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
+                });
             }
             if (this.mode == 'medicines-list') {
                 this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
