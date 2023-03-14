@@ -205,7 +205,8 @@
                 </div>
 
                 <h4>Препараты, добавленные пациентом</h4>
-                <small v-if="!patient.patient_medicines.length && !patient.patient_canceled_medicines.length">Нет добавленных
+                <small v-if="!patient.patient_medicines && !patient.patient_canceled_medicines ||
+                !patient.patient_medicines.length && !patient.patient_canceled_medicines.length">Нет добавленных
                     препаратов</small>
 
                 <div class="row">
