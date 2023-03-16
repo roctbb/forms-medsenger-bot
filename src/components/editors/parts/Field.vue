@@ -244,7 +244,7 @@
                 <form-group48 title="Предпросмотр" description="Шкала будет выглядеть так">
                     <visual-analog-scale :params="field.params">
                         <div class="row">
-                            <div class="col-1 d-flex justify-content-center" v-for="(color, i) in field.params.colors">
+                            <div class="col d-flex justify-content-center" v-for="(color, i) in field.params.colors">
                                 <input class="form-check-input monitoring-input" style="margin-left: 5px" type="radio"
                                        :id="'radio_' + field.uid + '_' + i" :name="'radio_' + field.uid">
                             </div>
