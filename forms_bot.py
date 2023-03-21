@@ -18,16 +18,6 @@ def trigger_error():
         log(e, True)
         abort(500)
 
-
-@app.route('/init-hooks')
-def init_hooks():
-    hm = HookManager(medsenger_api, db)
-    for algorithm in Algorithm.query.all():
-        hm.create_hooks_after_creation(algorithm)
-
-    return "done"
-
-
 # monitoring and common api
 
 @app.route('/status', methods=['POST'])
