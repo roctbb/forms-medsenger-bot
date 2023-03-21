@@ -1,4 +1,5 @@
 from helpers import log
+from managers.HookManager import HookManager
 from managers.Manager import Manager
 from models import Patient, Contract
 
@@ -43,6 +44,8 @@ class ContractManager(Manager):
                 raise Exception("No contract_id = {} found".format(contract_id))
 
             contract.is_active = False
+
+            HookManager(self.medsenger_api, self.db).clear_contract(contract)
 
             for object in contract.forms + contract.algorithms + contract.medicines + contract.reminders:
                 self.db.session.delete(object)

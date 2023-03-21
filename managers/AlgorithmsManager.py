@@ -1,8 +1,7 @@
 import json
 import re
 import time
-import uuid
-from copy import copy, deepcopy
+from copy import deepcopy
 from datetime import datetime, timedelta
 
 import medsenger_api
@@ -16,14 +15,17 @@ from helpers import log, generate_event_description, DATACACHE, timezone_now, lo
     clear_categories
 from managers.ContractsManager import ContractManager
 from managers.FormManager import FormManager
+from managers.HookManager import HookManager
 from managers.Manager import Manager
 from managers.MedicineManager import MedicineManager
-from models import Patient, Contract, Algorithm
+from models import Algorithm
 
 
 class AlgorithmsManager(Manager):
     def __init__(self, *args):
         super(AlgorithmsManager, self).__init__(*args)
+
+        self.__hook_manager = HookManager(self.medsenger_api, self.db)
 
     def get(self, algorithm_id):
         return Algorithm.query.filter_by(id=algorithm_id).first()
@@ -32,6 +34,7 @@ class AlgorithmsManager(Manager):
         algorithms = list(filter(lambda x: x.template_id == template_id, contract.patient.algorithms))
 
         for algorithm in algorithms:
+            self.__hook_manager.remove_hooks_before_deletion(algorithm)
             self.db.session.delete(algorithm)
 
         self.__commit__()
@@ -97,6 +100,8 @@ class AlgorithmsManager(Manager):
             self.__commit__()
             self.db.session.refresh(new_algorithm)
 
+            self.__hook_manager.create_hooks_after_creation(new_algorithm)
+
             params = {
                 'obj_id': new_algorithm.id,
                 'action': 'attach',
@@ -113,6 +118,9 @@ class AlgorithmsManager(Manager):
     def clear(self, contract):
         Algorithm.query.filter_by(contract_id=contract.id).delete()
         self.__commit__()
+
+        self.__hook_manager.clear_contract(contract)
+
         params = {
             'action': 'clear',
             'object_type': 'algorithm'
@@ -128,6 +136,8 @@ class AlgorithmsManager(Manager):
 
         if algorithm.contract_id != contract.id and not contract.is_admin:
             return None
+
+        self.__hook_manager.remove_hooks_before_deletion(algorithm)
 
         Algorithm.query.filter_by(id=id).delete()
 
@@ -453,7 +463,9 @@ class AlgorithmsManager(Manager):
                 ["<li>{}</li>".format(description) for description in descriptions]) + "</ul>"
 
         if action['type'] == 'change_step':
+            self.__hook_manager.remove_hooks_before_deletion(algorithm)
             self.change_step(algorithm, action['params']['target'])
+            self.__hook_manager.create_hooks_after_creation(algorithm)
 
         if action['type'] == 'set_info_materials':
             self.medsenger_api.set_info_materials(contract.id, action['params']['materials'])
@@ -921,6 +933,8 @@ class AlgorithmsManager(Manager):
             else:
                 algorithm = Algorithm.query.filter_by(id=algorithm_id).first_or_404()
 
+                self.__hook_manager.remove_hooks_before_deletion(algorithm)
+
                 if algorithm.contract_id != contract.id and not contract.is_admin:
                     return None
 
@@ -982,6 +996,8 @@ class AlgorithmsManager(Manager):
                 self.update_categories(algorithm)
 
                 self.__commit__()
+
+                self.__hook_manager.create_hooks_after_creation(algorithm)
 
             if DYNAMIC_CACHE:
                 self.medsenger_api.update_cache(contract.id)

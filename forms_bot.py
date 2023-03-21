@@ -1,5 +1,6 @@
 from manage import *
 from helpers import *
+from managers.HookManager import HookManager
 from models import Form, Algorithm
 from tasks import tasks
 
@@ -16,6 +17,15 @@ def trigger_error():
     except Exception as e:
         log(e, True)
         abort(500)
+
+
+@app.route('/init-hooks')
+def init_hooks():
+    hm = HookManager(medsenger_api, db)
+    for algorithm in Algorithm.query.all():
+        hm.create_hooks_after_creation(algorithm)
+
+    return "done"
 
 
 # monitoring and common api
