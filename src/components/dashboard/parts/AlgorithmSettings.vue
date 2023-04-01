@@ -4,7 +4,7 @@
             <h5>Настройка параметров алгоритма {{ algorithm.title }}</h5>
             <error-block :errors="errors"></error-block>
             <form-group48 v-for="field in fillable_fields" :key="field.value_code" :title="field.value_name">
-                <input type="form-control form-control-sm" v-model="algorithm.setup[field.value_code]"/>
+                <input type="text" class="form-control form-control-sm" v-model="algorithm.setup[field.value_code]"/>
             </form-group48>
 
             <button class="btn btn-danger btn-sm" @click="close()">Не подключать алгоритм</button>
@@ -16,8 +16,8 @@
 
 <script>
 
-import FormGroup48 from "../common/FormGroup-4-8";
-import ErrorBlock from "../common/ErrorBlock";
+import FormGroup48 from "../../common/FormGroup-4-8";
+import ErrorBlock from "../../common/ErrorBlock";
 
 export default {
     name: "AlgorithmSettings",
