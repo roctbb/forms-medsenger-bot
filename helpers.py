@@ -108,11 +108,7 @@ def generate_event_description(criteria, l_value, r_value, category_names, curre
         if not current_answer.get('params', {}).get('type'):
             return ""
 
-        if current_answer['params'].get('type') != 'checkbox':
-            return "<strong>{}</strong>: {}".format(current_answer['params']['question_text'],
-                                                    current_answer['params']['answer'])
-        else:
-            return "{}".format(current_answer['params']['answer'])
+        return current_answer['value']
 
     signs = {
         "equal": "равно",
