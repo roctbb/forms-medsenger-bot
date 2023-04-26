@@ -108,7 +108,7 @@ def generate_event_description(criteria, l_value, r_value, category_names, curre
         if not current_answer.get('params', {}).get('type'):
             return ""
 
-        return current_answer['value']
+        return current_answer['value'] + "."
 
     signs = {
         "equal": "равно",
