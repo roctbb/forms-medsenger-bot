@@ -459,7 +459,7 @@ class AlgorithmsManager(Manager):
         has_message_to_patient = False
         report = ""
         if action['params'].get('send_report') and descriptions:
-            report = '<ul>' + ''.join(
+            report = '<br><ul>' + ''.join(
                 ["<li>{}</li>".format(description) for description in descriptions]) + "</ul>"
 
         if action['type'] == 'change_step':
