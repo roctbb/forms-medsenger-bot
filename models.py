@@ -130,7 +130,7 @@ class Contract(db.Model):
         return timezone(self.clinic_timezone)
 
     def get_patient_timezone(self):
-        if not self.patient_timezone_offset:
+        if self.patient_timezone_offset is None:
             return None
 
         return FixedOffset(-1 * self.patient_timezone_offset)
@@ -139,9 +139,9 @@ class Contract(db.Model):
         patient_timezone = self.get_patient_timezone()
         clinic_timezone = self.get_clinic_timezone()
 
-        if patient_timezone:
+        if patient_timezone is not None:
             zone = patient_timezone
-        elif clinic_timezone:
+        elif clinic_timezone is not None:
             zone = clinic_timezone
         else:
             zone = None

@@ -10,12 +10,11 @@ from threading import Thread
 
 
 class TimetableManager(Manager):
-    def __init__(self, medicine_manager, form_manager, reminder_manager, contract_manager, *args):
+    def __init__(self, medicine_manager, form_manager, reminder_manager, *args):
         super(TimetableManager, self).__init__(*args)
         self.medicine_manager = medicine_manager
         self.form_manager = form_manager
         self.reminder_manager = reminder_manager
-        self.contract_manager = contract_manager
 
     def should_run(self, object, today=False):
         zone = object.contract.get_actual_timezone()
