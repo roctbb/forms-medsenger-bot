@@ -67,7 +67,7 @@ class Manager:
         zone = None
 
         if obj.contract:
-            zone = obj.contract.timezone
+            zone = obj.contract.get_actual_timezone()
 
         if obj.timetable.get('mode') == 'manual':
             return None

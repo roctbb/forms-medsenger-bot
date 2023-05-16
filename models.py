@@ -1,7 +1,7 @@
 import time
 from datetime import datetime, timedelta, date
 from functools import reduce
-
+from pytz import timezone, FixedOffset
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import backref
 from helpers import get_step, clear_categories
@@ -51,12 +51,19 @@ class Patient(db.Model):
             "month_compliance": self.count_month_compliance(),
             "contracts": [contract.as_dict() for contract in self.contracts],
             "forms": [form.as_dict() for form in self.forms],
-            "medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is None and not medicine.is_created_by_patient],
-            "canceled_medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is not None and not medicine.is_created_by_patient],
-            "patient_medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is None and medicine.is_created_by_patient],
-            "canceled_patient_medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is not None and medicine.is_created_by_patient],
-            "reminders": sorted([reminder.as_dict() for reminder in self.reminders if reminder.canceled_at is None], key=lambda k: k["attach_date"]),
-            "old_reminders": sorted([reminder.as_dict() for reminder in self.reminders if reminder.canceled_at is not None], key=lambda k: k["attach_date"], reverse=True),
+            "medicines": [medicine.as_dict() for medicine in self.medicines if
+                          medicine.canceled_at is None and not medicine.is_created_by_patient],
+            "canceled_medicines": [medicine.as_dict() for medicine in self.medicines if
+                                   medicine.canceled_at is not None and not medicine.is_created_by_patient],
+            "patient_medicines": [medicine.as_dict() for medicine in self.medicines if
+                                  medicine.canceled_at is None and medicine.is_created_by_patient],
+            "canceled_patient_medicines": [medicine.as_dict() for medicine in self.medicines if
+                                           medicine.canceled_at is not None and medicine.is_created_by_patient],
+            "reminders": sorted([reminder.as_dict() for reminder in self.reminders if reminder.canceled_at is None],
+                                key=lambda k: k["attach_date"]),
+            "old_reminders": sorted(
+                [reminder.as_dict() for reminder in self.reminders if reminder.canceled_at is not None],
+                key=lambda k: k["attach_date"], reverse=True),
             "algorithms": [algorithm.as_dict() for algorithm in self.algorithms]
         }
 
@@ -102,7 +109,8 @@ class Contract(db.Model):
     tasks = db.Column(db.JSON, nullable=True)
 
     is_admin = db.Column(db.Boolean, default=False)
-    timezone = db.Column(db.String(255), nullable=True)
+    clinic_timezone = db.Column(db.String(255), nullable=True)
+    patient_timezone_offset = db.Column(db.Integer, nullable=True)
 
     def as_dict(self, native=False):
         serialized = {
@@ -114,6 +122,31 @@ class Contract(db.Model):
             serialized['agent_token'] = self.agent_token
 
         return serialized
+
+    def get_clinic_timezone(self):
+        if not self.clinic_timezone:
+            return None
+
+        return timezone(self.clinic_timezone)
+
+    def get_patient_timezone(self):
+        if not self.patient_timezone_offset:
+            return None
+
+        return FixedOffset(-1 * self.patient_timezone_offset)
+
+    def get_actual_timezone(self):
+        patient_timezone = self.get_patient_timezone()
+        clinic_timezone = self.get_clinic_timezone()
+
+        if patient_timezone:
+            zone = patient_timezone
+        elif clinic_timezone:
+            zone = clinic_timezone
+        else:
+            zone = None
+
+        return zone
 
 
 class Medicine(db.Model, Compliance):

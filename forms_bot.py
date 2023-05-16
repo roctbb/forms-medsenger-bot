@@ -18,6 +18,7 @@ def trigger_error():
         log(e, True)
         abort(500)
 
+
 # monitoring and common api
 
 @app.route('/status', methods=['POST'])
@@ -50,6 +51,10 @@ def order(data):
         }
         medsenger_api.send_order(contract.id, 'conclusion_params', None, params)
         return 'ok'
+
+    if data['order'] == 'new_timezone':
+        contract_manager.actualize_timezone(contract, commit=True)
+
     return "not found"
 
 
@@ -212,8 +217,6 @@ def actions(data):
 @verify_json
 def params(data):
     contract = contract_manager.get(data.get('contract_id'))
-    contract.timezone = medsenger_api.get_patient_info(contract.id).get('timezone')
-    db.session.commit()
     return jsonify(algorithm_manager.search_params(contract))
 
 
@@ -701,6 +704,12 @@ def get_medicine_template(args, form):
     contract = contract_manager.get(contract_id)
     medicines = medicine_template_manager.get_clinic_templates(contract.clinic_id)
     return jsonify(medicines)
+
+
+@app.route('/service/actualize_timezones')
+def actualize_timezones():
+    contract_manager.actualize_timezones()
+    return "ok"
 
 
 with app.app_context():

@@ -1,27 +1,25 @@
 from datetime import datetime, timedelta
 import time
-
-import pytz
-
 from helpers import log, timezone_now, localize
 from managers.AlgorithmsManager import AlgorithmsManager
 from managers.FormManager import FormManager
 from managers.Manager import Manager
 from managers.MedicineManager import MedicineManager
-from models import Contract, Patient, Medicine, Reminder
+from models import Contract, Medicine, Reminder
 from threading import Thread
-from pytz import timezone
 
 
 class TimetableManager(Manager):
-    def __init__(self, medicine_manager, form_manager, reminder_manager, *args):
+    def __init__(self, medicine_manager, form_manager, reminder_manager, contract_manager, *args):
         super(TimetableManager, self).__init__(*args)
         self.medicine_manager = medicine_manager
         self.form_manager = form_manager
         self.reminder_manager = reminder_manager
+        self.contract_manager = contract_manager
 
     def should_run(self, object, today=False):
-        now = timezone_now(object.contract.timezone)
+        zone = object.contract.get_actual_timezone()
+        now = timezone_now(zone)
 
         timetable = object.timetable
 
@@ -40,7 +38,7 @@ class TimetableManager(Manager):
             last_sent = now - timedelta(minutes=5)
 
         if isinstance(object, Reminder) and object.send_next:
-            return now >= localize(object.send_next, object.contract.timezone) > last_sent
+            return now >= localize(object.send_next, zone) > last_sent
 
         points = timetable['points']
         if timetable['mode'] == 'weekly':
@@ -55,7 +53,7 @@ class TimetableManager(Manager):
             map(lambda p:
                 localize(
                     datetime(minute=int(p['minute']), hour=int(p['hour']), day=now.day, month=now.month, year=now.year),
-                    object.contract.timezone
+                    zone
                 ),
                 points)
         )
@@ -105,7 +103,7 @@ class TimetableManager(Manager):
                     log(e, True)
 
     def count_times(self, obj):
-        now = timezone_now(obj.contract.timezone)
+        now = timezone_now(obj.contract.get_actual_timezone())
         timetable = obj.timetable
         points = timetable['points']
 

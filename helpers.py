@@ -233,18 +233,24 @@ def generate_timetable(start, end, times):
 
 
 def timezone_now(zone=None):
-    if zone:
+    if isinstance(zone, str) and zone:
         tz = timezone(zone)
+    elif zone:
+        tz = zone
     else:
         tz = timezone('Europe/Moscow')
+
     return datetime.now(tz)
 
 
 def localize(d, zone=None):
-    if zone:
+    if isinstance(zone, str) and zone:
         tz = timezone(zone)
+    elif zone:
+        tz = zone
     else:
         tz = timezone('Europe/Moscow')
+
     return tz.localize(d)
 
 
@@ -281,8 +287,8 @@ def fullfill_message(text, contract, medsenger_api):
 
     return text
 
+
 def clear_categories(categories_string):
     if categories_string:
         return '|'.join(set(categories_string.strip('|').split('|')))
     return categories_string
-

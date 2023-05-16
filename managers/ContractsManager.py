@@ -28,7 +28,8 @@ class ContractManager(Manager):
             self.db.session.add(contract)
 
         contract.is_active = True
-        contract.timezone = patient_info.get('timezone')
+        contract.clinic_timezone = patient_info.get('timezone')
+        contract.patient_timezone_offset = patient_info.get('timezone_offset')
         contract.clinic_id = clinic_id
         contract.agent_token = self.medsenger_api.get_agent_token(contract_id).get('agent_token')
 
@@ -72,3 +73,17 @@ class ContractManager(Manager):
 
     def get_active_ids(self):
         return [contract.id for contract in Contract.query.filter_by(is_active=True).all()]
+
+    def actualize_timezone(self, contract, commit=False):
+        info = self.medsenger_api.get_patient_info(contract.id)
+        contract.clinic_timezone = info.get('timezone')
+        contract.patient_timezone_offset = info.get('timezone_offset')
+
+        if commit:
+            self.__commit__()
+
+    def actualize_timezones(self):
+        for contract in Contract.query.filter_by(is_active=True).all():
+            self.actualize_timezone(contract)
+
+        self.__commit__()

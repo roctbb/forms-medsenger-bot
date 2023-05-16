@@ -445,7 +445,7 @@ class AlgorithmsManager(Manager):
 
             date_obj = localize(datetime.strptime(date, '%Y-%m-%d'), algorithm.contract.timezone) + timedelta(
                 hours=add_hours)
-            now_obj = timezone_now(algorithm.contract.timezone)
+            now_obj = timezone_now(algorithm.contract.get_actual_timezone())
 
             if sign == 'equal' and 0 <= (now_obj - date_obj).total_seconds() < 60 * 60:
                 return True

@@ -73,7 +73,7 @@ class ReminderManager(Manager):
         else:
             doctor_text = 'Спасибо!'
 
-        deadline = (timezone_now(reminder.contract.timezone) + timedelta(days=1)).timestamp()
+        deadline = (timezone_now(reminder.contract.get_actual_timezone()) + timedelta(days=1)).timestamp()
 
         if state == 'later':
             result = self.medsenger_api.send_message(reminder.contract_id, 'Напоминание автоматически отправится позже.',
@@ -100,9 +100,9 @@ class ReminderManager(Manager):
         send_next = None
 
         if type == 'hour':
-            send_next = timezone_now(contract.timezone) + timedelta(hours=count)
+            send_next = timezone_now(contract.get_actual_timezone()) + timedelta(hours=count)
         elif type == 'day':
-            send_next = timezone_now(contract.timezone) + timedelta(days=count)
+            send_next = timezone_now(contract.get_actual_timezone()) + timedelta(days=count)
 
         reminder.send_next = send_next
         reminder.state = 'later'
