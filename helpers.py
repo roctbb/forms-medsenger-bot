@@ -44,6 +44,22 @@ def verify_args(func):
     wrapper.__name__ = func.__name__
     return wrapper
 
+def verify_agent_args(func):
+    def wrapper(*args, **kwargs):
+        if not request.args.get('contract_id'):
+            abort(422)
+
+        if not request.args.get('agent_token'):
+            abort(401)
+        try:
+            return func(request.args, request.form, *args, **kwargs)
+        except Exception as e:
+            log(e, True)
+            abort(500)
+
+    wrapper.__name__ = func.__name__
+    return wrapper
+
 
 def only_doctor_args(func):
     def wrapper(*args, **kargs):
