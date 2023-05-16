@@ -706,12 +706,6 @@ def get_medicine_template(args, form):
     return jsonify(medicines)
 
 
-@app.route('/service/actualize_timezones')
-def actualize_timezones():
-    contract_manager.actualize_timezones()
-    return "ok"
-
-
 with app.app_context():
     db.create_all()
 
