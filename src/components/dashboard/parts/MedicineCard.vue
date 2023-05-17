@@ -128,7 +128,7 @@ export default {
             this.flags.lock_btn = true
             this.$forceUpdate()
 
-            this.axios.post(this.url('/api/settings/medicine_history'), this.medicine).then(r => {
+            this.axios.post(this.direct_url('/api/settings/medicine_history'), this.medicine).then(r => {
                 this.response = 'Данные успешно сохранены.'
                 this.flags.lock_btn = false
                 this.$forceUpdate()
@@ -161,7 +161,7 @@ export default {
                         })
                         this.$forceUpdate()
 
-                        this.axios.post(this.url('/api/settings/delete_medicine'), this.medicine)
+                        this.axios.post(this.direct_url('/api/settings/delete_medicine'), this.medicine)
                             .then((response) => Event.fire('medicine-deleted', response.data.deleted_id));
                     }
                 }
@@ -182,7 +182,7 @@ export default {
                             date: new Date().toLocaleDateString()
                         })
                         this.$forceUpdate()
-                        this.axios.post(this.url('/api/settings/resume_medicine'), this.medicine)
+                        this.axios.post(this.direct_url('/api/settings/resume_medicine'), this.medicine)
                             .then((response) => Event.fire('medicine-resumed', response.data.resumed_id));
                     }
                 }

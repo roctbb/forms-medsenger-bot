@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import time
 from helpers import log, timezone_now, localize
-from managers.AlgorithmsManager import AlgorithmsManager
+from managers.AlgorithmManager import AlgorithmManager
 from managers.FormManager import FormManager
 from managers.Manager import Manager
 from managers.MedicineManager import MedicineManager
@@ -118,7 +118,7 @@ class TimetableManager(Manager):
             contracts = list(Contract.query.filter_by(is_active=True).all())
             algorithm_groups = list(map(lambda x: x.algorithms, contracts))
 
-            algorithm_manager = AlgorithmsManager(self.medsenger_api, self.db)
+            algorithm_manager = AlgorithmManager(self.medsenger_api, self.db)
 
             for group in algorithm_groups:
                 for alg in group:
@@ -130,7 +130,7 @@ class TimetableManager(Manager):
             contracts = list(Contract.query.filter_by(is_active=True).all())
             algorithm_groups = list(map(lambda x: x.algorithms, contracts))
 
-            algorithm_manager = AlgorithmsManager(self.medsenger_api, self.db)
+            algorithm_manager = AlgorithmManager(self.medsenger_api, self.db)
 
             for group in algorithm_groups:
                 for alg in group:

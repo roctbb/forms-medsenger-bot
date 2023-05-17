@@ -21,9 +21,9 @@ from managers.MedicineManager import MedicineManager
 from models import Algorithm
 
 
-class AlgorithmsManager(Manager):
+class AlgorithmManager(Manager):
     def __init__(self, *args):
-        super(AlgorithmsManager, self).__init__(*args)
+        super(AlgorithmManager, self).__init__(*args)
 
         self.__hook_manager = HookManager(self.medsenger_api, self.db)
 

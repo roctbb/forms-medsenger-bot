@@ -100,9 +100,6 @@
                 <ul>
                     <li>Посмотреть все внесенные пациентом данные можно с помощью интеллектуального агента <strong>"Медкарта"</strong>.
                     </li>
-                    <li>Посмотреть графики можно <a v-bind:href="url('graph')">здесь</a> (или с помощью кнопки <i>Действия
-                        -> Графики</i> в Medsenger).
-                    </li>
                 </ul>
             </div>
         </div>
@@ -265,7 +262,7 @@ export default {
 
             // save values
             if (changed_algorithms.size) {
-                this.axios.post(this.url('/api/settings/algorithms'), [...changed_algorithms])
+                this.axios.post(this.direct_url('/api/settings/algorithms'), [...changed_algorithms])
                     .then(response => Event.fire('params-saved'))
                     .catch(err => Event.fire('params-not-saved'));
 
@@ -381,7 +378,7 @@ export default {
                     },
                     callback: confirm => {
                         if (confirm) {
-                            this.axios.post(this.url('/api/settings/delete_algorithm'), algorithm).then(this.process_delete_algorithm_answer);
+                            this.axios.post(this.direct_url('/api/settings/delete_algorithm'), algorithm).then(this.process_delete_algorithm_answer);
                         }
                     }
                 }

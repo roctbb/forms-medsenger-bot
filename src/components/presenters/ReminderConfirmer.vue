@@ -42,7 +42,7 @@ export default {
             let data = {
                 state: state
             }
-            this.axios.post(this.url('/api/reminder/' + this.reminder.id + '/set_state'), data).then(r => Event.fire('confirm-reminder-done')).catch(r => this.errors.push('Ошибка сохранения'));
+            this.axios.post(this.direct_url('/api/reminder/' + this.reminder.id + '/set_state'), data).then(r => Event.fire('confirm-reminder-done')).catch(r => this.errors.push('Ошибка сохранения'));
         },
         set_reminder: function (count, type) {
             let data = {
@@ -50,7 +50,7 @@ export default {
                 count: count,
                 type: type
             }
-            this.axios.post(this.url('/api/reminder/' + this.reminder.id + '/set_state'), data).then(r => Event.fire('confirm-reminder-done')).catch(r => this.errors.push('Ошибка сохранения'));
+            this.axios.post(this.direct_url('/api/reminder/' + this.reminder.id + '/set_state'), data).then(r => Event.fire('confirm-reminder-done')).catch(r => this.errors.push('Ошибка сохранения'));
         },
         remind_later: function () {
             this.main_page = !this.main_page

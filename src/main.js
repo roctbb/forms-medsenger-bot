@@ -50,6 +50,13 @@ Vue.mixin({
 
             return api_host + '/api/client/agents/' + agent_id + '/?action=' + action + '&contract_id=' + contract_id + '&agent_token=' + agent_token
         },
+        direct_url: function (action) {
+            let localhost = window.LOCAL_HOST;
+            let agent_token = window.AGENT_TOKEN;
+            let contract_id = window.CONTRACT_ID;
+
+            return localhost + action + '?contract_id=' + contract_id + '&agent_token=' + agent_token
+        },
         empty: function (e) {
             return !e && e !== 0
         },

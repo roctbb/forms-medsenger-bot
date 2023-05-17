@@ -60,7 +60,7 @@ export default {
                         comment: this.comment
                     }
                 }
-                this.axios.post(this.url('/api/confirm-medicine'), data).then(r => Event.fire('confirm-medicine-done')).catch(r => this.errors.push('Ошибка сохранения'));
+                this.axios.post(this.direct_url('/api/confirm-medicine'), data).then(r => Event.fire('confirm-medicine-done')).catch(r => this.errors.push('Ошибка сохранения'));
             }
         },
     }

@@ -31,11 +31,21 @@ class ContractManager(Manager):
         contract.clinic_timezone = patient_info.get('timezone')
         contract.patient_timezone_offset = patient_info.get('timezone_offset')
         contract.clinic_id = clinic_id
-        contract.agent_token = self.medsenger_api.get_agent_token(contract_id).get('agent_token')
+
+        self.request_tokens(contract)
 
         self.__commit__()
 
         return contract, is_new
+
+    def request_tokens(self, contract, commit=False):
+        tokens = self.medsenger_api.get_agent_token(contract.id)
+
+        contract.patient_agent_token = tokens.get('patient_agent_token')
+        contract.doctor_agent_token = tokens.get('doctor_agent_token')
+
+        if commit:
+            self.__commit__()
 
     def remove(self, contract_id):
         try:

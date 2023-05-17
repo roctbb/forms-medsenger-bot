@@ -201,7 +201,7 @@ export default {
                 this.errors = ['Выбран некорректный период']
                 return
             }
-            this.axios.post(this.url('/api/graph/group'), data).then(this.process_load_answer);
+            this.axios.post(this.direct_url('/api/graph/group'), data).then(this.process_load_answer);
         },
 
         process_load_answer: function (response) {

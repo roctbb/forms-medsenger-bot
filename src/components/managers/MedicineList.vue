@@ -126,13 +126,13 @@ export default {
                 },
                 callback: confirm => {
                     if (confirm) {
-                        this.axios.post(this.url('/api/medicine/' + medicine.id + '/disable_notifications')).then(answer => medicine.notifications_disabled = answer.data.notifications_disabled);
+                        this.axios.post(this.direct_url('/api/medicine/' + medicine.id + '/disable_notifications')).then(answer => medicine.notifications_disabled = answer.data.notifications_disabled);
                     }
                 }
             })
         },
         enable_notifications: function (medicine) {
-            this.axios.post(this.url('/api/medicine/' + medicine.id + '/enable_notifications')).then(answer => medicine.notifications_disabled = answer.data.notifications_disabled);
+            this.axios.post(this.direct_url('/api/medicine/' + medicine.id + '/enable_notifications')).then(answer => medicine.notifications_disabled = answer.data.notifications_disabled);
         },
         edit_medicine: function (medicine) {
             this.custom_medicine = medicine
@@ -164,7 +164,7 @@ export default {
                                 date: new Date().toLocaleDateString()
                             })
                             medicine.deleted_by_patient = true
-                            this.axios.post(this.url('/api/settings/delete_medicine'), medicine)
+                            this.axios.post(this.direct_url('/api/settings/delete_medicine'), medicine)
                                 .then(response => {
                                     if (response.data.deleted_id) {
                                         let medicine = this.medicines.find(m => m.id == response.data.deleted_id)
@@ -199,7 +199,7 @@ export default {
                     },
                     callback: confirm => {
                         if (confirm) {
-                            this.axios.post(this.url('/api/confirm-medicine'), data).then(r => Event.fire('confirm-medicine-done')).catch(r => this.errors.push('Ошибка сохранения'));
+                            this.axios.post(this.direct_url('/api/confirm-medicine'), data).then(r => Event.fire('confirm-medicine-done')).catch(r => this.errors.push('Ошибка сохранения'));
                         }
                     }
                 })
@@ -227,7 +227,7 @@ export default {
                             comment: this.custom_medicine.comment
                         }
                     }
-                    this.axios.post(this.url('/api/confirm-medicine'), data)
+                    this.axios.post(this.direct_url('/api/confirm-medicine'), data)
                         .then(r => Event.fire('confirm-medicine-done'))
                         .catch(r => this.errors.push('Ошибка сохранения'));
 
@@ -242,7 +242,7 @@ export default {
                             }]
                         }
                         this.custom_medicine.edited_by_patient = true
-                        this.axios.post(this.url('/api/settings/medicine'), this.custom_medicine)
+                        this.axios.post(this.direct_url('/api/settings/medicine'), this.custom_medicine)
                             .then(r => {
                                 if (!this.custom_medicine.id) {
                                     this.patient_medicines.push(this.custom_medicine)

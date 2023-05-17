@@ -92,7 +92,7 @@ export default {
                 },
                 callback: confirm => {
                     if (confirm) {
-                        this.axios.post(this.url('/api/settings/delete_form'), this.form)
+                        this.axios.post(this.direct_url('/api/settings/delete_form'), this.form)
                             .then((response) => Event.fire('form-deleted', response.data.deleted_id));
                     }
                 }
@@ -120,7 +120,7 @@ export default {
                 },
                 callback: confirm => {
                     if (confirm) {
-                        this.axios.get(this.url('/api/send_form/' + id)).then(alert);
+                        this.axios.get(this.direct_url('/api/send_form/' + id)).then(alert);
                     }
                 }
             })

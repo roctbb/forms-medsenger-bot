@@ -10,3 +10,5 @@ pytz
 redis
 celery
 uwsgi
+flask_cors
+flask-compress

@@ -28,79 +28,19 @@ def log(error, terminating=False):
         print(gts(), exc_type, fname, exc_tb.tb_lineno, error)
 
 
-# decorators
-def verify_args(func):
-    def wrapper(*args, **kargs):
-        if not request.args.get('contract_id'):
-            abort(422)
-        if request.args.get('api_key') != API_KEY:
-            abort(401)
-        try:
-            return func(request.args, request.form, *args, **kargs)
-        except Exception as e:
-            log(e, True)
-            abort(500)
+def get_ui(page, contract, categories='[]', object_id=None, is_preview=False, dashboard_parts=[], role='doctor'):
+    token = 'undefined'
 
-    wrapper.__name__ = func.__name__
-    return wrapper
+    if contract:
+        if role == 'doctor':
+            token = contract.doctor_agent_token
+        else:
+            token = contract.patient_agent_token
 
-def verify_agent_args(func):
-    def wrapper(*args, **kwargs):
-        if not request.args.get('contract_id'):
-            abort(422)
-
-        if not request.args.get('agent_token'):
-            abort(401)
-        try:
-            return func(request.args, request.form, *args, **kwargs)
-        except Exception as e:
-            log(e, True)
-            abort(500)
-
-    wrapper.__name__ = func.__name__
-    return wrapper
-
-
-def only_doctor_args(func):
-    def wrapper(*args, **kargs):
-        if not request.args.get('contract_id'):
-            abort(422)
-        if request.args.get('api_key') != API_KEY:
-            abort(401)
-        # if request.args.get('source') == 'patient':
-        #    abort(401)
-        try:
-            return func(request.args, request.form, *args, **kargs)
-        except Exception as e:
-            log(e, True)
-            abort(500)
-
-    wrapper.__name__ = func.__name__
-    return wrapper
-
-
-def verify_json(func):
-    def wrapper(*args, **kargs):
-        if not request.json.get('contract_id') and "status" not in request.url:
-            abort(422)
-        if request.json.get('api_key') != API_KEY:
-            abort(401)
-        # return func(request.json, *args, **kargs)
-        try:
-            return func(request.json, *args, **kargs)
-        except Exception as e:
-            log(e, True)
-            abort(500)
-
-    wrapper.__name__ = func.__name__
-    return wrapper
-
-
-def get_ui(page, contract, categories='[]', object_id=None, is_preview=False, dashboard_parts=[]):
     return render_template('index.html', page=page, object_id=object_id,
                            contract_id=contract.id if contract else 'undefined',
-                           api_host=MAIN_HOST.replace('8001', '8000'), local_host=LOCALHOST,
-                           agent_token=contract.agent_token if contract else 'undefined',
+                           api_host=MAIN_HOST, localhost=LOCALHOST, jshost=JSHOST,
+                           agent_token=token,
                            agent_id=AGENT_ID, categories=json.dumps(categories),
                            is_admin=str(bool(contract.is_admin)).lower() if contract else 'false',
                            lc=dir_last_updated('static'), clinic_id=contract.clinic_id if contract else 'undefined',

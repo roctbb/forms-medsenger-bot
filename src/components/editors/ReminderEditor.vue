@@ -169,7 +169,7 @@ export default {
 
                 if (!this.button_lock) {
                     this.button_lock = true
-                    this.axios.post(this.url('/api/settings/reminder'), this.reminder).then(this.process_save_answer).catch(this.process_save_error);
+                    this.axios.post(this.direct_url('/api/settings/reminder'), this.reminder).then(this.process_save_answer).catch(this.process_save_error);
                 }
             }
         },

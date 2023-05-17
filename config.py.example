@@ -4,6 +4,7 @@ DB_HOST = 'localhost'
 DB_PORT = 5432
 DB_DATABASE = 'forms-medsenger-bot'
 MAIN_HOST = 'http://localhost:8001'
+JSHOST = 'http://localhost:8080'
 LOCALHOST = 'http://localhost:8080'
 API_KEY = ''
 AGENT_ID = 6

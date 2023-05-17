@@ -100,7 +100,8 @@ class Contract(db.Model):
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=False)
     clinic_id = db.Column(db.Integer, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
-    agent_token = db.Column(db.String(255), nullable=True)
+    doctor_agent_token = db.Column(db.String(255), nullable=True)
+    patient_agent_token = db.Column(db.String(255), nullable=True)
 
     forms = db.relationship('Form', backref=backref('contract', uselist=False), lazy=True)
     medicines = db.relationship('Medicine', backref=backref('contract', uselist=False), lazy=True)

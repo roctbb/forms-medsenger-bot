@@ -188,40 +188,34 @@ export default {
             }
 
             if (this.mode == 'settings') {
-                this.axios.get(this.url('/api/settings/get_templates')).then(response => {
+                this.axios.get(this.direct_url('/api/settings/get_templates')).then(response => {
                     this.templates = response.data
-                    this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
+                    this.axios.get(this.direct_url('/api/settings/get_patient')).then(this.process_load_answer);
                 });
             }
             if (this.mode == 'form') {
-                this.axios.get(this.url('/api/settings/get_patient')).then(response => {
+                this.axios.get(this.direct_url('/api/settings/get_patient_data')).then(response => {
                     this.patient = response.data
-                    this.axios.get(this.url('/api/form/' + this.object_id)).then(this.process_load_answer).catch(this.process_load_error);
+                    this.axios.get(this.direct_url('/api/form/' + this.object_id)).then(this.process_load_answer).catch(this.process_load_error);
                 });
             }
             if (this.mode == 'outsource-form') {
                 this.axios.get('/api/outsource_form/' + this.object_id).then(this.process_load_answer).catch(this.process_load_error);
             }
             if (this.mode == 'confirm-reminder') {
-                this.axios.get(this.url('/api/reminder/' + this.object_id)).then(this.process_load_answer);
+                this.axios.get(this.direct_url('/api/reminder/' + this.object_id)).then(this.process_load_answer);
             }
             if (this.mode == 'verify-dose') {
-                this.axios.get(this.url('/api/medicine/' + this.object_id)).then(this.process_load_answer);
+                this.axios.get(this.direct_url('/api/medicine/' + this.object_id)).then(this.process_load_answer);
             }
             if (this.mode == 'medicine-chooser') {
-                this.axios.get(this.url('/api/settings/get_templates')).then(response => {
+                this.axios.get(this.direct_url('/api/settings/get_templates')).then(response => {
                     this.templates = response.data
-                    this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
+                    this.axios.get(this.direct_url('/api/settings/get_patient')).then(this.process_load_answer);
                 });
             }
             if (this.mode == 'medicines-list') {
-                this.axios.get(this.url('/api/settings/get_patient')).then(this.process_load_answer);
-            }
-            if (this.mode == 'graph') {
-                this.axios.get(this.url('/api/settings/get_patient')).then(response => {
-                    this.patient = response.data
-                    this.axios.get(this.url('/api/graph/categories')).then(this.process_load_answer);
-                });
+                this.axios.get(this.direct_url('/api/settings/get_patient_data')).then(this.process_load_answer);
             }
         },
         process_load_answer: function (response) {

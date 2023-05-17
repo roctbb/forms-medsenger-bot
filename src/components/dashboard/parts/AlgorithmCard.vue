@@ -52,7 +52,7 @@ export default {
                 },
                 callback: confirm => {
                     if (confirm) {
-                        this.axios.post(this.url('/api/settings/delete_algorithm'), this.algorithm)
+                        this.axios.post(this.direct_url('/api/settings/delete_algorithm'), this.algorithm)
                             .then((response) => Event.fire('algorithm-deleted', response.data.deleted_id));
                     }
                 }

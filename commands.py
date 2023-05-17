@@ -1,5 +1,5 @@
 from config import *
-from managers.AlgorithmsManager import AlgorithmsManager
+from managers.AlgorithmsManager import AlgorithmManager
 from medsenger_api import AgentApiClient
 import flask
 
@@ -17,7 +17,7 @@ class MigrateLegacyStructure(Command):
 
     def run(self):
         medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG)
-        algorithm_manager = AlgorithmsManager(medsenger_api, db)
+        algorithm_manager = AlgorithmManager(medsenger_api, db)
         algorithm_manager.__migrate__()
 
 

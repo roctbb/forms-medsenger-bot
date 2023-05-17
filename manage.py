@@ -1,10 +1,13 @@
 from celery import Celery
 from flask import Flask
+from flask_compress import Compress
+from flask_cors import CORS
+
 from models import db
 from flask_migrate import Migrate
 from sentry_sdk.integrations.flask import FlaskIntegration
 import sentry_sdk
-from managers.AlgorithmsManager import AlgorithmsManager
+from managers.AlgorithmManager import AlgorithmManager
 from managers.ContractsManager import ContractManager
 from managers.FormManager import FormManager
 from managers.MedicineManager import MedicineManager
@@ -23,6 +26,10 @@ if PRODUCTION:
     )
 
 app = Flask(__name__)
+
+CORS(app)
+Compress(app)
+
 db_string = "postgresql://{}:{}@{}:{}/{}".format(DB_LOGIN, DB_PASSWORD, DB_HOST, DB_PORT, DB_DATABASE)
 app.config['SQLALCHEMY_DATABASE_URI'] = db_string
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {"pool_pre_ping": True}
@@ -44,5 +51,5 @@ form_manager = FormManager(medsenger_api, db)
 medicine_manager = MedicineManager(medsenger_api, db)
 reminder_manager = ReminderManager(medsenger_api, db)
 timetable_manager = TimetableManager(medicine_manager, form_manager, reminder_manager, medsenger_api, db)
-algorithm_manager = AlgorithmsManager(medsenger_api, db)
+algorithm_manager = AlgorithmManager(medsenger_api, db)
 medicine_template_manager = MedicineTemplateManager(medsenger_api, db)

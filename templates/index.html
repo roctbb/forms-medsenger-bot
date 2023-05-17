@@ -18,7 +18,8 @@
         window.CONTRACT_ID = parseInt('{{ contract_id }}');
         window.CLINIC_ID = parseInt('{{ clinic_id }}');
         window.API_HOST = '{{ api_host }}';
-        window.LOCAL_HOST = '{{ local_host }}';
+        window.LOCAL_HOST = '{{ localhost }}';
+        window.JSHOST = '{{ jshost }}';
         window.AGENT_TOKEN = '{{ agent_token }}';
         window.PAGE = '{{ page }}';
         window.OBJECT_ID = '{{ object_id }}';
@@ -32,6 +33,6 @@
 <div>
     <div id="app"></div>
 </div>
-<script src="{{ local_host }}/static/build.js?c={{lc}}"></script>
+<script src="{{ jshost }}/static/build.js?c={{lc}}"></script>
 </body>
 </html>

@@ -77,7 +77,7 @@ export default {
                 },
                 callback: confirm => {
                     if (confirm) {
-                        this.axios.post(this.url('/api/settings/delete_reminder'), this.reminder)
+                        this.axios.post(this.direct_url('/api/settings/delete_reminder'), this.reminder)
                             .then((response) => Event.fire('reminder-deleted', response.data.deleted_id));
                     }
                 }

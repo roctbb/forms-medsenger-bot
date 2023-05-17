@@ -217,7 +217,7 @@ export default {
 
             if (this.check()) {
                 this.submitted = true
-                let url = this.page == 'outsource-form' ? ('/api/outsource_form/' + this.form.id) : this.url('/api/form/' + this.form.id)
+                let url = this.page == 'outsource-form' ? ('/api/outsource_form/' + this.form.id) : this.direct_url('/api/form/' + this.form.id)
                 this.axios.post(url, this.answers).then(r => {
                     if (this.page == 'outsource-form') {
                         Event.fire('outsource-form-done', r.data.result)

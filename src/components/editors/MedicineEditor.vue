@@ -82,7 +82,7 @@ export default {
     },
     methods: {
         loadSuggetions: function () {
-            this.axios.get(this.url('/api/medicine-template'))
+            this.axios.get(this.direct_url('/api/medicine-template'))
                 .then(response => {
                     this.suggestions = response.data;
                 })
@@ -178,7 +178,7 @@ export default {
 
                 if (!this.button_lock) {
                     this.button_lock = true
-                    this.axios.post(this.url('/api/settings/medicine'), this.medicine).then(this.process_save_answer).catch(this.process_save_error);
+                    this.axios.post(this.direct_url('/api/settings/medicine'), this.medicine).then(this.process_save_answer).catch(this.process_save_error);
                 }
             }
         },
