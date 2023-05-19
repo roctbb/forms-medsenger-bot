@@ -88,7 +88,7 @@ export default {
         }
     },
     created() {
-        this.update_params()
+        if (this.page == 'dashboard') this.update_params()
 
         Event.listen('dashboard-to-main', () => {
             if (window.PAGE == 'settings') {

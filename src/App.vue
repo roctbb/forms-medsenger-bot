@@ -182,9 +182,6 @@ export default {
             Event.fire('navigate-to-edit-form-page', data);
             Event.fire('edit-form-tt-only');
         });
-        Event.listen('select-graph', () => {
-            this.state = 'graph-category-chooser'
-        });
         Event.listen('verify-dose', (medicine) => {
             this.medicine = medicine
             this.state = 'verify-dose'
@@ -193,6 +190,7 @@ export default {
             this.result = result
             this.state = 'form-result'
         });
+        Event.listen('examination-loaded', (examination) => this.state = 'examinations-list')
     },
     methods: {
         load: function () {

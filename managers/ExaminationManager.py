@@ -64,7 +64,6 @@ class ExaminationManager(Manager):
         if not date:
             date = datetime.now().time()
         examination.upload_date = datetime.fromtimestamp(date).strftime('%Y-%m-%d')
-        print(files)
         record = self.medsenger_api.add_record(contract_id, 'analysis_result', examination.title,
                                                files=files, params={'examination_id': examination.id},
                                                record_time=date, return_id=True)
@@ -104,7 +103,7 @@ class ExaminationManager(Manager):
         self.db.session.delete(examination)
         self.__commit__()
 
-        return id
+        return examination_id
 
     def log_request(self, examination, contract_id=None, description=None):
         if not contract_id:
