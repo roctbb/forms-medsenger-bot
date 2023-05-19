@@ -45,7 +45,7 @@ celery = Celery(
 )
 
 
-medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG)
+medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG, use_grpc=USE_GRPC, grpc_host=GRPC_HOST)
 contract_manager = ContractManager(medsenger_api, db)
 form_manager = FormManager(medsenger_api, db)
 medicine_manager = MedicineManager(medsenger_api, db)
