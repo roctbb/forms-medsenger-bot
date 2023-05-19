@@ -28,12 +28,11 @@ def __get_contract(contract_manager, contract_id):
         contract = contract_manager.get(contract_id)
 
         if not contract.patient_agent_token or not contract.doctor_agent_token:
-            contract_manager.request_token(contract, commit=True)
+            contract_manager.request_tokens(contract, commit=True)
 
         return contract
 
-    except Exception as e:
-        print(e)
+    except:
         abort(404)
 
 
