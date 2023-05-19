@@ -32,7 +32,8 @@ def __get_contract(contract_manager, contract_id):
 
         return contract
 
-    except:
+    except Exception as e:
+        print(e)
         abort(404)
 
 
