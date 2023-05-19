@@ -222,7 +222,6 @@ def params(data):
 @app.route('/params', methods=['GET'])
 @verify_request(contract_manager, 'doctor')
 def get_params(args, data, contract):
-    contract = contract_manager.get(args.get('contract_id'))
     return jsonify(algorithm_manager.search_params(contract))
 
 
@@ -317,6 +316,7 @@ def get_data(args, form, contract):
 
     return jsonify(patient)
 
+
 @app.route('/api/settings/get_patient_data', methods=['GET'])
 @verify_request(contract_manager, 'patient')
 def get_open_data(args, form, contract):
@@ -337,7 +337,8 @@ def get_templates(args, form, contract):
         "forms": form_manager.get_templates_as_dicts(),
         "medicines": medicine_manager.get_templates_as_dicts(),
         "reminders": reminder_manager.get_templates_as_dicts(),
-        "algorithms": algorithm_manager.get_templates_as_dicts()
+        "algorithms": algorithm_manager.get_templates_as_dicts(),
+        "examinations": examination_manager.get_templates_as_dicts()
     }
 
     return jsonify(templates)
@@ -626,7 +627,6 @@ def enable_notifications(args, form, contract, medicine_id):
 @app.route('/api/confirm-medicine', methods=['POST'])
 @verify_request(contract_manager, 'patient')
 def post_medicines(args, form, contract):
-
     data = request.json
 
     if data['custom']:
@@ -644,6 +644,103 @@ def post_medicines(args, form, contract):
 def get_medicine_template(args, form, contract):
     medicines = medicine_template_manager.get_clinic_templates(contract.clinic_id)
     return jsonify(medicines)
+
+# examinations
+
+
+@app.route('/examinations-list', methods=['GET'])
+@verify_request(contract_manager, 'patient')
+def examinations_list_page(args, form, contract):
+    contract = contract_manager.get(args.get('contract_id'))
+    return get_ui('examinations-list', contract, medsenger_api.get_categories())
+
+
+@app.route('/examination-manager', methods=['GET'])
+@verify_request(contract_manager, 'doctor')
+def examination_editor_page(args, form, contract):
+    return get_ui('settings', contract, medsenger_api.get_categories(), dashboard_parts=['examinations'], role='doctor')
+
+
+@app.route('/examination/<examination_id>', methods=['GET'])
+@verify_request(contract_manager, 'patient')
+def examination_page(args, form, contract, examination_id):
+    return get_ui('examination', contract, medsenger_api.get_categories(), examination_id, role='patient')
+
+
+@app.route('/api/settings/examination', methods=['POST'])
+@verify_request(contract_manager, 'doctor')
+def create_examination(args, form, contract):
+    examination = examination_manager.create_or_edit(request.json, contract)
+
+    if examination:
+        return jsonify(examination.as_dict())
+    else:
+        abort(422)
+
+
+@app.route('/api/settings/delete_examination', methods=['POST'])
+@verify_request(contract_manager, 'doctor')
+def delete_examination(args, form, contract):
+    result = examination_manager.remove(request.json.get('id'), contract)
+
+    if result:
+        return jsonify({
+            "deleted_id": result
+        })
+    else:
+        abort(404)
+
+
+@app.route('/api/examination/<examination_id>', methods=['GET'])
+@verify_request(contract_manager, 'patient')
+def get_examination(args, form, contract, examination_id):
+    examination = examination_manager.get(examination_id)
+
+    if examination.contract_id != int(args.get('contract_id')) and not examination.is_template:
+        abort(401)
+    answer = examination.as_dict()
+
+    if examination.record_id:
+        record = medsenger_api.get_record_by_id(contract.id, examination.record_id)
+        answer['files'] = [record['attached_files']]
+
+    return jsonify(answer)
+
+
+@app.route('/api/examination/<examination_id>', methods=['POST'])
+@verify_request(contract_manager, 'patient')
+def post_examination(args, form, contract, examination_id):
+    examination = examination_manager.get(examination_id)
+    data = request.json
+
+    if examination.contract_id != contract.id and not examination.is_template:
+        abort(401)
+
+    submit_chain = tasks.submit_examination.s(True, data['files'], examination_id, contract.id, data['date'])
+    submit_chain.apply_async()
+
+    return jsonify({
+        "result": "ok",
+    })
+
+
+@app.route('/api/settings/get_examination_files/<examination_id>', methods=['GET'])
+@verify_request(contract_manager, 'patient')
+def get_examination_files(args, form, contract, examination_id):
+    contract_id = int(args.get('contract_id'))
+    examination = examination_manager.get(examination_id)
+    record = medsenger_api.get_record_by_id(contract_id, examination.record_id)
+
+    files = []
+    for file_info in record['attached_files']:
+        file = medsenger_api.get_file(contract_id, file_info['id'])
+        print(file_info)
+        files.append({
+            'base64': file['base64'],
+            'type': file_info.get('type', 'text/plain'),
+            'name': file_info['name']
+        })
+    return jsonify(files)
 
 
 with app.app_context():

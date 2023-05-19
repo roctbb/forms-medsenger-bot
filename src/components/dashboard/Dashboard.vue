@@ -1,6 +1,8 @@
 <template>
     <div>
         <algorithm-settings/>
+        <examination-settings/>
+
         <div v-if="state == 'main'">
 
             <h6 v-if="parts.length == 0 && patient.month_compliance[0]" class="badge badge-info">Общая комплаентность за
@@ -54,6 +56,21 @@
                     <medicine-card :medicine="medicine" :key="'canceled_medicine' + medicine.id"
                                    v-for="(medicine, i) in patient.canceled_patient_medicines"/>
                 </div>
+            </div>
+
+            <!-- назначенные обследования -->
+            <div v-if="parts.length == 0 || parts.includes('examinations')">
+                <h4>Обследования</h4>
+                <small v-if="!patient.examinations.length">Нет назначенных обследований</small>
+                <div class="row">
+                    <examination-card :patient="patient" :examination="examination" :key="'examination_' + examination.id"
+                                      v-for="examination in patient.examinations"/>
+                    <examination-card :patient="patient" :examination="examination" :key="'examination_' + examination.id"
+                                      v-for="examination in patient.expired_examinations"/>
+                </div>
+
+                <button class="btn btn-default btn-sm" @click="state = 'examination_templates'">Назначить обследование
+                </button>
             </div>
 
             <!-- напоминания -->
@@ -155,6 +172,34 @@
             <button class="btn btn-danger btn-sm" @click="state = 'main'">Назад</button>
         </div>
 
+        <!-- шаблоны обследований -->
+        <div v-if="state == 'examination_templates'">
+            <h3>Шаблоны обследований</h3>
+            <div class="alert alert-info" role="alert">
+                <p>Выберите обследование из списка ниже или создайте новое.
+                    В дальнейшем Вы сможете изменить его параметры.</p>
+            </div>
+
+            <div class="row"
+                 v-for="(group, name) in group_by(templates.examinations.map((examination) => {
+                     if (!examination.template_category) examination.template_category = 'Общее'
+                     return examination
+                 }), 'template_category')">
+
+                <div class="col-md-12"><h5>{{ name }}</h5></div>
+                <examination-card :patient="patient" :examination="examination" :key="'examination_template_' + examination.id"
+                                  v-for="(examination, i) in group"/>
+
+                <div v-if="!templates.forms.length" class="col-md-12">
+                    <p style="margin-bottom: 15px;">Список шаблонов пуст.</p>
+                </div>
+            </div>
+
+
+            <button class="btn btn-default btn-sm" @click="create_examination()">Добавить</button>
+            <button class="btn btn-danger btn-sm" @click="state = 'main'">Назад</button>
+        </div>
+
         <!-- шаблоны напоминаний -->
         <div v-if="state == 'reminder_templates'">
             <h3>Шаблоны напоминаний</h3>
@@ -217,10 +262,14 @@ import FormCard from "./parts/FormCard";
 import MedicineCard from "./parts/MedicineCard";
 import ReminderCard from "./parts/ReminderCard";
 import AlgorithmCard from "./parts/AlgorithmCard";
+import ExaminationCard from "./parts/ExaminationCard";
+import ExaminationSettings from "./parts/ExaminationSettings";
 
 export default {
     name: "Dashboard",
     components: {
+        ExaminationSettings,
+        ExaminationCard,
         AlgorithmCard,
         ReminderCard, MedicineCard, FormCard, ParamsEditor, ErrorBlock, FormGroup48, AlgorithmSettings, Card
     },
@@ -303,6 +352,28 @@ export default {
             }
 
         },
+        ask_for_examination_doubling: function (title, F) {
+            this.$confirm({
+                message: `Пациенту уже назначено обследование ` + title + `. Назначить еще раз?`,
+                button: {
+                    no: 'Нет',
+                    yes: 'Да'
+                },
+                callback: confirm => {
+                    if (confirm) {
+                        F()
+                    }
+                }
+            })
+        },
+
+        setup_examination: function (examination) {
+            let setup = () => {
+                this.$modal.show('examination-settings', {examination: examination})
+            }
+            if (this.patient.examinations.filter(f => f.template_id == examination.id).length != 0) this.ask_for_examination_doubling(examination.title, setup)
+            else setup()
+        },
         ask_for_alg_doubling: function (title, F) {
             this.$confirm({
                 message: `Пациенту уже подключен алгоритм на основе шаблона ` + title + `. Подключить еще один?`,
@@ -345,6 +416,9 @@ export default {
         },
         create_medicine: function () {
             Event.fire('navigate-to-create-medicine-page')
+        },
+        create_examination: function () {
+            Event.fire('navigate-to-create-examination-page')
         },
         create_reminder: function () {
             Event.fire('navigate-to-create-reminder-page')
@@ -424,17 +498,17 @@ export default {
             }
             this.$forceUpdate()
         },
-        process_delete_algorithm_answer: function (response) {
-            if (response.data.deleted_id) {
-                this.patient.algorithms = this.patient.algorithms.filter(m => m.id != response.data.deleted_id)
-                this.templates.algorithms = this.templates.algorithms.filter(m => m.id != response.data.deleted_id)
-            }
-        },
         process_delete_algorithm: function (deleted_alg_id) {
-            console.log(deleted_alg_id)
             if (deleted_alg_id) {
                 this.patient.algorithms = this.patient.algorithms.filter(a => a.id != deleted_alg_id)
                 this.templates.algorithms = this.templates.algorithms.filter(a => a.id != deleted_alg_id)
+            }
+            this.$forceUpdate()
+        },
+        process_delete_examination: function (deleted_examination_id) {
+            if (deleted_examination_id) {
+                this.patient.examinations = this.patient.examinations.filter(e => e.id != deleted_examination_id)
+                this.templates.examinations = this.templates.examinations.filter(e => e.id != deleted_examination_id)
             }
             this.$forceUpdate()
         },
@@ -467,7 +541,6 @@ export default {
         },
     },
     mounted() {
-        console.log(this.patient)
         Event.listen('dashboard-to-main', () => {
             if (window.PAGE == 'settings') {
                 this.state = 'main'
@@ -483,6 +556,9 @@ export default {
         Event.listen('medicine-deleted', (deleted_medicine_id) => this.process_delete_medicine(deleted_medicine_id))
         Event.listen('medicine-resumed', (resumed_medicine_id) => this.process_resume_medicine(resumed_medicine_id))
         Event.listen('attach-medicine-from-card', (medicine) => this.attach_medicine(medicine))
+
+        Event.listen('examination-deleted', (deleted_examination_id) => this.process_delete_examination(deleted_examination_id))
+        Event.listen('attach-examination-from-card', (examination) => this.setup_examination(examination))
 
         Event.listen('reminder-deleted', (deleted_reminder_id) => this.process_delete_reminder(deleted_reminder_id))
 

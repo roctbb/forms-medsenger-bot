@@ -1,4 +1,4 @@
-from manage import app, celery, form_manager, algorithm_manager, contract_manager, medsenger_api
+from manage import app, celery, form_manager, algorithm_manager, examination_manager, contract_manager, medsenger_api
 import time
 
 
@@ -21,6 +21,16 @@ def examine_form(chain, form_id, contract_id):
         contract = contract_manager.get(contract_id)
         form = form_manager.get(form_id)
         return algorithm_manager.examine(contract, form)
+
+
+@celery.task
+def submit_examination(chain, files, examination_id, contract_id, date):
+    if not chain:
+        return chain
+
+    with app.app_context():
+        examination = examination_manager.get(examination_id)
+        return examination_manager.submit(examination, files, contract_id, date)
 
 
 @celery.task

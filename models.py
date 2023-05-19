@@ -44,26 +44,24 @@ class Patient(db.Model):
     medicines = db.relationship('Medicine', backref=backref('patient', uselist=False), lazy=True)
     reminders = db.relationship('Reminder', backref=backref('patient', uselist=False), lazy=True)
     algorithms = db.relationship('Algorithm', backref=backref('patient', uselist=False), lazy=True)
+    examinations = db.relationship('MedicalExamination', backref=backref('patient', uselist=False), lazy=True)
 
     def as_dict(self):
+        today = datetime.now()
+        today = today.date()
         return {
             "id": self.id,
             "month_compliance": self.count_month_compliance(),
             "contracts": [contract.as_dict() for contract in self.contracts],
             "forms": [form.as_dict() for form in self.forms],
-            "medicines": [medicine.as_dict() for medicine in self.medicines if
-                          medicine.canceled_at is None and not medicine.is_created_by_patient],
-            "canceled_medicines": [medicine.as_dict() for medicine in self.medicines if
-                                   medicine.canceled_at is not None and not medicine.is_created_by_patient],
-            "patient_medicines": [medicine.as_dict() for medicine in self.medicines if
-                                  medicine.canceled_at is None and medicine.is_created_by_patient],
-            "canceled_patient_medicines": [medicine.as_dict() for medicine in self.medicines if
-                                           medicine.canceled_at is not None and medicine.is_created_by_patient],
-            "reminders": sorted([reminder.as_dict() for reminder in self.reminders if reminder.canceled_at is None],
-                                key=lambda k: k["attach_date"]),
-            "old_reminders": sorted(
-                [reminder.as_dict() for reminder in self.reminders if reminder.canceled_at is not None],
-                key=lambda k: k["attach_date"], reverse=True),
+            "examinations": sorted([examination.as_dict() for examination in self.examinations if examination.deadline_date >= today], key=lambda ex: ex['deadline_date']),
+            "expired_examinations": sorted([examination.as_dict() for examination in self.examinations if examination.deadline_date < today], key=lambda ex: ex['deadline_date']),
+            "medicines": sorted([medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is None and not medicine.is_created_by_patient], key=lambda m: m['title']),
+            "canceled_medicines": sorted([medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is not None and not medicine.is_created_by_patient], key=lambda m: m['title']),
+            "patient_medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is None and medicine.is_created_by_patient],
+            "canceled_patient_medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is not None and medicine.is_created_by_patient],
+            "reminders": sorted([reminder.as_dict() for reminder in self.reminders if reminder.canceled_at is None], key=lambda k: k["attach_date"]),
+            "old_reminders": sorted([reminder.as_dict() for reminder in self.reminders if reminder.canceled_at is not None], key=lambda k: k["attach_date"], reverse=True),
             "algorithms": [algorithm.as_dict() for algorithm in self.algorithms]
         }
 
@@ -107,6 +105,7 @@ class Contract(db.Model):
     medicines = db.relationship('Medicine', backref=backref('contract', uselist=False), lazy=True)
     reminders = db.relationship('Reminder', backref=backref('contract', uselist=False), lazy=True)
     algorithms = db.relationship('Algorithm', backref=backref('contract', uselist=False), lazy=True)
+    examinations = db.relationship('MedicalExamination', backref=backref('contract', uselist=False), lazy=True)
     tasks = db.Column(db.JSON, nullable=True)
 
     is_admin = db.Column(db.Boolean, default=False)
@@ -601,4 +600,67 @@ class MedicineTemplate(db.Model):
             "title": self.title,
             "rules": self.rules,
             "dose": self.dose
+        }
+
+
+class MedicalExamination(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    is_template = db.Column(db.Boolean, default=False)
+    template_id = db.Column(db.Integer, db.ForeignKey('medical_examination.id', ondelete="set null"), nullable=True)
+
+    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=True)
+    contract_id = db.Column(db.Integer, db.ForeignKey('contract.id', ondelete="CASCADE"), nullable=True)
+
+    attach_date = db.Column(db.Date, nullable=True)
+    upload_date = db.Column(db.Date, nullable=True)
+    notification_date = db.Column(db.Date, nullable=True)
+    deadline_date = db.Column(db.Date, nullable=True)
+
+    asked = db.Column(db.Boolean, default=False)
+
+    title = db.Column(db.String(255), nullable=True)
+    template_category = db.Column(db.String(255), nullable=True)
+    doctor_description = db.Column(db.Text, nullable=True)
+    patient_description = db.Column(db.Text, nullable=True)
+
+    expiration_days = db.Column(db.Integer, default=0)
+    record_id = db.Column(db.Integer, nullable=True)
+
+    def clone(self):
+        new_examination = MedicalExamination()
+
+        new_examination.title = self.title
+        new_examination.template_category = self.template_category
+        new_examination.doctor_description = self.doctor_description
+        new_examination.patient_description = self.patient_description
+
+        new_examination.expiration_days = self.expiration_days
+        new_examination.attach_date = datetime.now()
+
+        if self.is_template:
+            new_examination.template_id = self.id
+        else:
+            new_examination.template_id = self.template_id
+
+        return new_examination
+
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "template_category": self.template_category,
+            "doctor_description": self.doctor_description,
+            "patient_description": self.patient_description,
+            "patient_id": self.patient_id,
+            "contract_id": self.contract_id,
+            "expiration_days": self.expiration_days,
+            "asked": self.asked,
+            "record_id": self.record_id,
+            "is_template": self.is_template,
+            "template_id": self.template_id,
+            "attach_date": self.attach_date.strftime('%Y-%m-%d') if self.attach_date else None,
+            "upload_date": self.upload_date.strftime('%Y-%m-%d') if self.upload_date else None,
+            "notification_date": self.notification_date.strftime('%Y-%m-%d') if self.notification_date else None,
+            "deadline_date": self.deadline_date.strftime('%Y-%m-%d') if self.deadline_date else None,
         }

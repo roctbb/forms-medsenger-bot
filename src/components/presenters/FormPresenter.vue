@@ -233,8 +233,6 @@ export default {
             }
         },
         check: function () {
-            console.log(this.answers)
-
             let prepare_field = (field, i) => {
                 if (this.empty(this.answers[field.uid])) {
                     return;
@@ -274,7 +272,6 @@ export default {
                     this.answers[field.uid] = 0
                 }
                 if (field.type == 'medicine_list') {
-                    console.log(this.patient)
                     if (this.patient.patient_medicines && this.patient.patient_medicines.length) {
                         this.answers[field.uid] = Array.from(Array(this.patient.patient_medicines.length), (_, i) => {
                             let med = {
@@ -322,10 +319,7 @@ export default {
                         this.$forceUpdate();
                     })
 
-
                 }
-
-
             }
         },
         fieldTransformer: function (field) {

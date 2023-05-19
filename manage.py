@@ -14,6 +14,7 @@ from managers.MedicineManager import MedicineManager
 from managers.ReminderManager import ReminderManager
 from managers.TimetableManager import TimetableManager
 from managers.MedicineTemplateManager import MedicineTemplateManager
+from managers.ExaminationManager import ExaminationManager
 from medsenger_api import AgentApiClient
 
 from config import *
@@ -51,5 +52,6 @@ form_manager = FormManager(medsenger_api, db)
 medicine_manager = MedicineManager(medsenger_api, db)
 reminder_manager = ReminderManager(medsenger_api, db)
 timetable_manager = TimetableManager(medicine_manager, form_manager, reminder_manager, medsenger_api, db)
+examination_manager = ExaminationManager(medsenger_api, db)
 algorithm_manager = AlgorithmManager(medsenger_api, db)
 medicine_template_manager = MedicineTemplateManager(medsenger_api, db)

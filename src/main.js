@@ -397,6 +397,9 @@ Vue.mixin({
                 nothing_found: window.LOCAL_HOST + '/static/images/icons8-nothing-found-100.png',
                 graph: window.LOCAL_HOST + '/static/images/icons8-play-graph-report-48.png',
                 heatmap: window.LOCAL_HOST + '/static/images/icons8-heat-map-96.png',
+                examination: window.LOCAL_HOST + '/static/images/icons8-examination-96.png',
+                expired_examination: window.LOCAL_HOST + '/static/images/icons8-expired-examination-96.png',
+                file: window.LOCAL_HOST + '/static/images/icons8-open-document-48.png',
             },
             maps: {
                 human: 'Тело человека',
