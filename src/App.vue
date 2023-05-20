@@ -232,7 +232,7 @@ export default {
                 this.axios.get(this.direct_url('/api/examination/' + this.object_id)).then(this.process_load_answer);
             }
             if (this.mode == 'medicines-list') {
-                this.axios.get(this.direct_url('/api/settings/get_patient')).then(this.process_load_answer);
+                this.axios.get(this.direct_url('/api/settings/get_patient_data')).then(this.process_load_answer);
             }
             if (this.mode == 'examinations-list') {
                 this.axios.get(this.direct_url('/api/settings/get_patient')).then(this.process_load_answer);
