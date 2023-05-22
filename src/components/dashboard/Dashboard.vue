@@ -133,10 +133,10 @@
                    placeholder="Поиск...">
 
             <div class="row"
-                 v-for="(group, name) in group_by(templates.forms.filter(show_form).map((form) => {
+                 v-for="(group, name) in group_by(templates.forms.map((form) => {
                      if (!form.template_category) form.template_category = 'Общее'
                      return form
-                 }), 'template_category')">
+                 }).filter(show_form), 'template_category')">
 
                 <div class="col-md-12"><h5>{{ name }}</h5></div>
                 <form-card :form="form" :patient="patient" :templates="templates"
@@ -163,10 +163,10 @@
                    placeholder="Поиск...">
 
             <div class="row"
-                 v-for="(group, name) in group_by(templates.medicines.filter(show_medicine).map((medicine) => {
+                 v-for="(group, name) in group_by(templates.medicines.map((medicine) => {
                      if (!medicine.template_category) medicine.template_category = 'Общее'
                      return medicine
-                 }), 'template_category')">
+                 }).filter(show_medicine), 'template_category')">
 
                 <div class="col-md-12"><h5>{{ name }}</h5></div>
                 <medicine-card :medicine="medicine" :patient="patient" :key="'medicine_template_' + medicine.id"
@@ -193,10 +193,10 @@
                    placeholder="Поиск...">
 
             <div class="row"
-                 v-for="(group, name) in group_by(templates.examinations.filter(show_examination).map((examination) => {
+                 v-for="(group, name) in group_by(templates.examinations.map((examination) => {
                      if (!examination.template_category) examination.template_category = 'Общее'
                      return examination
-                 }), 'template_category')">
+                 }).filter(show_examination), 'template_category')">
 
                 <div class="col-md-12"><h5>{{ name }}</h5></div>
                 <examination-card :patient="patient" :examination="examination"
@@ -241,10 +241,10 @@
                    style="margin-bottom: 5px;"
                    placeholder="Поиск...">
 
-            <div class="row" v-for="(group, name) in group_by(templates.algorithms.filter(show_algorithm).map((algorithms) => {
+            <div class="row" v-for="(group, name) in group_by(templates.algorithms.map((algorithms) => {
                 if (!algorithms.template_category) algorithms.template_category = 'Общее'
                 return algorithms
-            }), 'template_category')">
+            }).filter(show_algorithm), 'template_category')">
                 <div class="col-md-12"><h5>{{ name }}</h5></div>
                 <algorithm-card :algorithm="algorithm" :key="'algorithm_' + algorithm.id"
                                 v-if="is_admin || !algorithm.clinics || algorithm.clinics.includes(clinic_id)"
