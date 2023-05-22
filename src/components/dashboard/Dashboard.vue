@@ -128,7 +128,8 @@
                     описание и даже сами вопросы.</p>
             </div>
 
-            <input type="text" v-model="search_query" class="form-control form-control-sm" style="margin-bottom: 5px;"
+            <input type="text" v-model="form_search_query" class="form-control form-control-sm"
+                   style="margin-bottom: 5px;"
                    placeholder="Поиск...">
 
             <div class="row"
@@ -140,10 +141,9 @@
                 <div class="col-md-12"><h5>{{ name }}</h5></div>
                 <form-card :form="form" :patient="patient" :templates="templates"
                            v-for="form in group" :key="'form_template_' + form.id"/>
-
-                <div v-if="!templates.forms.length" class="col-md-12">
-                    <p style="margin-bottom: 15px;">Список опросников пуст.</p>
-                </div>
+            </div>
+            <div v-if="!templates.forms.length">
+                <p style="margin-bottom: 15px;">Список опросников пуст.</p>
             </div>
 
             <button class="btn btn-default btn-sm" @click="create_form()">Добавить свой опросник</button>
@@ -158,7 +158,8 @@
                     В дальнейшем Вы сможете изменить расписание, дозировку и правила приема.</p>
             </div>
 
-            <input type="text" v-model="search_query" class="form-control form-control-sm" style="margin-bottom: 5px;"
+            <input type="text" v-model="medicine_search_query" class="form-control form-control-sm"
+                   style="margin-bottom: 5px;"
                    placeholder="Поиск...">
 
             <div class="row"
@@ -170,10 +171,9 @@
                 <div class="col-md-12"><h5>{{ name }}</h5></div>
                 <medicine-card :medicine="medicine" :patient="patient" :key="'medicine_template_' + medicine.id"
                                v-for="medicine in group"/>
-
-                <div v-if="!templates.medicines.length" class="col-md-12">
-                    <p style="margin-bottom: 15px;">Список шаблонов пуст.</p>
-                </div>
+            </div>
+            <div v-if="!templates.medicines.length">
+                <p style="margin-bottom: 15px;">Список шаблонов пуст.</p>
             </div>
 
             <button class="btn btn-default btn-sm" @click="create_medicine()">Добавить</button>
@@ -188,8 +188,12 @@
                     В дальнейшем Вы сможете изменить его параметры.</p>
             </div>
 
+            <input type="text" v-model="examination_search_query" class="form-control form-control-sm"
+                   style="margin-bottom: 5px;"
+                   placeholder="Поиск...">
+
             <div class="row"
-                 v-for="(group, name) in group_by(templates.examinations.map((examination) => {
+                 v-for="(group, name) in group_by(templates.examinations.filter(show_examination).map((examination) => {
                      if (!examination.template_category) examination.template_category = 'Общее'
                      return examination
                  }), 'template_category')">
@@ -198,12 +202,10 @@
                 <examination-card :patient="patient" :examination="examination"
                                   :key="'examination_template_' + examination.id"
                                   v-for="(examination, i) in group"/>
-
-                <div v-if="!templates.forms.length" class="col-md-12">
-                    <p style="margin-bottom: 15px;">Список шаблонов пуст.</p>
-                </div>
             </div>
-
+            <div v-if="!templates.examinations.length">
+                <p style="margin-bottom: 15px;">Список шаблонов пуст.</p>
+            </div>
 
             <button class="btn btn-default btn-sm" @click="create_examination()">Добавить</button>
             <button class="btn btn-danger btn-sm" @click="state = 'main'">Назад</button>
@@ -219,10 +221,9 @@
             <div class="row">
                 <reminder-card :reminder="reminder" :key="'reminder_template_' + reminder.id"
                                v-for="(reminder, i) in templates.reminders"/>
-                <div v-if="!templates.medicines.length" class="col-md-12">
-                    <p style="margin-bottom: 15px;">Список шаблонов пуст.</p>
-                </div>
-
+            </div>
+            <div v-if="!templates.reminders.length">
+                <p style="margin-bottom: 15px;">Список шаблонов пуст.</p>
             </div>
 
             <button class="btn btn-default btn-sm" @click="create_reminder()">Добавить</button>
@@ -231,16 +232,16 @@
 
         <!-- шаблоны алгоритмов -->
         <div v-if="state == 'algorithm_templates'">
-
             <div class="alert alert-info" role="alert">
                 <h4 class="alert-heading">Выбор алгоритма</h4>
                 <p>Выберите алгоритм из списка ниже. В дальнейшем вы сможете посмотреть подробную схему его работы, но
                     изменять ее без опыта не рекомендуется.</p>
             </div>
+            <input type="text" v-model="algorithm_search_query" class="form-control form-control-sm"
+                   style="margin-bottom: 5px;"
+                   placeholder="Поиск...">
 
-            <div class="row" v-for="(group, name) in group_by(templates.algorithms.filter((algorithm) => {
-                return is_admin || !algorithm.clinics || algorithm.clinics.includes(clinic_id)
-            }).map((algorithms) => {
+            <div class="row" v-for="(group, name) in group_by(templates.algorithms.filter(show_algorithm).map((algorithms) => {
                 if (!algorithms.template_category) algorithms.template_category = 'Общее'
                 return algorithms
             }), 'template_category')">
@@ -248,9 +249,9 @@
                 <algorithm-card :algorithm="algorithm" :key="'algorithm_' + algorithm.id"
                                 v-if="is_admin || !algorithm.clinics || algorithm.clinics.includes(clinic_id)"
                                 v-for="(algorithm, i) in group"/>
-                <div v-if="!templates.algorithms.length" class="col-md-12">
-                    <p style="margin-bottom: 15px;">Список шаблонов пуст.</p>
-                </div>
+            </div>
+            <div v-if="!templates.algorithms.length" class="col-md-12">
+                <p style="margin-bottom: 15px;">Список шаблонов пуст.</p>
             </div>
 
             <button class="btn btn-default btn-sm" @click="create_algorithm()">Добавить</button>
@@ -292,7 +293,10 @@ export default {
             state: 'main',
             lock_btn: false,
             params: {},
-            search_query: ''
+            form_search_query: '',
+            algorithm_search_query: '',
+            medicine_search_query: '',
+            examination_search_query: '',
         }
     },
     methods: {
@@ -522,7 +526,9 @@ export default {
             this.$forceUpdate()
         },
         show_form: function (form) {
-            if (!form.title.toLowerCase().includes(this.search_query.toLowerCase())) return false
+            if (!(form.title.toLowerCase().includes(this.form_search_query.toLowerCase()) ||
+                form.template_category.toLowerCase().includes(this.form_search_query.toLowerCase())))
+                return false
             if (this.is_admin) return true
             if (form.clinic_id) {
                 return form.clinic_id == this.patient.info.clinic_id
@@ -539,12 +545,53 @@ export default {
             return true;
         },
         show_medicine: function (medicine) {
+            if (!(medicine.title.toLowerCase().includes(this.medicine_search_query.toLowerCase()) ||
+                medicine.template_category.toLowerCase().includes(this.medicine_search_query.toLowerCase())))
+                return false
             if (this.is_admin) return true
             if (medicine.clinic_id) {
-                return medicine.clinic_id == this.patient.info.clinic_id
+                return medicine.clinic_id == this.clinic_id
             }
             if (medicine.doctor_id) {
                 return medicine.doctor_id == this.patient.info.doctor_id
+            }
+            if (medicine.clinics) {
+                return medicine.clinics.includes(this.clinic_id);
+            }
+            if (medicine.exclude_clinics) {
+                return !medicine.exclude_clinics.includes(this.clinic_id);
+            }
+            return true;
+        },
+        show_examination: function (examination) {
+            if (!(examination.title.toLowerCase().includes(this.examination_search_query.toLowerCase()) ||
+                examination.template_category.toLowerCase().includes(this.examination_search_query.toLowerCase())))
+                return false
+            if (this.is_admin) return true
+            if (examination.clinics) {
+                return examination.clinics.includes(this.clinic_id)
+            }
+            if (examination.exclude_clinics) {
+                return !examination.exclude_clinics.includes(this.clinic_id)
+            }
+            if (examination.clinic_id) {
+                return examination.clinic_id == this.clinic_id
+            }
+            if (examination.doctor_id) {
+                return examination.doctor_id == this.patient.info.doctor_id
+            }
+            return true;
+        },
+        show_algorithm: function (algorithm) {
+            if (!(algorithm.title.toLowerCase().includes(this.algorithm_search_query.toLowerCase()) ||
+                algorithm.template_category.toLowerCase().includes(this.algorithm_search_query.toLowerCase())))
+                return false
+            if (this.is_admin) return true
+            if (algorithm.clinics) {
+                return algorithm.clinics.includes(this.clinic_id)
+            }
+            if (algorithm.exclude_clinics) {
+                return !algorithm.exclude_clinics.includes(this.clinic_id)
             }
             return true;
         },
