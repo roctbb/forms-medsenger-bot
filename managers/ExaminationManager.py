@@ -136,7 +136,6 @@ class ExaminationManager(Manager):
                     return None
 
             examination.title = data.get('title')
-            examination.template_category = data.get('template_category')
             examination.doctor_description = data.get('doctor_description')
             examination.patient_description = data.get('patient_description')
             examination.expiration_days = data.get('expiration_days', 1)
@@ -146,6 +145,11 @@ class ExaminationManager(Manager):
 
             if data.get('is_template') or examination.is_template:
                 examination.is_template = True
+                examination.template_category = data.get('template_category', 'Общее')
+
+                if contract.is_admin:
+                    examination.clinics = data.get('clinics')
+                    examination.exclude_clinics = data.get('exclude_clinics')
             else:
                 examination.patient_id = contract.patient_id
                 examination.contract_id = contract.id

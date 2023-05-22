@@ -8,11 +8,6 @@
                            v-model="examination.title"/>
                 </form-group48>
 
-                <form-group48 title="Категория шаблона" v-if="is_admin">
-                    <input class="form-control form-control-sm"
-                           v-model="examination.template_category"/>
-                </form-group48>
-
                 <form-group48 title="Описание для пациента">
                     <textarea class="form-control form-control-sm" v-model="examination.patient_description"></textarea>
                 </form-group48>
@@ -32,6 +27,21 @@
                            :class="this.flags.validated && examination.expiration_days < 1 ? 'is-invalid' : ''"
                            type="number" min="1" max="365" step="1" v-model="examination.expiration_days"/>
                     <small class="text-muted">дней</small>
+                </form-group48>
+
+                <form-group48 v-if="is_admin && (empty(examination.id) || examination.is_template)"
+                              title="Категория шаблона">
+                    <input class="form-control form-control-sm" value="Общее" v-model="examination.template_category"/>
+                </form-group48>
+
+                <form-group48 v-if="is_admin && (empty(examination.id) || examination.is_template)"
+                              title="Показывать шаблон клиникам (JSON)">
+                    <input class="form-control form-control-sm" type="text" v-model="examination.clinics"/>
+                </form-group48>
+
+                <form-group48 v-if="is_admin && (empty(examination.id) || examination.is_template)"
+                              title="Спрятать шаблон у клиник (JSON)">
+                    <input class="form-control form-control-sm" type="text" v-model="examination.exclude_clinics"/>
                 </form-group48>
             </card>
 

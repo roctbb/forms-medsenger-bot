@@ -617,6 +617,8 @@ class MedicalExamination(db.Model):
 
     is_template = db.Column(db.Boolean, default=False)
     template_id = db.Column(db.Integer, db.ForeignKey('medical_examination.id', ondelete="set null"), nullable=True)
+    clinics = db.Column(db.JSON, nullable=True)
+    exclude_clinics = db.Column(db.JSON, nullable=True)
 
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=True)
     contract_id = db.Column(db.Integer, db.ForeignKey('contract.id', ondelete="CASCADE"), nullable=True)
@@ -667,6 +669,8 @@ class MedicalExamination(db.Model):
             "asked": self.asked,
             "record_id": self.record_id,
             "is_template": self.is_template,
+            "clinics": self.clinics,
+            "exclude_clinics": self.exclude_clinics,
             "template_id": self.template_id,
             "attach_date": self.attach_date.strftime('%Y-%m-%d') if self.attach_date else None,
             "upload_date": self.upload_date.strftime('%Y-%m-%d') if self.upload_date else None,
