@@ -151,6 +151,13 @@ class Contract(db.Model):
 
 class Medicine(db.Model, Compliance):
     id = db.Column(db.Integer, primary_key=True)
+
+    template_id = db.Column(db.Integer, db.ForeignKey('medicine.id', ondelete="set null"), nullable=True)
+    is_template = db.Column(db.Boolean, default=False)
+    clinics = db.Column(db.JSON, nullable=True)
+    exclude_clinics = db.Column(db.JSON, nullable=True)
+    template_category = db.Column(db.String(512), default="Общее", nullable=True)
+
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=True)
     contract_id = db.Column(db.Integer, db.ForeignKey('contract.id', ondelete="CASCADE"), nullable=True)
 
@@ -159,13 +166,14 @@ class Medicine(db.Model, Compliance):
     is_created_by_patient = db.Column(db.Boolean, default=False)
 
     title = db.Column(db.String(255), nullable=True)
+    category = db.Column(db.String(255), nullable=True)
     rules = db.Column(db.Text, nullable=True)
     dose = db.Column(db.Text, nullable=True)
+    verify_dose = db.Column(db.Boolean, default=False)
+    notifications_disabled = db.Column(db.Boolean, default=False)
+
     timetable = db.Column(db.JSON, nullable=True)
     prescription_history = db.Column(db.JSON, nullable=True)
-    is_template = db.Column(db.Boolean, default=False)
-    verify_dose = db.Column(db.Boolean, default=False)
-    template_id = db.Column(db.Integer, db.ForeignKey('medicine.id', ondelete="set null"), nullable=True)
 
     last_sent = db.Column(db.DateTime(), nullable=True)
 
@@ -177,8 +185,6 @@ class Medicine(db.Model, Compliance):
 
     prescribed_at = db.Column(db.DateTime, server_default=db.func.now())
     canceled_at = db.Column(db.DateTime, nullable=True)
-
-    notifications_disabled = db.Column(db.Boolean, default=False)
 
     def as_dict(self):
         if self.contract_id:
@@ -199,6 +205,9 @@ class Medicine(db.Model, Compliance):
             "timetable": self.timetable,
             "prescription_history": self.prescription_history,
             "is_template": self.is_template,
+            "clinics": self.clinics,
+            "exclude_clinics": self.exclude_clinics,
+            "template_category": self.template_category,
             "notifications_disabled": self.notifications_disabled,
             "verify_dose": self.verify_dose,
             "template_id": self.template_id,

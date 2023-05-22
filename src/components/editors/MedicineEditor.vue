@@ -36,6 +36,19 @@
                                type="number" min="1" max="200" step="1" v-model="medicine.warning_days"/>
                         <small class="text-muted">дней</small>
                     </form-group48>
+
+                    <form-group48 v-if="is_admin && (empty(medicine.id) || medicine.is_template)"
+                                  title="Категория шаблона">
+                        <input class="form-control form-control-sm" value="Общее" v-model="medicine.template_category"/>
+                    </form-group48>
+
+                    <form-group48 v-if="is_admin && (empty(medicine.id) || medicine.is_template)" title="Показывать шаблон клиникам (JSON)">
+                        <input class="form-control form-control-sm" type="text" v-model="medicine.clinics"/>
+                    </form-group48>
+
+                    <form-group48 v-if="is_admin && (empty(medicine.id) || medicine.is_template)" title="Спрятать шаблон у клиник (JSON)">
+                        <input class="form-control form-control-sm" type="text" v-model="medicine.exclude_clinics"/>
+                    </form-group48>
                 </card>
             </div>
             <div class="col-lg-6">
@@ -43,20 +56,20 @@
                                   :timetable_save_clicked="timetable_save_clicked"/>
             </div>
         </div>
-                <button v-if="show_button" class="btn btn-danger" @click="go_back()">Назад</button>
-                <button :disabled="button_lock" class="btn btn-success" @click="save()">Сохранить <span
-                    v-if="medicine.is_template"> шаблон</span></button>
-                <button :disabled="button_lock" v-if="!medicine.id && is_admin" class="btn btn-default"
-                        @click="save(true)">Сохранить как шаблон
-                </button>
-                <button :disabled="button_lock" v-if="!medicine.id && !is_admin" class="btn btn-default"
-                        @click="save(true, 'doctor')">
-                    Сохранить как шаблон для себя
-                </button>
-                <button :disabled="button_lock" v-if="!medicine.id && !is_admin" class="btn btn-default"
-                        @click="save(true, 'clinic')">
-                    Сохранить как шаблон для клиники
-                </button>
+        <button v-if="show_button" class="btn btn-danger" @click="go_back()">Назад</button>
+        <button :disabled="button_lock" class="btn btn-success" @click="save()">Сохранить <span
+            v-if="medicine.is_template"> шаблон</span></button>
+        <button :disabled="button_lock" v-if="!medicine.id && is_admin" class="btn btn-default"
+                @click="save(true)">Сохранить как шаблон
+        </button>
+        <button :disabled="button_lock" v-if="!medicine.id && !is_admin" class="btn btn-default"
+                @click="save(true, 'doctor')">
+            Сохранить как шаблон для себя
+        </button>
+        <button :disabled="button_lock" v-if="!medicine.id && !is_admin" class="btn btn-default"
+                @click="save(true, 'clinic')">
+            Сохранить как шаблон для клиники
+        </button>
     </div>
 </template>
 
@@ -170,7 +183,7 @@ export default {
                     } else if (this.medicine.id) {
                         this.medicine.prescription_history.records.push({
                             description: 'Изменены параметры',
-                            comment:  this.med_description(this.medicine),
+                            comment: this.med_description(this.medicine),
                             date: new Date().toLocaleDateString()
                         })
                     }

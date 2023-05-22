@@ -37,10 +37,7 @@
                                    v-for="(medicine, i) in patient.canceled_medicines"/>
                 </div>
 
-                <button class="btn btn-default btn-sm" @click="create_medicine()">Назначить препарат</button>
-                <button v-if="is_admin" class="btn btn-info btn-sm" @click="state = 'medicine_templates'">
-                    Управление шаблонами
-                </button>
+                <button class="btn btn-default btn-sm" @click="state = 'medicine_templates'">Назначить препарат</button>
 
                 <!-- добавленные пациентом препараты -->
                 <h4>Препараты, добавленные пациентом</h4>
@@ -63,9 +60,11 @@
                 <h4>Обследования</h4>
                 <small v-if="!patient.examinations.length">Нет назначенных обследований</small>
                 <div class="row">
-                    <examination-card :patient="patient" :examination="examination" :key="'examination_' + examination.id"
+                    <examination-card :patient="patient" :examination="examination"
+                                      :key="'examination_' + examination.id"
                                       v-for="examination in patient.examinations"/>
-                    <examination-card :patient="patient" :examination="examination" :key="'examination_' + examination.id"
+                    <examination-card :patient="patient" :examination="examination"
+                                      :key="'examination_' + examination.id"
                                       v-for="examination in patient.expired_examinations"/>
                 </div>
 
@@ -159,13 +158,22 @@
                     В дальнейшем Вы сможете изменить расписание, дозировку и правила приема.</p>
             </div>
 
-            <div class="row">
+            <input type="text" v-model="search_query" class="form-control form-control-sm" style="margin-bottom: 5px;"
+                   placeholder="Поиск...">
+
+            <div class="row"
+                 v-for="(group, name) in group_by(templates.medicines.filter(show_medicine).map((medicine) => {
+                     if (!medicine.template_category) medicine.template_category = 'Общее'
+                     return medicine
+                 }), 'template_category')">
+
+                <div class="col-md-12"><h5>{{ name }}</h5></div>
                 <medicine-card :medicine="medicine" :patient="patient" :key="'medicine_template_' + medicine.id"
-                               v-for="(medicine, i) in templates.medicines.filter(show_medicine)"/>
+                               v-for="medicine in group"/>
+
                 <div v-if="!templates.medicines.length" class="col-md-12">
                     <p style="margin-bottom: 15px;">Список шаблонов пуст.</p>
                 </div>
-
             </div>
 
             <button class="btn btn-default btn-sm" @click="create_medicine()">Добавить</button>
@@ -187,7 +195,8 @@
                  }), 'template_category')">
 
                 <div class="col-md-12"><h5>{{ name }}</h5></div>
-                <examination-card :patient="patient" :examination="examination" :key="'examination_template_' + examination.id"
+                <examination-card :patient="patient" :examination="examination"
+                                  :key="'examination_template_' + examination.id"
                                   v-for="(examination, i) in group"/>
 
                 <div v-if="!templates.forms.length" class="col-md-12">
