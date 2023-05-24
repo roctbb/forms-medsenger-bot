@@ -242,8 +242,9 @@ def message(data):
 # settings and views
 
 @app.route('/settings', methods=['GET'])
-@verify_request(contract_manager, 'doctor')
-def get_settings(args, form, contract):
+@verify_request(contract_manager, 'backend')
+def get_settings(data):
+    contract = contract_manager.get(request.args.get('contract_id'))
     return get_ui('settings', contract, medsenger_api.get_categories(), role='doctor')
 
 
@@ -644,6 +645,7 @@ def post_medicines(args, form, contract):
 def get_medicine_template(args, form, contract):
     medicines = medicine_template_manager.get_clinic_templates(contract.clinic_id)
     return jsonify(medicines)
+
 
 # examinations
 
