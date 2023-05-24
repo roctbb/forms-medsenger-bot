@@ -48,6 +48,9 @@ def verify_request(contract_manager, expected_role):
             if expected_role == 'backend':
                 if api_key == API_KEY:
                     has_access = True
+
+                if contract_id:
+                    contract = __get_contract(contract_manager, contract_id)
             else:
                 contract = __get_contract(contract_manager, contract_id)
 
@@ -69,7 +72,7 @@ def verify_request(contract_manager, expected_role):
                 abort(401)
 
             try:
-                if expected_role == 'backend':
+                if expected_role == 'backend' and request.is_json:
                     return func(request.json)
                 else:
                     return func(request.args, request.form, contract, *args, **kargs)
@@ -79,4 +82,5 @@ def verify_request(contract_manager, expected_role):
 
         wrapper.__name__ = func.__name__
         return wrapper
+
     return request_verifier

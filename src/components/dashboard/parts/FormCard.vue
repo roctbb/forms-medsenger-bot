@@ -70,7 +70,7 @@ export default {
     components: {Card},
     computed: {
         preview_form_url() {
-            return this.url('/preview_form/' + this.form.id)
+            return this.direct_url('/preview_form/' + this.form.id)
         },
         is_attached() {
             return this.patient.forms.filter(f => f.template_id == this.form.id).length != 0

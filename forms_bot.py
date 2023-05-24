@@ -243,8 +243,7 @@ def message(data):
 
 @app.route('/settings', methods=['GET'])
 @verify_request(contract_manager, 'backend')
-def get_settings(data):
-    contract = contract_manager.get(request.args.get('contract_id'))
+def get_settings(args, form, contract):
     return get_ui('settings', contract, medsenger_api.get_categories(), role='doctor')
 
 
