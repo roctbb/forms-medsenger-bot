@@ -1,6 +1,4 @@
 from manage import app, celery, form_manager, algorithm_manager, examination_manager, contract_manager, medsenger_api
-import time
-
 
 @celery.task
 def submit_form(chain, answers, form_id, contract_id):
@@ -51,3 +49,11 @@ def examine_hook(contract_id, category_names):
     with app.app_context():
         contract = contract_manager.get(contract_id)
         return algorithm_manager.hook(contract, category_names)
+
+@celery.task
+def run_algorithm(chain, algorithm_id):
+    if not chain:
+        return chain
+
+    with app.app_context():
+        return algorithm_manager.run(algorithm_manager.get(algorithm_id))

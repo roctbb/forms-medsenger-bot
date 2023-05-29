@@ -275,8 +275,6 @@ class AlgorithmManager(Manager):
         return self.save_to_cache(k, answer)
 
     def check_values(self, left, right, sign, modifier=0, multiplier=1):
-        modifiers = []
-
         try:
             if isinstance(modifier, str) and "|" in modifier:
                 modifiers = list(map(float, modifier.split('|')))

@@ -3,7 +3,6 @@ from helpers import *
 from decorators import verify_request
 from tasks import tasks
 
-
 @app.route('/')
 def index():
     return "Waiting for the thunder"

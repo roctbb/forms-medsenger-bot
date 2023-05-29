@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from flask import request, abort, jsonify, render_template
 from config import *
 from sentry_sdk import capture_exception
-from pytz import timezone
+from pytz import timezone, utc
 import sys, os
 
 DATACACHE = {}
@@ -208,6 +208,9 @@ def localize(d, zone=None):
         tz = timezone('Europe/Moscow')
 
     return tz.localize(d)
+
+def toUTC(d):
+    return d.astimezone(utc)
 
 
 def fullfill_message(text, contract, medsenger_api):

@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 import time
 from helpers import log, timezone_now, localize
-from managers.AlgorithmManager import AlgorithmManager
 from managers.FormManager import FormManager
 from managers.Manager import Manager
 from managers.MedicineManager import MedicineManager
@@ -114,28 +113,28 @@ class TimetableManager(Manager):
         return len(points)
 
     def check_hours(self, app):
+        from tasks import tasks
+
         with app.app_context():
             contracts = list(Contract.query.filter_by(is_active=True).all())
             algorithm_groups = list(map(lambda x: x.algorithms, contracts))
-
-            algorithm_manager = AlgorithmManager(self.medsenger_api, self.db)
 
             for group in algorithm_groups:
                 for alg in group:
                     if "exact_time" in alg.categories:
-                        algorithm_manager.run(alg)
+                        tasks.run_algorithm.s(True, alg.id).apply_async()
 
     def check_days(self, app):
+        from tasks import tasks
+
         with app.app_context():
             contracts = list(Contract.query.filter_by(is_active=True).all())
             algorithm_groups = list(map(lambda x: x.algorithms, contracts))
 
-            algorithm_manager = AlgorithmManager(self.medsenger_api, self.db)
-
             for group in algorithm_groups:
                 for alg in group:
                     if "exact_date" in alg.categories:
-                        algorithm_manager.run(alg)
+                        tasks.run_algorithm.s(True, alg.id).apply_async()
 
     def iterate(self, app):
         with app.app_context():
