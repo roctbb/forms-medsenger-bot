@@ -249,7 +249,7 @@ class AlgorithmManager(Manager):
         if not values:
             answer = None, None
         elif (mode == 'value' or mode == 'count') and (
-            time.time() - int(answer['values'][0].get('timestamp')) > 60 * 60 * 24 or time.time() - int(
+                time.time() - int(answer['values'][0].get('timestamp')) > 60 * 60 * 24 or time.time() - int(
             answer['values'][0].get('uploaded')) > 10):
             answer = None, None
         elif mode == 'value' or mode == 'category_value':
@@ -328,6 +328,20 @@ class AlgorithmManager(Manager):
                 return right in left
 
         return False
+
+    def __should_observe_group(self, group, included_types, excluded_types):
+        categories_in_group = set()
+
+        for criteria in group:
+            categories_in_group.add(criteria.get('category'))
+
+        if included_types and not categories_in_group.intersection(included_types):
+            return False
+
+        if excluded_types and not categories_in_group.difference(excluded_types):
+            return False
+
+        return True
 
     def check_criteria(self, criteria, contract_id, buffer, descriptions, category_names, algorithm=None, contract=None,
                        is_init=False):
@@ -733,7 +747,7 @@ class AlgorithmManager(Manager):
     def check_timeouts(self, app):
         with app.app_context():
             algorithms = list(Algorithm.query.filter((Algorithm.contract_id != None) & (Algorithm.timeout_at != 0) & (
-                Algorithm.timeout_at < time.time())).all())
+                    Algorithm.timeout_at < time.time())).all())
 
             for algorithm in algorithms:
                 self.timeout(algorithm)
@@ -757,7 +771,10 @@ class AlgorithmManager(Manager):
 
         self.__commit__()
 
-    def run(self, algorithm):
+    def run(self, algorithm, included_types=[], excluded_types=['exact_date']):
+        included_types = set(included_types)
+        excluded_types = set(excluded_types)
+
         current_step = self.get_step(algorithm)
         contract = algorithm.contract
         fired = False
@@ -784,11 +801,13 @@ class AlgorithmManager(Manager):
             category_names = {category['name']: category['description'] for category in
                               self.medsenger_api.get_categories()}
 
+            or_groups = [group for group in criteria if
+                         self.__should_observe_group(group, included_types, excluded_types)]
+
             result = any([all(
-                list(
-                    map(lambda x: self.check_criteria(x, contract.id, additions, descriptions, category_names,
-                                                      algorithm=algorithm), block)))
-                for block in criteria])
+                list(map(lambda x: self.check_criteria(x, contract.id, additions, descriptions, category_names,
+                                                       algorithm=algorithm), group)))
+                for group in or_groups])
 
             if result:
                 if not condition.get('skip_additions'):

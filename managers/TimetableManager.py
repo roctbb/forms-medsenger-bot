@@ -134,7 +134,7 @@ class TimetableManager(Manager):
             for group in algorithm_groups:
                 for alg in group:
                     if "exact_date" in alg.categories:
-                        tasks.run_algorithm.s(True, alg.id).apply_async()
+                        tasks.run_algorithm.s(True, alg.id, ["exact_date"], []).apply_async()
 
     def iterate(self, app):
         with app.app_context():

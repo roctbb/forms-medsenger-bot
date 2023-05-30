@@ -51,9 +51,9 @@ def examine_hook(contract_id, category_names):
         return algorithm_manager.hook(contract, category_names)
 
 @celery.task
-def run_algorithm(chain, algorithm_id):
+def run_algorithm(chain, algorithm_id, included_categories=[], excluded_categories=[]):
     if not chain:
         return chain
 
     with app.app_context():
-        return algorithm_manager.run(algorithm_manager.get(algorithm_id))
+        return algorithm_manager.run(algorithm_manager.get(algorithm_id), included_categories, excluded_categories)
