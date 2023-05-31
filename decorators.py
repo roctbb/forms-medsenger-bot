@@ -33,7 +33,7 @@ def __get_contract(contract_manager, contract_id):
         return contract
 
     except:
-        abort(404)
+        return None
 
 
 # decorators
