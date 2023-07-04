@@ -49,6 +49,7 @@ class Patient(db.Model):
     def as_dict(self):
         today = datetime.now()
         today = today.date()
+        print([reminder.as_dict() for reminder in self.reminders])
         return {
             "id": self.id,
             "month_compliance": self.count_month_compliance(),
