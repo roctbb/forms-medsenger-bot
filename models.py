@@ -54,14 +54,24 @@ class Patient(db.Model):
             "month_compliance": self.count_month_compliance(),
             "contracts": [contract.as_dict() for contract in self.contracts],
             "forms": [form.as_dict() for form in self.forms],
-            "examinations": sorted([examination.as_dict() for examination in self.examinations if examination.deadline_date >= today], key=lambda ex: ex['deadline_date']),
-            "expired_examinations": sorted([examination.as_dict() for examination in self.examinations if examination.deadline_date < today], key=lambda ex: ex['deadline_date']),
-            "medicines": sorted([medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is None and not medicine.is_created_by_patient], key=lambda m: m['title']),
-            "canceled_medicines": sorted([medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is not None and not medicine.is_created_by_patient], key=lambda m: m['title']),
-            "patient_medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is None and medicine.is_created_by_patient],
-            "canceled_patient_medicines": [medicine.as_dict() for medicine in self.medicines if medicine.canceled_at is not None and medicine.is_created_by_patient],
-            "reminders": sorted([reminder.as_dict() for reminder in self.reminders if reminder.canceled_at is None], key=lambda k: k["attach_date"]),
-            "old_reminders": sorted([reminder.as_dict() for reminder in self.reminders if reminder.canceled_at is not None], key=lambda k: k["attach_date"], reverse=True),
+            "examinations": [examination.as_dict() for examination in sorted(self.examinations, key=lambda k: k.deadline_date) if
+                             examination.deadline_date >= today],
+            "expired_examinations": [examination.as_dict() for examination in sorted(self.examinations, key=lambda k: k.deadline_date) if
+                                     examination.deadline_date < today],
+            "medicines": sorted([medicine.as_dict() for medicine in self.medicines if
+                                 medicine.canceled_at is None and not medicine.is_created_by_patient],
+                                key=lambda m: m['title']),
+            "canceled_medicines": sorted([medicine.as_dict() for medicine in self.medicines if
+                                          medicine.canceled_at is not None and not medicine.is_created_by_patient],
+                                         key=lambda m: m['title']),
+            "patient_medicines": [medicine.as_dict() for medicine in self.medicines if
+                                  medicine.canceled_at is None and medicine.is_created_by_patient],
+            "canceled_patient_medicines": [medicine.as_dict() for medicine in self.medicines if
+                                           medicine.canceled_at is not None and medicine.is_created_by_patient],
+            "reminders": [reminder.as_dict() for reminder in sorted(self.reminders, key=lambda k: k.attach_date) if
+                          reminder.canceled_at is None],
+            "old_reminders": [reminder.as_dict() for reminder in sorted(self.reminders, key=lambda k: k.attach_date, reverse=True) if
+                          reminder.canceled_at is not None],
             "algorithms": [algorithm.as_dict() for algorithm in self.algorithms]
         }
 
