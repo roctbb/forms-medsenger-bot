@@ -28,6 +28,7 @@ class ReminderManager(Manager):
             new_reminder = reminder.clone()
             new_reminder.contract_id = contract.id
             new_reminder.patient_id = contract.patient.id
+            new_reminder.attach_date = datetime.now()
 
             self.db.session.add(new_reminder)
             self.__commit__()
