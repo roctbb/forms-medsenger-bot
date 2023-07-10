@@ -37,7 +37,8 @@
                                    v-for="(medicine, i) in patient.canceled_medicines"/>
                 </div>
 
-                <button class="btn btn-default btn-sm" @click="state = 'medicine_templates'">Назначить препарат</button>
+                <button class="btn btn-primary btn-sm" @click="create_medicine()">Назначить новый препарат</button>
+                <button class="btn btn-default btn-sm" @click="state = 'medicine_templates'">Назначить препарат из каталога</button>
 
                 <!-- добавленные пациентом препараты -->
                 <h4>Препараты, добавленные пациентом</h4>
