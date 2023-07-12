@@ -14,7 +14,7 @@
                         }}</small><br>
                     <small><strong>Правила приема: </strong> {{ medicine.rules ? medicine.rules : '-' }}</small><br>
                     <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
-                    <button class="btn btn-success btn-sm" @click="save(medicine)" v-if="medicine">Записать прием
+                    <button class="btn btn-success btn-sm my-2" @click="save(medicine)" v-if="medicine">Записать прием
                     </button>
                     <div v-if="medicine.timetable.mode !='manual'">
                         <a href="#" v-if="!medicine.notifications_disabled" @click="disable_notifications(medicine)">Отключить
@@ -34,7 +34,7 @@
                     <h5>{{ medicine.title }}</h5>
                     <small><strong>Дозировка: </strong> {{ medicine.dose ? medicine.dose : '-' }}</small><br>
                     <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
-                    <button class="btn btn-success btn-sm" @click="save(medicine)" v-if="medicine">Записать прием
+                    <button class="btn btn-success btn-sm my-2" @click="save(medicine)" v-if="medicine">Записать прием
                     </button>
                     <div v-if="medicine.timetable.mode !='manual'">
                         <a href="#" v-if="!medicine.notifications_disabled" @click="disable_notifications(medicine)">Отключить
@@ -79,7 +79,7 @@
         <timetable-editor v-if="mode != 'add-record'" source="patient-medicine" :data="custom_medicine.timetable"
                           :timetable_save_clicked="timetable_save_clicked"/>
 
-        <button class="btn btn-danger btn" @click="clear()" v-if="medicines.length">Назад</button>
+        <button class="btn btn-warning btn" @click="clear()">Назад</button>
         <button class="btn btn-success btn" @click="custom_save()" :disabled="button_lock">
             {{ mode == 'add-record' ? 'Записать прием' : 'Сохранить' }}
         </button>
