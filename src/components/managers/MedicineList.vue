@@ -76,7 +76,7 @@
                 <textarea class="form-control monitoring-input" v-model="custom_medicine.comment"/>
             </form-group48>
         </card>
-        <timetable-editor source="patient-medicine" :data="custom_medicine.timetable"
+        <timetable-editor v-if="mode != 'add-record'" source="patient-medicine" :data="custom_medicine.timetable"
                           :timetable_save_clicked="timetable_save_clicked"/>
 
         <button class="btn btn-danger btn" @click="clear()" v-if="medicines.length">Назад</button>
