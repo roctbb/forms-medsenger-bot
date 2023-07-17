@@ -66,7 +66,7 @@
                        v-model="custom_medicine.title"/>
             </form-group48>
 
-            <form-group48 :title="mode == 'add-record' ?'Принятая доза' : 'Дозировка'" required="true">
+            <form-group48 :title="mode == 'add-record' ? 'Принятая доза' : 'Дозировка'" required="true">
                 <input class="form-control form-control-sm"
                        :class="validated && empty(custom_medicine.dose) ? 'is-invalid' : ''"
                        v-model="custom_medicine.dose"/>

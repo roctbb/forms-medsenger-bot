@@ -267,6 +267,11 @@ class MedicineManager(Manager):
             medicine.is_created_by_patient = data.get('is_created_by_patient', False)
             medicine.prescribed_at = datetime.now()
 
+            try:
+                medicine.medicine_database_id = int(data.get('medicine_database_id'))
+            except:
+                pass
+
             if data.get('is_template') or medicine.is_template:
                 medicine.is_template = True
                 medicine.template_category = data.get('template_category')

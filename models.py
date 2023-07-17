@@ -196,6 +196,8 @@ class Medicine(db.Model, Compliance):
     prescribed_at = db.Column(db.DateTime, server_default=db.func.now())
     canceled_at = db.Column(db.DateTime, nullable=True)
 
+    medicine_database_id = db.Column(db.Integer, nullable=True)
+
     def as_dict(self):
         if self.contract_id:
             sent, done = self.current_month_compliance()
@@ -226,7 +228,8 @@ class Medicine(db.Model, Compliance):
             "prescribed_at": self.prescribed_at.strftime("%d.%m.%Y"),
             "canceled_at": self.canceled_at.strftime("%d.%m.%Y") if self.canceled_at else None,
             "sent": sent,
-            "done": done
+            "done": done,
+            "medicine_database_id": self.medicine_database_id
         }
 
     def timetable_description(self):
