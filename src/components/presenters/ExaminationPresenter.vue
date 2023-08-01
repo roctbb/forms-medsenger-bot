@@ -27,7 +27,7 @@
                 <form-group48 :big="true"
                               :title="'Время прохождения обследования'" :key="-1"
                               style="margin-top: 15px; margin-bottom: 15px;">
-                    <date-picker v-model="fill_time" :minute-step="15" type="datetime" format="DD.MM.YYYY HH:mm"
+                    <date-picker v-model="fill_time" lang="ru" :minute-step="15" type="datetime" format="DD.MM.YYYY HH:mm"
                                  time-title-format="DD.MM.YYYY"
                                  :class="flags.validated && date_invalid(fill_time) ? 'is-invalid' : ''"
                                  :disabled-date="date_invalid"></date-picker>

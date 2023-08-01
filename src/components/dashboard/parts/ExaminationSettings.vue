@@ -4,7 +4,7 @@
             <h5>Настройка параметров обследования {{ examination.title }}</h5>
             <error-block :errors="errors"></error-block>
             <form-group48 title="Крайний срок загрузки">
-                <date-picker v-model="examination.deadline_date"
+                <date-picker lang="ru" v-model="examination.deadline_date"
                              :class="this.flags.validated && is_valid_date ? 'is-invalid' : ''"
                              value-type="YYYY-MM-DD"></date-picker>
             </form-group48>

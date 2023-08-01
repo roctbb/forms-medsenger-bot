@@ -83,12 +83,12 @@
                         </div>
 
                         <div v-if="field.type == 'date'">
-                            <date-picker :required="field.required" v-model="answers[field.uid]"
+                            <date-picker lang="ru" :required="field.required" v-model="answers[field.uid]"
                                          value-type="YYYY-MM-DD"></date-picker>
                         </div>
 
                         <div v-if="field.type == 'time'">
-                            <date-picker :required="field.required" v-model="answers[field.uid]" format="HH:mm"
+                            <date-picker lang="ru" :required="field.required" v-model="answers[field.uid]" format="HH:mm"
                                          value-type="HH:mm"
                                          type="time"></date-picker>
                         </div>
@@ -147,7 +147,7 @@
                     :big="true"
                     :title="'Время заполнения'" :key="-1"
                     style="margin-top: 15px; margin-bottom: 15px;">
-                    <date-picker v-model="fill_time" :minute-step="15" type="datetime" format="DD.MM.YYYY HH:mm"
+                    <date-picker v-model="fill_time" lang="ru" :minute-step="15" type="datetime" format="DD.MM.YYYY HH:mm"
                                  time-title-format="DD.MM.YYYY"
                                  :disabled-date="date_invalid"></date-picker>
                 </form-group48>

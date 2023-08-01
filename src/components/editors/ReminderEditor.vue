@@ -17,13 +17,13 @@
                 </form-group48>
 
                 <form-group48 title="Дата начала">
-                    <date-picker v-model="reminder.attach_date"
+                    <date-picker lang="ru" v-model="reminder.attach_date"
                                  :class="this.validated && !reminder.is_template && empty(reminder.attach_date) ? 'is-invalid' : ''"
                                  value-type="YYYY-MM-DD"></date-picker>
                 </form-group48>
 
                 <form-group48 title="Дата завершения">
-                    <date-picker v-model="reminder.detach_date"
+                    <date-picker lang="ru" v-model="reminder.detach_date"
                                  :class="this.validated && !reminder.is_template && empty(reminder.detach_date) ? 'is-invalid' : ''"
                                  value-type="YYYY-MM-DD"></date-picker>
                 </form-group48>

@@ -23,11 +23,11 @@
                 </form-group48>
 
                 <form-group48 title="Дата отсчета">
-                    <date-picker v-model="algorithm.attach_date" value-type="YYYY-MM-DD"></date-picker>
+                    <date-picker lang="ru" v-model="algorithm.attach_date" value-type="YYYY-MM-DD"></date-picker>
                 </form-group48>
 
                 <form-group48 title="Дата завершения">
-                    <date-picker v-model="algorithm.detach_date" value-type="YYYY-MM-DD"></date-picker>
+                    <date-picker lang="ru" v-model="algorithm.detach_date" value-type="YYYY-MM-DD"></date-picker>
                 </form-group48>
             </card>
 

@@ -62,7 +62,7 @@
             </form-group48>
             <div v-if="timetable.detach_date_enabled">
                 <form-group48 title="Дата отмены">
-                    <date-picker v-model="timetable.detach_date" value-type="YYYY-MM-DD"></date-picker>
+                    <date-picker v-model="timetable.detach_date" lang="ru" value-type="YYYY-MM-DD"></date-picker>
                 </form-group48>
             </div>
         </div>

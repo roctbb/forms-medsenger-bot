@@ -17,7 +17,7 @@
                 </form-group48>
 
                 <form-group48 title="Крайняя дата загрузки" v-if="!examination.is_template">
-                    <date-picker v-model="examination.deadline_date"
+                    <date-picker lang="ru" v-model="examination.deadline_date"
                                  :class="this.flags.validated && is_valid_date ? 'is-invalid' : ''"
                                  value-type="YYYY-MM-DD"></date-picker>
                 </form-group48>

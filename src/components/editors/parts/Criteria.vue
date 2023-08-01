@@ -173,7 +173,7 @@
                            class="form-control form-control-sm"
                            :class="this.save_clicked && empty(criteria.value) ? 'is-invalid' : ''"
                            v-model="criteria.value">
-                    <date-picker v-else v-model="criteria.value" value-type="YYYY-MM-DD"></date-picker>
+                    <date-picker v-else  lang="ru" v-model="criteria.value" value-type="YYYY-MM-DD"></date-picker>
                     <small class="text-muted" v-if="criteria.right_mode == 'value'">значение для сравнения</small>
                     <small class="text-muted" v-else>модификатор</small>
                 </div>
