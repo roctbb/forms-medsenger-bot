@@ -30,7 +30,7 @@
                         </form-group48>
 
                         <form-group48 title="Дозировка">
-                            <input v-model="medicine.dose" class="form-control form-control-sm">
+                            <input v-model="medicine.dose" class="form-control form-control-sm"> <!-- -->
                         </form-group48>
 
                         <form-group48 title="Правила приема">
