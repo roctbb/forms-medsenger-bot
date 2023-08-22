@@ -1,5 +1,5 @@
 <template>
-    <card class="col-lg-6 col-md-6" :class="medicine.canceled_at ? 'text-muted' : ''"
+    <card :class="`col-lg-${col} col-md-${col} ${medicine.canceled_at ? 'text-muted' : ''}`"
           :image="medicine.canceled_at ? images.canceled_medicine : images.medicine">
 
         <strong class="card-title">{{ medicine.title }}</strong>
@@ -106,7 +106,8 @@ export default {
     name: "MedicineCard",
     props: {
         medicine: {required: true},
-        patient: {required: false}
+        patient: {required: false},
+        col: {required: true}
     },
     components: {Card},
     data() {

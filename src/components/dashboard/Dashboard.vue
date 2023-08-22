@@ -31,9 +31,9 @@
                     Нет назначенных препаратов
                 </small>
                 <div class="row">
-                    <medicine-card :medicine="medicine" :key="'medicine' + medicine.id"
+                    <medicine-card :medicine="medicine" :key="'medicine' + medicine.id" :col="6"
                                    v-for="(medicine, i) in patient.medicines"/>
-                    <medicine-card :medicine="medicine" :key="'canceled_medicine' + medicine.id"
+                    <medicine-card :medicine="medicine" :key="'canceled_medicine' + medicine.id" :col="6"
                                    v-for="(medicine, i) in patient.canceled_medicines"/>
                 </div>
 
@@ -49,9 +49,9 @@
                 </small>
 
                 <div class="row">
-                    <medicine-card :medicine="medicine" :key="'medicine' + medicine.id"
+                    <medicine-card :medicine="medicine" :key="'medicine' + medicine.id" :col="6"
                                    v-for="(medicine, i) in patient.patient_medicines"/>
-                    <medicine-card :medicine="medicine" :key="'canceled_medicine' + medicine.id"
+                    <medicine-card :medicine="medicine" :key="'canceled_medicine' + medicine.id" :col="6"
                                    v-for="(medicine, i) in patient.canceled_patient_medicines"/>
                 </div>
             </div>
@@ -170,7 +170,8 @@
                  }).filter(show_medicine), 'template_category')">
 
                 <div class="col-md-12"><h5>{{ name }}</h5></div>
-                <medicine-card :medicine="medicine" :patient="patient" :key="'medicine_template_' + medicine.id"
+                <medicine-card :medicine="medicine" :patient="patient" :col="3"
+                               :key="'medicine_template_' + medicine.id"
                                v-for="medicine in group"/>
             </div>
             <div v-if="!templates.medicines.length">
