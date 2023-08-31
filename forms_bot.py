@@ -209,11 +209,11 @@ def init(data):
 
             if has_examinations:
                 medsenger_api.send_message(contract.id,
-                                           "Врач назначил Вам обследования. Их необходимо загрузить до {}. Для просмотра списка и загрузки результатов воспользуйтесь кнопкой <b>Обследования</b>"
+                                           "Врач назначил Вам обследования. Их необходимо загрузить до <b>{}</b>.\n Для просмотра списка и загрузки результатов нажмите на кнопку:"
                                            .format(examinations_deadline.strftime('%d.%m.%Y')),
                                            only_patient=True, action_link='/examinations-list', action_name='Обследования', action_big=True)
                 medsenger_api.send_message(contract.id,
-                                           "Пациенту назначены обследования. Для просмотра списка и результатов воспользуйтесь кнопкой <b>Обследования</b>"
+                                           "Пациенту назначены обследования. Для просмотра списка и результатов нажмите на кнопку:"
                                            .format(examinations_deadline.strftime('%d.%m.%Y')),
                                            only_doctor=True, action_link='/examination-manager', action_name='Обследования', action_big=True)
 
