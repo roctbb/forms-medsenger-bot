@@ -31,7 +31,7 @@
             <a href="#" @click="attach_reminder()">Подключить</a>
             <a href="#" v-if="is_admin" @click="edit_reminder()">Редактировать</a><br>
             <a href="#" v-if="is_admin" @click="delete_reminder()">Удалить</a>
-            <small class="text-muted" v-else>ID: {{ reminder.id }}</small>
+            <small class="text-muted">ID: {{ reminder.id }}</small>
         </div>
     </card>
 </template>
