@@ -30,7 +30,7 @@
         <div v-else>
             <a href="#" @click="attach_reminder()">Подключить</a>
             <a href="#" v-if="is_admin" @click="edit_reminder()">Редактировать</a><br>
-            <a href="#" v-if="is_admin" @click="delete_reminder()">Удалить</a>
+            <a href="#" v-if="is_admin" @click="delete_reminder()">Удалить</a><br>
             <small class="text-muted">ID: {{ reminder.id }}</small>
         </div>
     </card>
