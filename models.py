@@ -534,6 +534,7 @@ class Reminder(db.Model):
     last_sent = db.Column(db.DateTime(), nullable=True)
     send_next = db.Column(db.DateTime(), nullable=True)
 
+    title = db.Column(db.String(255), nullable=True)
     type = db.Column(db.String(7), nullable=False)
     state = db.Column(db.Text, nullable=True)
     text = db.Column(db.Text, nullable=True)
@@ -566,6 +567,7 @@ class Reminder(db.Model):
             "contract_id": self.contract_id,
             "patient_id": self.patient_id,
             "type": self.type,
+            "title": self.title,
             "state": self.state,
             "text": self.text,
             "attach_date": self.attach_date.strftime('%Y-%m-%d') if self.attach_date else None,
@@ -584,6 +586,7 @@ class Reminder(db.Model):
     def clone(self):
         new_reminder = Reminder()
         new_reminder.type = self.type
+        new_reminder.title = self.title
         new_reminder.state = 'active'
 
         new_reminder.text = self.text

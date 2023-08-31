@@ -54,6 +54,7 @@ class ReminderManager(Manager):
         return id
 
     def set_state(self, reminder, state):
+        result = None
 
         reminder.state = state
         self.__commit__()
@@ -122,6 +123,7 @@ class ReminderManager(Manager):
                     return None
 
             reminder.type = data.get('type')
+            reminder.title = data.get('title')
             reminder.text = data.get('text')
 
             reminder.attach_date = data.get('attach_date')

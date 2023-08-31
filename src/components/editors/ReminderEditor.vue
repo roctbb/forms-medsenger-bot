@@ -3,6 +3,12 @@
         <div class="form">
             <card title="Описание напоминания">
 
+                <form-group48 title="Название обследования">
+                    <input class="form-control form-control-sm"
+                           :class="this.validated && empty(reminder.title) ? 'is-invalid' : ''"
+                           v-model="reminder.title"/>
+                </form-group48>
+
                 <form-group48 title="Кому прислать напоминание">
                     <select class="form-control form-control-sm" v-model="reminder.type">
                         <option value="patient">пациенту</option>
@@ -57,7 +63,8 @@
 
             </card>
 
-            <timetable-editor source="reminder" :data="reminder.timetable" :timetable_save_clicked="timetable_validated"/>
+            <timetable-editor source="reminder" :data="reminder.timetable"
+                              :timetable_save_clicked="timetable_validated"/>
         </div>
 
         <button v-if="show_button" class="btn btn-danger" @click="go_back()">Назад</button>

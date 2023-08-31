@@ -2,9 +2,13 @@
     <card class="col-lg-3 col-md-4" :class="reminder.canceled_at ? 'text-muted' : ''"
           :image="reminder.canceled_at ? images.old_reminder : images.reminder">
         <strong class="card-title">
-            Для {{ reminder.type == 'both' ? 'всех' : (reminder.type == 'patient' ? 'пациента' : 'врача') }}
+            {{ reminder.title ? reminder.title : 'Без названия' }}
         </strong>
-        <small> {{ reminder.text }} </small><br>
+        <small>
+            <i>Для {{ reminder.type == 'both' ? 'всех' : (reminder.type == 'patient' ? 'пациента' : 'врача') }}</i>
+            <br>
+            {{ reminder.text }}
+        </small><br>
         <br>
         <small><i>{{ tt_description(reminder.timetable) }}</i></small>
         <small><i> {{ duration }}</i></small><br>
