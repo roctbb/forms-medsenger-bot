@@ -28,8 +28,6 @@ class ExaminationManager(Manager):
         if not examination_group:
             raise Exception("No examination_group_id = {} found".format(examination_group_id))
 
-        print('GROUP', examination_group.as_dict())
-
         return examination_group
 
     def detach(self, template_id, contract):
