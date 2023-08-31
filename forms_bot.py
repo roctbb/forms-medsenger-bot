@@ -95,7 +95,6 @@ def init(data):
         exclude_algorithms = params.get('exclude_algorithms', "").split(',')
 
         if forms:
-
             if not is_new:
                 form_manager.clear(contract)
                 algorithm_manager.clear(contract)
@@ -171,6 +170,52 @@ def init(data):
                 algorithm_manager.attach(algorithm_id, contract)
             except Exception as e:
                 print(e)
+
+        if params.get('examinations_deadline'):
+            examinations_deadline = datetime.strptime(params.get('examinations_deadline'), '%Y-%m-%d')
+            has_examinations = False
+
+            examinations = params.get('examinations')
+            if examinations:
+                for template_id in examinations.split(','):
+                    examination_manager.attach(template_id, contract, examinations_deadline, False)
+                    has_examinations = True
+
+            custom_examinations = filter(lambda x: "examination_" in x and params.get(x), params.keys())
+            for custom_examination in custom_examinations:
+                try:
+                    part = custom_examination.split('_')[1]
+                    if not part.isnumeric():
+                        continue
+                    examination_id = int(part)
+
+                    examination_manager.attach(examination_id, contract, examinations_deadline, False)
+                    has_examinations = True
+                except Exception as e:
+                    log(e)
+
+            custom_examination_groups = filter(lambda x: "examination_group_" in x and params.get(x), params.keys())
+            for custom_examination_group in custom_examination_groups:
+                try:
+                    part = custom_examination_group.split('_')[2]
+                    if not part.isnumeric():
+                        continue
+                    examination_group_id = int(part)
+
+                    examination_manager.attach_group(examination_group_id, contract, examinations_deadline, False)
+                    has_examinations = True
+                except Exception as e:
+                    log(e)
+
+            if has_examinations:
+                medsenger_api.send_message(contract.id,
+                                           "Врач назначил Вам обследования. Их необходимо загрузить до {}. Для просмотра списка и загрузки результатов воспользуйтесь кнопкой <b>Обследования</b>"
+                                           .format(examinations_deadline.strftime('%d.%m.%Y')),
+                                           only_patient=True, action_link='/examinations-list', action_name='Обследования', action_big=True)
+                medsenger_api.send_message(contract.id,
+                                           "Пациенту назначены обследования. Для просмотра списка и результатов воспользуйтесь кнопкой <b>Обследования</b>"
+                                           .format(examinations_deadline.strftime('%d.%m.%Y')),
+                                           only_doctor=True, action_link='/examination-manager', action_name='Обследования', action_big=True)
 
     return "ok"
 
@@ -734,7 +779,7 @@ def get_examination_files(args, form, contract, examination_id):
     files = []
     for file_info in record['attached_files']:
         file = medsenger_api.get_file(contract_id, file_info['id'])
-        print(file_info)
+
         files.append({
             'base64': file['base64'],
             'type': file_info.get('type', 'text/plain'),

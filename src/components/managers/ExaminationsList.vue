@@ -21,13 +21,13 @@
                             </span>
                             <span class="col-2">
                                 {{ format_date(examination.notification_date) }} <br>
-                                <small v-if="!examination.active && !examination.expired">
+                                <small v-if="!examination.active && !examination.expired && days_left(examination.notification_date) >= 0">
                                     Осталось {{ days_left(examination.notification_date) }} дн.
                                 </small>
                             </span>
                             <span class="col-2">
                                 {{ format_date(examination.deadline_date) }} <br>
-                                <small v-if="!examination.expired">Осталось {{ days_left(examination.deadline_date) }} дн.</small>
+                                <small v-if="!examination.expired && days_left(examination.deadline_date) >= 0">Осталось {{ days_left(examination.deadline_date) }} дн.</small>
                             </span>
                             <div class="col">
                                 <button class="btn btn-sm btn-primary" v-if="examination.active"
@@ -36,7 +36,7 @@
                                 </button>
                                 <span
                                     v-else-if="examination.expired && !examination.upload_date">Срок загрузки истек<br></span>
-                                <span v-else-if="!examination.upload_date">Загрузка сейчас недоступна<br></span>
+                                <span v-else-if="!examination.active">Загрузка сейчас недоступна<br></span>
                                 <div v-if="examination.upload_date">
                                     <small>
                                         Срок действия
@@ -68,7 +68,7 @@
                             {{ days_left(examination.notification_date) }} дн.)</i>
                         <br>
                         <span>Загрузить до <b>{{ format_date(examination.deadline_date) }}</b></span>
-                        <i v-if="!examination.expired">(осталось {{ days_left(examination.deadline_date) }} дн.)</i>
+                        <i v-if="!examination.expired && days_left(examination.deadline_date) >= 0">(осталось {{ days_left(examination.deadline_date) }} дн.)</i>
                         <br>
                         <button class="btn btn-sm btn-primary" v-if="examination.active"
                                 @click="load_examination(examination)">
@@ -76,7 +76,7 @@
                         </button>
                         <span
                             v-else-if="examination.expired && !examination.upload_date"><br>Срок загрузки истек<br></span>
-                        <span v-else-if="examination.upload_date"><br>Загрузка сейчас недоступна<br></span>
+                        <span v-else-if="!examination.active"><br>Загрузка сейчас недоступна<br></span>
                         <div v-if="examination.upload_date">
                             <span>
                                 Срок действия
@@ -149,13 +149,18 @@ export default {
     },
     created() {
         let today = new Date()
-        today.setHours(23, 59, 59)
 
         this.examinations = this.data.examinations.concat(this.data.expired_examinations)
         this.examinations = this.examinations.map((examination) => {
-            examination.date = new Date(examination.notification_date)
-            examination.expired = new Date(examination.deadline_date) < today
-            examination.active = examination.date < today && new Date(examination.deadline_date) > today
+            let notification_date = new Date(examination.notification_date)
+            let deadline_date = new Date(examination.deadline_date)
+
+            notification_date.setHours(0, 0, 0)
+            deadline_date.setHours(23, 59, 59)
+
+            examination.active = notification_date <= today && deadline_date >= today
+            examination.expired = deadline_date < today
+
             return examination
         })
 

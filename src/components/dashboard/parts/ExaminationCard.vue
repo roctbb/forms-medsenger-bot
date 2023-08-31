@@ -23,7 +23,7 @@
                 <a href="#" @click="edit_examination()">Редактировать</a>
                 <a href="#" @click="delete_examination()">Отменить</a>
             </div>
-            <div v-else>
+            <div v-else-if="examination.contract_id !== current_contract_id">
                 <small>Добавлено в другом контракте.</small>
             </div>
 
@@ -55,7 +55,7 @@ export default {
     computed: {
         is_expired() {
             if (this.examination.is_template) return false
-            return moment(this.examination.deadline_date, 'YYYY-MM-DD') < moment()
+            return moment(this.examination.deadline_date + ' 23:59', 'YYYY-MM-DD hh:mm') < moment()
         },
         days_left() {
             let len = moment(this.examination.deadline_date, 'YYYY-MM-DD').diff(moment())

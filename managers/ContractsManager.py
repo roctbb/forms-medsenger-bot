@@ -58,7 +58,7 @@ class ContractManager(Manager):
 
             HookManager(self.medsenger_api, self.db).clear_contract(contract)
 
-            for object in contract.forms + contract.algorithms + contract.medicines + contract.reminders:
+            for object in contract.forms + contract.algorithms + contract.medicines + contract.reminders + contract.examinations:
                 self.db.session.delete(object)
 
             self.__commit__()

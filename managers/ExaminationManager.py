@@ -4,7 +4,7 @@ from datetime import timedelta
 from config import DYNAMIC_CACHE
 from helpers import log
 from managers.Manager import Manager
-from models import MedicalExamination
+from models import MedicalExamination, MedicalExaminationGroup
 
 
 class ExaminationManager(Manager):
@@ -22,6 +22,16 @@ class ExaminationManager(Manager):
 
         return examination
 
+    def get_group(self, examination_group_id):
+        examination_group = MedicalExaminationGroup.query.filter_by(id=examination_group_id).first()
+
+        if not examination_group:
+            raise Exception("No examination_group_id = {} found".format(examination_group_id))
+
+        print('GROUP', examination_group.as_dict())
+
+        return examination_group
+
     def detach(self, template_id, contract):
         examinations = list(filter(lambda x: x.template_id == template_id, contract.patient.examinations))
 
@@ -30,7 +40,7 @@ class ExaminationManager(Manager):
 
         self.__commit__()
 
-    def attach(self, template_id, contract, deadline_date):
+    def attach(self, template_id, contract, deadline_date, send_message=True):
         examination = self.get(template_id)
 
         if examination:
@@ -39,11 +49,13 @@ class ExaminationManager(Manager):
             new_examination.patient_id = contract.patient.id
 
             new_examination.deadline_date = deadline_date
+            new_examination.notification_date = deadline_date - timedelta(days=new_examination.expiration_days)
 
-            self.medsenger_api.send_message(contract.id,
-                                            "Врач назначил обследование {} (срок действия {} сут.). Его необходимо загрузить до {}."
-                                            .format(new_examination.title, new_examination.expiration_days,
-                                                    new_examination.deadline_date.strftime('%d.%m.%Y')))
+            if send_message:
+                self.medsenger_api.send_message(contract.id,
+                                                "Врач назначил обследование <b>{}</b> (срок действия {} сут.). Его необходимо загрузить до {}."
+                                                .format(new_examination.title, new_examination.expiration_days,
+                                                        new_examination.deadline_date.strftime('%d.%m.%Y')))
             self.db.session.add(new_examination)
             self.__commit__()
 
@@ -60,6 +72,12 @@ class ExaminationManager(Manager):
         else:
             return False
 
+    def attach_group(self, group_id, contract, deadline_date, send_message=True):
+        examination_group = self.get_group(group_id)
+
+        for template_id in examination_group.examinations:
+            self.attach(template_id, contract, deadline_date, send_message)
+
     def submit(self, examination, files, contract_id, date=None):
         if not date:
             date = datetime.now().time()
@@ -67,7 +85,6 @@ class ExaminationManager(Manager):
         record = self.medsenger_api.add_record(contract_id, 'analysis_result', examination.title,
                                                files=files, params={'examination_id': examination.id},
                                                record_time=date, return_id=True)
-        print(record)
         if record:
             examination.record_id = record[0]
         self.__commit__()
