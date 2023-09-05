@@ -91,6 +91,9 @@
                     <button class="btn btn-sm btn-danger" @click="remove_common_condition(algorithm, condition_index)">
                         Удалить условие
                     </button>
+                    <button class="btn btn-sm btn-primary" @click="duplicate_common_condition(algorithm, condition_index)">
+                        Дублировать условие
+                    </button>
                 </card>
                 <button class="btn btn-sm btn-default" @click="add_common_condition(algorithm)">Добавить условие
                 </button>
@@ -251,6 +254,12 @@ export default {
         },
         remove_common_condition: function (algorithm, index) {
             algorithm.common_conditions.splice(index, 1);
+        },
+        duplicate_common_condition: function(algorithm, index) {
+            let tmp = {}
+            this.copy(tmp, algorithm.common_conditions[index])
+            tmp.uid = this.uuidv4()
+            algorithm.common_conditions.push(tmp)
         },
         add_condition: function (step, type) {
             step.conditions.push(this.create_condition());
