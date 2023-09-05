@@ -256,7 +256,7 @@ export default {
             algorithm.common_conditions.splice(index, 1);
         },
         duplicate_common_condition: function(algorithm, index) {
-            let tmp = {}
+            let tmp = this.create_condition()
             this.copy(tmp, algorithm.common_conditions[index])
             tmp.uid = this.uuidv4()
             algorithm.common_conditions.push(tmp)
