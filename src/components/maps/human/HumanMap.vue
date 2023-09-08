@@ -1,7 +1,7 @@
 <template>
     <svg
-        :style="size + ' position:relative;'"
-        viewBox="20 20 170 270"
+        :style="size"
+        :viewBox="`50 29 ${originalWidth} ${originalHeight}`"
         id="map"
         xml:space="preserve"
         xmlns="http://www.w3.org/2000/svg">
@@ -338,14 +338,18 @@ export default {
     props: ['parts', 'width'],
     data() {
         return {
-            originalWidth: 170,
-            originalHeight: 250
+            originalWidth: 112,
+            originalHeight: 246
         }
     },
     computed: {
         size() {
-            let w = this.mobile ? window.innerWidth - 20 : 500
-            return `width: ${w}px; height: ${this.originalHeight * w / this.originalWidth}px;`
+            let w = this.mobile ? window.innerWidth * 0.8 : 500
+            return `width: ${w}px; height: ${this.originalHeight * this.proportion}px;`
+        },
+        proportion() {
+            let w = this.mobile ? window.innerWidth * 0.8 : 500
+            return w / this.originalWidth
         }
     },
     methods: {

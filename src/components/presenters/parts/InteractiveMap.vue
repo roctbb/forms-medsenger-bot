@@ -1,5 +1,5 @@
 <template>
-    <div v-if="map" class="map" style="margin: 5px">
+    <div v-if="map" style="margin: 5px">
         <human-map v-if="map == 'human'" :parts="parts" />
     </div>
 </template>
@@ -15,6 +15,8 @@ export default {
         return {
             parts: [],
         }
+    },
+    computed: {
     },
     created() {
         Event.listen('mouse-down', zone => {
@@ -32,15 +34,6 @@ export default {
 </script>
 
 <style>
-.map svg {
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
 @media (hover: hover) and (pointer: fine) {
     path:hover, circle:hover {
         stroke: #24a8b4 !important;
