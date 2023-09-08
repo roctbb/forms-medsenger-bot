@@ -344,11 +344,11 @@ export default {
     },
     computed: {
         size() {
-            let w = this.mobile ? window.innerWidth * 0.8 : 500
+            let w = this.mobile ? window.innerWidth * 0.7 : 500
             return `width: ${w}px; height: ${this.originalHeight * this.proportion}px;`
         },
         proportion() {
-            let w = this.mobile ? window.innerWidth * 0.8 : 500
+            let w = this.mobile ? window.innerWidth * 0.7 : 500
             return w / this.originalWidth
         }
     },
