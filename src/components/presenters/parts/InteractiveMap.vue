@@ -1,15 +1,18 @@
 <template>
     <div v-if="map" style="margin: 5px">
         <human-map v-if="map == 'human'" :parts="parts" />
+        <child-map v-if="map == 'child'" :parts="parts" />
     </div>
 </template>
 
 <script>
 
 import HumanMap from "../../maps/human/HumanMap";
+import ChildMap from "../../maps/child/ChildMap";
+
 export default {
     name: "InteractiveMap",
-    components: {HumanMap},
+    components: {HumanMap,ChildMap},
     props: ['map', 'uid'],
     data() {
         return {

@@ -400,7 +400,8 @@ Vue.mixin({
                 file: window.LOCAL_HOST + '/static/images/icons8-open-document-48.png',
             },
             maps: {
-                human: 'Тело человека',
+                human: 'Тело взрослого человека',
+                child: 'Тело ребенка',
             },
             page: window.PAGE,
             is_admin: window.IS_ADMIN,
