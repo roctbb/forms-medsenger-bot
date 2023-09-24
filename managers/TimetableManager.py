@@ -39,6 +39,12 @@ class TimetableManager(Manager):
             return now >= localize(object.send_next, zone) > last_sent
 
         points = timetable['points']
+        if timetable['mode'] == 'dates':
+            now_timestamp = now.timestamp()
+            points = list(filter(lambda x: abs(x['date'] / 1000 - now_timestamp) < 60, points))
+            timepoints = list(map(lambda x: localize(datetime.fromtimestamp(x['date'] / 1000), zone), points))
+            return bool(list(filter(lambda p: p <= now and p > last_sent, timepoints)))
+
         if timetable['mode'] == 'weekly':
             points = list(filter(lambda x: x['day'] == now.weekday(), points))
         if timetable['mode'] == 'monthly':

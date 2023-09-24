@@ -75,6 +75,7 @@ Vue.mixin({
         },
         verify_timetable: function (timetable) {
             if (timetable.mode == 'manual') return true;
+            if (timetable.mode == 'dates') return true;
             let prepare_point = (point) => {
                 point.hour = parseInt(point.hour);
                 point.minute = parseInt(point.minute);
@@ -187,8 +188,9 @@ Vue.mixin({
         tt_description: function (timetable) {
             if (timetable.mode == 'manual') {
                 return 'Заполняется вручную или присылается алгоритмом.'
-            }
-            if (timetable.mode == 'daily') {
+            } else if (timetable.mode == 'dates') {
+                return 'Отправляется в конкретные даты.'
+            } else if (timetable.mode == 'daily') {
                 return timetable.points.length + ' раз(а) в день.'
             } else if (timetable.mode == 'weekly') {
                 return timetable.points.length + ' раз(а) в неделю.'

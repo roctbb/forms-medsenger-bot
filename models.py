@@ -551,14 +551,17 @@ class Reminder(db.Model):
     order_agent_id = db.Column(db.Integer, nullable=True)
 
     def timetable_description(self):
-        if self.timetable['mode'] == 'daily':
+        if self.timetable['mode'] == 'dates':
+            description = 'Отправляется в конкретные даты.'
+        elif self.timetable['mode'] == 'daily':
             description = '{} раз(а) в день'.format(len(self.timetable['points']))
         elif self.timetable['mode'] == 'weekly':
             description = '{} раз(а) в неделю'.format(len(self.timetable['points']))
         else:
             description = '{} раз(а) в месяц'.format(len(self.timetable['points']))
-        delta = self.detach_date - self.attach_date
-        description += ' в течение {} дней'.format(abs(delta.days))
+        if self.timetable['mode'] not in ['dates', 'manual']:
+            delta = self.detach_date - self.attach_date
+            description += ' в течение {} дней'.format(abs(delta.days))
         return description
 
     def as_dict(self):

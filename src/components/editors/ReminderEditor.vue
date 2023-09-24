@@ -3,7 +3,7 @@
         <div class="form">
             <card title="Описание напоминания">
 
-                <form-group48 title="Название обследования">
+                <form-group48 title="Название">
                     <input class="form-control form-control-sm"
                            :class="this.validated && empty(reminder.title) ? 'is-invalid' : ''"
                            v-model="reminder.title"/>
@@ -16,25 +16,13 @@
                     </select>
                 </form-group48>
 
-                <form-group48 title="Текст напоминания">
+                <form-group48 title="Текст сообщения">
                     <textarea class="form-control form-control-sm"
                               :class="this.validated && empty(reminder.text) ? 'is-invalid' : ''"
                               v-model="reminder.text"></textarea>
                 </form-group48>
 
-                <form-group48 title="Дата начала">
-                    <date-picker lang="ru" v-model="reminder.attach_date"
-                                 :class="this.validated && !reminder.is_template && empty(reminder.attach_date) ? 'is-invalid' : ''"
-                                 value-type="YYYY-MM-DD"></date-picker>
-                </form-group48>
-
-                <form-group48 title="Дата завершения">
-                    <date-picker lang="ru" v-model="reminder.detach_date"
-                                 :class="this.validated && !reminder.is_template && empty(reminder.detach_date) ? 'is-invalid' : ''"
-                                 value-type="YYYY-MM-DD"></date-picker>
-                </form-group48>
-
-                <form-group48 title="Спрятать действия" v-if="is_admin">
+                <form-group48 title="Спрятать подтверждение действия" v-if="is_admin">
                     <input class="form-check" type="checkbox"
                            v-model="reminder.hide_actions"/>
                 </form-group48>
@@ -122,8 +110,12 @@ export default {
             let attach_date = moment().format('YYYY-MM-DD')
             let detach_date = moment().add(7, 'days').format('YYYY-MM-DD')
             let timetable = this.empty_timetable()
+            timetable.dates_enabled = true
             timetable.points[0].hour = 10
             timetable.points[0].minute = '00'
+            timetable.attach_date = attach_date
+            timetable.detach_date = detach_date
+
             return {
                 type: 'patient',
                 text: '',
@@ -135,6 +127,9 @@ export default {
         },
         check: function () {
             this.errors = [];
+
+            this.reminder.attach_date = this.reminder.timetable.attach_date
+            this.reminder.detach_date = this.reminder.timetable.detach_date
 
             if (this.empty(this.reminder.text) && !this.reminder.has_order) {
                 this.errors.push('Заполните текст напоминания')
@@ -154,7 +149,7 @@ export default {
                 }
             }
 
-            return this.errors.length == 0;
+            return this.errors.length === 0;
         },
         show_validation: function () {
             this.validated = true
@@ -256,6 +251,9 @@ export default {
             this.show_button = true
             this.reminder = reminder
             this.reminder.date = new Date(this.reminder.date)
+
+            this.reminder.timetable.attach_date = this.reminder.attach_date
+            this.reminder.timetable.detach_date = this.reminder.detach_date
 
             this.backup = JSON.stringify(reminder)
             this.$forceUpdate()

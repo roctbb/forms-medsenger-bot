@@ -5,19 +5,23 @@
             {{ reminder.title ? reminder.title : 'Без названия' }}
         </strong>
         <small>
-            <i>Для {{ reminder.type == 'both' ? 'всех' : (reminder.type == 'patient' ? 'пациента' : 'врача') }}</i>
+            <i>Для {{ reminder.type === 'both' ? 'всех' : (reminder.type === 'patient' ? 'пациента' : 'врача') }}</i>
             <br>
             {{ reminder.text }}
         </small><br>
         <br>
         <small><i>{{ tt_description(reminder.timetable) }}</i></small>
         <small><i> {{ duration }}</i></small><br>
-        <small v-if="!reminder.canceled_at && !reminder.is_template"><b>Начало: </b>{{ attach_date }}<br></small>
-        <small v-if="!reminder.canceled_at && !reminder.is_template"><b>Завершение: </b>{{ detach_date }}<br></small>
+        <div v-if="!['manual', 'dates'].includes(reminder.timetable.mode)">
+            <small v-if="!reminder.canceled_at && !reminder.is_template"><b>Начало: </b>{{ attach_date }}<br></small>
+            <small v-if="!reminder.canceled_at && !reminder.is_template"><b>Завершение: </b>{{
+                    detach_date
+                }}<br></small>
+        </div>
         <small v-if="reminder.canceled_at"><b>Отключено: </b>{{ reminder.canceled_at }}<br></small>
 
         <div v-if="!reminder.is_template">
-            <div v-if="reminder.contract_id == current_contract_id && !reminder.canceled_at">
+            <div v-if="reminder.contract_id === current_contract_id && !reminder.canceled_at">
                 <a href="#" @click="edit_reminder()">Редактировать</a>
                 <a href="#" @click="delete_reminder()">Отключить</a>
             </div>
@@ -58,6 +62,11 @@ export default {
             return `${d[2]}.${d[1]}.${d[0]}`
         },
         duration: function () {
+            if (this.reminder.timetable.mode === 'dates') {
+                let dates = new Set(this.reminder.timetable.points.map(d => moment(d.date).format('DD.MM.YYYY')))
+                return `(${Array.from(dates).join(', ')})`
+            }
+
             if (!this.reminder.attach_date || !this.reminder.detach_date) return 'Пока не отключить вручную'
             let attach = moment(this.reminder.attach_date, "YYYY-MM-DD")
             let detach = moment(this.reminder.detach_date, "YYYY-MM-DD")
