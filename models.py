@@ -661,6 +661,7 @@ class MedicalExamination(db.Model):
     doctor_description = db.Column(db.Text, nullable=True)
     patient_description = db.Column(db.Text, nullable=True)
 
+    no_expiration = db.Column(db.Boolean, nullable=True, default=False)
     expiration_days = db.Column(db.Integer, default=0)
     record_id = db.Column(db.Integer, nullable=True)
 
@@ -672,6 +673,7 @@ class MedicalExamination(db.Model):
         new_examination.doctor_description = self.doctor_description
         new_examination.patient_description = self.patient_description
 
+        new_examination.no_expiration = self.no_expiration
         new_examination.expiration_days = self.expiration_days
         new_examination.attach_date = datetime.now()
 
@@ -691,6 +693,7 @@ class MedicalExamination(db.Model):
             "patient_description": self.patient_description,
             "patient_id": self.patient_id,
             "contract_id": self.contract_id,
+            "no_expiration": self.no_expiration,
             "expiration_days": self.expiration_days,
             "asked": self.asked,
             "record_id": self.record_id,

@@ -16,13 +16,18 @@
                     <textarea class="form-control form-control-sm" v-model="examination.doctor_description"></textarea>
                 </form-group48>
 
+
                 <form-group48 title="Крайняя дата загрузки" v-if="!examination.is_template">
-                    <date-picker lang="ru" v-model="examination.deadline_date"
+                    <date-picker lang="ru" v-model="examination.deadline_date" format="DD.MM.YYYY"
                                  :class="this.flags.validated && is_valid_date ? 'is-invalid' : ''"
                                  value-type="YYYY-MM-DD"></date-picker>
                 </form-group48>
 
-                <form-group48 title="Обследование действительно">
+                <form-group48 title="Действует бессрочно">
+                    <input class="form-check" type="checkbox" v-model="examination.no_expiration"/>
+                </form-group48>
+
+                <form-group48 title="Обследование действительно" v-if="!examination.no_expiration">
                     <input class="form-control form-control-sm"
                            :class="this.flags.validated && examination.expiration_days < 1 ? 'is-invalid' : ''"
                            type="number" min="1" max="365" step="1" v-model="examination.expiration_days"/>

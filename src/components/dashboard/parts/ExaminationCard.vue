@@ -5,7 +5,8 @@
             {{ examination.title }}
         </strong>
         <small v-if="examination.doctor_description"> {{ examination.doctor_description }}<br></small>
-        <small><i>Срок действия: {{ examination.expiration_days }} дн.</i></small><br>
+        <small v-if="!examination.no_expiration"><i>Срок действия: {{ examination.expiration_days }} дн.</i><br></small>
+        <small v-else><i>Бессрочно</i><br></small>
         <small v-if="examination.upload_date" class="text-muted">
             <img :src="images.file" height="20"/>
             <a href="#" @click="get_files()">Скачать файлы ({{ format_date(examination.upload_date) }})</a><br>
@@ -54,7 +55,7 @@ export default {
     },
     computed: {
         is_expired() {
-            if (this.examination.is_template) return false
+            if (this.examination.is_template || this.examination.no_expiration) return false
             return moment(this.examination.deadline_date + ' 23:59', 'YYYY-MM-DD hh:mm') < moment()
         },
         days_left() {

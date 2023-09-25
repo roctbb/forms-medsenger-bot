@@ -47,7 +47,11 @@ class ExaminationManager(Manager):
             new_examination.patient_id = contract.patient.id
 
             new_examination.deadline_date = deadline_date
-            new_examination.notification_date = deadline_date - timedelta(days=new_examination.expiration_days)
+
+            if new_examination.no_expiration:
+                new_examination.notification_date = deadline_date - timedelta(days=new_examination.expiration_days)
+            else:
+                new_examination.notification_date = datetime.now().date()
 
             if send_message:
                 self.medsenger_api.send_message(contract.id,
@@ -154,6 +158,7 @@ class ExaminationManager(Manager):
             examination.doctor_description = data.get('doctor_description')
             examination.patient_description = data.get('patient_description')
             examination.expiration_days = data.get('expiration_days', 1)
+            examination.no_expiration= data.get('no_expiration', False)
             examination.record_id = data.get('record_id')
 
             examination.template_id = data.get('template_id')
@@ -169,7 +174,10 @@ class ExaminationManager(Manager):
                 examination.patient_id = contract.patient_id
                 examination.contract_id = contract.id
                 examination.deadline_date = datetime.strptime(data.get('deadline_date'), '%Y-%m-%d')
-                examination.notification_date = examination.deadline_date - timedelta(days=examination.expiration_days)
+                if examination.no_expiration:
+                    examination.notification_date = examination.deadline_date - timedelta(days=examination.expiration_days)
+                else:
+                    examination.notification_date = datetime.now().date()
 
                 params = {
                     'obj_id': examination.id,
@@ -178,16 +186,18 @@ class ExaminationManager(Manager):
                     'description': examination.doctor_description
                 }
 
+                expiration_text = 'действует бессрочно' if examination.no_expiration else '(срок действия {} сут.)'.format(examination.expiration_days)
+
                 if is_new:
                     examination.attach_date = datetime.now()
                     self.medsenger_api.send_message(contract.id,
-                                                    "Врач назначил обследование {} (срок действия {} сут.). Его необходимо загрузить до {}."
-                                                    .format(examination.title, examination.expiration_days,
+                                                    "Врач назначил обследование {} ({}). Его необходимо загрузить до {}."
+                                                    .format(examination.title, expiration_text,
                                                             examination.deadline_date.strftime('%d.%m.%Y')))
                 else:
                     self.medsenger_api.send_message(contract.id,
-                                                    "Врач изменил параметры обследования {} (срок действия {} сут.). Его необходимо загрузить до {}."
-                                                    .format(examination.title, examination.expiration_days,
+                                                    "Врач изменил параметры обследования {} ({}). Его необходимо загрузить до {}."
+                                                    .format(examination.title, expiration_text,
                                                             examination.deadline_date.strftime('%d.%m.%Y')))
 
                 action = 'Назначено обследование' if is_new else 'Изменены параметры обследования'

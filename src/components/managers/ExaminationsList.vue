@@ -21,13 +21,16 @@
                             </span>
                             <span class="col-2">
                                 {{ format_date(examination.notification_date) }} <br>
-                                <small v-if="!examination.active && !examination.expired && days_left(examination.notification_date) >= 0">
+                                <small
+                                    v-if="!examination.active && !examination.expired && days_left(examination.notification_date) >= 0">
                                     Осталось {{ days_left(examination.notification_date) }} дн.
                                 </small>
                             </span>
                             <span class="col-2">
                                 {{ format_date(examination.deadline_date) }} <br>
-                                <small v-if="!examination.expired && days_left(examination.deadline_date) >= 0">Осталось {{ days_left(examination.deadline_date) }} дн.</small>
+                                <small v-if="!examination.expired && days_left(examination.deadline_date) >= 0">Осталось {{
+                                        days_left(examination.deadline_date)
+                                    }} дн.</small>
                             </span>
                             <div class="col">
                                 <button class="btn btn-sm btn-primary" v-if="examination.active"
@@ -39,12 +42,14 @@
                                 <span v-else-if="!examination.active">Загрузка сейчас недоступна<br></span>
                                 <div v-if="examination.upload_date">
                                     <small>
-                                        Срок действия
+                                        <span v-if="examination.no_expiration">Действует бессрочно</span>
                                         <span
-                                            v-if="days_left(examination.upload_date, examination.expiration_days) >= 0">истечет через {{
+                                            v-else-if="days_left(examination.upload_date, examination.expiration_days) >= 0">
+                                            Срок действия истечет через {{
                                                 days_left(examination.upload_date, examination.expiration_days)
-                                            }} дн. </span>
-                                        <span v-else>истек</span>
+                                            }} дн.
+                                        </span>
+                                        <span v-else>Срок действия истек</span>
                                     </small>
                                     <br>
                                     <img :src="images.file" height="20"/>
@@ -68,7 +73,8 @@
                             {{ days_left(examination.notification_date) }} дн.)</i>
                         <br>
                         <span>Загрузить до <b>{{ format_date(examination.deadline_date) }}</b></span>
-                        <i v-if="!examination.expired && days_left(examination.deadline_date) >= 0">(осталось {{ days_left(examination.deadline_date) }} дн.)</i>
+                        <i v-if="!examination.expired && days_left(examination.deadline_date) >= 0">(осталось
+                            {{ days_left(examination.deadline_date) }} дн.)</i>
                         <br>
                         <button class="btn btn-sm btn-primary" v-if="examination.active"
                                 @click="load_examination(examination)">
@@ -78,13 +84,14 @@
                             v-else-if="examination.expired && !examination.upload_date"><br>Срок загрузки истек<br></span>
                         <span v-else-if="!examination.active"><br>Загрузка сейчас недоступна<br></span>
                         <div v-if="examination.upload_date">
-                            <span>
-                                Срок действия
-                                <span v-if="days_left(examination.upload_date, examination.expiration_days) >= 0">истечет через {{
-                                        days_left(examination.upload_date, examination.expiration_days)
-                                    }} дн. </span>
-                                <span v-else>истек</span>
-                            </span><br>
+                            <span v-if="examination.no_expiration">Действует бессрочно</span>
+                            <span v-else-if="days_left(examination.upload_date, examination.expiration_days) >= 0">
+                                    Срок действия истечет через {{
+                                    days_left(examination.upload_date, examination.expiration_days)
+                                }} дн.
+                            </span>
+                            <span v-else>Срок действия истек</span>
+                            <br>
                             <img :src="images.file" height="20"/>
                             <a href="#" @click="get_files(examination)">Скачать файлы
                                 ({{ format_date(examination.upload_date) }})</a>
