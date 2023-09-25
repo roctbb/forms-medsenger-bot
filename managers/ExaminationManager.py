@@ -133,13 +133,17 @@ class ExaminationManager(Manager):
         super().log_request("examination_{}".format(examination.id), contract_id, description)
 
     def run(self, examination):
-        text = 'Пожалуйста, не забудьте загрузить обследование {}.'.format(examination.title)
+        text = 'Пожалуйста, не забудьте загрузить обследование <b>{}</b>.'.format(examination.title)
         action = 'examination/{}'.format(examination.id)
         action_name = 'Загрузить обследование'
-        deadline = self.calculate_deadline(examination)
 
-        result = self.medsenger_api.send_message(examination.contract_id, text, action, action_name, True, False, True,
-                                                 deadline)
+        result = self.medsenger_api.send_message(examination.contract_id, text, action, action_name,
+                                                 True, False, True)
+
+        if result:
+            examination.asked = True
+            self.__commit__()
+
         return result
 
     def create_or_edit(self, data, contract):

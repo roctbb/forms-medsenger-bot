@@ -57,3 +57,12 @@ def run_algorithm(chain, algorithm_id, included_categories=[], excluded_categori
 
     with app.app_context():
         return algorithm_manager.run(algorithm_manager.get(algorithm_id), included_categories, excluded_categories)
+
+
+@celery.task
+def run_examination(chain, examination_id):
+    if not chain:
+        return chain
+
+    with app.app_context():
+        return examination_manager.run(examination_manager.get(examination_id))

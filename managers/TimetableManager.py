@@ -142,6 +142,13 @@ class TimetableManager(Manager):
                     if "exact_date" in alg.categories:
                         tasks.run_algorithm.s(True, alg.id, ["exact_date"], []).apply_async()
 
+            examination_groups = list(map(lambda x: x.examinations, contracts))
+            today = datetime.today().date()
+            for group in examination_groups:
+                for examination in group:
+                    if not examination.asked and examination.notification_date <= today <= examination.deadline_date:
+                        tasks.run_examination(True, examination.id)
+
     def iterate(self, app):
         with app.app_context():
             contracts = list(Contract.query.filter_by(is_active=True).all())
