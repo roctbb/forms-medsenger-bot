@@ -35,7 +35,7 @@
             <a href="#" @click="attach_examination()">Назначить</a>
             <a href="#" v-if="is_admin" @click="edit_examination()">Редактировать</a><br>
             <a href="#" v-if="is_admin" @click="delete_examination()">Удалить</a>
-            <small class="text-muted" v-else-if="is_admin">ID: {{ examination.id }}</small>
+            <small class="text-muted" v-if="is_admin">ID: {{ examination.id }}</small>
         </div>
     </card>
 </template>
