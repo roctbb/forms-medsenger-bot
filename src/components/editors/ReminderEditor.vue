@@ -22,7 +22,7 @@
                               v-model="reminder.text"></textarea>
                 </form-group48>
 
-                <form-group48 title="Спрятать подтверждение действия" v-if="is_admin">
+                <form-group48 title="Спрятать подтверждение" v-if="is_admin">
                     <input class="form-check" type="checkbox"
                            v-model="reminder.hide_actions"/>
                 </form-group48>
@@ -49,6 +49,22 @@
                     </div>
                 </div>
 
+                <form-group48 title="Привязать действие" v-if="is_admin">
+                    <input class="form-check" type="checkbox"
+                           v-model="reminder.has_action"/>
+                </form-group48>
+
+                <div v-if="reminder.has_action" class="form-group form-group-sm row">
+                    <div class="col-md-3">
+                        <input class="form-control form-control-sm" type="text" v-model="reminder.action">
+                        <small class="text-muted">action link</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <input class="form-control form-control-sm" type="text" v-model="reminder.action_description">
+                        <small class="text-muted">Текст для кнопки</small>
+                    </div>
+                </div>
             </card>
 
             <timetable-editor source="reminder" :data="reminder.timetable"
@@ -108,21 +124,21 @@ export default {
         },
         create_empty_reminder: function () {
             let attach_date = moment().format('YYYY-MM-DD')
-            let detach_date = moment().add(7, 'days').format('YYYY-MM-DD')
             let timetable = this.empty_timetable()
             timetable.dates_enabled = true
             timetable.points[0].hour = 10
             timetable.points[0].minute = '00'
             timetable.attach_date = attach_date
-            timetable.detach_date = detach_date
+            timetable.detach_date = undefined
 
             return {
                 type: 'patient',
                 text: '',
                 timetable: timetable,
                 attach_date: attach_date,
-                detach_date: detach_date,
-                has_order: false
+                detach_date: undefined,
+                has_order: false,
+                has_action: false
             }
         },
         check: function () {
@@ -171,7 +187,10 @@ export default {
 
                 if (!this.button_lock) {
                     this.button_lock = true
-                    this.axios.post(this.direct_url('/api/settings/reminder'), this.reminder).then(this.process_save_answer).catch(this.process_save_error);
+                    this.axios
+                        .post(this.direct_url('/api/settings/reminder'), this.reminder)
+                        .then(this.process_save_answer)
+                        .catch(this.process_save_error);
                 }
             }
         },
@@ -214,6 +233,23 @@ export default {
     created() {
     },
     mounted() {
+        Event.listen('create-reminder-from-template', (reminder) => {
+            this.reminder = {}
+
+            this.copy(this.reminder, reminder)
+            this.reminder.id = undefined
+
+            this.reminder.timetable = {
+                mode: 'dates',
+                dates_enabled: true,
+                attach_date: moment().format('YYYY-MM-DD'),
+                points: [{date: +moment().add(7, 'days')}]
+            }
+
+            this.reminder.is_template = false;
+            this.reminder.template_id = reminder.id;
+        });
+
         Event.listen('attach-reminder', (reminder) => {
             this.reminder = {}
 

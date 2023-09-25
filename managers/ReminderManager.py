@@ -126,6 +126,7 @@ class ReminderManager(Manager):
             reminder.title = data.get('title')
             reminder.text = data.get('text')
 
+            print(data.get('attach_date'))
             reminder.attach_date = data.get('attach_date')
             reminder.detach_date = data.get('detach_date')
             reminder.timetable = data.get('timetable')
@@ -138,6 +139,13 @@ class ReminderManager(Manager):
                 reminder.order = data.get('order')
                 reminder.order_params = data.get('order_params')
                 reminder.order_agent_id = data.get('order_agent_id')
+
+            if contract.is_admin:
+                reminder.has_action = data.get('has_action')
+
+            if reminder.has_action:
+                reminder.action = data.get('action')
+                reminder.action_description = data.get('action_description')
 
             reminder.state = data.get('state', 'active')
 
@@ -174,10 +182,13 @@ class ReminderManager(Manager):
         action_link = None
 
         if reminder.text:
-
             if not reminder.hide_actions:
                 action_name = 'Отметить действие'
                 action_link = 'reminder/{}'.format(reminder.id)
+
+            if reminder.has_action:
+                action_name = reminder.action_description
+                action_link = reminder.action
 
             if reminder.type == 'patient':
                 result = self.medsenger_api.send_message(reminder.contract_id, reminder.text, action_name=action_name,

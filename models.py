@@ -550,6 +550,10 @@ class Reminder(db.Model):
     order_params = db.Column(db.JSON, nullable=True)
     order_agent_id = db.Column(db.Integer, nullable=True)
 
+    has_action = db.Column(db.Boolean, default=False)
+    action = db.Column(db.String(255), nullable=True)
+    action_description = db.Column(db.String(255), nullable=True)
+
     def timetable_description(self):
         if self.timetable['mode'] == 'dates':
             description = 'Отправляется в конкретные даты.'
@@ -583,7 +587,10 @@ class Reminder(db.Model):
             "has_order": self.has_order,
             "order": self.order,
             "order_params": self.order_params,
-            "order_agent_id": self.order_agent_id
+            "order_agent_id": self.order_agent_id,
+            "has_action": self.has_action,
+            "action": self.action,
+            "action_description": self.action_description
         }
 
     def clone(self):

@@ -51,6 +51,7 @@ export default {
     },
     methods: {
         update_params: function () {
+            if (this.page != 'settings') return
             this.flags.loaded = false
             this.params = {
                 backup: [],

@@ -10,6 +10,7 @@
                 <form-presenter :patient="patient" :data="form" v-if="state == 'form-presenter'"/>
                 <result-presenter :result="result" v-if="state == 'form-result'"/>
             </div>
+
             <div class="container" style="margin-top: 15px;" v-else>
                 <dashboard :patient="patient" :templates="templates" v-show="state == 'dashboard'"
                            :parts="dashboard_parts"/>
@@ -219,6 +220,13 @@ export default {
             if (this.mode == 'confirm-reminder') {
                 this.axios.get(this.direct_url('/api/reminder/' + this.object_id)).then(this.process_load_answer);
             }
+            if (this.mode == 'create-reminder') {
+                this.axios.get(this.direct_url('/api/settings/get_patient')).then((response) => {
+                    this.patient = response.data
+                    this.state = 'reminder-manager'
+                    this.axios.get(this.direct_url('/api/reminder/' + this.object_id)).then(this.process_load_answer);
+                });
+            }
             if (this.mode == 'verify-dose') {
                 this.axios.get(this.direct_url('/api/medicine/' + this.object_id)).then(this.process_load_answer);
             }
@@ -252,6 +260,10 @@ export default {
             if (this.mode == 'confirm-reminder') {
                 this.reminder = response.data;
                 this.state = 'confirm-reminder'
+            }
+
+            if (this.mode == 'create-reminder') {
+                Event.fire('create-reminder-from-template', response.data)
             }
 
             if (this.mode == 'medicines-list') {

@@ -488,6 +488,12 @@ def create_reminder(args, form, contract):
         abort(422)
 
 
+@app.route('/reminder/template/<template_id>', methods=['GET'])
+@verify_request(contract_manager, 'doctor')
+def create_reminder_page(args, form, contract, template_id):
+    return get_ui('create-reminder', contract, medsenger_api.get_categories(), template_id, role='doctor')
+
+
 @app.route('/reminder/<reminder_id>', methods=['GET'])
 @verify_request(contract_manager, 'patient')
 def reminder_page(args, form, contract, reminder_id):
