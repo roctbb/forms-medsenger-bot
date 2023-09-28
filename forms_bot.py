@@ -719,6 +719,13 @@ def examination_page(args, form, contract, examination_id):
     return get_ui('examination', contract, medsenger_api.get_categories(), examination_id, role='patient')
 
 
+@app.route('/examination/template/<template_id>', methods=['GET'])
+@verify_request(contract_manager, 'doctor')
+def attach_examination_page(args, form, contract, template_id):
+    return get_ui('attach-examination', contract, medsenger_api.get_categories(), template_id,
+                  role='doctor', dashboard_parts=['examinations'])
+
+
 @app.route('/api/settings/examination', methods=['POST'])
 @verify_request(contract_manager, 'doctor')
 def create_examination(args, form, contract):

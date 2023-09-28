@@ -227,6 +227,13 @@ export default {
                     this.axios.get(this.direct_url('/api/reminder/' + this.object_id)).then(this.process_load_answer);
                 });
             }
+            if (this.mode == 'attach-examination') {
+                this.axios.get(this.direct_url('/api/settings/get_patient')).then((response) => {
+                    this.patient = response.data
+                    this.state = 'examination-manager'
+                    this.axios.get(this.direct_url('/api/examination/' + this.object_id)).then(this.process_load_answer);
+                });
+            }
             if (this.mode == 'verify-dose') {
                 this.axios.get(this.direct_url('/api/medicine/' + this.object_id)).then(this.process_load_answer);
             }
@@ -264,6 +271,10 @@ export default {
 
             if (this.mode == 'create-reminder') {
                 Event.fire('create-reminder-from-template', response.data)
+            }
+
+            if (this.mode == 'attach-examination') {
+                Event.fire('create-examination-from-template', response.data)
             }
 
             if (this.mode == 'medicines-list') {

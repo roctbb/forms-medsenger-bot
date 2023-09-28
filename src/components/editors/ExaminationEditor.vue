@@ -192,6 +192,20 @@ export default {
     created() {
     },
     mounted() {
+        Event.listen('create-examination-from-template', (examination) => {
+            this.examination = {}
+
+            this.copy(this.examination, examination)
+            this.examination.id = undefined
+
+            this.examination.attach_date = moment().format('YYYY-MM-DD')
+            this.examination.deadline_date =  moment().add(14, 'day').format('YYYY-MM-DD')
+
+
+            this.examination.is_template = false;
+            this.examination.template_id = examination.id;
+        });
+
         Event.listen('attach-examination', (examination) => {
             this.examination = {}
 
