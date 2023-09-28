@@ -173,6 +173,7 @@ def init(data):
 
         if params.get('examinations_deadline'):
             examinations_deadline = datetime.strptime(params.get('examinations_deadline'), '%Y-%m-%d')
+            medsenger_api.add_record(contract_id, 'examinations_deadline', params.get('examinations_deadline'))
             has_examinations = False
 
             examinations = params.get('examinations')
