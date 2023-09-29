@@ -72,7 +72,9 @@
                 </form-group48>
 
                 <div v-if="reminder.has_record_params && is_admin" class="form-group form-group-sm row">
+                    <hr>
                     <b>Выбранная дата добавится к тексту напоминания.</b>
+                    <br>
                     <div class="col-md-4">
                         <select class="form-control form-control-sm" v-model="reminder.record_params.category">
                             <optgroup
