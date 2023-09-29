@@ -190,7 +190,7 @@ class ExaminationManager(Manager):
                     'description': examination.doctor_description
                 }
 
-                expiration_text = 'действует бессрочно' if examination.no_expiration else '(срок действия {} сут.)'.format(examination.expiration_days)
+                expiration_text = 'действует бессрочно' if examination.no_expiration else 'срок действия {} сут.'.format(examination.expiration_days)
 
                 if is_new:
                     examination.attach_date = datetime.now()
