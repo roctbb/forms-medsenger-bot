@@ -126,7 +126,6 @@ class ReminderManager(Manager):
             reminder.title = data.get('title')
             reminder.text = data.get('text')
 
-            print(data.get('attach_date'))
             reminder.attach_date = data.get('attach_date')
             reminder.detach_date = data.get('detach_date')
             reminder.timetable = data.get('timetable')
@@ -147,6 +146,11 @@ class ReminderManager(Manager):
                 reminder.action = data.get('action')
                 reminder.action_description = data.get('action_description')
 
+            reminder.has_record_params = data.get('has_record_params')
+
+            if reminder.has_record_params:
+                reminder.record_params = data.get('record_params')
+
             reminder.state = data.get('state', 'active')
 
             if data.get('is_template'):
@@ -154,6 +158,9 @@ class ReminderManager(Manager):
             else:
                 reminder.patient_id = contract.patient_id
                 reminder.contract_id = contract.id
+
+            if not reminder.is_template and reminder.has_record_params and not reminder_id:
+                self.medsenger_api.add_record(contract.id, reminder.record_params['category'], reminder.record_params['date'])
 
             if not reminder_id:
                 self.db.session.add(reminder)
@@ -180,6 +187,7 @@ class ReminderManager(Manager):
         result = None
         action_name = None
         action_link = None
+        text = reminder.text
 
         if reminder.text:
             if not reminder.hide_actions:
@@ -190,12 +198,17 @@ class ReminderManager(Manager):
                 action_name = reminder.action_description
                 action_link = reminder.action
 
+            if reminder.has_record_params:
+                date_parts = reminder.record_params['date'].split('-')
+                text += '<br><b>{}:</b> {}.{}.{}'.format(reminder.record_params['description'],
+                                                         date_parts[2], date_parts[1], date_parts[0])
+
             if reminder.type == 'patient':
-                result = self.medsenger_api.send_message(reminder.contract_id, reminder.text, action_name=action_name,
+                result = self.medsenger_api.send_message(reminder.contract_id, text, action_name=action_name,
                                                          action_onetime=True, action_big=False,
                                                          action_link=action_link, only_patient=True)
             if reminder.type == 'doctor':
-                result = self.medsenger_api.send_message(reminder.contract_id, reminder.text, action_name=action_name,
+                result = self.medsenger_api.send_message(reminder.contract_id, text, action_name=action_name,
                                                          action_onetime=True, action_big=False,
                                                          action_link=action_link, only_doctor=True)
         if reminder.has_order:

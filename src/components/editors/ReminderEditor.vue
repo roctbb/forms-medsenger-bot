@@ -28,11 +28,11 @@
                 </form-group48>
 
                 <form-group48 title="Привязать приказ агенту" v-if="is_admin">
-                    <input class="form-check" type="checkbox"
+                    <input class="form-check" type="checkbox" @change="$forceUpdate()"
                            v-model="reminder.has_order"/>
                 </form-group48>
 
-                <div v-if="reminder.has_order" class="form-group form-group-sm row">
+                <div v-if="reminder.has_order && is_admin" class="form-group form-group-sm row">
                     <div class="col-md-3">
                         <input class="form-control form-control-sm" type="number" v-model="reminder.order_agent_id">
                         <small class="text-muted">ID агента</small>
@@ -50,11 +50,11 @@
                 </div>
 
                 <form-group48 title="Привязать действие" v-if="is_admin">
-                    <input class="form-check" type="checkbox"
+                    <input class="form-check" type="checkbox" @change="$forceUpdate()"
                            v-model="reminder.has_action"/>
                 </form-group48>
 
-                <div v-if="reminder.has_action" class="form-group form-group-sm row">
+                <div v-if="reminder.has_action && is_admin" class="form-group form-group-sm row">
                     <div class="col-md-3">
                         <input class="form-control form-control-sm" type="text" v-model="reminder.action">
                         <small class="text-muted">action link</small>
@@ -64,6 +64,47 @@
                         <input class="form-control form-control-sm" type="text" v-model="reminder.action_description">
                         <small class="text-muted">Текст для кнопки</small>
                     </div>
+                </div>
+
+                <form-group48 title="Привязать запись в медкарту" v-if="is_admin">
+                    <input class="form-check" type="checkbox" @change="$forceUpdate()"
+                           v-model="reminder.has_record_params"/>
+                </form-group48>
+
+                <div v-if="reminder.has_record_params && is_admin" class="form-group form-group-sm row">
+                    <b>Выбранная дата добавится к тексту напоминания.</b>
+                    <div class="col-md-4">
+                        <select class="form-control form-control-sm" v-model="reminder.record_params.category">
+                            <optgroup
+                                v-for="(group, name) in group_by(category_list.filter(c => c.type == 'date'), 'subcategory')"
+                                v-bind:label="name">
+                                <option v-for="category in group" :value="category.name">{{
+                                        category.description
+                                    }}
+                                </option>
+                            </optgroup>
+                        </select>
+                        <small class="text-muted">Категория записи</small>
+                    </div>
+                    <div class="col-md-4">
+                        <input class="form-control form-control-sm" type="text"
+                               v-model="reminder.record_params.description">
+                        <small class="text-muted">Название</small>
+                    </div>
+                    <div class="col-md-3">
+                        <date-picker lang="ru" v-model="reminder.record_params.date" @change="$forceUpdate()"
+                                     format="DD.MM.YYYY" value-type="YYYY-MM-DD"></date-picker>
+                        <small class="text-muted">Дата</small>
+                    </div>
+                </div>
+                <div v-else-if="reminder.has_record_params" class="form-group form-group-sm">
+                    <hr>
+                    <b>Выбранная дата добавится к тексту напоминания.</b>
+                    <form-group48 :title="reminder.record_params.description">
+                        <date-picker lang="ru" v-model="reminder.record_params.date" @change="$forceUpdate()"
+                                     :disabled="!!reminder.id"
+                                     format="DD.MM.YYYY" value-type="YYYY-MM-DD"></date-picker>
+                    </form-group48>
                 </div>
             </card>
 
@@ -138,7 +179,9 @@ export default {
                 attach_date: attach_date,
                 detach_date: undefined,
                 has_order: false,
-                has_action: false
+                has_action: false,
+                has_record_params: false,
+                record_params: {}
             }
         },
         check: function () {
@@ -239,6 +282,7 @@ export default {
             this.copy(this.reminder, reminder)
             this.reminder.id = undefined
 
+            if (!this.reminder.record_params) this.reminder.record_params = {}
             this.reminder.timetable = {
                 mode: 'dates',
                 dates_enabled: true,
@@ -255,6 +299,7 @@ export default {
 
             this.copy(this.reminder, reminder)
             this.reminder.id = undefined
+            if (!this.reminder.record_params) this.reminder.record_params = {}
 
             this.reminder.attach_date = moment().format('YYYY-MM-DD')
             let len = 7
@@ -287,6 +332,7 @@ export default {
             this.show_button = true
             this.reminder = reminder
             this.reminder.date = new Date(this.reminder.date)
+            if (!this.reminder.record_params) this.reminder.record_params = {}
 
             this.reminder.timetable.attach_date = this.reminder.attach_date
             this.reminder.timetable.detach_date = this.reminder.detach_date

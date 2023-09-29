@@ -57,7 +57,7 @@
 
         <div v-if="timetable.mode === 'dates'">
             <hr>
-
+            <i>Напоминания будут отправляться в выбранные даты.</i>
             <div class="row form-group" v-for="(timepoint, index) in timetable.points"
                  :key="'timepoint_' + index">
                 <div class="col-md-4">
@@ -86,7 +86,8 @@
             </form-group48>
             <div v-if="timetable.detach_date_enabled">
                 <form-group48 title="Дата отмены">
-                    <date-picker v-model="timetable.detach_date" lang="ru" value-type="YYYY-MM-DD"></date-picker>
+                    <date-picker v-model="timetable.detach_date" lang="ru"
+                                 format="DD.MM.YYYY" value-type="YYYY-MM-DD"></date-picker>
                 </form-group48>
             </div>
         </div>
