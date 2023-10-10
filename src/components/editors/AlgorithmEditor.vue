@@ -255,7 +255,7 @@ export default {
         remove_common_condition: function (algorithm, index) {
             algorithm.common_conditions.splice(index, 1);
         },
-        duplicate_common_condition: function(algorithm, index) {
+        duplicate_common_condition: function (algorithm, index) {
             let tmp = this.create_condition()
             this.copy(tmp, algorithm.common_conditions[index])
             tmp.uid = this.uuidv4()
@@ -415,13 +415,13 @@ export default {
             }
 
             this.algorithm.steps.forEach(step => {
-                step.conditions.forEach(condition => {
+                if (step.timeout_actions) {
+                    step.timeout_actions = step.timeout_actions.map(prepare_action)
+                } else {
+                    step.timeout_actions = []
+                }
 
-                    if (step.timeout_actions) {
-                        step.timeout_actions = step.timeout_actions.map(prepare_action)
-                    } else {
-                        step.timeout_actions = []
-                    }
+                step.conditions.forEach(condition => {
 
                     condition.criteria = condition.criteria.map((L) => L.map(prepare_criteria))
                     condition.positive_actions = condition.positive_actions.map(prepare_action)
