@@ -18,6 +18,7 @@ from managers.FormManager import FormManager
 from managers.HookManager import HookManager
 from managers.Manager import Manager
 from managers.MedicineManager import MedicineManager
+from managers.ReminderManager import ReminderManager
 from models import Algorithm
 
 
@@ -683,6 +684,7 @@ class AlgorithmManager(Manager):
             form_manager = FormManager(self.medsenger_api, self.db)
             contract_manager = ContractManager(self.medsenger_api, self.db)
             medicine_manager = MedicineManager(self.medsenger_api, self.db)
+            reminder_manager = ReminderManager(self.medsenger_api, self.db)
             try:
                 exec(action['params']['code'])
             except Exception as e:

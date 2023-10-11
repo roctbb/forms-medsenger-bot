@@ -21,7 +21,7 @@ class ReminderManager(Manager):
 
         return reminder
 
-    def attach(self, template_id, contract):
+    def attach(self, template_id, contract, dates):
         reminder = self.get(template_id)
 
         if reminder:
@@ -29,6 +29,13 @@ class ReminderManager(Manager):
             new_reminder.contract_id = contract.id
             new_reminder.patient_id = contract.patient.id
             new_reminder.attach_date = datetime.now()
+
+            if dates:
+                new_reminder.timetable = {
+                    "mode": "dates",
+                    "points": [{"date": d} for d in dates],
+                    "dates_enabled": True
+                }
 
             self.db.session.add(new_reminder)
             self.__commit__()
