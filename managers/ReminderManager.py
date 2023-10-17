@@ -21,7 +21,7 @@ class ReminderManager(Manager):
 
         return reminder
 
-    def attach(self, template_id, contract, dates):
+    def attach(self, template_id, contract, dates=None):
         reminder = self.get(template_id)
 
         if reminder:
