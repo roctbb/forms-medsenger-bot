@@ -841,6 +841,24 @@ class AlgorithmManager(Manager):
 
         return fired, has_message_to_patient
 
+    def set_params(self, contract, params):
+        def update_condition(condition):
+            for block_index, block in enumerate(condition['criteria']):
+                for criteria_index, criteria in enumerate(block):
+                    if criteria.get('ask_value'):
+                        value_code = criteria.get('value_name')
+                        if value_code and value_code in params:
+                            criteria["value"] = params[value_code]
+
+        for algorithm in contract.algorithms:
+            for step_index, step in enumerate(algorithm.steps):
+                for condition_index, condition in enumerate(step['conditions']):
+                    update_condition(condition)
+
+            if algorithm.common_conditions:
+                for condition_index, condition in enumerate(algorithm.common_conditions):
+                    update_condition(condition)
+
     def search_params(self, contract):
         params = {}
 

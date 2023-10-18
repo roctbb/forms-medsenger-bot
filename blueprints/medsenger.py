@@ -77,6 +77,9 @@ def order(data):
     if data['order'] == 'detach_algorithm':
         algorithm_manager.detach(data['params'].get('template_id'), contract)
         return "ok"
+    if data['order'] == 'set_params':
+        algorithm_manager.set_params(contract, data['params'])
+        return "ok"
 
     return "not found"
 
