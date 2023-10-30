@@ -7,7 +7,8 @@
         <div v-if="medicines.length || patient_medicines.length">
             <h4>Назначения врача</h4>
             <div class="row">
-                <card v-for="(medicine, i) in medicines" :key="medicine.id" :image="images.medicine" class="col-lg-4 col-md-4">
+                <card v-for="(medicine, i) in medicines" :key="medicine.id" :image="images.medicine"
+                      class="col-lg-4 col-md-4">
                     <h5>{{ medicine.title }}</h5>
                     <small><strong>Назначенная дозировка: </strong> {{
                             medicine.dose ? medicine.dose : '-'
@@ -30,7 +31,8 @@
             </div>
             <h4>Другие препараты</h4>
             <div class="row">
-                <card v-for="(medicine, i) in patient_medicines" :key="medicine.id" :image="images.medicine" class="col-lg-4 col-md-4">
+                <card v-for="(medicine, i) in patient_medicines" :key="medicine.id" :image="images.medicine"
+                      class="col-lg-4 col-md-4">
                     <h5>{{ medicine.title }}</h5>
                     <small><strong>Дозировка: </strong> {{ medicine.dose ? medicine.dose : '-' }}</small><br>
                     <small><i>{{ tt_description(medicine.timetable) }}</i></small><br>
@@ -61,9 +63,11 @@
 
         <card>
             <form-group48 title="Название препарата" required="true">
-                <input class="form-control form-control-sm"
-                       :class="validated && empty(custom_medicine.title) ? 'is-invalid' : ''"
-                       v-model="custom_medicine.title"/>
+                <autocomplete :search="search_hil" placeholder="Поиск лекарств"
+                              :defaultValue="custom_medicine.title"
+                              aria-label="Введите название препарата" :getResultValue="m => m.title"
+                              auto-select
+                              @submit="sub_er"></autocomplete>
             </form-group48>
 
             <form-group48 :title="mode == 'add-record' ? 'Принятая доза' : 'Дозировка'" required="true">
@@ -94,10 +98,11 @@ import FormGroup48 from "../common/FormGroup-4-8";
 import ErrorBlock from "../common/ErrorBlock";
 import TimetableEditor from "../editors/parts/TimetableEditor";
 import * as moment from "moment/moment";
+import Autocomplete from "@trevoreyre/autocomplete-vue";
 
 export default {
     name: "MedicineList",
-    components: {TimetableEditor, ErrorBlock, FormGroup48, Card},
+    components: {TimetableEditor, ErrorBlock, FormGroup48, Card, Autocomplete},
     props: {
         data: {
             required: false
@@ -117,6 +122,28 @@ export default {
         }
     },
     methods: {
+        search_hil: function (input) {
+            this.custom_medicine.title = input
+
+            return new Promise((resolve, reject) => {
+                const url = `https://medicines.services.ai.medsenger.ru/search?name=${encodeURI(input)}`
+
+                if (input.length < 3) {
+                    resolve([])
+                }
+
+                this.axios.get(url).then(response => {
+                    resolve(response.data);
+                }).catch(error => {
+                    console.log("error", error);
+                    reject();
+                })
+
+            })
+        },
+        sub_er: function (custom_medicine) {
+            this.custom_medicine.title = custom_medicine.title
+        },
         disable_notifications: function (medicine) {
             this.$confirm({
                 message: `Вы уверены, что хотите отключить напоминания для препарата ${medicine.title}?`,
@@ -206,6 +233,7 @@ export default {
             }
         },
         custom_save: function () {
+            console.log(this.custom_medicine.title, this.custom_medicine.dose)
             this.errors = []
             this.validated = true
             if (this.empty(this.custom_medicine.title) || this.empty(this.custom_medicine.dose) ||
