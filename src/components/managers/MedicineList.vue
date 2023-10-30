@@ -233,7 +233,6 @@ export default {
             }
         },
         custom_save: function () {
-            console.log(this.custom_medicine.title, this.custom_medicine.dose)
             this.errors = []
             this.validated = true
             if (this.empty(this.custom_medicine.title) || this.empty(this.custom_medicine.dose) ||
