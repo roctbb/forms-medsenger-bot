@@ -172,7 +172,7 @@ export default {
             this.medicine.medicine_database_id = undefined
 
             return new Promise((resolve, reject) => {
-                const url = `https://medicines.services.ai.medsenger.ru/search?name=${encodeURI(input)}`
+                const url = `https://medicines.services.ai.medsenger.ru/search?title=${encodeURI(input)}`
 
                 if (input.length < 3) {
                     resolve([])
