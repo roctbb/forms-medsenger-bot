@@ -18,6 +18,7 @@ class MedicineManager(Manager):
             try:
                 answer = requests.get(MEDICINE_CATALOG_URL + '/search?title=' + medicine.title)
                 atx = set(map(lambda m: m['atx'], answer.json()))
+                print(atx)
 
                 if len(atx) == 1:
                     medicine.atx = atx.pop()
