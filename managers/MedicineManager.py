@@ -21,8 +21,8 @@ class MedicineManager(Manager):
 
                 if len(atx) == 1:
                     medicine.atx = atx.pop()
-            except:
-                pass
+            except Exception as e:
+                print(e)
 
     def detach(self, template_id, contract):
         medicines = list(filter(lambda x: x.template_id == template_id, contract.patient.medicines))
