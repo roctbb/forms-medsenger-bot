@@ -128,7 +128,7 @@ export default {
             return new Promise((resolve, reject) => {
                 const url = `https://medicines.services.ai.medsenger.ru/search?title=${encodeURI(input)}`
 
-                if (input.length < 3) {
+                if (input.length < 2) {
                     resolve([])
                 }
 
