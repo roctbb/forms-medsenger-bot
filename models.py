@@ -54,9 +54,11 @@ class Patient(db.Model):
             "month_compliance": self.count_month_compliance(),
             "contracts": [contract.as_dict() for contract in self.contracts],
             "forms": [form.as_dict() for form in self.forms],
-            "examinations": [examination.as_dict() for examination in sorted(self.examinations, key=lambda k: k.deadline_date) if
+            "examinations": [examination.as_dict() for examination in
+                             sorted(self.examinations, key=lambda k: k.deadline_date) if
                              examination.deadline_date >= today],
-            "expired_examinations": [examination.as_dict() for examination in sorted(self.examinations, key=lambda k: k.deadline_date) if
+            "expired_examinations": [examination.as_dict() for examination in
+                                     sorted(self.examinations, key=lambda k: k.deadline_date) if
                                      examination.deadline_date < today],
             "medicines": sorted([medicine.as_dict() for medicine in self.medicines if
                                  medicine.canceled_at is None and not medicine.is_created_by_patient],
@@ -70,8 +72,9 @@ class Patient(db.Model):
                                            medicine.canceled_at is not None and medicine.is_created_by_patient],
             "reminders": [reminder.as_dict() for reminder in sorted(self.reminders, key=lambda k: k.attach_date) if
                           reminder.canceled_at is None],
-            "old_reminders": [reminder.as_dict() for reminder in sorted(self.reminders, key=lambda k: k.attach_date, reverse=True) if
-                          reminder.canceled_at is not None],
+            "old_reminders": [reminder.as_dict() for reminder in
+                              sorted(self.reminders, key=lambda k: k.attach_date, reverse=True) if
+                              reminder.canceled_at is not None],
             "algorithms": [algorithm.as_dict() for algorithm in self.algorithms]
         }
 
@@ -167,6 +170,8 @@ class Medicine(db.Model, Compliance):
     clinics = db.Column(db.JSON, nullable=True)
     exclude_clinics = db.Column(db.JSON, nullable=True)
     template_category = db.Column(db.String(512), default="Общее", nullable=True)
+
+    atx = db.Column(db.String(128), nullable=True)
 
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=True)
     contract_id = db.Column(db.Integer, db.ForeignKey('contract.id', ondelete="CASCADE"), nullable=True)
@@ -269,6 +274,7 @@ class Medicine(db.Model, Compliance):
         new_medicine.rules = self.rules
         new_medicine.dose = self.dose
         new_medicine.verify_dose = self.verify_dose
+        new_medicine.atx = self.atx
 
         new_medicine.timetable = self.timetable
         new_medicine.warning_days = self.warning_days
