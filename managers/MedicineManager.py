@@ -18,7 +18,6 @@ class MedicineManager(Manager):
             try:
                 answer = requests.get(MEDICINE_CATALOG_URL + '/search?title=' + medicine.title)
                 atx = set(map(lambda m: m['atx'], answer.json()))
-                print(atx)
 
                 if len(atx) == 1:
                     medicine.atx = atx.pop()
@@ -27,6 +26,14 @@ class MedicineManager(Manager):
 
     def detach(self, template_id, contract):
         medicines = list(filter(lambda x: x.template_id == template_id, contract.patient.medicines))
+
+        for medicine in medicines:
+            medicine.canceled_at = datetime.now()
+
+        self.__commit__()
+
+    def detach_by_atx(self, atx, contract):
+        medicines = list(filter(lambda x: x.atx == atx, contract.patient.medicines))
 
         for medicine in medicines:
             medicine.canceled_at = datetime.now()
@@ -187,7 +194,7 @@ class MedicineManager(Manager):
         with app.app_context():
             medicines = list(Medicine.query.filter(
                 (Medicine.detach_date == datetime.now().date()) & (Medicine.is_template == False) & (
-                            Medicine.canceled_at == None)).all())
+                        Medicine.canceled_at == None)).all())
 
             for medicine in medicines:
                 self.medsenger_api.send_message(medicine.contract_id,

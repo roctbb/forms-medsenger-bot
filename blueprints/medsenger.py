@@ -62,6 +62,13 @@ def order(data):
         form_manager.detach(data['params'].get('template_id'), contract)
         return "ok"
 
+    if data['order'] == 'detach_medicine':
+        if data['params'].get('template_id'):
+            medicine_manager.detach(data['params'].get('template_id'), contract)
+        if data['params'].get('atx'):
+            medicine_manager.detach_by_atx(data['params'].get('atx'), contract)
+        return "ok"
+
     if data['order'] == 'remove_form':
         form_manager.remove(data['params'].get('id'), contract)
         return "ok"
