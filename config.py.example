@@ -17,3 +17,4 @@ DYNAMIC_CACHE = False
 RECORDS_AGENT_ID = 14
 USE_GRPC = False
 GRPC_HOST = None
+MEDICINE_CATALOG_URL = 'https://medicines.services.ai.medsenger.ru/'

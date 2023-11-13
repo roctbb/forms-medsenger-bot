@@ -318,7 +318,7 @@ class FormManager(Manager):
                             "question_text": field.get('text'),
                             "answer": answer,
                             "type": field['type'],
-                            "medicine_id":  medicine.get('id'),
+                            "medicine_id": medicine.get('id'),
                             "dose": medicine.get('dose')
                         }
                         packet.append(('medicine', medicine['title'], params))
@@ -518,10 +518,10 @@ class FormManager(Manager):
             form.fields = data.get('fields')
             form.has_integral_evaluation = bool(data.get('has_integral_evaluation'))
             form.integral_evaluation = data.get('integral_evaluation')
-            form.categories = clear_categories(data.get('categories'))
             form.template_id = data.get('template_id')
             form.warning_days = data.get('warning_days')
             form.instant_report = bool(data.get('instant_report'))
+            form.categories = '|'.join(set(filter(lambda x: x, map(lambda f: f.get('category'), form.fields))))
 
             if data.get('is_template'):
                 form.is_template = True

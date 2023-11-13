@@ -97,8 +97,8 @@
             <div class="container">
                 <div v-if="show_medicine_description">
                     <div v-for="medicine_field in medicine_info_fields">
-                        <form-group48 v-if="database_medicine_description[medicine_field]" :title="ru_ru[medicine_field]">
-                            {{ database_medicine_description[medicine_field] }}
+                        <form-group48 v-if="database_medicine_description[medicine_field]" :title="ru_ru[medicine_field]" v-html="">
+                            <div v-html="database_medicine_description[medicine_field]"></div>
                         </form-group48>
                         <hr/>
                     </div>
@@ -172,9 +172,9 @@ export default {
             this.medicine.medicine_database_id = undefined
 
             return new Promise((resolve, reject) => {
-                const url = `https://medicines.services.ai.medsenger.ru/search?name=${encodeURI(input)}`
+                const url = `https://medicines.services.ai.medsenger.ru/search?title=${encodeURI(input)}`
 
-                if (input.length < 3) {
+                if (input.length < 2) {
                     resolve([])
                 }
 
@@ -333,7 +333,7 @@ export default {
                 "atx": "ATX-код:",
                 "pharm": "Отпускается:",
                 "influence": "Действие:",
-                "hepata": "Противопоказания связаные с печенью:",
+                "hepato": "Противопоказания связаные с печенью:",
                 "old": "Применение пожилым:",
                 "storage_conditions": "Условия хранения:",
                 "child": "Применения детям:",

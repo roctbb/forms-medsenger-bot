@@ -5,14 +5,35 @@ from config import DYNAMIC_CACHE
 from helpers import log
 from managers.Manager import Manager
 from models import Patient, Contract, Medicine
+import requests
+from config import MEDICINE_CATALOG_URL
 
 
 class MedicineManager(Manager):
     def __init__(self, *args):
         super(MedicineManager, self).__init__(*args)
 
+    def fill_atx(self, medicine):
+        if not medicine.atx:
+            try:
+                answer = requests.get(MEDICINE_CATALOG_URL + '/search?title=' + medicine.title)
+                atx = set(map(lambda m: m['atx'], answer.json()))
+
+                if len(atx) == 1:
+                    medicine.atx = atx.pop()
+            except Exception as e:
+                print(e)
+
     def detach(self, template_id, contract):
         medicines = list(filter(lambda x: x.template_id == template_id, contract.patient.medicines))
+
+        for medicine in medicines:
+            medicine.canceled_at = datetime.now()
+
+        self.__commit__()
+
+    def detach_by_atx(self, atx, contract):
+        medicines = list(filter(lambda x: x.atx == atx, contract.patient.medicines))
 
         for medicine in medicines:
             medicine.canceled_at = datetime.now()
@@ -126,7 +147,8 @@ class MedicineManager(Manager):
             return None
 
         if medicine.contract_id:
-            self.medsenger_api.send_message(contract.id, "Врач возобновил препарат {}.".format(medicine.get_description()))
+            self.medsenger_api.send_message(contract.id,
+                                            "Врач возобновил препарат {}.".format(medicine.get_description()))
             params = {
                 'obj_id': medicine.id,
                 'action': 'resume',
@@ -151,7 +173,8 @@ class MedicineManager(Manager):
 
         if medicine.contract_id:
             if not by_patient:
-                self.medsenger_api.send_message(contract.id, "Врач отменил препарат {}.".format(medicine.get_description()))
+                self.medsenger_api.send_message(contract.id,
+                                                "Врач отменил препарат {}.".format(medicine.get_description()))
             params = {
                 'obj_id': medicine.id,
                 'action': 'cancel',
@@ -170,10 +193,12 @@ class MedicineManager(Manager):
     def check_detach_dates(self, app):
         with app.app_context():
             medicines = list(Medicine.query.filter(
-                (Medicine.detach_date == datetime.now().date()) & (Medicine.is_template == False) & (Medicine.canceled_at == None)).all())
+                (Medicine.detach_date == datetime.now().date()) & (Medicine.is_template == False) & (
+                        Medicine.canceled_at == None)).all())
 
             for medicine in medicines:
-                self.medsenger_api.send_message(medicine.contract_id,"Врач отменил препарат {}.".format(medicine.get_description()))
+                self.medsenger_api.send_message(medicine.contract_id,
+                                                "Врач отменил препарат {}.".format(medicine.get_description()))
                 params = {
                     'obj_id': medicine.id,
                     'action': 'cancel',
@@ -302,11 +327,14 @@ class MedicineManager(Manager):
                                                         " Мы будем автоматически присылать напоминания о приемах." if
                                                         medicine.timetable['mode'] != "manual" else ''))
                 action = 'Назначен препарат' if is_new else 'Изменены параметры приема препарата'
-                self.medsenger_api.add_record(contract.id, 'doctor_action' if not data.get('edited_by_patient') else 'action',
+                self.medsenger_api.add_record(contract.id,
+                                              'doctor_action' if not data.get('edited_by_patient') else 'action',
                                               '{} "{}".'.format(action, medicine.title), params=params)
 
             if not medicine_id:
                 self.db.session.add(medicine)
+
+            self.fill_atx(medicine)
             self.__commit__()
 
             return medicine
