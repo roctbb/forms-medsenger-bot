@@ -419,10 +419,9 @@ class AlgorithmManager(Manager):
 
                 for rvalue in right_values:
                     modifier = 0
-                    multiplier = 1
+                    multiplier = criteria.get('multiplier', 1) if criteria.get('multiplier', 1) else 1
                     if criteria.get('right_mode') != 'value':
                         modifier = criteria.get('value', 0)
-                        multiplier = criteria.get('multiplier', 1)
                     result = self.check_values(lvalue, rvalue, criteria['sign'], modifier, multiplier)
 
                     if result:

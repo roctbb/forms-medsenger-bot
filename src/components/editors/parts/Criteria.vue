@@ -178,7 +178,7 @@
                     <small class="text-muted" v-else>модификатор</small>
                 </div>
                 <div class="col-md-1"
-                     v-if="!['time', 'init', 'step_init'].includes(criteria.left_mode) && criteria.right_mode != 'value'">
+                     v-if="!['time', 'init', 'step_init'].includes(criteria.left_mode)">
 
                     <input class="form-control form-control-sm"
                            :class="this.save_clicked && empty(criteria.multiplier) ? 'is-invalid' : ''"
