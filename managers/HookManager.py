@@ -1,4 +1,5 @@
 from managers.Manager import Manager
+from tasks import threader
 
 
 class HookManager(Manager):
@@ -23,9 +24,10 @@ class HookManager(Manager):
         categories_for_action = alg_categories.difference(current_categories)
 
         if action == "add":
-            self.medsenger_api.add_hooks(algorithm.contract_id, list(categories_for_action))
+            if categories_for_action:
+                threader.async_add_hooks.delay(algorithm.contract_id, list(categories_for_action))
         else:
-            self.medsenger_api.remove_hooks(algorithm.contract_id, list(categories_for_action))
+            threader.async_remove_hooks.delay(algorithm.contract_id, list(categories_for_action))
 
     def _get_current_categories_for_patient(self, patient, discard_id=None):
         current_categories = set()
