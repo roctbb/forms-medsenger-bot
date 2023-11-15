@@ -69,11 +69,13 @@ class FormManager(Manager):
         if form:
             print(gts() + f"cloning form {template_id} from contract {contract.id}")
             new_form = form.clone()
+            print(gts() + f"cloning form {template_id} done!")
             new_form.contract_id = contract.id
             new_form.patient_id = contract.patient.id
 
             if "times" in custom_params and custom_params.get('times', None) != None:
                 try:
+                    print(gts() + f"generating timetable {template_id}")
                     new_form.timetable = generate_timetable(9, 21, int(custom_params.get('times')))
                 except Exception as e:
                     log(e, False)
@@ -94,6 +96,7 @@ class FormManager(Manager):
                 print(gts() + f"init message form {template_id} from contract {contract.id}")
                 self.medsenger_api.send_message(form.contract_id, form.init_text, only_patient=True)
 
+            print(gts() + f"saving form to database {template_id}")
             self.db.session.add(new_form)
             self.__commit__()
 
