@@ -12,7 +12,7 @@ from config import DYNAMIC_CACHE
 from sqlalchemy.orm.attributes import flag_modified, flag_dirty
 
 from helpers import log, generate_event_description, DATACACHE, timezone_now, localize, fullfill_message, \
-    clear_categories
+    clear_categories, gts
 from managers.ContractsManager import ContractManager
 from managers.FormManager import FormManager
 from managers.HookManager import HookManager
@@ -51,7 +51,7 @@ class AlgorithmManager(Manager):
                                       'Отключены алгоритмы', params=params)
 
     def attach(self, template_id, contract, setup=None):
-        print(f"algorithm template {template_id}: attaching")
+        print(gts() + f"algorithm template {template_id}: attaching")
         algorithm = self.get(template_id)
 
         if algorithm:
@@ -92,16 +92,16 @@ class AlgorithmManager(Manager):
             self.__commit__()
             self.db.session.refresh(new_algorithm)
 
-            print(f"algorithm template {template_id}: setting step")
+            print(gts() + f"algorithm template {template_id}: setting step")
             self.change_step(new_algorithm, new_algorithm.initial_step)
-            print(f"algorithm template {template_id}: check inits")
+            print(gts() + f"algorithm template {template_id}: check inits")
             self.check_inits(new_algorithm, contract)
-            print(f"algorithm template {template_id}: check init timeouts")
+            print(gts() + f"algorithm template {template_id}: check init timeouts")
             self.check_init_timeouts(new_algorithm, contract)
 
             self.__commit__()
             self.db.session.refresh(new_algorithm)
-            print(f"algorithm template {template_id}: creating hooks")
+            print(gts() + f"algorithm template {template_id}: creating hooks")
             self.__hook_manager.create_hooks_after_creation(new_algorithm)
 
             params = {
@@ -111,11 +111,11 @@ class AlgorithmManager(Manager):
                 'params': new_algorithm.get_params()
             }
 
-            print(f"algorithm template {template_id}: scheduling record")
+            print(gts() + f"algorithm template {template_id}: scheduling record")
             threader.async_record.delay(contract.id, 'doctor_action',
                                           'Подключен алгоритм "{}"'.format(new_algorithm.title), params=params)
 
-            print(f"algorithm template {template_id}: ending")
+            print(gts() + f"algorithm template {template_id}: ending")
             return True
         else:
             return False
