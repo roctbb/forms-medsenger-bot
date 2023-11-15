@@ -280,7 +280,7 @@ def remove(data):
 @medsenger_blueprint.route('/actions', methods=['POST'])
 @verify_request(contract_manager, 'backend')
 def actions(data):
-    print("asked for actions")
+    print(f"asked for actions for contract {data.get('contract_id')}")
     contract = contract_manager.get(data.get('contract_id'))
     forms = filter(lambda f: f.show_button, contract.forms)
 
@@ -293,6 +293,7 @@ def actions(data):
 @medsenger_blueprint.route('/params', methods=['POST'])
 @verify_request(contract_manager, 'backend')
 def params(data):
+    print(f"asked for actions for params {data.get('contract_id')}")
     contract = contract_manager.get(data.get('contract_id'))
     return jsonify(algorithm_manager.search_params(contract))
 
@@ -306,6 +307,7 @@ def get_params(args, data, contract):
 @medsenger_blueprint.route('/compliance', methods=['POST'])
 @verify_request(contract_manager, 'backend')
 def compliance(data):
+    print(f"asked for compliance for params {data.get('contract_id')}")
     contract = contract_manager.get(data.get('contract_id'))
     sent, done = contract.patient.count_week_compliance()
     return jsonify({"sent": sent, "done": done})
