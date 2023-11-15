@@ -81,8 +81,9 @@ class MedicineManager(Manager):
                 'object_type': 'medicine',
                 'description': new_medicine.get_description(True, False)
             }
-            self.medsenger_api.add_record(contract.id, 'doctor_action',
-                                          'Назначен препарат "{}".'.format(new_medicine.title), params=params)
+
+            threader.async_record.delay(contract.id, 'doctor_action',
+                                        'Назначен препарат "{}".'.format(new_medicine.title), params=params)
 
             return medicine
         else:
@@ -152,8 +153,9 @@ class MedicineManager(Manager):
                 'object_type': 'medicine',
                 'description': medicine.get_description(True, False)
             }
-            self.medsenger_api.add_record(contract.id, 'doctor_action',
-                                          'Возобновлен препарат "{}".'.format(medicine.title), params=params)
+
+            threader.async_record.delay(contract.id, 'doctor_action',
+                                        'Возобновлен препарат "{}".'.format(medicine.title), params=params)
 
         medicine.canceled_at = None
 
@@ -178,8 +180,8 @@ class MedicineManager(Manager):
                 'object_type': 'medicine',
                 'description': medicine.get_description(True, False)
             }
-            self.medsenger_api.add_record(contract.id, 'doctor_action' if not by_patient else 'action',
-                                          'Отменен препарат "{}".'.format(medicine.title), params=params)
+            threader.async_record.delay(contract.id, 'doctor_action' if not by_patient else 'action',
+                                        'Отменен препарат "{}".'.format(medicine.title), params=params)
 
         medicine.canceled_at = datetime.now()
 
@@ -202,7 +204,8 @@ class MedicineManager(Manager):
                     'object_type': 'medicine',
                     'description': medicine.get_description(True, False)
                 }
-                self.medsenger_api.add_record(medicine.contract_id, 'doctor_action',
+
+                threader.async_record.delay(medicine.contract_id, 'doctor_action',
                                               'Отменен препарат "{}".'.format(medicine.title), params=params)
 
                 record = {
@@ -324,9 +327,9 @@ class MedicineManager(Manager):
                                                         " Мы будем автоматически присылать напоминания о приемах." if
                                                         medicine.timetable['mode'] != "manual" else ''))
                 action = 'Назначен препарат' if is_new else 'Изменены параметры приема препарата'
-                self.medsenger_api.add_record(contract.id,
-                                              'doctor_action' if not data.get('edited_by_patient') else 'action',
-                                              '{} "{}".'.format(action, medicine.title), params=params)
+                threader.async_record.delay(contract.id,
+                                            'doctor_action' if not data.get('edited_by_patient') else 'action',
+                                            '{} "{}".'.format(action, medicine.title), params=params)
 
             if not medicine_id:
                 self.db.session.add(medicine)

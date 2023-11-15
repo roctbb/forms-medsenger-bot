@@ -47,7 +47,7 @@ class AlgorithmManager(Manager):
             'algorithm_titles': list(map(lambda a: a.title, algorithms))
         }
 
-        self.medsenger_api.add_record(contract.id, 'doctor_action',
+        threader.async_record.delay(contract.id, 'doctor_action',
                                       'Отключены алгоритмы', params=params)
 
     def attach(self, template_id, contract, setup=None):
@@ -106,8 +106,10 @@ class AlgorithmManager(Manager):
                 'object_type': 'algorithm',
                 'params': new_algorithm.get_params()
             }
-            self.medsenger_api.add_record(contract.id, 'doctor_action',
+
+            threader.async_record.delay(contract.id, 'doctor_action',
                                           'Подключен алгоритм "{}"'.format(new_algorithm.title), params=params)
+
 
             return True
         else:
@@ -123,7 +125,8 @@ class AlgorithmManager(Manager):
             'action': 'clear',
             'object_type': 'algorithm'
         }
-        self.medsenger_api.add_record(contract.id, 'doctor_action',
+
+        threader.async_record.delay(contract.id, 'doctor_action',
                                       'Отключены все алгоритмы.', params=params)
 
         return True
@@ -146,8 +149,7 @@ class AlgorithmManager(Manager):
             'action': 'detach',
             'object_type': 'algorithm'
         }
-
-        self.medsenger_api.add_record(contract.id, 'doctor_action',
+        threader.async_record.delay(contract.id, 'doctor_action',
                                       'Отключен алгоритм "{}".'.format(algorithm.title), params=params)
 
         return id
@@ -1010,7 +1012,8 @@ class AlgorithmManager(Manager):
                     'object_type': 'algorithm',
                     'algorithm_params': algorithm.get_params()
                 }
-                self.medsenger_api.add_record(contract.id, 'doctor_action',
+
+                threader.async_record.delay(contract.id, 'doctor_action',
                                               '{} алгоритм "{}".'.format('Изменен' if algorithm_id else 'Подключен',
                                                                          algorithm.title), params=params)
 

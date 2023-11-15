@@ -45,7 +45,8 @@ class FormManager(Manager):
                 'object_type': 'form',
                 'description': form.doctor_description
             }
-            self.medsenger_api.add_record(contract.id, 'doctor_action',
+
+            threader.async_record.delay(contract.id, 'doctor_action',
                                           'Отменен опросник "{}".'.format(form.title), params=params)
 
         return id
@@ -101,7 +102,8 @@ class FormManager(Manager):
                 'description': form.doctor_description,
                 'template_id': template_id
             }
-            self.medsenger_api.add_record(contract.id, 'doctor_action',
+
+            threader.async_record.delay(contract.id, 'doctor_action',
                                           'Назначен опросник "{}".'.format(form.title), params=params)
 
             return new_form
@@ -558,7 +560,7 @@ class FormManager(Manager):
                     'object_type': 'form',
                     'description': form.doctor_description
                 }
-                self.medsenger_api.add_record(contract.id, 'doctor_action',
+                threader.async_record.delay(contract.id, 'doctor_action',
                                               'Назначен опросник "{}".'.format(form.title), params=params)
 
             return form

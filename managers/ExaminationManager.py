@@ -5,7 +5,7 @@ from config import DYNAMIC_CACHE
 from helpers import log
 from managers.Manager import Manager
 from models import MedicalExamination, MedicalExaminationGroup
-
+from tasks import threader
 
 class ExaminationManager(Manager):
     def __init__(self, *args):
@@ -67,7 +67,8 @@ class ExaminationManager(Manager):
                 'object_type': 'examination',
                 'description': new_examination.doctor_description
             }
-            self.medsenger_api.add_record(contract.id, 'doctor_action',
+
+            threader.async_record.delay(contract.id, 'doctor_action',
                                           'Назначено обследование "{}".'.format(new_examination.title), params=params)
 
             return new_examination
@@ -113,7 +114,7 @@ class ExaminationManager(Manager):
                 'object_type': 'examination',
                 'description': examination.doctor_description
             }
-            self.medsenger_api.add_record(contract.id, 'doctor_action',
+            threader.async_record.delay(contract.id, 'doctor_action',
                                           'Отменено обследование "{}".'.format(examination.title), params=params)
 
         self.db.session.delete(examination)
@@ -202,7 +203,8 @@ class ExaminationManager(Manager):
                                                             examination.deadline_date.strftime('%d.%m.%Y')))
 
                 action = 'Назначено обследование' if is_new else 'Изменены параметры обследования'
-                self.medsenger_api.add_record(contract.id, 'doctor_action',
+
+                threader.async_record.delay(contract.id, 'doctor_action',
                                               '{} "{}".'.format(action, examination.title), params=params)
 
             if not examination_id:
