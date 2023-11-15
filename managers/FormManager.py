@@ -23,10 +23,8 @@ class FormManager(Manager):
         return Form.query.filter_by(is_template=True).all()
 
     def clear(self, contract):
-        print(gts() + f"clearing forms from contract {contract.id}")
         Form.query.filter_by(contract_id=contract.id).delete()
         self.__commit__()
-        print(gts() + f"clearing forms from contract {contract.id} done")
         return True
 
     def remove(self, id, contract):
@@ -62,53 +60,41 @@ class FormManager(Manager):
         self.__commit__()
 
     def attach(self, template_id, contract, custom_params=dict()):
-        print(gts() + f"attaching form template_id {template_id} from contract {contract.id}")
 
         form = self.get(template_id)
 
         if form:
-            print(gts() + f"cloning form {template_id} from contract {contract.id}")
             new_form = form.clone()
-            print(gts() + f"cloning form {template_id} done!")
             new_form.contract_id = contract.id
-            print(gts() + f"loading patient {template_id}")
             new_form.patient_id = contract.patient.id
-            print(gts() + f"loading patient done {template_id}")
 
             if "times" in custom_params and custom_params.get('times', None) != None:
                 try:
-                    print(gts() + f"generating timetable {template_id}")
                     new_form.timetable = generate_timetable(9, 21, int(custom_params.get('times')))
                 except Exception as e:
                     log(e, False)
             else:
                 if "timetable" in custom_params and custom_params.get('timetable'):
                     try:
-                        print(gts() + f"taking timetable {template_id}")
                         new_form.timetable = custom_params.get('timetable')
                     except Exception as e:
                         log(e, False)
 
             if "message" in custom_params and custom_params.get('message'):
                 try:
-                    print(gts() + f"forming custom message {template_id}")
                     new_form.custom_text = new_form.custom_text + "\n\n" + custom_params.get('message')
                 except Exception as e:
                     log(e, False)
 
             if new_form.init_text:
-                print(gts() + f"init message form {template_id} from contract {contract.id}")
                 self.medsenger_api.send_message(form.contract_id, form.init_text, only_patient=True)
 
-            print(gts() + f"saving form to database {template_id}")
             self.db.session.add(new_form)
             self.__commit__()
 
-            print(gts() + f"form {template_id} saved from contract {contract.id}")
 
             if new_form.timetable.get('send_on_init'):
                 self.db.session.refresh(new_form)
-                print(gts() + f"running form {template_id} from contract {contract.id}")
                 self.run(new_form)
 
             params = {
@@ -122,7 +108,6 @@ class FormManager(Manager):
             threader.async_record.delay(contract.id, 'doctor_action',
                                           'Назначен опросник "{}".'.format(form.title), params=params)
 
-            print(gts() + f"attaching form {template_id} done for contract {contract.id}")
             return new_form
         else:
             return False

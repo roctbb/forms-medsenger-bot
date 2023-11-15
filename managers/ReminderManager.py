@@ -22,7 +22,6 @@ class ReminderManager(Manager):
         return reminder
 
     def attach(self, template_id, contract, dates=None):
-        print(gts() + f"attaching reminder contract {contract.id} with template_id {template_id}")
         reminder = self.get(template_id)
 
         if reminder:
@@ -41,7 +40,6 @@ class ReminderManager(Manager):
             self.db.session.add(new_reminder)
             self.__commit__()
 
-            print(gts() + f"attaching reminder contract {contract.id} with template_id {template_id} done")
 
             return reminder
         else:

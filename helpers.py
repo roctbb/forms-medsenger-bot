@@ -158,7 +158,6 @@ def get_step(algorithm, step=None):
 
 
 def generate_timetable(start, end, times):
-    print(gts() + f"generating timetable with params {start} / {end} / {times}")
 
     if times < 1:
         return {

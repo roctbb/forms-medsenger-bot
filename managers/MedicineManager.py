@@ -133,10 +133,8 @@ class MedicineManager(Manager):
         return True
 
     def clear(self, contract):
-        print(gts() + f"clearing medicines from contract {contract.id}")
         Medicine.query.filter_by(contract_id=contract.id).delete()
         self.__commit__()
-        print(gts() + f"clearing medicines from contract {contract.id} done")
         return True
 
     def resume(self, id, contract):

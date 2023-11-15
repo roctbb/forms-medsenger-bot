@@ -51,7 +51,6 @@ class AlgorithmManager(Manager):
                                       'Отключены алгоритмы', params=params)
 
     def attach(self, template_id, contract, setup=None):
-        print(gts() + f"algorithm template {template_id}: attaching")
         algorithm = self.get(template_id)
 
         if algorithm:
@@ -92,16 +91,12 @@ class AlgorithmManager(Manager):
             self.__commit__()
             self.db.session.refresh(new_algorithm)
 
-            print(gts() + f"algorithm template {template_id}: setting step")
             self.change_step(new_algorithm, new_algorithm.initial_step)
-            print(gts() + f"algorithm template {template_id}: check inits")
             self.check_inits(new_algorithm, contract)
-            print(gts() + f"algorithm template {template_id}: check init timeouts")
             self.check_init_timeouts(new_algorithm, contract)
 
             self.__commit__()
             self.db.session.refresh(new_algorithm)
-            print(gts() + f"algorithm template {template_id}: creating hooks")
             self.__hook_manager.create_hooks_after_creation(new_algorithm)
 
             params = {
@@ -111,24 +106,17 @@ class AlgorithmManager(Manager):
                 'params': new_algorithm.get_params()
             }
 
-            print(gts() + f"algorithm template {template_id}: scheduling record")
             threader.async_record.delay(contract.id, 'doctor_action',
                                           'Подключен алгоритм "{}"'.format(new_algorithm.title), params=params)
 
-            print(gts() + f"algorithm template {template_id}: ending")
             return True
         else:
             return False
 
     def clear(self, contract):
-        print(gts() + f"clearing algorithms from contract {contract.id}")
         Algorithm.query.filter_by(contract_id=contract.id).delete()
         self.__commit__()
-        print(gts() + f"clearing algorithms from contract {contract.id} done")
-
-        print(gts() + f"removing hooks from contract {contract.id}")
         self.__hook_manager.clear_contract(contract)
-        print(gts() + f"removing hooks from contract {contract.id} done")
 
         params = {
             'action': 'clear',
