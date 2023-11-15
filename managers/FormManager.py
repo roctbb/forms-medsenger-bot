@@ -2,7 +2,7 @@ import json
 import time
 from copy import copy
 from datetime import datetime
-
+from tasks import threader
 from config import DYNAMIC_CACHE
 from helpers import log, clear_categories
 from managers.ContractsManager import ContractManager
@@ -136,7 +136,7 @@ class FormManager(Manager):
 
         result = self.medsenger_api.send_message(contract_id, text, action, action_name, True, False, True, deadline)
         # telepat speaker
-        self.medsenger_api.send_order(contract_id, "form", 26, form.as_dict())
+        threader.async_order.delay(contract_id, "form", 26, form.as_dict())
 
         if result:
             form.last_sent = datetime.now()

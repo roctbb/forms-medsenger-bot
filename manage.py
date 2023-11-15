@@ -1,8 +1,6 @@
-from celery import Celery
 from flask import Flask
 from flask_compress import Compress
 from flask_cors import CORS
-
 from models import db
 from flask_migrate import Migrate
 from sentry_sdk.integrations.flask import FlaskIntegration
@@ -15,7 +13,8 @@ from managers.ReminderManager import ReminderManager
 from managers.TimetableManager import TimetableManager
 from managers.MedicineTemplateManager import MedicineTemplateManager
 from managers.ExaminationManager import ExaminationManager
-from medsenger_api import AgentApiClient
+from medsenger_manager import medsenger_api
+from celery_manager import celery
 
 from config import *
 
@@ -39,14 +38,8 @@ db.init_app(app)
 
 migrate = Migrate(app, db)
 
-celery = Celery(
-    __name__,
-    broker="redis://127.0.0.1:6379/0",
-    backend="redis://127.0.0.1:6379/0"
-)
 
 
-medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG, use_grpc=USE_GRPC, grpc_host=GRPC_HOST, sentry_dsn=SENTRY)
 contract_manager = ContractManager(medsenger_api, db)
 form_manager = FormManager(medsenger_api, db)
 medicine_manager = MedicineManager(medsenger_api, db)

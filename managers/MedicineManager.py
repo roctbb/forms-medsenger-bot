@@ -1,6 +1,6 @@
 import time
 from datetime import datetime
-
+from tasks import threader
 from config import DYNAMIC_CACHE
 from helpers import log
 from managers.Manager import Manager
@@ -238,7 +238,7 @@ class MedicineManager(Manager):
         result = self.medsenger_api.send_message(medicine.contract_id, text, action, action_name, True, False, True,
                                                  deadline)
         # telepat speaker
-        self.medsenger_api.send_order(medicine.contract_id, "medicine", 26, medicine.as_dict())
+        threader.async_order.delay(medicine.contract_id, "medicine", 26, medicine.as_dict())
 
         if result:
             medicine.last_sent = datetime.now()

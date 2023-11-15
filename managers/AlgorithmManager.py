@@ -3,7 +3,7 @@ import re
 import time
 from copy import deepcopy
 from datetime import datetime, timedelta
-
+from tasks import threader
 import medsenger_api
 import requests
 
@@ -490,7 +490,7 @@ class AlgorithmManager(Manager):
 
                 params["message"] = params.get("message", "") + report
 
-            self.medsenger_api.send_order(contract.id, order, agent_id, params)
+            threader.async_order.delay(contract.id, order, agent_id, params)
 
         if action['type'] == 'patient_public_attachment':
             criteria = action['params'].get('criteria')

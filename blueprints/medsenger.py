@@ -1,5 +1,5 @@
 from flask import Blueprint
-
+from tasks import threader
 from manage import *
 from helpers import *
 from decorators import verify_request
@@ -36,7 +36,7 @@ def order(data):
             'medicines': medicines,
             'canceled_medicines': canceled_medicines
         }
-        medsenger_api.send_order(contract.id, 'conclusion_params', None, params)
+        threader.async_order.delay(contract.id, 'conclusion_params', None, params)
         return 'ok'
 
     if data['order'] == 'new_timezone':
