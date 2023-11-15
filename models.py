@@ -39,12 +39,12 @@ class Compliance:
 # models
 class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    contracts = db.relationship('Contract', backref=backref('patient', uselist=False), lazy=False)
-    forms = db.relationship('Form', backref=backref('patient', uselist=False), lazy=False)
-    medicines = db.relationship('Medicine', backref=backref('patient', uselist=False), lazy=False)
-    reminders = db.relationship('Reminder', backref=backref('patient', uselist=False), lazy=False)
-    algorithms = db.relationship('Algorithm', backref=backref('patient', uselist=False), lazy=False)
-    examinations = db.relationship('MedicalExamination', backref=backref('patient', uselist=False), lazy=False)
+    contracts = db.relationship('Contract', backref=backref('patient', uselist=False), lazy=True)
+    forms = db.relationship('Form', backref=backref('patient', uselist=False), lazy=True)
+    medicines = db.relationship('Medicine', backref=backref('patient', uselist=False), lazy=True)
+    reminders = db.relationship('Reminder', backref=backref('patient', uselist=False), lazy=True)
+    algorithms = db.relationship('Algorithm', backref=backref('patient', uselist=False), lazy=True)
+    examinations = db.relationship('MedicalExamination', backref=backref('patient', uselist=False), lazy=True)
 
     def as_dict(self):
         today = datetime.now()

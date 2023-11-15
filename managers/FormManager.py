@@ -71,7 +71,9 @@ class FormManager(Manager):
             new_form = form.clone()
             print(gts() + f"cloning form {template_id} done!")
             new_form.contract_id = contract.id
+            print(gts() + f"loading patient {template_id}")
             new_form.patient_id = contract.patient.id
+            print(gts() + f"loading patient done {template_id}")
 
             if "times" in custom_params and custom_params.get('times', None) != None:
                 try:
@@ -82,12 +84,14 @@ class FormManager(Manager):
             else:
                 if "timetable" in custom_params and custom_params.get('timetable'):
                     try:
+                        print(gts() + f"taking timetable {template_id}")
                         new_form.timetable = custom_params.get('timetable')
                     except Exception as e:
                         log(e, False)
 
             if "message" in custom_params and custom_params.get('message'):
                 try:
+                    print(gts() + f"forming custom message {template_id}")
                     new_form.custom_text = new_form.custom_text + "\n\n" + custom_params.get('message')
                 except Exception as e:
                     log(e, False)
