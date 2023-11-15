@@ -4,7 +4,7 @@ from copy import copy
 from datetime import datetime
 from tasks import threader
 from config import DYNAMIC_CACHE
-from helpers import log, clear_categories
+from helpers import log, clear_categories, gts
 from managers.ContractsManager import ContractManager
 from managers.MedicineManager import MedicineManager
 from managers.Manager import Manager
@@ -23,8 +23,10 @@ class FormManager(Manager):
         return Form.query.filter_by(is_template=True).all()
 
     def clear(self, contract):
+        print(gts() + f"clearing forms from contract {contract.id}")
         Form.query.filter_by(contract_id=contract.id).delete()
         self.__commit__()
+        print(gts() + f"clearing forms from contract {contract.id} done")
         return True
 
     def remove(self, id, contract):

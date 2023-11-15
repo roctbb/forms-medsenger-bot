@@ -121,10 +121,14 @@ class AlgorithmManager(Manager):
             return False
 
     def clear(self, contract):
+        print(gts() + f"clearing algorithms from contract {contract.id}")
         Algorithm.query.filter_by(contract_id=contract.id).delete()
         self.__commit__()
+        print(gts() + f"clearing algorithms from contract {contract.id} done")
 
+        print(gts() + f"removing hooks from contract {contract.id}")
         self.__hook_manager.clear_contract(contract)
+        print(gts() + f"removing hooks from contract {contract.id} done")
 
         params = {
             'action': 'clear',

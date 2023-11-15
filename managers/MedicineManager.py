@@ -2,7 +2,7 @@ import time
 from datetime import datetime
 from tasks import threader
 from config import DYNAMIC_CACHE
-from helpers import log
+from helpers import log, gts
 from managers.Manager import Manager
 from models import Patient, Contract, Medicine
 import requests
@@ -133,8 +133,10 @@ class MedicineManager(Manager):
         return True
 
     def clear(self, contract):
+        print(gts() + f"clearing medicines from contract {contract.id}")
         Medicine.query.filter_by(contract_id=contract.id).delete()
         self.__commit__()
+        print(gts() + f"clearing medicines from contract {contract.id} done")
         return True
 
     def resume(self, id, contract):

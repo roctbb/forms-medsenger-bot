@@ -144,22 +144,25 @@ def init(data):
                 if form.algorithm_id and str(form.algorithm_id) not in exclude_algorithms:
                     algorithm_manager.attach(form.algorithm_id, contract, params)
 
+        print(gts() + f"attaching reminders")
         reminders = params.get('reminders')
         if reminders:
             for template_id in reminders.split(','):
                 reminder_manager.attach(template_id, contract)
 
+        print(gts() + f"attaching algorithms")
         algorithms = params.get('algorithms')
         if algorithms:
             for template_id in algorithms.split(','):
                 algorithm_manager.attach(template_id, contract, params)
 
+        print(gts() + f"attaching medicines")
         medicines = params.get('medicines')
-
         if medicines:
             for template_id in medicines.split(','):
                 medicine_manager.attach(template_id, contract, params.get('medicine_timetable_{}'.format(template_id)))
 
+        print(gts() + f"attaching custom forms")
         custom_forms = filter(lambda x: "form_" in x and params.get(x), params.keys())
         for custom_form in custom_forms:
             try:
@@ -180,6 +183,7 @@ def init(data):
             except Exception as e:
                 log(e)
 
+        print(gts() + f"attaching custom medicines")
         custom_medicines = filter(lambda x: "medicine_" in x and params.get(x), params.keys())
         for custom_medicine in custom_medicines:
             try:
@@ -191,6 +195,7 @@ def init(data):
             except Exception as e:
                 log(e)
 
+        print(gts() + f"attaching custom algorithms")
         custom_algorithms = filter(lambda x: "algorithm_" in x and params.get(x), params.keys())
         for custom_algorithm in custom_algorithms:
             try:
@@ -203,6 +208,7 @@ def init(data):
                 print(e)
 
         if params.get('examinations_deadline'):
+            print(gts() + f"setting examinations")
             examinations_deadline = datetime.strptime(params.get('examinations_deadline'), '%Y-%m-%d')
             medsenger_api.add_record(contract_id, 'examinations_deadline', params.get('examinations_deadline'))
             has_examinations = False
