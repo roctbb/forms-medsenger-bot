@@ -50,9 +50,6 @@ class AlgorithmManager(Manager):
         self.medsenger_api.add_record(contract.id, 'doctor_action',
                                       'Отключены алгоритмы', params=params)
 
-        if DYNAMIC_CACHE:
-            self.medsenger_api.update_cache(contract.id)
-
     def attach(self, template_id, contract, setup=None):
         algorithm = self.get(template_id)
 
@@ -152,9 +149,6 @@ class AlgorithmManager(Manager):
 
         self.medsenger_api.add_record(contract.id, 'doctor_action',
                                       'Отключен алгоритм "{}".'.format(algorithm.title), params=params)
-
-        if DYNAMIC_CACHE:
-            self.medsenger_api.update_cache(contract.id)
 
         return id
 
@@ -629,6 +623,7 @@ class AlgorithmManager(Manager):
 
                 if form:
                     form_manager.detach(template_id, contract)
+
                     self.medsenger_api.send_message(contract.id,
                                                     'Опросник {} автоматически отключен.'.format(form.title),
                                                     only_doctor=True)
@@ -835,9 +830,6 @@ class AlgorithmManager(Manager):
             except Exception as e:
                 log(e, False)
 
-        if DYNAMIC_CACHE:
-            self.medsenger_api.update_cache(contract.id)
-
         return fired, has_message_to_patient
 
     def set_params(self, contract, params):
@@ -1035,8 +1027,6 @@ class AlgorithmManager(Manager):
 
                 self.__hook_manager.create_hooks_after_creation(algorithm)
 
-            if DYNAMIC_CACHE:
-                self.medsenger_api.update_cache(contract.id)
 
             return algorithm
         except Exception as e:

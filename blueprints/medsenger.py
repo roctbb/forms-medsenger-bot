@@ -42,50 +42,49 @@ def order(data):
     if data['order'] == 'new_timezone':
         contract_manager.actualize_timezone(contract, commit=True)
 
-    if data['order'] == 'create_form':
-        form = form_manager.create_or_edit(data['params'], contract)
+    if data['order'] in ['create_form', 'attach_form', 'detach_form', 'detach_medicine', 'remove_form', 'attach_algorithm', 'detach_algorithm', 'set_params']:
+        if data['order'] == 'create_form':
+            form = form_manager.create_or_edit(data['params'], contract)
 
-        if form:
-            return str(form.id)
-        else:
-            abort(422)
+            if form:
+                tasks.request_cache_update.delay(contract.id)
+                return str(form.id)
+            else:
+                abort(422)
 
-    if data['order'] == 'attach_form':
-        form = form_manager.attach(data['params'].get('template_id'), contract)
+        if data['order'] == 'attach_form':
+            form = form_manager.attach(data['params'].get('template_id'), contract)
 
-        if form:
-            return "ok"
-        else:
-            abort(422)
+            if not form:
+                abort(422)
 
-    if data['order'] == 'detach_form':
-        form_manager.detach(data['params'].get('template_id'), contract)
-        return "ok"
 
-    if data['order'] == 'detach_medicine':
-        if data['params'].get('template_id'):
-            medicine_manager.detach(data['params'].get('template_id'), contract)
-        if data['params'].get('atx'):
-            medicine_manager.detach_by_atx(data['params'].get('atx'), contract)
-        return "ok"
+        if data['order'] == 'detach_form':
+            form_manager.detach(data['params'].get('template_id'), contract)
 
-    if data['order'] == 'remove_form':
-        form_manager.remove(data['params'].get('id'), contract)
-        return "ok"
+        if data['order'] == 'detach_medicine':
+            if data['params'].get('template_id'):
+                medicine_manager.detach(data['params'].get('template_id'), contract)
+            if data['params'].get('atx'):
+                medicine_manager.detach_by_atx(data['params'].get('atx'), contract)
 
-    if data['order'] == 'attach_algorithm':
-        form = algorithm_manager.attach(data['params'].get('template_id'), contract)
 
-        if form:
-            return "ok"
-        else:
-            abort(422)
+        if data['order'] == 'remove_form':
+            form_manager.remove(data['params'].get('id'), contract)
 
-    if data['order'] == 'detach_algorithm':
-        algorithm_manager.detach(data['params'].get('template_id'), contract)
-        return "ok"
-    if data['order'] == 'set_params':
-        algorithm_manager.set_params(contract, data['params'])
+        if data['order'] == 'attach_algorithm':
+            form = algorithm_manager.attach(data['params'].get('template_id'), contract)
+
+            if not form:
+                abort(422)
+
+        if data['order'] == 'detach_algorithm':
+            algorithm_manager.detach(data['params'].get('template_id'), contract)
+
+        if data['order'] == 'set_params':
+            algorithm_manager.set_params(contract, data['params'])
+
+        tasks.request_cache_update.delay(contract.id)
         return "ok"
 
     return "not found"
@@ -136,7 +135,6 @@ def init(data):
                 medicine_manager.clear(contract)
 
             for template_id in forms.split(','):
-
                 form = form_manager.attach(template_id, contract, {
                     "timetable": params.get('form_timetable_{}'.format(template_id)),
                     "message": params.get('form_message_{}'.format(template_id)),
@@ -147,13 +145,11 @@ def init(data):
                     algorithm_manager.attach(form.algorithm_id, contract, params)
 
         reminders = params.get('reminders')
-
         if reminders:
             for template_id in reminders.split(','):
                 reminder_manager.attach(template_id, contract)
 
         algorithms = params.get('algorithms')
-
         if algorithms:
             for template_id in algorithms.split(','):
                 algorithm_manager.attach(template_id, contract, params)

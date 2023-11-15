@@ -92,9 +92,6 @@ class ExaminationManager(Manager):
         self.__commit__()
         self.log_done("examination_{}".format(examination.id), contract_id)
 
-        if DYNAMIC_CACHE:
-            self.medsenger_api.update_cache(contract_id)
-
         return True
 
     def clear(self, contract):

@@ -45,6 +45,8 @@ def medicine_page(args, form, contract, medicine_id):
     if contract.tasks and 'medicine-{}'.format(medicine_id) in contract.tasks:
         medsenger_api.finish_task(contract.id, contract.tasks['medicine-{}'.format(medicine_id)])
 
+    tasks.request_cache_update.delay(contract.id)
+
     return get_ui('done', contract, [], role='patient')
 
 

@@ -129,9 +129,6 @@ class MedicineManager(Manager):
 
         self.log_done("medicine_{}".format(medicine_id), contract_id)
 
-        if DYNAMIC_CACHE:
-            self.medsenger_api.update_cache(contract_id)
-
         return True
 
     def clear(self, contract):

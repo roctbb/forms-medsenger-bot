@@ -52,6 +52,7 @@ def create_form(args, form, contract):
     form = form_manager.create_or_edit(request.json, contract)
 
     if form:
+        tasks.request_cache_update.delay(contract.id)
         return jsonify(form.as_dict())
     else:
         abort(422)
@@ -63,6 +64,7 @@ def delete_form(args, form, contract):
     result = form_manager.remove(request.json.get('id'), contract)
 
     if result:
+        tasks.request_cache_update.delay(contract.id)
         return jsonify({
             "deleted_id": result
         })
@@ -85,7 +87,6 @@ def create_medicine(args, form, contract):
 @verify_request(contract_manager, 'doctor')
 def edit_medicine_history(args, form, contract):
     form = medicine_manager.edit_history(request.json)
-
     if form:
         return jsonify(form.as_dict())
     else:
@@ -99,6 +100,8 @@ def delete_medicine(args, form, contract):
     result = medicine_manager.remove(request.json.get('id'), contract, request.json.get('deleted_by_patient'))
 
     if result:
+        tasks.request_cache_update.delay(contract.id)
+
         return jsonify({
             "result": "ok",
             "deleted_id": result
@@ -182,6 +185,7 @@ def create_algorithm(args, form, contract):
     form = algorithm_manager.create_or_edit(request.json, contract)
 
     if form:
+        tasks.request_cache_update.delay(contract.id)
         return jsonify(form.as_dict())
     else:
         abort(422)
@@ -194,6 +198,7 @@ def save_algorithms(args, form, contract):
     contract = contract_manager.get(contract_id)
     for alg in request.json:
         form = algorithm_manager.create_or_edit(alg, contract)
+        tasks.request_cache_update.delay(contract.id)
         if not form:
             abort(422)
     return 'ok'
@@ -207,6 +212,7 @@ def delete_algorithm(args, form, contract):
     result = algorithm_manager.remove(request.json.get('id'), contract)
 
     if result:
+        tasks.request_cache_update.delay(contract.id)
         return jsonify({
             "result": "ok",
             "deleted_id": result
@@ -251,6 +257,7 @@ def post_form(args, form, contract, form_id):
     submit_chain = tasks.submit_form.s(True, data, form_id, contract_id)
     submit_chain |= tasks.examine_form.s(form_id, contract_id)
     submit_chain |= tasks.examine_contract_tasks.s(form_id, contract_id)
+    submit_chain |= tasks.request_chained_cache_update.s(contract_id)
     submit_chain.apply_async()
 
     return jsonify({
@@ -332,6 +339,8 @@ def post_medicines(args, form, contract):
         if contract.tasks and 'medicine-{}'.format(data['medicine']) in contract.tasks:
             medsenger_api.finish_task(contract.id, contract.tasks['medicine-{}'.format(data['medicine'])])
 
+        tasks.request_cache_update.delay(contract.id)
+
     return get_ui('done', contract, [], role='patient')
 
 
@@ -348,6 +357,7 @@ def create_examination(args, form, contract):
     examination = examination_manager.create_or_edit(request.json, contract)
 
     if examination:
+        tasks.request_cache_update.delay(contract.id)
         return jsonify(examination.as_dict())
     else:
         abort(422)
@@ -359,6 +369,7 @@ def delete_examination(args, form, contract):
     result = examination_manager.remove(request.json.get('id'), contract)
 
     if result:
+        tasks.request_cache_update.delay(contract.id)
         return jsonify({
             "deleted_id": result
         })
@@ -392,6 +403,7 @@ def post_examination(args, form, contract, examination_id):
         abort(401)
 
     submit_chain = tasks.submit_examination.s(True, data['files'], examination_id, contract.id, data['date'])
+    submit_chain |= tasks.request_chained_cache_update.s(contract.id)
     submit_chain.apply_async()
 
     return jsonify({

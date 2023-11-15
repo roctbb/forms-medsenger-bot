@@ -128,7 +128,9 @@ class TimetableManager(Manager):
             for group in algorithm_groups:
                 for alg in group:
                     if "exact_time" in alg.categories:
-                        tasks.run_algorithm.s(True, alg.id).apply_async()
+                        chain = tasks.run_algorithm.s(True, alg.id)
+                        chain |= tasks.request_chained_cache_update.s(alg.contract_id)
+                        chain.apply_async()
 
     def check_days(self, app):
         from tasks import tasks
@@ -140,7 +142,9 @@ class TimetableManager(Manager):
             for group in algorithm_groups:
                 for alg in group:
                     if "exact_date" in alg.categories:
-                        tasks.run_algorithm.s(True, alg.id, ["exact_date"], []).apply_async()
+                        chain = tasks.run_algorithm.s(True, alg.id, ["exact_date"], [])
+                        chain |= tasks.request_chained_cache_update.s(alg.contract_id)
+                        chain.apply_async()
 
             examination_groups = list(map(lambda x: x.examinations, contracts))
             today = datetime.today().date()

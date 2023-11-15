@@ -37,7 +37,6 @@ class FormManager(Manager):
         Form.query.filter_by(id=id).delete()
 
         self.__commit__()
-        self.medsenger_api.update_cache(contract.id)
 
         if not form.is_template:
             params = {
@@ -395,9 +394,6 @@ class FormManager(Manager):
         if result:
             self.log_done("form_{}".format(form.id), contract_id)
 
-        if DYNAMIC_CACHE:
-            self.medsenger_api.update_cache(contract_id)
-
         return True
 
     def get_integral_evaluation(self, contract_id, answers, form):
@@ -554,9 +550,6 @@ class FormManager(Manager):
 
                 if form.timetable.get('send_on_init'):
                     self.run(form)
-
-            if DYNAMIC_CACHE:
-                self.medsenger_api.update_cache(contract.id)
 
             if not form_id and not data.get('is_template'):
                 params = {
