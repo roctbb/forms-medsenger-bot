@@ -62,9 +62,12 @@ class FormManager(Manager):
         self.__commit__()
 
     def attach(self, template_id, contract, custom_params=dict()):
+        print(gts() + f"attaching form template_id {template_id} from contract {contract.id}")
+
         form = self.get(template_id)
 
         if form:
+            print(gts() + f"cloning form {template_id} from contract {contract.id}")
             new_form = form.clone()
             new_form.contract_id = contract.id
             new_form.patient_id = contract.patient.id
@@ -88,13 +91,17 @@ class FormManager(Manager):
                     log(e, False)
 
             if new_form.init_text:
+                print(gts() + f"init message form {template_id} from contract {contract.id}")
                 self.medsenger_api.send_message(form.contract_id, form.init_text, only_patient=True)
 
             self.db.session.add(new_form)
             self.__commit__()
 
+            print(gts() + f"form {template_id} saved from contract {contract.id}")
+
             if new_form.timetable.get('send_on_init'):
                 self.db.session.refresh(new_form)
+                print(gts() + f"running form {template_id} from contract {contract.id}")
                 self.run(new_form)
 
             params = {
@@ -108,6 +115,7 @@ class FormManager(Manager):
             threader.async_record.delay(contract.id, 'doctor_action',
                                           'Назначен опросник "{}".'.format(form.title), params=params)
 
+            print(gts() + f"attaching form {template_id} done for contract {contract.id}")
             return new_form
         else:
             return False
