@@ -13,7 +13,7 @@ class HookManager(Manager):
         self._change_hooks(algorithm, "remove")
 
     def clear_contract(self, contract):
-        self.medsenger_api.remove_hooks(contract.id, [])
+        threader.async_remove_hooks.delay(contract.id, [])
 
     def _change_hooks(self, algorithm, action="add"):
         patient = algorithm.patient
