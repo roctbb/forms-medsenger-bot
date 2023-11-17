@@ -193,7 +193,7 @@ export default {
             this.axios.get(url).then(response => {
                 let data = response.data
                 this.database_medicine_description = data
-                this.medicine.title = data.name
+                this.medicine.title = data.title
                 this.database_medicine_description.name = null
                 this.database_medicine_description.id = null
                 this.database_medicine_description.name_l = null
