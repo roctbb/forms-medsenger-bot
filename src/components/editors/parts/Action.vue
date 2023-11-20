@@ -18,6 +18,7 @@
                 <option value="patient_public_attachment">найти и отправить файл пациенту</option>
                 <option value="send_file_by_link">отправить как файл</option>
                 <option v-if="is_admin" value="script">выполнить скрипт</option>
+                <option v-if="is_admin" value="send_addition">пометить записи</option>
                 <option v-if="is_admin" value="set_info_materials">задать список информационных материалов</option>
                 <!-- назначение/отключения мониторинга/лекарства/алгоритма / order -->
             </select>
@@ -121,6 +122,12 @@
         <div class="col-md-5" v-if="['order'].includes(action.type)">
             <textarea class="form-control form-control-sm"
                       v-model="action.params.order_params"></textarea>
+            <small class="text-muted">JSON параметры</small>
+        </div>
+
+        <div class="col-md-9" v-if="['send_addition'].includes(action.type)">
+            <textarea class="form-control form-control-sm"
+                      v-model="action.params.json_params"></textarea>
             <small class="text-muted">JSON параметры</small>
         </div>
 

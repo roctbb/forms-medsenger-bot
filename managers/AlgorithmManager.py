@@ -48,7 +48,7 @@ class AlgorithmManager(Manager):
         }
 
         threader.async_record.delay(contract.id, 'doctor_action',
-                                      'Отключены алгоритмы', params=params)
+                                    'Отключены алгоритмы', params=params)
 
     def attach(self, template_id, contract, setup=None):
         algorithm = self.get(template_id)
@@ -107,7 +107,7 @@ class AlgorithmManager(Manager):
             }
 
             threader.async_record.delay(contract.id, 'doctor_action',
-                                          'Подключен алгоритм "{}"'.format(new_algorithm.title), params=params)
+                                        'Подключен алгоритм "{}"'.format(new_algorithm.title), params=params)
 
             return True
         else:
@@ -124,7 +124,7 @@ class AlgorithmManager(Manager):
         }
 
         threader.async_record.delay(contract.id, 'doctor_action',
-                                      'Отключены все алгоритмы.', params=params)
+                                    'Отключены все алгоритмы.', params=params)
 
         return True
 
@@ -147,7 +147,7 @@ class AlgorithmManager(Manager):
             'object_type': 'algorithm'
         }
         threader.async_record.delay(contract.id, 'doctor_action',
-                                      'Отключен алгоритм "{}".'.format(algorithm.title), params=params)
+                                    'Отключен алгоритм "{}".'.format(algorithm.title), params=params)
 
         return id
 
@@ -338,7 +338,7 @@ class AlgorithmManager(Manager):
         return True
 
     def check_criteria(self, criteria, contract_id, buffer, descriptions, category_names, algorithm=None, contract=None,
-                       is_init=False):
+                       is_init=False, records=[]):
         category_name = criteria.get('category')
         mode = criteria.get('left_mode')
 
@@ -406,7 +406,7 @@ class AlgorithmManager(Manager):
                 return False
 
             occurred = 0
-            print(right_values, left_values)
+
             for i in range(len(left_values)):
                 lvalue = left_values[i]
 
@@ -418,6 +418,8 @@ class AlgorithmManager(Manager):
                     result = self.check_values(lvalue, rvalue, criteria['sign'], modifier, multiplier)
 
                     if result:
+                        records.extend(objects)
+
                         current_answer = None
                         if objects:
                             current_answer = objects[i]
@@ -460,7 +462,7 @@ class AlgorithmManager(Manager):
                 return True
             return False
 
-    def run_action(self, action, contract, descriptions, algorithm):
+    def run_action(self, action, contract, descriptions, algorithm, records=[]):
         has_message_to_patient = False
         report = ""
         if action['params'].get('send_report') and descriptions:
@@ -471,6 +473,21 @@ class AlgorithmManager(Manager):
             self.__hook_manager.remove_hooks_before_deletion(algorithm)
             self.change_step(algorithm, action['params']['target'])
             self.__hook_manager.create_hooks_after_creation(algorithm)
+
+        if action['type'] == 'send_addition':
+            for record in records:
+                params = {
+                    "algorithm_id": algorithm.id,
+                    "comment": "Помечено алгоритмом"
+                }
+
+                try:
+                    params.update(json.loads(action['params']['json_params']))
+                except Exception as e:
+                    log(e, False)
+
+                self.medsenger_api.send_addition(contract.id, record.id, params)
+
 
         if action['type'] == 'set_info_materials':
             self.medsenger_api.set_info_materials(contract.id, action['params']['materials'])
@@ -793,6 +810,7 @@ class AlgorithmManager(Manager):
 
             additions = []
             descriptions = []
+            records = []
             category_names = {category['name']: category['description'] for category in
                               self.medsenger_api.get_categories()}
 
@@ -801,7 +819,7 @@ class AlgorithmManager(Manager):
 
             result = any([all(
                 list(map(lambda x: self.check_criteria(x, contract.id, additions, descriptions, category_names,
-                                                       algorithm=algorithm), group)))
+                                                       algorithm=algorithm, records=records), group)))
                 for group in or_groups])
 
             if result:
@@ -815,12 +833,12 @@ class AlgorithmManager(Manager):
 
                 if not bypass:
                     for action in condition.get('positive_actions', []):
-                        has_message = self.run_action(action, contract, descriptions, algorithm)
+                        has_message = self.run_action(action, contract, descriptions, algorithm, records)
                         has_message_to_patient = has_message_to_patient or has_message
                     condition['last_fired'] = int(time.time())
             else:
                 for action in condition.get('negative_actions', []):
-                    self.run_action(action, contract, descriptions, algorithm)
+                    self.run_action(action, contract, descriptions, algorithm, records)
         if fired:
             try:
                 flag_modified(algorithm, "steps")
@@ -1011,8 +1029,8 @@ class AlgorithmManager(Manager):
                 }
 
                 threader.async_record.delay(contract.id, 'doctor_action',
-                                              '{} алгоритм "{}".'.format('Изменен' if algorithm_id else 'Подключен',
-                                                                         algorithm.title), params=params)
+                                            '{} алгоритм "{}".'.format('Изменен' if algorithm_id else 'Подключен',
+                                                                       algorithm.title), params=params)
 
             if algorithm.contract_id == contract.id:
                 if not algorithm.current_step:
@@ -1026,7 +1044,6 @@ class AlgorithmManager(Manager):
                 self.__commit__()
 
                 self.__hook_manager.create_hooks_after_creation(algorithm)
-
 
             return algorithm
         except Exception as e:
