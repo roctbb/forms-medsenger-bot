@@ -284,6 +284,7 @@ def send_form(args, form, contract, form_id):
     contract_id = int(args.get('contract_id'))
 
     form_manager.run(form, contract_id=contract_id, commit=False)
+    form_manager.log_request(form, contract_id)
 
     return jsonify({
         "result": "ok",
