@@ -338,7 +338,7 @@ class AlgorithmManager(Manager):
         return True
 
     def check_criteria(self, criteria, contract_id, buffer, descriptions, category_names, algorithm=None, contract=None,
-                       is_init=False, records=[]):
+                       is_init=False, record_ids=[]):
         category_name = criteria.get('category')
         mode = criteria.get('left_mode')
 
@@ -418,7 +418,7 @@ class AlgorithmManager(Manager):
                     result = self.check_values(lvalue, rvalue, criteria['sign'], modifier, multiplier)
 
                     if result:
-                        records.extend(objects)
+                        record_ids.extend([object['id'] for object in objects])
 
                         current_answer = None
                         if objects:
@@ -462,7 +462,7 @@ class AlgorithmManager(Manager):
                 return True
             return False
 
-    def run_action(self, action, contract, descriptions, algorithm, records=[]):
+    def run_action(self, action, contract, descriptions, algorithm, record_ids=[]):
         has_message_to_patient = False
         report = ""
         if action['params'].get('send_report') and descriptions:
@@ -475,7 +475,7 @@ class AlgorithmManager(Manager):
             self.__hook_manager.create_hooks_after_creation(algorithm)
 
         if action['type'] == 'send_addition':
-            for record in records:
+            for record_id in record_ids:
                 params = {
                     "algorithm_id": algorithm.id,
                     "comment": "Помечено алгоритмом"
@@ -486,8 +486,7 @@ class AlgorithmManager(Manager):
                 except Exception as e:
                     log(e, False)
 
-                self.medsenger_api.send_addition(contract.id, record.id, params)
-
+                self.medsenger_api.send_addition(contract.id, record_id, params)
 
         if action['type'] == 'set_info_materials':
             self.medsenger_api.set_info_materials(contract.id, action['params']['materials'])
@@ -783,6 +782,29 @@ class AlgorithmManager(Manager):
 
         self.__commit__()
 
+    def __check_criteria_groups(self, or_groups, contract, additions, descriptions, category_names, algorithm):
+        all_record_ids = set()
+        result = False
+        for or_group in or_groups:
+            and_result = True
+            group_records_ids = None
+            for criteria in or_group:
+                record_ids = []
+                and_result = and_result and self.check_criteria(criteria, contract.id, additions, descriptions,
+                                                                category_names,
+                                                                algorithm=algorithm, record_ids=record_ids)
+
+                if group_records_ids is None:
+                    group_records_ids = set(record_ids)
+                else:
+                    group_records_ids = group_records_ids & record_ids
+
+            result = result or and_result
+            all_record_ids = all_record_ids | group_records_ids
+
+        record_ids = list(all_record_ids)
+
+        return result, record_ids
     def run(self, algorithm, included_types=[], excluded_types=['exact_date']):
         included_types = set(included_types)
         excluded_types = set(excluded_types)
@@ -810,17 +832,14 @@ class AlgorithmManager(Manager):
 
             additions = []
             descriptions = []
-            records = []
+
             category_names = {category['name']: category['description'] for category in
                               self.medsenger_api.get_categories()}
 
             or_groups = [group for group in criteria if
                          self.__should_observe_group(group, included_types, excluded_types)]
 
-            result = any([all(
-                list(map(lambda x: self.check_criteria(x, contract.id, additions, descriptions, category_names,
-                                                       algorithm=algorithm, records=records), group)))
-                for group in or_groups])
+            result, record_ids = self.__check_criteria_groups(or_groups, contract, additions, descriptions, category_names, algorithm)
 
             if result:
                 if not condition.get('skip_additions'):
@@ -833,12 +852,12 @@ class AlgorithmManager(Manager):
 
                 if not bypass:
                     for action in condition.get('positive_actions', []):
-                        has_message = self.run_action(action, contract, descriptions, algorithm, records)
+                        has_message = self.run_action(action, contract, descriptions, algorithm, record_ids)
                         has_message_to_patient = has_message_to_patient or has_message
                     condition['last_fired'] = int(time.time())
             else:
                 for action in condition.get('negative_actions', []):
-                    self.run_action(action, contract, descriptions, algorithm, records)
+                    self.run_action(action, contract, descriptions, algorithm, record_ids)
         if fired:
             try:
                 flag_modified(algorithm, "steps")
