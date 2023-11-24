@@ -213,7 +213,7 @@ export default {
             this.mode = this.action.type
         }
 
-        if (this.action.type == 'order' && this.action.params.order_params)
+        if (this.action.type === 'order' && this.action.params.order_params && !(typeof this.action.params.order_params === 'string' || this.action.params.order_params instanceof String))
         {
             this.action.params.order_params = JSON.stringify(this.action.params.order_params)
         }

@@ -373,7 +373,7 @@ export default {
                 }
                 if (action.type == 'order') {
                     action.params.agent_id = parseInt(action.params.agent_id)
-                    if (action.params.order_params) {
+                    if (action.params.order_params && (typeof action.params.order_params === 'string' || action.params.order_params instanceof String)) {
                         action.params.order_params = JSON.parse(action.params.order_params);
                     }
 
