@@ -132,8 +132,11 @@ def order(data):
 def init(data):
     contract_id = data.get('contract_id')
     clinic_id = data.get('clinic_id')
+
     if not contract_id:
         abort(422)
+
+    print("got init payload:", data)
 
     contract, is_new = contract_manager.add(contract_id, clinic_id)
 
