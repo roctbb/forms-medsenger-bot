@@ -43,14 +43,19 @@ def order(data):
         from_timestamp = data['params'].get('from_timestamp')
         to_timestamp = data['params'].get('to_timestamp')
 
+        print(from_timestamp, to_timestamp)
+
         from_date = datetime.fromtimestamp(from_timestamp) if from_timestamp else None
         to_date = datetime.fromtimestamp(to_timestamp) if to_timestamp else None
+        print(from_date, to_date)
 
         if data['order'] == 'get_medicines':
+            print(from_date, to_date)
             medicines = medicine_manager.get_attached_medicines(contract.patient, from_date, to_date)
+            print([medicine.as_dict() for medicine in medicines])
             return jsonify([medicine.as_dict() for medicine in medicines])
         if data['order'] == 'get_compliance':
-            compliance = {
+            ordered_compliance = {
                 "medicines": [],
                 "forms": []
             }
@@ -68,11 +73,11 @@ def order(data):
                 }
 
             for medicine in medicines:
-                compliance['medicines'].append(get_obj_compliance(medicine))
+                ordered_compliance['medicines'].append(get_obj_compliance(medicine))
             for form in forms:
-                compliance['forms'].append(get_obj_compliance(form))
+                ordered_compliance['forms'].append(get_obj_compliance(form))
 
-            return jsonify(compliance)
+            return jsonify(ordered_compliance)
         return 'ok'
 
     if data['order'] == 'new_timezone':
@@ -102,7 +107,6 @@ def order(data):
                 medicine_manager.detach(data['params'].get('template_id'), contract)
             if data['params'].get('atx'):
                 medicine_manager.detach_by_atx(data['params'].get('atx'), contract)
-
 
         if data['order'] == 'remove_form':
             form_manager.remove(data['params'].get('id'), contract)

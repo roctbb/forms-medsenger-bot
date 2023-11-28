@@ -101,9 +101,10 @@ class MedicineManager(Manager):
         return medicine
 
     def get_attached_medicines(self, obj, from_date=None, to_date=None):
+        print(from_date, to_date)
         medicines = list(filter(lambda m: not m.canceled_at and
                                           (not from_date or m.prescribed_at >= from_date) and
-                                          (not to_date or m.prescribed_at >= from_date), obj.medicines))
+                                          (not to_date or m.prescribed_at <= to_date), obj.medicines))
         return medicines
 
     def check_warning(self, medicine):
