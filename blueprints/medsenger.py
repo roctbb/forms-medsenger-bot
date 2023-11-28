@@ -43,16 +43,11 @@ def order(data):
         from_timestamp = data['params'].get('from_timestamp')
         to_timestamp = data['params'].get('to_timestamp')
 
-        print(from_timestamp, to_timestamp)
-
         from_date = datetime.fromtimestamp(from_timestamp) if from_timestamp else None
         to_date = datetime.fromtimestamp(to_timestamp) if to_timestamp else None
-        print(from_date, to_date)
 
         if data['order'] == 'get_medicines':
-            print(from_date, to_date)
             medicines = medicine_manager.get_attached_medicines(contract.patient, from_date, to_date)
-            print([medicine.as_dict() for medicine in medicines])
             return jsonify([medicine.as_dict() for medicine in medicines])
         if data['order'] == 'get_compliance':
             ordered_compliance = {
