@@ -100,6 +100,12 @@ class MedicineManager(Manager):
 
         return medicine
 
+    def get_attached_medicines(self, obj, from_date=None, to_date=None):
+        medicines = list(filter(lambda m: not m.canceled_at and
+                                          (not from_date or m.prescribed_at >= from_date) and
+                                          (not to_date or m.prescribed_at >= from_date), obj.medicines))
+        return medicines
+
     def check_warning(self, medicine):
         if medicine.warning_days and medicine.warning_timestamp == 0 and medicine.asked_timestamp:
             time_from = medicine.asked_timestamp
