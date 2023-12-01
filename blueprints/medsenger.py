@@ -121,6 +121,9 @@ def order(data):
         tasks.request_cache_update.delay(contract.id)
         return "ok"
 
+    if data['order'] == 'get_params':
+        return jsonify(algorithm_manager.search_params(contract))
+
     return "not found"
 
 
