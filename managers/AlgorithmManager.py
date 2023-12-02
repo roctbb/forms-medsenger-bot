@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import time
 from copy import deepcopy
@@ -190,8 +191,13 @@ class AlgorithmManager(Manager):
         if cached != None:
             return cached
 
+        emulated_date = os.environ.get('EMULATED_DATE')
+
         if category_name == "exact_date":
-            return [datetime.now().strftime("%Y-%m-%d")], None
+            if emulated_date:
+                return [emulated_date], None
+            else:
+                return [datetime.now().strftime("%Y-%m-%d")], None
         if category_name == "contract_start_date":
             return self.save_to_cache(k, ([self.medsenger_api.get_patient_info(contract_id).get('start_date')], None))
         if category_name == "contract_end_date":
@@ -840,6 +846,9 @@ class AlgorithmManager(Manager):
                          self.__should_observe_group(group, included_types, excluded_types)]
 
             result, record_ids = self.__check_criteria_groups(or_groups, contract, additions, descriptions, category_names, algorithm)
+
+            if os.environ.get('DRY_RUN'):
+                continue
 
             if result:
                 if not condition.get('skip_additions'):

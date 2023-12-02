@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta
 import time
 from helpers import log, timezone_now, localize
@@ -148,6 +149,10 @@ class TimetableManager(Manager):
 
             examination_groups = list(map(lambda x: x.examinations, contracts))
             today = datetime.today().date()
+
+            if os.environ.get('EMULATED_DATE'):
+                today = datetime.strptime(os.environ.get('EMULATED_DATE'), '%y-%m-%d').date()
+
             for group in examination_groups:
                 for examination in group:
                     if not examination.asked and examination.notification_date <= today <= examination.deadline_date:
