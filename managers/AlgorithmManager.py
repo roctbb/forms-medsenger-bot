@@ -418,10 +418,10 @@ class AlgorithmManager(Manager):
                     result = self.check_values(lvalue, rvalue, criteria['sign'], modifier, multiplier)
 
                     if result:
-                        record_ids.extend([object['id'] for object in objects if object.get('id')])
 
                         current_answer = None
                         if objects:
+                            record_ids.extend([object['id'] for object in objects if object.get('id')])
                             current_answer = objects[i]
 
                         description = generate_event_description(criteria, lvalue, rvalue, category_names,
