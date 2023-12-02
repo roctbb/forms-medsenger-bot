@@ -797,7 +797,7 @@ class AlgorithmManager(Manager):
                 if group_records_ids is None:
                     group_records_ids = set(record_ids)
                 else:
-                    group_records_ids = group_records_ids & record_ids
+                    group_records_ids = group_records_ids & set(record_ids)
 
             result = result or and_result
             all_record_ids = all_record_ids | group_records_ids
