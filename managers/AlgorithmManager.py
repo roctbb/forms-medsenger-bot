@@ -876,12 +876,15 @@ class AlgorithmManager(Manager):
             for block_index, block in enumerate(condition['criteria']):
                 for criteria_index, criteria in enumerate(block):
                     if criteria.get('ask_value'):
-                        value_code = criteria.get('value_name')
-
-                        print(value_code, params.get(value_code))
+                        value_name = criteria.get('value_name')
+                        value_code = criteria.get('value_code')
 
                         if value_code and value_code in params:
                             criteria["value"] = params[value_code]
+                            print("Set!")
+
+                        if value_name and value_name in params:
+                            criteria["value"] = params[value_name]
                             print("Set!")
 
         for algorithm in contract.algorithms:
