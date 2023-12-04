@@ -869,6 +869,9 @@ class AlgorithmManager(Manager):
         return fired, has_message_to_patient
 
     def set_params(self, contract, params):
+
+        print(f"Running set_params  {params} for contract ID {contract}")
+
         def update_condition(condition):
             for block_index, block in enumerate(condition['criteria']):
                 for criteria_index, criteria in enumerate(block):
