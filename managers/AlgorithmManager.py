@@ -805,6 +805,7 @@ class AlgorithmManager(Manager):
         record_ids = list(all_record_ids)
 
         return result, record_ids
+
     def run(self, algorithm, included_types=[], excluded_types=['exact_date']):
         included_types = set(included_types)
         excluded_types = set(excluded_types)
@@ -839,7 +840,8 @@ class AlgorithmManager(Manager):
             or_groups = [group for group in criteria if
                          self.__should_observe_group(group, included_types, excluded_types)]
 
-            result, record_ids = self.__check_criteria_groups(or_groups, contract, additions, descriptions, category_names, algorithm)
+            result, record_ids = self.__check_criteria_groups(or_groups, contract, additions, descriptions,
+                                                              category_names, algorithm)
 
             if result:
                 if not condition.get('skip_additions'):
@@ -881,11 +883,9 @@ class AlgorithmManager(Manager):
 
                         if value_code and value_code in params:
                             criteria["value"] = params[value_code]
-                            print("Set!")
 
                         if value_name and value_name in params:
                             criteria["value"] = params[value_name]
-                            print("Set!")
 
         for algorithm in contract.algorithms:
             for step_index, step in enumerate(algorithm.steps):
@@ -895,6 +895,12 @@ class AlgorithmManager(Manager):
             if algorithm.common_conditions:
                 for condition_index, condition in enumerate(algorithm.common_conditions):
                     update_condition(condition)
+
+            try:
+                flag_modified(algorithm, "steps")
+                flag_modified(algorithm, "common_conditions")
+            except Exception as e:
+                log(e, False)
 
         self.__commit__()
 
