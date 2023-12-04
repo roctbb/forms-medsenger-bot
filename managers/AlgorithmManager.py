@@ -889,6 +889,8 @@ class AlgorithmManager(Manager):
                 for condition_index, condition in enumerate(algorithm.common_conditions):
                     update_condition(condition)
 
+        self.__commit__()
+
     def search_params(self, contract):
         params = {}
 
