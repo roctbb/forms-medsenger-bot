@@ -39,6 +39,42 @@ def order(data):
         threader.async_order.delay(contract.id, 'conclusion_params', None, params)
         return 'ok'
 
+    if data['order'] in ['get_medicines', 'get_compliance']:
+        from_timestamp = data['params'].get('from_timestamp')
+        to_timestamp = data['params'].get('to_timestamp')
+
+        from_date = datetime.fromtimestamp(from_timestamp) if from_timestamp else None
+        to_date = datetime.fromtimestamp(to_timestamp) if to_timestamp else None
+
+        if data['order'] == 'get_medicines':
+            medicines = medicine_manager.get_attached_medicines(contract.patient, from_date, to_date)
+            return jsonify([medicine.as_dict() for medicine in medicines])
+        if data['order'] == 'get_compliance':
+            ordered_compliance = {
+                "medicines": [],
+                "forms": []
+            }
+
+            medicines = medicine_manager.get_attached_medicines(contract)
+            forms = contract.forms
+
+            def get_obj_compliance(obj):
+                req, done = obj.count_compliance(start_date=from_date, end_date=to_date)
+                return {
+                    "id": obj.id,
+                    "title": obj.title,
+                    "done": done,
+                    "requested": req
+                }
+
+            for medicine in medicines:
+                ordered_compliance['medicines'].append(get_obj_compliance(medicine))
+            for form in forms:
+                ordered_compliance['forms'].append(get_obj_compliance(form))
+
+            return jsonify(ordered_compliance)
+        return 'ok'
+
     if data['order'] == 'new_timezone':
         contract_manager.actualize_timezone(contract, commit=True)
 
@@ -58,7 +94,6 @@ def order(data):
             if not form:
                 abort(422)
 
-
         if data['order'] == 'detach_form':
             form_manager.detach(data['params'].get('template_id'), contract)
 
@@ -67,7 +102,6 @@ def order(data):
                 medicine_manager.detach(data['params'].get('template_id'), contract)
             if data['params'].get('atx'):
                 medicine_manager.detach_by_atx(data['params'].get('atx'), contract)
-
 
         if data['order'] == 'remove_form':
             form_manager.remove(data['params'].get('id'), contract)
@@ -86,6 +120,9 @@ def order(data):
 
         tasks.request_cache_update.delay(contract.id)
         return "ok"
+
+    if data['order'] == 'get_params':
+        return jsonify(algorithm_manager.search_params(contract))
 
     return "not found"
 

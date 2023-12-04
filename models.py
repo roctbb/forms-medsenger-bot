@@ -231,6 +231,7 @@ class Medicine(db.Model, Compliance):
             "warning_days": self.warning_days,
             "detach_date": self.detach_date.strftime('%Y-%m-%d') if self.detach_date else None,
             "prescribed_at": self.prescribed_at.strftime("%d.%m.%Y"),
+            "prescribed_timestamp": self.prescribed_at.timestamp(),
             "canceled_at": self.canceled_at.strftime("%d.%m.%Y") if self.canceled_at else None,
             "sent": sent,
             "done": done,
