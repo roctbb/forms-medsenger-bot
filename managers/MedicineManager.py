@@ -293,6 +293,7 @@ class MedicineManager(Manager):
             medicine.timetable = data.get('timetable')
             medicine.prescription_history = data.get('prescription_history')
             medicine.template_id = data.get('template_id')
+            medicine.atx = data.get('atx')
             medicine.warning_days = data.get('warning_days')
             medicine.verify_dose = data.get('verify_dose', False)
             medicine.is_created_by_patient = data.get('is_created_by_patient', False)
