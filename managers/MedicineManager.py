@@ -169,7 +169,7 @@ class MedicineManager(Manager):
 
         return id
 
-    def remove(self, id, contract, by_patient=False):
+    def remove(self, id, contract, by_patient=False, silent=False):
 
         medicine = Medicine.query.filter_by(id=id).first_or_404()
 
@@ -177,7 +177,7 @@ class MedicineManager(Manager):
             return None
 
         if medicine.contract_id:
-            if not by_patient:
+            if not by_patient and not silent:
                 self.medsenger_api.send_message(contract.id,
                                                 "Врач отменил препарат {}.".format(medicine.get_description()))
             params = {
@@ -326,7 +326,7 @@ class MedicineManager(Manager):
                     'description': medicine.get_description(True, False)
                 }
 
-                if not data.get('edited_by_patient'):
+                if not data.get('edited_by_patient') and not data.get('bypass_notifications'):
                     self.medsenger_api.send_message(contract.id,
                                                     "Врач {} {}.{}".format(
                                                         action, medicine.get_description(True),

@@ -80,13 +80,22 @@ def order(data):
     if data['order'] == 'new_timezone':
         contract_manager.actualize_timezone(contract, commit=True)
 
-    if data['order'] in ['create_form', 'attach_form', 'detach_form', 'detach_medicine', 'remove_form', 'attach_algorithm', 'detach_algorithm', 'set_params']:
+    if data['order'] in ['create_form', 'create_medicine', 'attach_form', 'detach_form', 'detach_medicine', 'remove_form', 'attach_algorithm', 'detach_algorithm', 'set_params']:
         if data['order'] == 'create_form':
             form = form_manager.create_or_edit(data['params'], contract)
 
             if form:
                 tasks.request_cache_update.delay(contract.id)
                 return str(form.id)
+            else:
+                abort(422)
+
+        if data['order'] == 'create_medicine':
+            medicine = medicine_manager.create_or_edit(data['params'], contract)
+
+            if medicine:
+                tasks.request_cache_update.delay(contract.id)
+                return str(medicine.id)
             else:
                 abort(422)
 
@@ -100,6 +109,8 @@ def order(data):
             form_manager.detach(data['params'].get('template_id'), contract)
 
         if data['order'] == 'detach_medicine':
+            if data['params'].get('id'):
+                medicine_manager.remove(data['params'].get('id'), contract, data['params'].get('bypass_notifications'))
             if data['params'].get('template_id'):
                 medicine_manager.detach(data['params'].get('template_id'), contract)
             if data['params'].get('atx'):
