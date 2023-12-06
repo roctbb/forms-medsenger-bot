@@ -35,6 +35,6 @@ def gts():
 
 def extract_date(S):
     try:
-        return datetime.strptime(S, '%Y-%m-%d')
+        return datetime.strptime(S, '%Y-%m-%d').date()
     except:
         return None
