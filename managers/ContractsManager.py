@@ -1,12 +1,12 @@
 from helpers import log
-from managers.HookManager import HookManager
 from managers.Manager import Manager
+from methods.hooks import clear_contract_hooks
 from models import Patient, Contract
 
 
 class ContractManager(Manager):
     def __init__(self, *args):
-        super(ContractManager, self).__init__(*args)
+        super(ContractManager, self).__init__()
 
     def add(self, contract_id, clinic_id):
         contract = Contract.query.filter_by(id=contract_id).first()
@@ -56,7 +56,7 @@ class ContractManager(Manager):
 
             contract.is_active = False
 
-            HookManager(self.medsenger_api, self.db).clear_contract(contract)
+            clear_contract_hooks(contract)
 
             for object in contract.forms + contract.algorithms + contract.medicines + contract.reminders + contract.examinations:
                 self.db.session.delete(object)

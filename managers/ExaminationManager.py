@@ -9,7 +9,7 @@ from tasks import threader
 
 class ExaminationManager(Manager):
     def __init__(self, *args):
-        super(ExaminationManager, self).__init__(*args)
+        super(ExaminationManager, self).__init__()
 
     def get_templates(self):
         return MedicalExamination.query.filter_by(is_template=True).all()

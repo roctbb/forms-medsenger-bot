@@ -8,7 +8,7 @@ from models import Patient, Contract, Reminder
 
 class ReminderManager(Manager):
     def __init__(self, *args):
-        super(ReminderManager, self).__init__(*args)
+        super(ReminderManager, self).__init__()
 
     def get_templates(self):
         return Reminder.query.filter_by(is_template=True).all()

@@ -11,7 +11,7 @@ from config import MEDICINE_CATALOG_URL
 
 class MedicineManager(Manager):
     def __init__(self, *args):
-        super(MedicineManager, self).__init__(*args)
+        super(MedicineManager, self).__init__()
 
     def fill_atx(self, medicine):
         if not medicine.atx:

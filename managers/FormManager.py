@@ -14,7 +14,7 @@ from helpers import generate_timetable
 
 class FormManager(Manager):
     def __init__(self, *args):
-        super(FormManager, self).__init__(*args)
+        super(FormManager, self).__init__()
 
     def get(self, form_id):
         return Form.query.filter_by(id=form_id).first()

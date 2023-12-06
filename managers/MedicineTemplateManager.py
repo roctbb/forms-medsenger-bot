@@ -4,7 +4,7 @@ from models import MedicineTemplate
 
 class MedicineTemplateManager(Manager):
     def __init__(self, *args):
-        super(MedicineTemplateManager, self).__init__(*args)
+        super(MedicineTemplateManager, self).__init__()
 
     def get_clinic_templates(self, clinic_id):
         medicines = MedicineTemplate.query.filter_by(clinic_id=clinic_id).all()

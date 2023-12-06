@@ -10,7 +10,7 @@ from threading import Thread
 
 class TimetableManager(Manager):
     def __init__(self, medicine_manager, form_manager, reminder_manager, *args):
-        super(TimetableManager, self).__init__(*args)
+        super(TimetableManager, self).__init__()
         self.medicine_manager = medicine_manager
         self.form_manager = form_manager
         self.reminder_manager = reminder_manager
