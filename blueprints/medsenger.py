@@ -91,6 +91,11 @@ def order(data):
                 abort(422)
 
         if data['order'] == 'create_medicine':
+            times = data['params'].get('times')
+
+            if times != None:
+                data['params']['timetable'] = generate_timetable(8, 23, times)
+
             medicine = medicine_manager.create_or_edit(data['params'], contract)
 
             if medicine:
