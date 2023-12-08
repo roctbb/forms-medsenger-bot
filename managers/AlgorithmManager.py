@@ -93,7 +93,7 @@ class AlgorithmManager(Manager):
 
         self.__commit__()
 
-        log_action("algorithm", "remove", contract)
+        log_action("algorithm", "remove", contract, algorithm)
 
         return id
 
