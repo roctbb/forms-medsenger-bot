@@ -2,6 +2,8 @@ import json
 import time
 from copy import copy
 from datetime import datetime
+
+from methods import log_action
 from tasks import threader
 from config import DYNAMIC_CACHE
 from helpers import log, clear_categories, gts
@@ -25,6 +27,7 @@ class FormManager(Manager):
     def clear(self, contract):
         Form.query.filter_by(contract_id=contract.id).delete()
         self.__commit__()
+        log_action("form", "clear", contract)
         return True
 
     def remove(self, id, contract):
@@ -39,15 +42,7 @@ class FormManager(Manager):
         self.__commit__()
 
         if not form.is_template:
-            params = {
-                'obj_id': form.id,
-                'action': 'delete',
-                'object_type': 'form',
-                'description': form.doctor_description
-            }
-
-            threader.async_record.delay(contract.id, 'doctor_action',
-                                          'Отменен опросник "{}".'.format(form.title), params=params)
+            log_action("form", "remove", contract, form)
 
         return id
 
@@ -55,6 +50,7 @@ class FormManager(Manager):
         forms = list(filter(lambda x: x.template_id == template_id, contract.forms))
 
         for form in forms:
+            log_action("form", "detach", contract, form)
             self.db.session.delete(form)
 
         self.__commit__()
@@ -97,16 +93,7 @@ class FormManager(Manager):
                 self.db.session.refresh(new_form)
                 self.run(new_form)
 
-            params = {
-                'obj_id': new_form.id,
-                'action': 'attach',
-                'object_type': 'form',
-                'description': form.doctor_description,
-                'template_id': template_id
-            }
-
-            threader.async_record.delay(contract.id, 'doctor_action',
-                                          'Назначен опросник "{}".'.format(form.title), params=params)
+            log_action("form", "attach", contract, new_form)
 
             return new_form
         else:
@@ -556,14 +543,10 @@ class FormManager(Manager):
                     self.run(form)
 
             if not form_id and not data.get('is_template'):
-                params = {
-                    'obj_id': form.id,
-                    'action': 'create',
-                    'object_type': 'form',
-                    'description': form.doctor_description
-                }
-                threader.async_record.delay(contract.id, 'doctor_action',
-                                              'Назначен опросник "{}".'.format(form.title), params=params)
+                log_action("form", "create", contract, form)
+
+            if form_id:
+                log_action("form", "edit", contract, form)
 
             return form
         except Exception as e:

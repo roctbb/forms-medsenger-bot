@@ -125,7 +125,7 @@ def get_values(category_name, mode, contract_id, dimension='hours', hours=1, tim
     return save_to_cache(k, answer)
 
 
-def check_values(self, left, right, sign, modifier=0, multiplier=1):
+def check_values(left, right, sign, modifier=0, multiplier=1):
     try:
         if isinstance(modifier, str) and "|" in modifier:
             modifiers = list(map(float, modifier.split('|')))

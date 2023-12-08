@@ -24,11 +24,10 @@ class AlgorithmManager(Manager):
 
         for algorithm in algorithms:
             remove_hooks_before_deletion(algorithm)
+            log_action("algorithm", "detach", contract, algorithm)
             self.db.session.delete(algorithm)
 
         self.__commit__()
-
-        log_action("algorithm", "detach", contract, algorithms)
 
     def attach(self, template_id, contract, setup=None):
         algorithm = self.get(template_id)
@@ -39,7 +38,6 @@ class AlgorithmManager(Manager):
             new_algorithm.patient_id = contract.patient.id
 
             if setup:
-
                 for condition in extract_conditions(algorithm):
                     for block in condition['criteria']:
                         for criteria in block:
@@ -378,16 +376,10 @@ class AlgorithmManager(Manager):
             self.__commit__()
 
             if not data.get('is_template'):
-                params = {
-                    'obj_id': algorithm.id,
-                    'action': 'edit' if algorithm_id else 'create',
-                    'object_type': 'algorithm',
-                    'algorithm_params': algorithm.get_params()
-                }
-
-                threader.async_record.delay(contract.id, 'doctor_action',
-                                            '{} алгоритм "{}".'.format('Изменен' if algorithm_id else 'Подключен',
-                                                                       algorithm.title), params=params)
+                if algorithm_id:
+                    log_action("algorithm", "edit", contract, algorithm)
+                else:
+                    log_action("algorithm", "create", contract, algorithm)
 
             if algorithm.contract_id == contract.id:
                 if not algorithm.current_step:

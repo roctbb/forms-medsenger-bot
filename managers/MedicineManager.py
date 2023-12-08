@@ -1,5 +1,7 @@
 import time
 from datetime import datetime
+
+from methods import log_action
 from tasks import threader
 from config import DYNAMIC_CACHE
 from helpers import log, gts
@@ -29,6 +31,7 @@ class MedicineManager(Manager):
 
         for medicine in medicines:
             medicine.canceled_at = datetime.now()
+            log_action("medicine", "detach", contract, medicine)
 
         self.__commit__()
 
@@ -75,17 +78,9 @@ class MedicineManager(Manager):
             self.db.session.add(new_medicine)
             self.__commit__()
 
-            params = {
-                'obj_id': new_medicine.id,
-                'action': 'attach',
-                'object_type': 'medicine',
-                'description': new_medicine.get_description(True, False)
-            }
+            log_action("medicine", "attach", contract, new_medicine)
 
-            threader.async_record.delay(contract.id, 'doctor_action',
-                                        'Назначен препарат "{}".'.format(new_medicine.title), params=params)
-
-            return medicine
+            return new_medicine
         else:
             return False
 
@@ -141,6 +136,9 @@ class MedicineManager(Manager):
     def clear(self, contract):
         Medicine.query.filter_by(contract_id=contract.id).delete()
         self.__commit__()
+
+        log_action("medicine", "clear", contract)
+
         return True
 
     def resume(self, id, contract):
@@ -153,15 +151,8 @@ class MedicineManager(Manager):
         if medicine.contract_id:
             self.medsenger_api.send_message(contract.id,
                                             "Врач возобновил препарат {}.".format(medicine.get_description()))
-            params = {
-                'obj_id': medicine.id,
-                'action': 'resume',
-                'object_type': 'medicine',
-                'description': medicine.get_description(True, False)
-            }
 
-            threader.async_record.delay(contract.id, 'doctor_action',
-                                        'Возобновлен препарат "{}".'.format(medicine.title), params=params)
+            log_action("medicine", "resume", contract, medicine)
 
         medicine.canceled_at = None
 
@@ -180,14 +171,8 @@ class MedicineManager(Manager):
             if not by_patient and not silent:
                 self.medsenger_api.send_message(contract.id,
                                                 "Врач отменил препарат {}.".format(medicine.get_description()))
-            params = {
-                'obj_id': medicine.id,
-                'action': 'cancel',
-                'object_type': 'medicine',
-                'description': medicine.get_description(True, False)
-            }
-            threader.async_record.delay(contract.id, 'doctor_action' if not by_patient else 'action',
-                                        'Отменен препарат "{}".'.format(medicine.title), params=params)
+
+            log_action("medicine", "remove", contract, medicine)
 
         medicine.canceled_at = datetime.now()
 
@@ -212,7 +197,7 @@ class MedicineManager(Manager):
                 }
 
                 threader.async_record.delay(medicine.contract_id, 'doctor_action',
-                                              'Отменен препарат "{}".'.format(medicine.title), params=params)
+                                            'Отменен препарат "{}".'.format(medicine.title), params=params)
 
                 record = {
                     'description': 'Отменен',
@@ -319,13 +304,13 @@ class MedicineManager(Manager):
 
                 detach_date = medicine.timetable.get('detach_date')
                 medicine.detach_date = datetime.strptime(detach_date, "%Y-%m-%d") if detach_date else None
+
+                if is_new:
+                    log_action("medicine", "create", contract, medicine)
+                else:
+                    log_action("medicine", "edit", contract, medicine)
+
                 action = 'назначил препарат' if is_new else 'изменил параметры приема препарата'
-                params = {
-                    'obj_id': medicine.id,
-                    'action': 'create' if is_new else 'edit',
-                    'object_type': 'medicine',
-                    'description': medicine.get_description(True, False)
-                }
 
                 if not data.get('edited_by_patient') and not data.get('bypass_notifications'):
                     self.medsenger_api.send_message(contract.id,
@@ -333,10 +318,6 @@ class MedicineManager(Manager):
                                                         action, medicine.get_description(True),
                                                         " Мы будем автоматически присылать напоминания о приемах." if
                                                         medicine.timetable['mode'] != "manual" else ''))
-                action = 'Назначен препарат' if is_new else 'Изменены параметры приема препарата'
-                threader.async_record.delay(contract.id,
-                                            'doctor_action' if not data.get('edited_by_patient') else 'action',
-                                            '{} "{}".'.format(action, medicine.title), params=params)
 
             if not medicine_id:
                 self.db.session.add(medicine)

@@ -4,6 +4,7 @@ from datetime import timedelta
 from config import DYNAMIC_CACHE
 from helpers import log
 from managers.Manager import Manager
+from methods.action_logging import log_action
 from models import MedicalExamination, MedicalExaminationGroup
 from tasks import threader
 
@@ -34,6 +35,7 @@ class ExaminationManager(Manager):
         examinations = list(filter(lambda x: x.template_id == template_id, contract.patient.examinations))
 
         for examination in examinations:
+            log_action("examination", "detach", contract, examination)
             self.db.session.delete(examination)
 
         self.__commit__()
@@ -61,15 +63,7 @@ class ExaminationManager(Manager):
             self.db.session.add(new_examination)
             self.__commit__()
 
-            params = {
-                'obj_id': new_examination.id,
-                'action': 'attach',
-                'object_type': 'examination',
-                'description': new_examination.doctor_description
-            }
-
-            threader.async_record.delay(contract.id, 'doctor_action',
-                                          'Назначено обследование "{}".'.format(new_examination.title), params=params)
+            log_action("examination", "attach", contract, examination)
 
             return new_examination
         else:
@@ -98,6 +92,7 @@ class ExaminationManager(Manager):
     def clear(self, contract):
         MedicalExamination.query.filter_by(contract_id=contract.id).delete()
         self.__commit__()
+        log_action("examination", "clear", contract)
         return True
 
     def remove(self, examination_id, contract):
@@ -108,14 +103,7 @@ class ExaminationManager(Manager):
 
         if examination.contract_id:
             self.medsenger_api.send_message(contract.id, "Врач отменил обследование {}.".format(examination.title))
-            params = {
-                'obj_id': examination.id,
-                'action': 'cancel',
-                'object_type': 'examination',
-                'description': examination.doctor_description
-            }
-            threader.async_record.delay(contract.id, 'doctor_action',
-                                          'Отменено обследование "{}".'.format(examination.title), params=params)
+            log_action("examination", "detach", contract, examination)
 
         self.db.session.delete(examination)
         self.__commit__()
@@ -181,13 +169,6 @@ class ExaminationManager(Manager):
                 else:
                     examination.notification_date = datetime.now().date()
 
-                params = {
-                    'obj_id': examination.id,
-                    'action': 'create' if is_new else 'edit',
-                    'object_type': 'examination',
-                    'description': examination.doctor_description
-                }
-
                 expiration_text = 'действует бессрочно' if examination.no_expiration else 'срок действия {} сут.'.format(examination.expiration_days)
 
                 if is_new:
@@ -196,16 +177,14 @@ class ExaminationManager(Manager):
                                                     "Врач назначил обследование {} ({}). Его необходимо загрузить до {}."
                                                     .format(examination.title, expiration_text,
                                                             examination.deadline_date.strftime('%d.%m.%Y')))
+                    log_action("examination", "create", contract, examination)
                 else:
                     self.medsenger_api.send_message(contract.id,
                                                     "Врач изменил параметры обследования {} ({}). Его необходимо загрузить до {}."
                                                     .format(examination.title, expiration_text,
                                                             examination.deadline_date.strftime('%d.%m.%Y')))
+                    log_action("examination", "edit", contract, examination)
 
-                action = 'Назначено обследование' if is_new else 'Изменены параметры обследования'
-
-                threader.async_record.delay(contract.id, 'doctor_action',
-                                              '{} "{}".'.format(action, examination.title), params=params)
 
             if not examination_id:
                 self.db.session.add(examination)
