@@ -1,12 +1,11 @@
 class ComplianceManager:
-    __manager = None
+    _singleton_instance = None
 
     @classmethod
     def instance(cls):
-        if cls.__manager is None:
-            cls.__manager = cls()
-
-        return cls.__manager
+        if cls._singleton_instance is None:
+            cls._singleton_instance = cls()
+        return cls._singleton_instance
 
     def __init__(self):
         self.__action_requests = {}
@@ -16,9 +15,10 @@ class ComplianceManager:
             del self.__action_requests[contract_id]
 
     def get(self, contract_id):
-        from models import ActionRequest
-
         if contract_id not in self.__action_requests:
-            self.__action_requests[contract_id] = ActionRequest.query.filter_by(contract_id=contract_id).all()
-
+            self._load_action_requests(contract_id)
         return self.__action_requests[contract_id]
+
+    def _load_action_requests(self, contract_id):
+        from models import ActionRequest
+        self.__action_requests[contract_id] = ActionRequest.query.filter_by(contract_id=contract_id).all()
