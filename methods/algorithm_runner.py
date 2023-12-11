@@ -138,11 +138,14 @@ def check_values(left, right, sign, modifier=0, multiplier=1):
 
     if "date_" in sign:
         for modifier in modifiers:
-            leftc = extract_date(left)
-            rightc = (extract_date(right) + timedelta(days=modifier)).date()
-            signc = sign.replace('date_', '')
+            try:
+                leftc = extract_date(left)
+                rightc = (extract_date(right) + timedelta(days=modifier)).date()
+                signc = sign.replace('date_', '')
 
-            conditions.append((leftc, rightc, signc))
+                conditions.append((leftc, rightc, signc))
+            except:
+                pass
     else:
         for modifier in modifiers:
             try:
