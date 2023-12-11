@@ -17,14 +17,17 @@ def toUTC(d):
     return d.astimezone(utc)
 
 
-def timezone_now(zone=None):
+def determine_timezone(zone=None):
     if isinstance(zone, str) and zone:
-        tz = timezone(zone)
+        return timezone(zone)
     elif zone:
-        tz = zone
+        return zone
     else:
-        tz = timezone('Europe/Moscow')
+        return timezone('Europe/Moscow')
 
+
+def timezone_now(zone=None):
+    tz = determine_timezone(zone)
     return datetime.now(tz)
 
 
