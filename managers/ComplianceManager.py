@@ -1,3 +1,4 @@
+
 class ComplianceManager:
     _singleton_instance = None
 

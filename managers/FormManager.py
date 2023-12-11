@@ -126,8 +126,6 @@ class FormManager(Manager):
             deadline = None
 
         result = self.medsenger_api.send_message(contract_id, text, action, action_name, True, False, True, deadline)
-        # telepat speaker
-        threader.async_order.delay(contract_id, "form", 26, form.as_dict())
 
         if result:
             form.last_sent = datetime.now()
