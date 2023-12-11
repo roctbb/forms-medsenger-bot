@@ -17,7 +17,7 @@ class Compliance:
             if isinstance(self, Medicine):
                 action = "medicine_{}".format(self.id)
 
-        manager = ComplianceManager.getInstance()
+        manager = ComplianceManager.instance()
         action_requests = filter(lambda r: r.action == action, manager.get(self.contract_id))
 
         if start_date:

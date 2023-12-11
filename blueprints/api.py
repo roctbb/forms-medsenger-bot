@@ -12,7 +12,7 @@ api_blueprint = Blueprint('api_endpoints', __name__, template_folder='templates'
 @api_blueprint.route('/api/settings/get_patient', methods=['GET'])
 @verify_request(contract_manager, 'doctor')
 def get_data(args, form, contract):
-    ComplianceManager.getInstance().clear(contract.id)
+    ComplianceManager.instance().clear(contract.id)
     patient = contract.patient.as_dict()
     patient["info"] = medsenger_api.get_patient_info(contract.id)
     patient["current_contract"] = contract.as_dict()
@@ -23,7 +23,7 @@ def get_data(args, form, contract):
 @api_blueprint.route('/api/settings/get_patient_data', methods=['GET'])
 @verify_request(contract_manager, 'patient')
 def get_open_data(args, form, contract):
-    ComplianceManager.getInstance().clear(contract.id)
+    ComplianceManager.instance().clear(contract.id)
     patient = contract.patient.as_dict()
 
     return jsonify({

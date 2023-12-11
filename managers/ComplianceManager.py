@@ -2,7 +2,7 @@ class ComplianceManager:
     __manager = None
 
     @classmethod
-    def getInstance(cls):
+    def instance(cls):
         if cls.__manager is None:
             cls.__manager = cls()
 
