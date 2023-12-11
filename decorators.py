@@ -54,14 +54,14 @@ def verify_request(contract_manager, expected_role):
             else:
                 contract = __get_contract(contract_manager, contract_id)
 
-            if expected_role == 'doctor':
+            if expected_role == 'doctor' and contract:
                 if api_key == API_KEY and source == 'doctor':
                     has_access = True
 
                 if agent_token == contract.doctor_agent_token:
                     has_access = True
 
-            if expected_role == 'patient':
+            if expected_role == 'patient' and contract:
                 if api_key == API_KEY and source in ['patient', 'doctor']:
                     has_access = True
 
