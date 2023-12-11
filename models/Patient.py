@@ -7,7 +7,7 @@ from datetime import datetime
 
 class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    contracts = db.relationship('Contract', backref=backref('patient', uselist=False), lazy=True)
+    contracts = db.relationship('Contract', backref=backref('patient', uselist=False, lazy=True), lazy=True)
     forms = db.relationship('Form', backref=backref('patient', uselist=False), lazy=True)
     medicines = db.relationship('Medicine', backref=backref('patient', uselist=False), lazy=True)
     reminders = db.relationship('Reminder', backref=backref('patient', uselist=False), lazy=True)

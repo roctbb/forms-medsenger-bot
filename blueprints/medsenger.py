@@ -1,4 +1,6 @@
 from flask import Blueprint
+
+from managers import ComplianceManager
 from tasks import threader
 from manage import *
 from helpers import *
@@ -52,6 +54,8 @@ def order(data):
             medicines = medicine_manager.get_attached_medicines(contract.patient, from_date, to_date)
             return jsonify([medicine.as_dict() for medicine in medicines])
         if data['order'] == 'get_compliance':
+            ComplianceManager.getInstance().clear(contract.id)
+
             ordered_compliance = {
                 "medicines": [],
                 "forms": []

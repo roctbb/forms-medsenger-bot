@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 
-
 class Compliance:
     def current_month_compliance(self, action=None):
         return self.count_compliance(action, start_date=datetime.now().replace(day=1, minute=0, hour=0, second=0))
@@ -9,7 +8,8 @@ class Compliance:
         return self.count_compliance(action, start_date=datetime.now() - timedelta(days=7))
 
     def count_compliance(self, action=None, start_date=None, end_date=None):
-        from . import Form, Medicine, ActionRequest
+        from managers import ComplianceManager
+        from . import Form, Medicine
 
         if not action:
             if isinstance(self, Form):
@@ -17,14 +17,15 @@ class Compliance:
             if isinstance(self, Medicine):
                 action = "medicine_{}".format(self.id)
 
-        request = ActionRequest.query.filter_by(contract_id=self.contract_id, action=action)
+        manager = ComplianceManager.getInstance()
+        action_requests = filter(lambda r: r.action == action, manager.get(self.contract_id))
 
         if start_date:
-            request = request.filter(ActionRequest.sent >= start_date)
+            action_requests = filter(lambda r: r.sent >= start_date, action_requests)
 
         if end_date:
-            request = request.filter(ActionRequest.sent <= end_date)
+            action_requests = filter(lambda r: r.sent <= end_date, action_requests)
 
-        records = request.all()
+        action_requests = list(action_requests)
 
-        return len(records), len(list(filter(lambda x: x.is_done, records)))
+        return len(action_requests), len(list(filter(lambda x: x.is_done, action_requests)))

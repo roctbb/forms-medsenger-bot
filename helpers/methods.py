@@ -1,9 +1,11 @@
 import json
 import threading
+import traceback
 from flask import request, abort, jsonify, render_template
 from config import *
 from sentry_sdk import capture_exception
 import sys, os
+from .timing import *
 
 from helpers import *
 
@@ -17,8 +19,10 @@ def log(error, terminating=False):
         capture_exception(error)
 
     if terminating:
+        print(traceback.format_exc())
         print(gts(), exc_type, fname, exc_tb.tb_lineno, error, "CRITICAL")
     else:
+        print(traceback.format_exc())
         print(gts(), exc_type, fname, exc_tb.tb_lineno, error)
 
 

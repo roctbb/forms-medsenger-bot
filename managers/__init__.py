@@ -6,3 +6,4 @@ from .MedicineManager import MedicineManager
 from .MedicineTemplateManager import MedicineTemplateManager
 from .ReminderManager import ReminderManager
 from .TimetableManager import TimetableManager
+from .ComplianceManager import ComplianceManager
