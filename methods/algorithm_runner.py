@@ -322,6 +322,7 @@ def should_observe_group(group, included_types, excluded_types):
 
     return True
 
+
 def check_criteria_groups(or_groups, contract, additions, descriptions, category_names, algorithm):
     all_record_ids = set()
     result = False
@@ -346,6 +347,7 @@ def check_criteria_groups(or_groups, contract, additions, descriptions, category
 
     return result, record_ids
 
+
 def run_algorithm(algorithm, included_types=[], excluded_types=['exact_date']):
     from managers import AlgorithmManager
 
@@ -368,7 +370,7 @@ def run_algorithm(algorithm, included_types=[], excluded_types=['exact_date']):
 
         criteria = condition['criteria']
 
-        reset_minutes = int(condition.get('reset_minutes', 0))
+        reset_minutes = toInt(condition.get('reset_minutes'), 0)
         last_fired = int(condition.get('last_fired', 0))
 
         if time.time() - last_fired < max(reset_minutes * 60, 10):
@@ -385,7 +387,7 @@ def run_algorithm(algorithm, included_types=[], excluded_types=['exact_date']):
                      should_observe_group(group, included_types, excluded_types)]
 
         result, record_ids = check_criteria_groups(or_groups, contract, additions, descriptions,
-                                                          category_names, algorithm)
+                                                   category_names, algorithm)
 
         if result:
             if not condition.get('skip_additions'):

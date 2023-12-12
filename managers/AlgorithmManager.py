@@ -6,7 +6,7 @@ from methods.action_runner import run_action
 from methods.algorithm_runner import check_criteria, clear_cache, run_algorithm
 from sqlalchemy.orm.attributes import flag_modified, flag_dirty
 
-from helpers import log, clear_categories, extract_conditions, extract_date
+from helpers import log, clear_categories, extract_conditions, extract_date, toInt
 from managers.Manager import Manager
 from models import Algorithm
 from methods.hooks import *
@@ -141,7 +141,7 @@ class AlgorithmManager(Manager):
         algorithm.current_step = new_step['uid']
 
         if new_step.get('reset_minutes'):
-            algorithm.timeout_at = time.time() + 60 * int(new_step['reset_minutes'])
+            algorithm.timeout_at = time.time() + 60 * toInt(new_step['reset_minutes'], 0)
         else:
             algorithm.timeout_at = 0
 

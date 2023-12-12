@@ -11,6 +11,7 @@ from helpers import *
 
 DATACACHE = {}
 
+
 def log(error, terminating=False):
     exc_type, exc_obj, exc_tb = sys.exc_info()
     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -97,8 +98,6 @@ def generate_timetable(start, end, times):
     return timetable
 
 
-
-
 def fullfill_message(text, contract, medsenger_api):
     def fullfill(text, info, a, b):
         L = b.split('.')
@@ -149,3 +148,10 @@ def extract_conditions(algorithm):
         conditions.extend(algorithm.common_conditions)
 
     return conditions
+
+
+def toInt(value, default=None):
+    try:
+        return int(value)
+    except:
+        return default
