@@ -1,6 +1,6 @@
 from infrastructure import db
 from datetime import datetime, timedelta
-from helpers import clear_categories, get_step, extract_conditions
+from helpers import clear_categories, get_step, extract_conditions, toInt
 import time
 
 
@@ -70,10 +70,10 @@ class Algorithm(db.Model):
         new_algorithm.detach_date = detach
 
         step = get_step(self)
-        if not step.get('reset_minutes') or int(step['reset_minutes']) == 0:
+        if not step.get('reset_minutes') or toInt(step['reset_minutes'], 0) == 0:
             new_algorithm.timeout_at = 0
         else:
-            new_algorithm.timeout_at = time.time() + 60 * int(step['reset_minutes'])
+            new_algorithm.timeout_at = time.time() + 60 * toInt(step['reset_minutes'], 0)
 
         if self.is_template:
             new_algorithm.template_id = self.id
