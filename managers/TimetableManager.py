@@ -66,9 +66,12 @@ class TimetableManager(Manager):
 
     def run_if_should(self, objects, manager):
         for object in objects:
-            if object and self.should_run(object):
-                manager.run(object)
-                manager.log_request(object)
+            try:
+                if object and self.should_run(object):
+                    manager.run(object)
+                    manager.log_request(object)
+            except Exception as e:
+                log(e, False)
 
     def update_daily_tasks(self, app):
         print("Start tasks update")
