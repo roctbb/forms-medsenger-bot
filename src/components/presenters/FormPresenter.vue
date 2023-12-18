@@ -382,7 +382,8 @@ export default {
             Event.fire('back-to-dashboard');
         },
         get_field_styles: function (field) {
-            return `margin-top: 15px; margin-bottom: 15px; margin-left: ${ 45 * (this.get_level(field) - 1)}px;`
+            const change = 10 * (this.get_level(field) - 1);
+            return `margin-top: 15px; margin-bottom: 15px; background-color: rgb(${255 - change},${255 - change}, ${255});`
         },
         load_form: function (form) {
             if (form.fields === undefined) {
