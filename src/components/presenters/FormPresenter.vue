@@ -22,7 +22,7 @@
                                   :required="field.required"
                                   :title="field.text" :key="i"
                                   :description="field.description" :errors="field_errors[field.uid]"
-                                  style="margin-top: 15px; margin-bottom: 15px;">
+                                  :style="get_field_styles(field)">
                         <input type="number" :min="field.params.min" :max="field.params.max" step="1"
                                class="form-control monitoring-input" @input="fieldTransformer(field)"
                                :class="save_clicked && field.required &&
@@ -88,7 +88,8 @@
                         </div>
 
                         <div v-if="field.type == 'time'">
-                            <date-picker lang="ru" :required="field.required" v-model="answers[field.uid]" format="HH:mm"
+                            <date-picker lang="ru" :required="field.required" v-model="answers[field.uid]"
+                                         format="HH:mm"
                                          value-type="HH:mm"
                                          type="time"></date-picker>
                         </div>
@@ -147,7 +148,8 @@
                     :big="true"
                     :title="'Время заполнения'" :key="-1"
                     style="margin-top: 15px; margin-bottom: 15px;">
-                    <date-picker v-model="fill_time" lang="ru" :minute-step="15" type="datetime" format="DD.MM.YYYY HH:mm"
+                    <date-picker v-model="fill_time" lang="ru" :minute-step="15" type="datetime"
+                                 format="DD.MM.YYYY HH:mm"
                                  time-title-format="DD.MM.YYYY"
                                  :disabled-date="date_invalid"></date-picker>
                 </form-group48>
@@ -329,19 +331,30 @@ export default {
                 }
             }
         },
+        find_field_by_descriptor: function (uid) {
+            if (uid) {
+                return this.form.fields.find(f => {
+                    return uid.uid && uid.uid === field.show_if.uid ||
+                        uid === f.uid
+                })
+            }
+        },
         show_field: function (field) {
             if (field.show_if) {
-                if (this.answers[field.show_if] || field.show_if.uid && this.answers[field.show_if.uid] == field.show_if.ans) {
-                    let f = this.form.fields.filter(f => {
-                        return field.show_if.uid && f.uid == field.show_if.uid ||
-                            field.show_if == f.uid
-                    })[0]
-                    return this.show_field(f)
+                if (this.answers[field.show_if] || field.show_if.uid && this.answers[field.show_if.uid] === field.show_if.ans) {
+                    return this.show_field(this.find_field_by_descriptor(field.show_if))
                 }
                 return false
             }
             return true
 
+        },
+        get_level: function (field) {
+            if (field && field.show_if) {
+                field = this.find_field_by_descriptor(field.show_if)
+                return 1 + this.get_level(field)
+            }
+            return 1;
         },
         add_medicine: function (field) {
             this.answers[field.uid].push({
@@ -367,6 +380,9 @@ export default {
         },
         back: function () {
             Event.fire('back-to-dashboard');
+        },
+        get_field_styles: function (field) {
+            return `margin-top: 15px; margin-bottom: 15px; margin-left: ${ 30 * (this.get_level(field) - 1)}px;`
         },
         load_form: function (form) {
             if (form.fields === undefined) {
