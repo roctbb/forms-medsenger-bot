@@ -382,7 +382,7 @@ export default {
             Event.fire('back-to-dashboard');
         },
         get_field_styles: function (field) {
-            return `margin-top: 15px; margin-bottom: 15px; margin-left: ${ 30 * (this.get_level(field) - 1)}px;`
+            return `margin-top: 15px; margin-bottom: 15px; margin-left: ${ 45 * (this.get_level(field) - 1)}px;`
         },
         load_form: function (form) {
             if (form.fields === undefined) {
