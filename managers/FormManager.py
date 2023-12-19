@@ -82,10 +82,9 @@ class FormManager(Manager):
                 except Exception as e:
                     log(e, False)
 
-            print("init text is", new_form.init_text)
 
             if new_form.init_text:
-                self.medsenger_api.send_message(form.contract_id, form.init_text, only_patient=True)
+                self.medsenger_api.send_message(new_form.contract_id, form.init_text, only_patient=True)
 
             self.db.session.add(new_form)
             self.__commit__()
