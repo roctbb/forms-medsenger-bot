@@ -106,6 +106,7 @@ class Form(db.Model, Compliance):
         new_form.button_title = self.button_title
         new_form.custom_title = self.custom_title
         new_form.custom_text = self.custom_text
+        new_form.init_text = self.init_text
         new_form.fields = self.fields
         new_form.has_integral_evaluation = self.has_integral_evaluation
         new_form.integral_evaluation = self.integral_evaluation
