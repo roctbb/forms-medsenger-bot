@@ -89,6 +89,7 @@ def generate_event_description(criteria, l_value, r_value, category_names, curre
         return comment
     except Exception as e:
         log(e, False)
+        return ""
 
 
 def generate_contract_description(contract):
