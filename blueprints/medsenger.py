@@ -203,7 +203,7 @@ def init(data):
                     "times": params.get('form_times_{}'.format(template_id)),
                 })
 
-                if form.algorithm_id and str(form.algorithm_id) not in exclude_algorithms:
+                if form and form.algorithm_id and str(form.algorithm_id) not in exclude_algorithms:
                     algorithm_manager.attach(form.algorithm_id, contract, params)
 
         print(gts() + f"attaching reminders")

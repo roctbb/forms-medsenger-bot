@@ -131,7 +131,11 @@ class AlgorithmManager(Manager):
         for condition in conditions:
             for block in condition['criteria']:
                 for k in block:
-                    categories.append(k['category'])
+                    if k.get('category'):
+                        categories.append(k['category'])
+                    if k.get('right_category'):
+                        categories.append(k["right_category"])
+
 
         algorithm.categories = "|".join(set(categories))
 

@@ -4,7 +4,6 @@ app.register_blueprint(actions_blueprint, url_prefix='/')
 app.register_blueprint(medsenger_blueprint, url_prefix='/')
 app.register_blueprint(api_blueprint, url_prefix='/')
 
-
 @app.route('/')
 def index():
     return "Waiting for the thunder"

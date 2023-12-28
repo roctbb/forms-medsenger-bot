@@ -138,6 +138,8 @@ class TimetableManager(Manager):
     def check_days(self, app):
         from tasks import tasks
 
+        print("Running check dates")
+
         with app.app_context():
             contracts = list(Contract.query.filter_by(is_active=True).all())
             algorithm_groups = list(map(lambda x: x.algorithms, contracts))
@@ -145,6 +147,8 @@ class TimetableManager(Manager):
             for group in algorithm_groups:
                 for alg in group:
                     if "exact_date" in alg.categories:
+                        print("Running algorithm {} for contract {}".format(alg.id, alg.contract_id))
+
                         chain = tasks.run_algorithm.s(True, alg.id, ["exact_date"], [])
                         chain |= tasks.request_chained_cache_update.s(alg.contract_id)
                         chain.apply_async()
