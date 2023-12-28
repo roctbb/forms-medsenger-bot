@@ -247,6 +247,7 @@ def check_criteria(criteria, contract_id, buffer, descriptions, category_names, 
                                                  dimension=dimension, times=criteria.get('right_times'),
                                                  offset_dim=offset_dim, offset_count=offset_count,
                                                  algorithm=algorithm)
+
         if not right_values or not left_values:
             return False
 
@@ -312,7 +313,10 @@ def should_observe_group(group, included_types, excluded_types):
     categories_in_group = set()
 
     for criteria in group:
-        categories_in_group.add(criteria.get('category'))
+        if criteria.get('category'):
+            categories_in_group.add(criteria.get('category'))
+        if criteria.get('right_category'):
+            categories_in_group.add(criteria.get('right_category'))
 
     if included_types and not categories_in_group.intersection(included_types):
         return False

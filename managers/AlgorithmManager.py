@@ -187,7 +187,7 @@ class AlgorithmManager(Manager):
         self.__commit__()
 
     def run(self, algorithm, included_types=[], excluded_types=['exact_date']):
-        fired, has_messages = run_algorithm(algorithm, included_types=[], excluded_types=['exact_date'])
+        fired, has_messages = run_algorithm(algorithm, included_types=included_types, excluded_types=excluded_types)
 
         self.__commit__()
 
