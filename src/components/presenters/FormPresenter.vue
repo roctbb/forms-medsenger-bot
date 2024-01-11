@@ -331,11 +331,11 @@ export default {
                 }
             }
         },
-        find_field_by_descriptor: function (uid) {
-            if (uid) {
+        find_field_by_descriptor: function (descriptor) {
+            if (descriptor) {
                 return this.form.fields.find(f => {
-                    return uid.uid && uid.uid === field.show_if.uid ||
-                        uid === f.uid
+                    return descriptor.uid && descriptor.uid === f.uid ||
+                        descriptor === f.uid
                 })
             }
         },
