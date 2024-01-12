@@ -1,30 +1,11 @@
 import json
 import threading
-import traceback
-from flask import request, abort, jsonify, render_template
+from flask import render_template
 from config import *
-from sentry_sdk import capture_exception
-import sys, os
-from .timing import *
-
-from helpers import *
+import os
+from helpers.descriptions import generate_contract_description
 
 DATACACHE = {}
-
-
-def log(error, terminating=False):
-    exc_type, exc_obj, exc_tb = sys.exc_info()
-    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-
-    if PRODUCTION:
-        capture_exception(error)
-
-    if terminating:
-        print(traceback.format_exc())
-        print(gts(), exc_type, fname, exc_tb.tb_lineno, error, "CRITICAL")
-    else:
-        print(traceback.format_exc())
-        print(gts(), exc_type, fname, exc_tb.tb_lineno, error)
 
 
 def get_ui(page, contract, categories='[]', object_id=None, is_preview=False, dashboard_parts=[], role='doctor'):

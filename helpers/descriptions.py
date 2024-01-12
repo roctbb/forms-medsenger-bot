@@ -1,4 +1,3 @@
-from helpers import log
 
 
 def get_signs():
@@ -88,6 +87,7 @@ def generate_event_description(criteria, l_value, r_value, category_names, curre
 
         return comment
     except Exception as e:
+        from helpers import log
         log(e, False)
         return ""
 
