@@ -1,7 +1,12 @@
 <template>
     <div v-if="map" style="margin: 5px">
-        <human-map v-if="map == 'human'" :parts="parts" />
-        <child-map v-if="map == 'child'" :parts="parts" />
+        <human-map v-if="map == 'human'" :parts="parts" :uid="uid"/>
+        <child-map v-if="map == 'child'" :parts="parts" :uid="uid"/>
+        <emotions-map v-if="map == 'emotions'" :parts="parts" :uid="uid"/>
+
+        <br>
+
+        <b>Выбор:</b> <i>{{parts.length ? parts.join(', ') : 'Ничего не выбрано'}}</i>
     </div>
 </template>
 
@@ -9,10 +14,11 @@
 
 import HumanMap from "../../maps/human/HumanMap";
 import ChildMap from "../../maps/child/ChildMap";
+import EmotionsMap from "../../maps/emotions/EmotionsMap.vue";
 
 export default {
     name: "InteractiveMap",
-    components: {HumanMap,ChildMap},
+    components: {EmotionsMap, HumanMap,ChildMap},
     props: ['map', 'uid'],
     data() {
         return {
@@ -22,12 +28,13 @@ export default {
     computed: {
     },
     created() {
-        Event.listen('mouse-down', zone => {
-            let part = this.parts.filter(p => p == zone)
+        Event.listen('mouse-down', (data) => {
+            if (data.uid !== this.uid) return
+            let part = this.parts.filter(p => p == data.zone)
             if (part.length)
-                this.parts = this.parts.filter(p => p != zone)
+                this.parts = this.parts.filter(p => p != data.zone)
             else
-                this.parts.push(zone)
+                this.parts.push(data.zone)
 
             if (this.uid)
                 Event.fire('interactive-map-answer', {answer: this.parts, uid: this.uid})
@@ -39,10 +46,9 @@ export default {
 <style>
 @media (hover: hover) and (pointer: fine) {
     path:hover, circle:hover {
-        stroke: #24a8b4 !important;
-        stroke-width: 1px;
+        stroke: #000000 !important;
+        stroke-width: 2px;
         stroke-linejoin: round;
-        fill: #24a8b4 !important;
         cursor: pointer;
     }
 }
