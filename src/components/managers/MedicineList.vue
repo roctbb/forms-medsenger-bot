@@ -272,6 +272,7 @@ export default {
                         this.axios.post(this.direct_url('/api/settings/medicine'), this.custom_medicine)
                             .then(r => {
                                 if (!this.custom_medicine.id) {
+                                    this.custom_medicine.id = r.data.id
                                     this.patient_medicines.push(this.custom_medicine)
                                 }
                                 this.clear()
