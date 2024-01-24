@@ -8,6 +8,7 @@ from methods.action_logging import log_action
 from models import MedicalExamination, MedicalExaminationGroup
 from tasks import threader
 
+
 class ExaminationManager(Manager):
     def __init__(self, *args):
         super(ExaminationManager, self).__init__()
@@ -79,7 +80,7 @@ class ExaminationManager(Manager):
         if not date:
             date = datetime.now().time()
         examination.upload_date = datetime.fromtimestamp(date).strftime('%Y-%m-%d')
-        record = self.medsenger_api.add_record(contract_id, 'analysis_result', examination.title,
+        record = self.medsenger_api.add_record(examination.contract_id, 'analysis_result', examination.title,
                                                files=files, params={'examination_id': examination.id},
                                                record_time=date, return_id=True)
         if record:
@@ -184,7 +185,6 @@ class ExaminationManager(Manager):
                                                     .format(examination.title, expiration_text,
                                                             examination.deadline_date.strftime('%d.%m.%Y')))
                     log_action("examination", "edit", contract, examination)
-
 
             if not examination_id:
                 self.db.session.add(examination)
