@@ -214,7 +214,10 @@ def init(data):
                 medicine_manager.attach(template_id, contract, params.get('medicine_timetable_{}'.format(template_id)))
 
         print(gts() + f"attaching custom forms")
-        custom_forms = filter(lambda x: "form_" in x and params.get(x), params.keys())
+        custom_forms = list(filter(lambda x: "form_" in x and params.get(x), params.keys()))
+        selections = filter(lambda x: "select_forms_" in x and params.get(x), params.keys())
+        custom_forms += [params[s] for s in selections]
+
         for custom_form in custom_forms:
             try:
                 part = custom_form.split('_')[1]

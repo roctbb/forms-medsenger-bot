@@ -723,8 +723,8 @@
 
 <script>
     export default {
-        name: "HumanMap",
-        props: ['parts', 'width'],
+        name: "ChildMap",
+        props: ['parts', 'width', 'uid'],
         data() {
             return {
                 originalWidth: 185,
@@ -743,7 +743,7 @@
         },
         methods: {
             mouse: function (action, zone) {
-                Event.fire(`mouse-${action}`, zone)
+                Event.fire(`mouse-${action}`, {zone: zone, uid: this.uid})
             },
             color: function (zone) {
                 return this.parts.filter(p => p == zone).length ? '#24a8b4' : '#d3d3d3'
