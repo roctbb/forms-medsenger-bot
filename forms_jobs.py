@@ -1,8 +1,6 @@
 from forms_bot import *
 from apscheduler.schedulers.background import BlockingScheduler
 
-timetable_manager.check_days(app)
-
 scheduler = BlockingScheduler()
 scheduler.add_job(timetable_manager.iterate, 'interval', minutes=1, args=(app, ))
 scheduler.add_job(algorithm_manager.check_timeouts, 'interval', minutes=1, args=(app, ))

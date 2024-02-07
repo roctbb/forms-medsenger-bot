@@ -402,7 +402,7 @@ def post_examination(args, form, contract, examination_id):
     examination = examination_manager.get(examination_id)
     data = request.json
 
-    if examination.contract_id != contract.id and not examination.is_template:
+    if examination.patient_id != contract.patient.id and not examination.is_template:
         abort(401)
 
     submit_chain = tasks.submit_examination.s(True, data['files'], examination_id, contract.id, data['date'])
