@@ -22,7 +22,9 @@
                 <option v-if="is_admin" value="set_info_materials">задать список информационных материалов</option>
                 <!-- назначение/отключения мониторинга/лекарства/алгоритма / order -->
             </select>
-            <small class="text-muted"><button class="btn btn-sm btn-default" @click="remove()">Удалить</button></small>
+            <small class="text-muted">
+                <button class="btn btn-sm btn-default" @click="remove()">Удалить</button>
+            </small>
         </div>
 
         <div class="col-md-9" v-if="['change_step'].includes(action.type)">
@@ -31,11 +33,35 @@
             </select>
         </div>
 
-         <div class="col-md-9" v-if="['set_info_materials'].includes(action.type)">
+        <div class="col-md-9" v-if="['set_info_materials'].includes(action.type)">
             <textarea class="form-control form-control-sm" v-model="action.params.materials"></textarea>
         </div>
 
         <div class="col-md-9" v-if="['script'].includes(action.type)">
+            <div>
+                Параметры для скрипта<br>
+                <div class="row" v-for="(param, i) in action.params.script_params">
+                    <div class="col-md-5">
+                        <input class="form-control form-control-sm" v-model="param.value_name">
+                        <small class="text-muted">Имя поля</small>
+                    </div>
+                    <div class="col-md-3">
+                        <input class="form-control form-control-sm" v-model="param.value_code">
+                        <small class="text-muted">Код (для сценариев)</small>
+                    </div>
+                    <div class="col-md-2">
+                        <input class="form-control form-control-sm" v-model="param.value">
+                        <small class="text-muted">Значение</small>
+                    </div>
+                    <div class="col-md-1">
+                        <a class="btn btn-default btn-sm" @click="remove_script_param(i)">Удалить параметр</a>
+                    </div>
+                </div>
+                <a class="btn btn-default btn-sm" @click="add_script_param()">Добавить параметр</a>
+                <br>
+            </div>
+            Скрипт <br>
+            <span class="small text-muted">form_manager, contract_manager, medicine_manager, reminder_manager, algorithm_params, get_param_value_by_code(code)</span>
             <textarea class="form-control form-control-sm" v-model="action.params.code"></textarea>
         </div>
 
@@ -104,7 +130,8 @@
             <small class="text-muted">Название препарата</small>
         </div>
 
-        <div class="col-md-3" v-if="['form', 'attach_form', 'detach_form', 'attach_algorithm', 'detach_algorithm', 'attach_medicine', 'detach_medicine'].includes(action.type)">
+        <div class="col-md-3"
+             v-if="['form', 'attach_form', 'detach_form', 'attach_algorithm', 'detach_algorithm', 'attach_medicine', 'detach_medicine'].includes(action.type)">
             <input type="text" class="form-control form-control-sm" v-model="action.params.template_id">
             <small class="text-muted">ID шаблона</small>
         </div>
@@ -204,18 +231,31 @@ export default {
                 this.action.params = {};
             }
 
+            if (this.action.type === 'script' && !this.action.params.script_params) {
+                this.action.params.script_params = []
+            }
+        },
+        add_script_param: function () {
+            let variant = {value_name: '', value_code: '', value: 0}
+            this.action.params.script_params.push(variant);
+            this.$forceUpdate()
+        },
+        remove_script_param: function (j) {
+            this.action.params.script_params.splice(j, 1);
+            this.$forceUpdate()
         },
     },
     created() {
         this.action = this.data;
-        if (this.data.type)
-        {
+        if (this.data.type) {
             this.mode = this.action.type
         }
 
-        if (this.action.type === 'order' && this.action.params.order_params && !(typeof this.action.params.order_params === 'string' || this.action.params.order_params instanceof String))
-        {
+        if (this.action.type === 'order' && this.action.params.order_params && !(typeof this.action.params.order_params === 'string' || this.action.params.order_params instanceof String)) {
             this.action.params.order_params = JSON.stringify(this.action.params.order_params)
+        }
+        if (this.action.type === 'script' && !this.action.params.script_params) {
+            this.action.params.script_params = []
         }
     }
 }

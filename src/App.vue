@@ -12,7 +12,7 @@
             </div>
 
             <div class="container" style="margin-top: 15px;" v-else>
-                <dashboard :patient="patient" :templates="templates" v-show="state == 'dashboard'"
+                <dashboard :patient="patient" :templates="templates" v-show="state == 'dashboard'" v-if="mode == 'settings'"
                            :parts="dashboard_parts"/>
                 <form-editor :patient="patient" v-show="state == 'form-manager'"/>
                 <form-presenter v-show="state == 'form-preview-presenter'"/>

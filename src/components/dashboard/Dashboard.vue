@@ -293,7 +293,6 @@ export default {
     data: function () {
         return {
             state: 'main',
-            lock_btn: false,
             params: {},
             form_search_query: '',
             algorithm_search_query: '',
@@ -312,11 +311,33 @@ export default {
                         let alg = this.patient.algorithms.filter(a => a.id == loc.algorithm)[0]
 
                         if (loc.common) {
-                            alg.common_conditions[loc.condition]
-                                .criteria[loc.block][loc.criteria].value = params.edited[i]
+                            let condition = alg.common_conditions[loc.condition]
+                            if (loc.action_type) {
+                                condition[loc.action_type][loc.action]
+                                    .params.script_params.forEach((p) => {
+                                    if (p.value_code == param.code) p.value = params.edited[i]
+                                })
+                            } else {
+                                condition.criteria[loc.block][loc.criteria].value = params.edited[i]
+                            }
                         } else {
-                            alg.steps[loc.step].conditions[loc.condition]
-                                .criteria[loc.block][loc.criteria].value = params.edited[i]
+                            let step = alg.steps[loc.step]
+                            if (loc.action_type) {
+                                if (loc.action_type != 'step_timeout_actions') {
+                                    step.conditions[loc.condition][loc.action_type][loc.action]
+                                        .params.script_params.forEach((p) => {
+                                        if (p.value_code == param.code) p.value = params.edited[i]
+                                    })
+                                } else {
+                                    step.timeout_actions[loc.action]
+                                        .params.script_params.forEach((p) => {
+                                        if (p.value_code == param.code) p.value = params.edited[i]
+                                    })
+                                }
+                            } else {
+                                step.conditions[loc.condition]
+                                    .criteria[loc.block][loc.criteria].value = params.edited[i]
+                            }
                         }
 
                         changed_algorithms.add(alg)
@@ -329,10 +350,9 @@ export default {
                 this.axios.post(this.direct_url('/api/settings/algorithms'), [...changed_algorithms])
                     .then(response => Event.fire('params-saved'))
                     .catch(err => Event.fire('params-not-saved'));
-
+            } else {
+                Event.fire('unlock-params-btn')
             }
-
-            this.lock_btn = false
         },
         find_algorithm: function (id) {
             return this.templates.algorithms.filter(t => t.id == id)[0]

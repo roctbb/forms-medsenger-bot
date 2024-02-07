@@ -133,6 +133,45 @@ def extract_conditions(algorithm):
     return conditions
 
 
+def extract_actions(algorithm):
+    actions = []
+
+    def set_action_loc(action, algorithm_id, step_index, condition_index, action_index, action_type, common=False):
+        action['loc'] = {
+            'algorithm': algorithm_id,
+            'step': step_index,
+            'condition': condition_index,
+            'action': action_index,
+            'action_type': action_type,
+            'common': common
+        }
+        return action
+
+    def search_actions_in_conditions(conditions, step_index, common=False):
+        for condition_index, condition in enumerate(conditions):
+            for action_index, action in enumerate(condition.get('positive_actions', [])):
+                actions.append(set_action_loc(action, algorithm.id, step_index, condition_index,
+                                              action_index, 'positive_actions', common))
+            for action_index, action in enumerate(condition.get('negative_actions', [])):
+                actions.append(set_action_loc(action, algorithm.id, step_index, condition_index,
+                                              action_index, 'negative_actions', common))
+            for action_index, action in enumerate(condition.get('timeout_actions', [])):
+                actions.append(set_action_loc(action, algorithm.id, step_index, condition_index,
+                                              action_index, 'timeout_actions', common))
+
+    for step_index, step in enumerate(algorithm.steps):
+        search_actions_in_conditions(step['conditions'], step_index)
+
+        for action_index, action in enumerate(step.get('timeout_actions', [])):
+            actions.append(set_action_loc(action, algorithm.id, step_index, None,
+                                          action_index, 'step_timeout_actions'))
+
+    if algorithm.common_conditions:
+        search_actions_in_conditions(algorithm.common_conditions, None, True)
+
+    return actions
+
+
 def toInt(value, default=None):
     try:
         return int(value)

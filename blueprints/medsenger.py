@@ -359,7 +359,7 @@ def params(data):
 
 
 @medsenger_blueprint.route('/params', methods=['GET'])
-@verify_request(contract_manager, 'doctor')
+@verify_request(contract_manager, 'patient')
 def get_params(args, data, contract):
     return jsonify(algorithm_manager.search_params(contract))
 

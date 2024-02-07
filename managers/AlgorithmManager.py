@@ -6,7 +6,7 @@ from methods.action_runner import run_action
 from methods.algorithm_runner import check_criteria, clear_cache, run_algorithm
 from sqlalchemy.orm.attributes import flag_modified, flag_dirty
 
-from helpers import log, clear_categories, extract_conditions, extract_date, toInt
+from helpers import log, clear_categories, extract_conditions, extract_actions, extract_date, toInt
 from managers.Manager import Manager
 from models import Algorithm
 from methods.hooks import *
@@ -43,6 +43,13 @@ class AlgorithmManager(Manager):
                         for criteria in block:
                             if criteria.get('ask_value') and setup.get(criteria['value_code']):
                                 criteria['value'] = setup.get(criteria['value_code'])
+
+                    actions = extract_actions(algorithm)
+                    for action in actions:
+                        if action.get('params') and action['params'].get('script_params'):
+                            for param in action['params'].get('script_params', []):
+                                if setup.get(param['value_code']):
+                                    param['value'] = setup.get(param['value_code'])
 
                 attach_date = extract_date(setup.get('algorithm_{}_attach_date'.format(template_id)))
                 detach_date = extract_date(setup.get('algorithm_{}_detach_date'.format(template_id)))
@@ -198,7 +205,7 @@ class AlgorithmManager(Manager):
         print(f"Running set_params  {params} for contract ID {contract}")
 
         def update_condition(condition):
-            for block_index, block in enumerate(condition['criteria']):
+            for block_index, block in enumerate(condition.get('criteria', [])):
                 for criteria_index, criteria in enumerate(block):
                     if criteria.get('ask_value'):
                         value_name = criteria.get('value_name')
@@ -210,6 +217,21 @@ class AlgorithmManager(Manager):
                         if value_name and value_name in params:
                             criteria["value"] = params[value_name]
 
+        def update_action_params(algorithm):
+            actions = extract_actions(algorithm)
+
+            for action in actions:
+                if action.get('params') and action['params'].get('script_params'):
+                    for param in action['params'].get('script_params', []):
+                        value_name = param.get('value_name')
+                        value_code = param.get('value_code')
+
+                        if value_code and value_code in params:
+                            param["value"] = params[value_code]
+
+                        if value_name and value_name in params:
+                            param["value"] = params[value_name]
+
         for algorithm in contract.algorithms:
             for step_index, step in enumerate(algorithm.steps):
                 for condition_index, condition in enumerate(step['conditions']):
@@ -218,6 +240,8 @@ class AlgorithmManager(Manager):
             if algorithm.common_conditions:
                 for condition_index, condition in enumerate(algorithm.common_conditions):
                     update_condition(condition)
+
+            update_action_params(algorithm)
 
             try:
                 flag_modified(algorithm, "steps")
@@ -230,8 +254,8 @@ class AlgorithmManager(Manager):
     def search_params(self, contract):
         params = {}
 
-        def search_condition(condition, step_index, condition_index, common=False):
-            for block_index, block in enumerate(condition['criteria']):
+        def search_condition_param(condition, step_index, condition_index, common=False):
+            for block_index, block in enumerate(condition.get('criteria', [])):
                 for criteria_index, criteria in enumerate(block):
                     if criteria.get('ask_value'):
                         pair = (criteria.get('value_name'), criteria.get('value'), criteria.get('value_code'))
@@ -257,14 +281,36 @@ class AlgorithmManager(Manager):
                                 }
                             })
 
+        def search_actions_params(algorithm):
+            actions = extract_actions(algorithm)
+
+            for action in actions:
+                if action.get('params') and action['params'].get('script_params'):
+                    for param in action['params']['script_params']:
+                        pair = (param.get('value_name'), param.get('value'), param.get('value_code'))
+
+                        if pair in params:
+                            params[pair]['locations'].append(action['loc'])
+                        else:
+                            params.update({
+                                pair: {
+                                    'name': pair[0],
+                                    'value': pair[1],
+                                    'code': pair[2],
+                                    'locations': [action['loc']]
+                                }
+                            })
+
         for algorithm in contract.algorithms:
             for step_index, step in enumerate(algorithm.steps):
                 for condition_index, condition in enumerate(step['conditions']):
-                    search_condition(condition, step_index, condition_index)
+                    search_condition_param(condition, step_index, condition_index)
 
             if algorithm.common_conditions:
                 for condition_index, condition in enumerate(algorithm.common_conditions):
-                    search_condition(condition, None, condition_index, True)
+                    search_condition_param(condition, None, condition_index, True)
+
+            search_actions_params(algorithm)
 
         return [value for key, value in params.items()]
 
