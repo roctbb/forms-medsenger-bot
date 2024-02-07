@@ -242,6 +242,12 @@ def run_action(action, contract, descriptions, algorithm, record_ids=[]):
         contract_manager = ContractManager(medsenger_api, db)
         medicine_manager = MedicineManager(medsenger_api, db)
         reminder_manager = ReminderManager(medsenger_api, db)
+        algorithm_params = algorithm.get_params()
+
+        def get_param_value_by_code(code):
+            param = list(filter(lambda p: p['code'] == code, algorithm_params))
+            return param[0]['value'] if len(param) else None
+
         try:
             exec(action['params']['code'])
         except Exception as e:

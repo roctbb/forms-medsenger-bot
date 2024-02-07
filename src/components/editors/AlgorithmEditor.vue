@@ -378,6 +378,14 @@ export default {
                     }
 
                 }
+                if (action.type == 'script') {
+                    if (action.params.script_params) {
+                        action.params.script_params.forEach((param) => {
+                            if ( (typeof param.value === 'string' || param.value instanceof String))
+                            param.value =  parseFloat(param.value)
+                        })
+                    }
+                }
                 return action;
             }
 

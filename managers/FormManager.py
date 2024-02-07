@@ -362,6 +362,8 @@ class FormManager(Manager):
         integral_result, integral_description, custom_params = self.get_integral_evaluation(contract_id, answers, form)
         action_name += integral_description
 
+        custom_params['record_time'] = time.time()
+
         packet.append(('action', action_name, custom_params))
 
         params = {
