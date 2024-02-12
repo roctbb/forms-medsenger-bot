@@ -244,9 +244,9 @@ def run_action(action, contract, descriptions, algorithm, record_ids=[]):
         reminder_manager = ReminderManager(medsenger_api, db)
         algorithm_params = algorithm.get_params()
 
-        def get_param_value_by_code(code):
+        def get_param_value_by_code(code, default=None):
             param = list(filter(lambda p: p['code'] == code, algorithm_params))
-            return param[0]['value'] if len(param) else None
+            return param[0]['value'] if len(param) else default
 
         try:
             exec(action['params']['code'])
