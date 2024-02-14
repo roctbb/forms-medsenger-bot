@@ -58,7 +58,7 @@ def generate_event_description(criteria, l_value, r_value, category_names, curre
                 and criteria.get('sign') in ['equal', 'contains'] and current_answer):
             if not current_answer.get('params', {}).get('type'):
                 return ""
-            return current_answer['value'] + "."
+            return str(current_answer['value']) + "."
 
         LEFT_MODE = get_left_modes().get(criteria.get('left_mode'))
         LEFT_CATEGORY = category_names.get(criteria.get('category'))

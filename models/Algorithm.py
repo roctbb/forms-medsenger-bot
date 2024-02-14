@@ -1,6 +1,6 @@
 from infrastructure import db
 from datetime import datetime, timedelta
-from helpers import clear_categories, get_step, extract_conditions, toInt
+from helpers import clear_categories, get_step, extract_conditions, extract_actions, toInt
 import time
 
 
@@ -94,5 +94,14 @@ class Algorithm(db.Model):
                             'name': criteria['value_name'],
                             'value': criteria['value']
                         })
+
+        for action in extract_actions(self):
+            if action.get('params') and action['params'].get('script_params'):
+                for param in action['params']['script_params']:
+                    algorithm_params.append({
+                        'code': param['value_code'],
+                        'name': param['value_name'],
+                        'value': param['value']
+                    })
 
         return algorithm_params

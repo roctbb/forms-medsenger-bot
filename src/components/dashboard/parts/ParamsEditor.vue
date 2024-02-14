@@ -114,6 +114,7 @@ export default {
             this.flags.lock_btn = false
         })
 
+        Event.listen('unlock-params-btn', () => this.flags.lock_btn = false)
     }
 }
 </script>
