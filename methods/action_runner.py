@@ -3,7 +3,7 @@ from copy import deepcopy
 import requests
 import time
 import re
-from infrastructure import medsenger_api, db
+from infrastructure import medsenger_api, db, prepare_binary
 from methods.hooks import *
 
 
@@ -88,7 +88,7 @@ def run_action(action, contract, descriptions, algorithm, record_ids=[]):
                     fname = link.split("/")[-1]
                 has_message_to_patient = True
                 medsenger_api.send_message(contract.id, text, only_patient=True,
-                                           attachments=[medsenger_api.prepare_binary(fname, answer.content)])
+                                           attachments=[prepare_binary(fname, answer.content)])
 
             except Exception as e:
                 log(e, False)
