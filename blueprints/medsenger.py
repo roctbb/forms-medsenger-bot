@@ -286,6 +286,19 @@ def init(data):
                 except Exception as e:
                     log(e)
 
+            examination_groups = params.get('examination_groups')
+            if examination_groups:
+                for group_id in examination_groups.split(','):
+                    try:
+                        if not group_id.isnumeric():
+                            continue
+                        examination_group_id = int(group_id)
+
+                        examination_manager.attach_group(examination_group_id, contract, examinations_deadline, False)
+                        has_examinations = True
+                    except Exception as e:
+                        log(e)
+
             custom_examination_groups = filter(lambda x: "examination_group_" in x and params.get(x), params.keys())
             for custom_examination_group in custom_examination_groups:
                 try:
