@@ -1,5 +1,5 @@
 from celery import Celery
-from medsenger_api import AgentApiClient
+from medsenger_api import AgentApiClient, prepare_binary
 from config import *
 from sentry_sdk.integrations.flask import FlaskIntegration
 import sentry_sdk
