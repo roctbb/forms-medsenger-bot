@@ -11,8 +11,8 @@
         </div>
 
         <div class="row justify-content-md-center" style="column-gap: 5px; margin-bottom: 10px">
-                <a class="btn btn-default btn-sm" @click="add_field(field.length)">Добавить вопрос</a>
-                <a class="btn btn-default btn-sm" @click="add_header(field.length)">Добавить подзаголовок</a>
+                <a class="btn btn-default btn-sm" @click="add_field(fields.length)">Добавить вопрос</a>
+                <a class="btn btn-default btn-sm" @click="add_header(fields.length)">Добавить подзаголовок</a>
             </div>
     </div>
 </template>
