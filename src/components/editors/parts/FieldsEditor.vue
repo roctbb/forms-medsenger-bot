@@ -1,15 +1,19 @@
 <template>
     <div>
         <div v-for="(field, i) in fields" :key="field.uid">
-            <field :form="form" :data="field" :pkey="i" :num="get_field_num(field.uid)"
-                   :save_clicked="fields_save_clicked[i]"></field>
-
             <div class="row justify-content-md-center" style="column-gap: 5px; margin-bottom: 10px">
                 <a class="btn btn-default btn-sm" @click="add_field(i)">Добавить вопрос</a>
                 <a class="btn btn-default btn-sm" @click="add_header(i)">Добавить подзаголовок</a>
             </div>
 
+            <field :form="form" :data="field" :pkey="i" :num="get_field_num(field.uid)"
+                   :save_clicked="fields_save_clicked[i]"></field>
         </div>
+
+        <div class="row justify-content-md-center" style="column-gap: 5px; margin-bottom: 10px">
+                <a class="btn btn-default btn-sm" @click="add_field(field.length)">Добавить вопрос</a>
+                <a class="btn btn-default btn-sm" @click="add_header(field.length)">Добавить подзаголовок</a>
+            </div>
     </div>
 </template>
 
