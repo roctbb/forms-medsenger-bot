@@ -7,6 +7,13 @@
                    v-model="field.text"/>
         </form-group48>
 
+        <form-group48 title="Тип" v-if="field.type == 'header'">
+            <select class="form-control form-control-sm" v-model="field.subtype">
+                <option value="block">Блок вопросов</option>
+                <option value="subheader">Подзаголовок в блоке</option>
+            </select>
+        </form-group48>
+
         <form-group48 title="Описание раздела" v-if="field.type == 'header'">
             <textarea class="form-control form-control-sm" v-model="field.description"></textarea>
         </form-group48>
