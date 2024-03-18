@@ -19,8 +19,7 @@
             style="font-size:3.52094px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke-width:0.264999"
             x="39.775723"
             y="29.087042"
-            id="text4756-0"
-            transform="matrix(5.1503119,0,0,-5.1503119,-142.67658,129.40458)">
+            id="text4756-0">
             <tspan
                 id="tspan4754-9"
                 x="39.775723"
@@ -48,8 +47,7 @@
             style="font-size:3.52778px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke-width:0.264999"
             x="13.469838"
             y="28.913151"
-            id="text4756"
-            transform="matrix(-5.1503119,0,0,5.1503119,130.07308,-6.5245793)">
+            id="text4756">
             <tspan
                 id="tspan4754"
                 x="13.469838"
