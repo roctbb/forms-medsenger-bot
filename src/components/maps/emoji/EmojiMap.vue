@@ -16,10 +16,12 @@
             id="path4932" @mousedown="mouse('down', 'Отлично')"
             style="stroke-width:0.193792"/>
         <path
+            :fill="'#FFFFFF'"
             d="m 45.219992,44.756924 c 3.232452,-0.294564 9.885335,-0.12984 12.747645,-0.0078 0.03682,2.742158 -12.708887,2.707276 -12.747645,0.0078 z"
             id="path4934" @mousedown="mouse('down', 'Отлично')"
             style="stroke-width:0.193792"/>
         <path
+            :fill="'#FF0000'"
             class="st3"
             d="m 47.167602,49.37499 c 2.153031,1.862343 6.170341,1.935984 8.584991,0 -1.313911,-1.494137 -2.747972,-1.540647 -4.339005,-0.364329 -1.639482,-1.311972 -2.738283,-1.348793 -4.245986,0.364329 z"
             id="path4936" @mousedown="mouse('down', 'Отлично')"
@@ -85,7 +87,7 @@
 
         <text
             xml:space="preserve"
-            style="font-size:3.5px;text-align:center;text-anchor:middle;clip-rule:evenodd;display:inline;fill:#dc0909;fill-opacity:1;fill-rule:evenodd;stroke-width:0.264999;image-rendering:optimizeQuality;shape-rendering:geometricPrecision;text-rendering:geometricPrecision"
+            style="font-size:3px;text-align:center;text-anchor:middle;clip-rule:evenodd;display:inline;fill:#dc0909;fill-opacity:1;fill-rule:evenodd;stroke-width:0.264999;image-rendering:optimizeQuality;shape-rendering:geometricPrecision;text-rendering:geometricPrecision"
             x="39.68285"
             y="27.997259"
             id="text4756-3">
@@ -93,14 +95,14 @@
                 id="tspan4754"
                 x="39.68285"
                 y="27.997259"
-                style="font-size:3.5px;fill:#000000;stroke-width:0.264999">
+                style="font-size:3px;fill:#000000;stroke-width:0.264999">
                 Плохо
             </tspan>
         </text>
 
         <text
             xml:space="preserve"
-            style="font-size:3.5px;text-align:center;text-anchor:middle;clip-rule:evenodd;display:inline;fill:#dc0909;fill-opacity:1;fill-rule:evenodd;stroke-width:0.264999;image-rendering:optimizeQuality;shape-rendering:geometricPrecision;text-rendering:geometricPrecision"
+            style="font-size:3px;text-align:center;text-anchor:middle;clip-rule:evenodd;display:inline;fill:#dc0909;fill-opacity:1;fill-rule:evenodd;stroke-width:0.264999;image-rendering:optimizeQuality;shape-rendering:geometricPrecision;text-rendering:geometricPrecision"
             x="13.224516"
             y="28.029299"
             id="text21026">
@@ -108,14 +110,14 @@
                 id="tspan21024"
                 x="13.224516"
                 y="28.029299"
-                style="font-size:3.5px;fill:#000000;stroke-width:0.264999">
+                style="font-size:3px;fill:#000000;stroke-width:0.264999">
                 Очень плохо
             </tspan>
         </text>
 
         <text
             xml:space="preserve"
-            style="font-size:3.5px;text-align:center;text-anchor:middle;clip-rule:evenodd;display:inline;fill:#dc0909;fill-opacity:1;fill-rule:evenodd;stroke-width:0.264999;image-rendering:optimizeQuality;shape-rendering:geometricPrecision;text-rendering:geometricPrecision"
+            style="font-size:3px;text-align:center;text-anchor:middle;clip-rule:evenodd;display:inline;fill:#dc0909;fill-opacity:1;fill-rule:evenodd;stroke-width:0.264999;image-rendering:optimizeQuality;shape-rendering:geometricPrecision;text-rendering:geometricPrecision"
             x="66.19751"
             y="27.997259"
             id="text21030">
@@ -123,7 +125,7 @@
                 id="tspan21028"
                 x="66.19751"
                 y="27.997259"
-                style="font-size:3.5px;fill:#000000;stroke-width:0.264999">
+                style="font-size:3px;fill:#000000;stroke-width:0.264999">
                 Удовлетворительно
             </tspan>
         </text>
@@ -131,7 +133,7 @@
 
         <text
             xml:space="preserve"
-            style="font-size:3.5px;text-align:center;text-anchor:middle;clip-rule:evenodd;display:inline;fill:#dc0909;fill-opacity:1;fill-rule:evenodd;stroke-width:0.264999;image-rendering:optimizeQuality;shape-rendering:geometricPrecision;text-rendering:geometricPrecision"
+            style="font-size:3px;text-align:center;text-anchor:middle;clip-rule:evenodd;display:inline;fill:#dc0909;fill-opacity:1;fill-rule:evenodd;stroke-width:0.264999;image-rendering:optimizeQuality;shape-rendering:geometricPrecision;text-rendering:geometricPrecision"
             x="25.155054"
             y="58.424343"
             id="text21034">
@@ -139,14 +141,14 @@
                 id="tspan21032"
                 x="25.155054"
                 y="58.424343"
-                style="font-size:3.5px;fill:#000000;stroke-width:0.264999">
+                style="font-size:3px;fill:#000000;stroke-width:0.264999">
                 Хорошо
             </tspan>
         </text>
 
         <text
             xml:space="preserve"
-            style="font-size:3.5px;text-align:center;text-anchor:middle;fill:#141518;fill-opacity:1;stroke-width:0.264999"
+            style="font-size:3px;text-align:center;text-anchor:middle;fill:#141518;fill-opacity:1;stroke-width:0.264999"
             x="51.5891"
             y="58.456383"
             id="text21038">
@@ -173,11 +175,11 @@ export default {
     },
     computed: {
         size() {
-            let w = this.mobile ? window.innerWidth * 0.8 : 400
+            let w = this.mobile ? window.innerWidth * 0.85 : 400
             return `width: ${w}px; height: ${this.originalHeight * this.proportion}px;`
         },
         proportion() {
-            let w = this.mobile ? window.innerWidth * 0.8 : 400
+            let w = this.mobile ? window.innerWidth * 0.85 : 400
             return w / this.originalWidth
         }
     },
@@ -200,5 +202,10 @@ export default {
     path.part:hover {
         stroke-width: 0.5px !important;
     }
+}
+
+path {
+    fill-rule:evenodd;
+    clip-rule:evenodd
 }
 </style>
