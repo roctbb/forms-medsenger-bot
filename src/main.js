@@ -404,7 +404,8 @@ Vue.mixin({
             maps: {
                 human: 'Тело взрослого человека',
                 child: 'Тело ребенка',
-                emotions: 'Круг эмоций'
+                emotions: 'Круг эмоций',
+                yes_no: 'Да - нет'
             },
             page: window.PAGE,
             is_admin: window.IS_ADMIN,
