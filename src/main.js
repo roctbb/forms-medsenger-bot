@@ -405,7 +405,8 @@ Vue.mixin({
                 human: 'Тело взрослого человека',
                 child: 'Тело ребенка',
                 emotions: 'Круг эмоций',
-                yes_no: 'Да - нет'
+                yes_no: 'Да - нет',
+                emoji: 'Пятибалльная шкала - смайлики'
             },
             page: window.PAGE,
             is_admin: window.IS_ADMIN,

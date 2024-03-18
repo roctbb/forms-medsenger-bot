@@ -4,6 +4,7 @@
         <child-map v-if="map == 'child'" :parts="parts" :uid="uid"/>
         <emotions-map v-if="map == 'emotions'" :parts="parts" :uid="uid"/>
         <yes-no-map v-if="map == 'yes_no'" :parts="parts" :uid="uid"/>
+        <emoji-map v-if="map == 'emoji'" :parts="parts" :uid="uid"/>
 
         <br>
 
@@ -17,10 +18,11 @@ import HumanMap from "../../maps/human/HumanMap";
 import ChildMap from "../../maps/child/ChildMap";
 import EmotionsMap from "../../maps/emotions/EmotionsMap.vue";
 import YesNoMap from "../../maps/yes-no/YesNoMap.vue";
+import EmojiMap from "../../maps/emoji/EmojiMap.vue";
 
 export default {
     name: "InteractiveMap",
-    components: {YesNoMap, EmotionsMap, HumanMap,ChildMap},
+    components: {EmojiMap, YesNoMap, EmotionsMap, HumanMap,ChildMap},
     props: ['map', 'uid'],
     data() {
         return {
