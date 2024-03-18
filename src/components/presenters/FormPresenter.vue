@@ -398,7 +398,7 @@ export default {
             let block = []
 
             this.form.fields.forEach((item) => {
-                if (item.type == 'header' && block.length != 0) {
+                if (item.type == 'header' && (item.subtype == 'block' || !item.subtype) && block.length != 0) {
                     this.blocks.push(block)
                     block = []
                 }
