@@ -167,7 +167,7 @@ export default {
     props: ['parts', 'width', 'uid'],
     data() {
         return {
-            originalWidth: 80,
+            originalWidth: 83,
             originalHeight: 62
         }
     },
@@ -186,7 +186,7 @@ export default {
             Event.fire(`mouse-${action}`, {zone: zone, uid: this.uid})
         },
         color: function (zone, color) {
-            return this.parts.filter(p => p == zone).length ? color : (color + '99')
+            return this.parts.filter(p => p == zone).length ? color : (color + 'dd')
         },
         stroke: function (zone) {
             return this.parts.filter(p => p == zone).length ? '1px' : '0'
