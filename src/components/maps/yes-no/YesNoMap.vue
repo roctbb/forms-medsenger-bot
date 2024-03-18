@@ -71,11 +71,11 @@ export default {
     },
     computed: {
         size() {
-            let w = this.mobile ? window.innerWidth * 0.7 : 400
+            let w = this.mobile ? window.innerWidth * 0.8 : 400
             return `width: ${w}px; height: ${this.originalHeight * this.proportion}px;`
         },
         proportion() {
-            let w = this.mobile ? window.innerWidth * 0.7 : 400
+            let w = this.mobile ? window.innerWidth * 0.8 : 400
             return w / this.originalWidth
         }
     },
