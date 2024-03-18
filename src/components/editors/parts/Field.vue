@@ -271,7 +271,7 @@
                 </form-group48>
 
                 <form-group48 title="Предпросмотр" description="Карта будет выглядеть так">
-                    <interactive-map :map="field.params.map"/>
+                    <interactive-map :map="field.params.map" :uid="field.uid"/>
                 </form-group48>
             </div>
 

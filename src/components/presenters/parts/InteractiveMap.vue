@@ -3,6 +3,7 @@
         <human-map v-if="map == 'human'" :parts="parts" :uid="uid"/>
         <child-map v-if="map == 'child'" :parts="parts" :uid="uid"/>
         <emotions-map v-if="map == 'emotions'" :parts="parts" :uid="uid"/>
+        <yes-no-map v-if="map == 'yes_no'" :parts="parts" :uid="uid"/>
 
         <br>
 
@@ -15,10 +16,11 @@
 import HumanMap from "../../maps/human/HumanMap";
 import ChildMap from "../../maps/child/ChildMap";
 import EmotionsMap from "../../maps/emotions/EmotionsMap.vue";
+import YesNoMap from "../../maps/yes-no/YesNoMap.vue";
 
 export default {
     name: "InteractiveMap",
-    components: {EmotionsMap, HumanMap,ChildMap},
+    components: {YesNoMap, EmotionsMap, HumanMap,ChildMap},
     props: ['map', 'uid'],
     data() {
         return {
@@ -45,9 +47,9 @@ export default {
 
 <style>
 @media (hover: hover) and (pointer: fine) {
-    path:hover, circle:hover {
+    path.part:hover {
         stroke: #000000 !important;
-        stroke-width: 2px;
+        stroke-width: 1px;
         stroke-linejoin: round;
         cursor: pointer;
     }
