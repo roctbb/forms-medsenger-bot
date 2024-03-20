@@ -50,6 +50,17 @@
                 <input type="checkbox" class="form-check" v-model="field.required">
             </form-group48>
 
+            <form-group48 title="Цвет" v-if="field.show_if">
+                <div class="row">
+                    <div class="col">
+                        <ColorPicker v-model="field.params.color" />
+                    </div>
+                    <div class="col">
+                        <input type="text" class="form-control form-control-sm" v-model="field.params.color">
+                    </div>
+                </div>
+            </form-group48>
+
             <form-group48 title="Не включать в оценку?" v-if="form.has_integral_evaluation">
                 <input type="checkbox" class="form-check" v-model="field.exclude_weight">
             </form-group48>
@@ -305,10 +316,14 @@ import Card from "../../common/Card";
 import FormGroup48 from "../../common/FormGroup-4-8";
 import VisualAnalogScale from "../../presenters/parts/VisualAnalogScale";
 import InteractiveMap from "../../presenters/parts/InteractiveMap";
+import ColorPicker from 'primevue/colorpicker';
+import 'primevue/resources/themes/saga-blue/theme.css'
+import 'primevue/resources/primevue.min.css'
+
 
 export default {
     name: "Field",
-    components: {InteractiveMap, VisualAnalogScale, FormGroup48, Card},
+    components: {InteractiveMap, VisualAnalogScale, FormGroup48, Card, ColorPicker},
     props: ['data', 'pkey', 'form', 'save_clicked', 'num'],
     data() {
         return {

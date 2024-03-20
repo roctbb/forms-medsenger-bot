@@ -2,4 +2,4 @@ from forms_bot import app
 from config import *
 
 if __name__ == "__main__":
-    app.run(port=PORT, host=HOST)
+    app.run(port=PORT, host=HOST, debug=API_DEBUG)

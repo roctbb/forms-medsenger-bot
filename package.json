@@ -17,6 +17,7 @@
     "highcharts-heatmap": "^0.1.7",
     "highcharts-vue": "^1.3.5",
     "moment": "^2.29.1",
+    "primevue": "^2.10.4",
     "uglifyjs-webpack-plugin": "^1.3.0",
     "vue": "^2.7.10",
     "vue-autocomplete": "^0.0.2",

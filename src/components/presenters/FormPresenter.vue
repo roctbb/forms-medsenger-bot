@@ -382,8 +382,17 @@ export default {
             Event.fire('back-to-dashboard');
         },
         get_field_styles: function (field) {
+            let color = ""
+
+            if (field.params.color) {
+                color = "#" + field.params.color
+            }
+            else {
+                color = `rgb(${255 - change},${255 - change}, ${255})`
+            }
+
             const change = 10 * (this.get_level(field) - 1);
-            return `margin-top: 15px; margin-bottom: 15px; background-color: rgb(${255 - change},${255 - change}, ${255});`
+            return `margin-top: 15px; margin-bottom: 15px; background-color: ${color};`
         },
         load_form: function (form) {
             if (form.fields === undefined) {
