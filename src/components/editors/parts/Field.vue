@@ -88,7 +88,7 @@
                           v-if="form.has_integral_evaluation && form.integral_evaluation.script_enabled && !field.exclude_weight">
                 <input type="text" class="form-control form-control-sm" v-model="field.script_group"/>
             </form-group48>
-            <div v-if="['integer', 'range'].includes(field.type) && is_admin">
+            <div v-if="['integer', 'range'].includes(field.type) && (is_admin || field.type === 'range')">
                 <div class="form-group row">
                     <div class="col-md-4">
                         <strong>Ограничения</strong>
@@ -104,6 +104,13 @@
                                                  :class="save_clicked && (empty(field.params.max) || field.params.max < field.params.min) ? 'is-invalid' : ''"
                                                  class="form-control form-control-sm"
                                                  v-model="field.params.max"/>
+                    </div>
+                    
+                    <div class="col-md-3" v-if="field.type === 'range'">
+                        <small>шаг </small><input type="number" pattern="\d*"
+                                                 :class="save_clicked && (empty(field.params.step) || field.params.step < field.params.min) ? 'is-invalid' : ''"
+                                                 class="form-control form-control-sm"
+                                                 v-model="field.params.step"/>
                     </div>
                 </div>
             </div>
