@@ -276,10 +276,6 @@ export default {
                     this.answers[field.uid] = 0
                 }
 
-                if (field.type == 'range' && field.params.default) {
-                    this.answers[field.uid] = field.params.default
-                }
-
                 if (field.type == 'medicine_list') {
                     if (this.patient.patient_medicines && this.patient.patient_medicines.length) {
                         this.answers[field.uid] = Array.from(Array(this.patient.patient_medicines.length), (_, i) => {
