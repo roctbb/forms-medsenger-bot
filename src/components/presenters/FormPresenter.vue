@@ -99,7 +99,7 @@
                                :class="save_clicked && field.required && (!answers[field.uid] && answers[field.uid] !== 0) ? 'is-invalid' : ''"
                                v-if="field.type == 'range'" v-model="answers[field.uid]"/>
 
-                        <span v-if="field.type == 'range'"><b>{{ answers[field.uid] }}</b></span>
+                        <span v-if="field.type == 'range'"><b>{{ answers[field.uid] }}</b><b v-if="save_clicked && field.required && (!answers[field.uid] && answers[field.uid] !== 0)" style="color:red;">Укажите значение!</b></span>
 
                         <div v-if="field.type == 'medicine_list'">
                             <div v-for="(medicine, j) in answers[field.uid]">
