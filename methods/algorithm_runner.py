@@ -177,7 +177,7 @@ def check_values(left, right, sign, modifier=0, multiplier=1):
         if sign == 'not_equal':
             return left != right
         if sign == 'contains':
-            return right in left
+            return str(right) in str(left)
 
     return False
 
