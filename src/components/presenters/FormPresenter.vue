@@ -94,7 +94,7 @@
                                          type="time"></date-picker>
                         </div>
 
-                        <input type="range" :min="field.params.min" :max="field.params.max" :step="field.params.step"
+                        <input type="range" :min="field.params.min" :max="field.params.max" :step="field.params.step" :value="field.params.default"
                                class="form-control monitoring-input"
                                :class="save_clicked && field.required && (!answers[field.uid] && answers[field.uid] !== 0) ? 'is-invalid' : ''"
                                v-if="field.type == 'range'" v-model="answers[field.uid]"/>
