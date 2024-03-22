@@ -111,6 +111,15 @@ def delete_medicine(args, form, contract):
     else:
         abort(404)
 
+@api_blueprint.route('/api/settings/hide_medicine', methods=['POST'])
+@verify_request(contract_manager, 'doctor')
+def hide_medicine(args, form, contract):
+    medicine_manager.hide(request.json.get('id'), contract)
+
+    return jsonify({
+        "result": "ok"
+    })
+
 
 @api_blueprint.route('/api/settings/resume_medicine', methods=['POST'])
 @verify_request(contract_manager, 'doctor')

@@ -40,6 +40,7 @@ class Medicine(db.Model, Compliance):
 
     prescribed_at = db.Column(db.DateTime, server_default=db.func.now())
     canceled_at = db.Column(db.DateTime, nullable=True)
+    is_hidden = db.Column(db.Boolean, default=False)
 
     medicine_database_id = db.Column(db.Integer, nullable=True)
 
@@ -75,7 +76,8 @@ class Medicine(db.Model, Compliance):
             "canceled_at": self.canceled_at.strftime("%d.%m.%Y") if self.canceled_at else None,
             "sent": sent,
             "done": done,
-            "medicine_database_id": self.medicine_database_id
+            "medicine_database_id": self.medicine_database_id,
+            "is_hidden": self.is_hidden
         }
 
     def timetable_description(self):

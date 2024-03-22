@@ -1,5 +1,5 @@
 <template>
-    <card :class="`col-lg-${col} col-md-${col} ${medicine.canceled_at ? 'text-muted' : ''}`"
+    <card v-if="!medicine.is_hidden" :class="`col-lg-${col} col-md-${col} ${medicine.canceled_at ? 'text-muted' : ''}`"
           :image="medicine.canceled_at ? images.canceled_medicine : images.medicine">
 
         <strong class="card-title">{{ medicine.title }}</strong>
@@ -72,6 +72,7 @@
             </div>
             <div v-else-if="medicine.contract_id == current_contract_id && medicine.canceled_at">
                 <a href="#" @click="resume_medicine()">Возобновить</a>
+                <a href="#" @click="hide_medicine()">Удалить из списка</a>
             </div>
             <div v-else>
                 <small>Добавлен в другом контракте.</small>
@@ -164,6 +165,22 @@ export default {
 
                         this.axios.post(this.direct_url('/api/settings/delete_medicine'), this.medicine)
                             .then((response) => Event.fire('medicine-deleted', response.data.deleted_id));
+                    }
+                }
+            })
+        },
+        hide_medicine: function () {
+            this.$confirm({
+                message: `Вы уверены, что хотите удалить из списка препарат ` + this.medicine.title + `?`,
+                button: {
+                    no: 'Нет',
+                    yes: 'Да, удалить'
+                },
+                callback: confirm => {
+                    if (confirm) {
+                        this.$forceUpdate()
+                        this.medicine.is_hidden = true
+                        this.axios.post(this.direct_url('/api/settings/hide_medicine'), this.medicine);
                     }
                 }
             })

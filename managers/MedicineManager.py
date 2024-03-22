@@ -180,6 +180,16 @@ class MedicineManager(Manager):
 
         return id
 
+    def hide(self, id, contract):
+        medicine = Medicine.query.filter_by(id=id).first_or_404()
+
+        if medicine.contract_id != contract.id and not contract.is_admin:
+            return None
+
+        medicine.is_hidden = True
+
+        self.__commit__()
+
     def check_detach_dates(self, app):
         with app.app_context():
             medicines = list(Medicine.query.filter(
