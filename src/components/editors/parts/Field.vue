@@ -112,6 +112,12 @@
                                                  class="form-control form-control-sm"
                                                  v-model="field.params.step"/>
                     </div>
+                    <div class="col-md-2" v-if="field.type === 'range'">
+                        <small>начать с </small><input type="number" default="0.1"
+                                                 :class="save_clicked && (empty(field.params.default) || field.params.default < field.params.min) ? 'is-invalid' : ''"
+                                                 class="form-control form-control-sm"
+                                                 v-model="field.params.default"/>
+                    </div>
                 </div>
             </div>
 

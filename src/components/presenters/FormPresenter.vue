@@ -99,6 +99,8 @@
                                :class="save_clicked && field.required && (!answers[field.uid] && answers[field.uid] !== 0) ? 'is-invalid' : ''"
                                v-if="field.type == 'range'" :required="field.required" v-model="answers[field.uid]"/>
 
+                        <span v-if="field.type == 'range'"><strong>{{ answers[field.uid] }}</strong></span>
+
                         <div v-if="field.type == 'medicine_list'">
                             <div v-for="(medicine, j) in answers[field.uid]">
                                 <div class="row">
@@ -273,6 +275,11 @@ export default {
                 if (field.type == 'radio' && field.required) {
                     this.answers[field.uid] = 0
                 }
+
+                if (field.type == 'range' && field.params.default) {
+                    this.answers[field.uid] = field.params.default
+                }
+
                 if (field.type == 'medicine_list') {
                     if (this.patient.patient_medicines && this.patient.patient_medicines.length) {
                         this.answers[field.uid] = Array.from(Array(this.patient.patient_medicines.length), (_, i) => {
