@@ -93,20 +93,20 @@
                     <div class="col-md-4">
                         <strong>Ограничения</strong>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <small>от </small><input type="number" pattern="\d*"
                                                  :class="save_clicked && (empty(field.params.min) || field.params.max < field.params.min) ? 'is-invalid' : ''"
                                                  class="form-control form-control-sm"
                                                  v-model="field.params.min"/>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <small>до </small><input type="number" pattern="\d*"
                                                  :class="save_clicked && (empty(field.params.max) || field.params.max < field.params.min) ? 'is-invalid' : ''"
                                                  class="form-control form-control-sm"
                                                  v-model="field.params.max"/>
                     </div>
                     
-                    <div class="col-md-3" v-if="field.type === 'range'">
+                    <div class="col-md-2" v-if="field.type === 'range'">
                         <small>шаг </small><input type="number" pattern="\d*"
                                                  :class="save_clicked && (empty(field.params.step) || field.params.step < field.params.min) ? 'is-invalid' : ''"
                                                  class="form-control form-control-sm"
