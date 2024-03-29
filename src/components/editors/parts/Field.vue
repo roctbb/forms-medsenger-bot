@@ -83,7 +83,7 @@
 
                 <optgroup v-for="field in form.fields.filter(f => f.type == 'map' && f.params.zone_groups_enabled)" :label="field.text">
                     <option v-for="(group, i) in field.params.zone_groups" :value="{uid: field.uid, group_index: i}">
-                        {{ group.description }} {{i}}
+                        {{ group.description }}
                     </option>
                 </optgroup>
             </select>
