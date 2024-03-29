@@ -8,7 +8,9 @@
 
         <br>
 
-        <b>Выбор:</b> <i>{{parts.length ? parts.join(', ') : 'Ничего не выбрано'}}</i>
+        <div v-if="!is_map_preview">
+            <b>Выбор:</b> <i>{{ parts.length ? parts.join(', ') : 'Ничего не выбрано' }}</i>
+        </div>
     </div>
 </template>
 
@@ -22,15 +24,14 @@ import EmojiMap from "../../maps/emoji/EmojiMap.vue";
 
 export default {
     name: "InteractiveMap",
-    components: {EmojiMap, YesNoMap, EmotionsMap, HumanMap,ChildMap},
-    props: ['map', 'uid'],
+    components: {EmojiMap, YesNoMap, EmotionsMap, HumanMap, ChildMap},
+    props: ['map', 'uid', 'is_map_preview'],
     data() {
         return {
             parts: [],
         }
     },
-    computed: {
-    },
+    computed: {},
     created() {
         Event.listen('mouse-down', (data) => {
             if (data.uid !== this.uid) return
@@ -40,8 +41,14 @@ export default {
             else
                 this.parts.push(data.zone)
 
-            if (this.uid)
+            if (!this.is_map_preview)
                 Event.fire('interactive-map-answer', {answer: this.parts, uid: this.uid})
+        })
+
+        Event.listen('set-map-zones', (data) => {
+            if (data.uid !== this.uid) return
+            this.parts = data.parts
+            this.$forceUpdate()
         })
     }
 }

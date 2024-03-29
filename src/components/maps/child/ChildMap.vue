@@ -744,7 +744,8 @@ export default {
     data() {
         return {
             originalWidth: 185,
-            originalHeight: 252
+            originalHeight: 252,
+            zone_groups: []
         }
     },
     computed: {
@@ -759,11 +760,22 @@ export default {
     },
     methods: {
         mouse: function (action, zone) {
-            Event.fire(`mouse-${action}`, {zone: zone, uid: this.uid})
+            let group = this.zone_groups.findIndex((gr) => gr.zones.includes(zone))
+            Event.fire(`mouse-${action}`, {zone: zone, uid: this.uid, group_index: group})
         },
         color: function (zone) {
-            return this.parts.filter(p => p == zone).length ? '#24a8b4' : '#d3d3d3'
-        }
+            let group = this.zone_groups.filter((gr) => gr.zones.includes(zone))
+            let color = group[0] ? ('#' + group[0].color) : '#24a8b4'
+
+            return this.parts.filter(p => p == zone).length ? color : '#d3d3d3'        }
+    },
+    created() {
+        Event.listen('map-zone-groups-changed', (data) => {
+            if (data.uid == this.uid) {
+                this.zone_groups = data.groups
+                this.$forceUpdate()
+            }
+        })
     }
 }
 </script>

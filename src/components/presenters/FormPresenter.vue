@@ -344,8 +344,15 @@ export default {
         },
         show_field: function (field) {
             if (field.show_if) {
-                if (this.answers[field.show_if] || field.show_if.uid && this.answers[field.show_if.uid] === field.show_if.ans) {
-                    return this.show_field(this.find_field_by_descriptor(field.show_if))
+                let show_if_field = this.find_field_by_descriptor(field.show_if)
+
+                if (this.answers[field.show_if] // галочка
+                    || this.answers[field.show_if.uid] &&
+                    (field.show_if.ans != undefined && this.answers[field.show_if.uid] === field.show_if.ans // вариант ответа
+                    || field.show_if.group_index != undefined && show_if_field.params.zone_groups[field.show_if.group_index].zones // зоны
+                            .filter((z) => this.answers[field.show_if.uid].includes(z)).length)) {
+
+                    return this.show_field(show_if_field)
                 }
                 return false
             }
@@ -422,7 +429,8 @@ export default {
             this.set_default()
 
             setTimeout(() => {
-                window.document.querySelector('input.monitoring-input').focus()
+                if (window.document.querySelector('input.monitoring-input'))
+                    window.document.querySelector('input.monitoring-input').focus()
             }, 300)
         },
         date_invalid: (date) => date > new Date() || date < new Date(new Date().getTime() - 7 * 24 * 3600 * 1000)
@@ -441,6 +449,7 @@ export default {
 
         Event.listen('interactive-map-answer', data => {
             this.answers[data.uid] = data.answer
+            this.$forceUpdate()
         })
     }
 }

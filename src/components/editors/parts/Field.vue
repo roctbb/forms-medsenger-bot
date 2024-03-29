@@ -53,7 +53,7 @@
             <form-group48 title="Цвет" v-if="field.show_if">
                 <div class="row">
                     <div class="col">
-                        <ColorPicker v-model="field.params.color" />
+                        <ColorPicker v-model="field.params.color"/>
                     </div>
                     <div class="col">
                         <input type="text" class="form-control form-control-sm" v-model="field.params.color">
@@ -74,9 +74,16 @@
                         other.text
                     }}
                 </option>
+
                 <optgroup v-for="field in form.fields.filter(f => f.type == 'radio')" :label="field.text">
                     <option v-for="(variant, i) in field.params.variants" :value="{uid: field.uid, ans: i}">
                         {{ variant.text }}
+                    </option>
+                </optgroup>
+
+                <optgroup v-for="field in form.fields.filter(f => f.type == 'map' && f.params.zone_groups_enabled)" :label="field.text">
+                    <option v-for="(group, i) in field.params.zone_groups" :value="{uid: field.uid, group_index: i}">
+                        {{ group.description }} {{i}}
                     </option>
                 </optgroup>
             </select>
@@ -105,18 +112,18 @@
                                                  class="form-control form-control-sm"
                                                  v-model="field.params.max"/>
                     </div>
-                    
+
                     <div class="col-md-2" v-if="field.type === 'range'">
                         <small>шаг </small><input type="number" step="0.1"
-                                                 :class="save_clicked && (empty(field.params.step) || field.params.step < field.params.min) ? 'is-invalid' : ''"
-                                                 class="form-control form-control-sm"
-                                                 v-model="field.params.step"/>
+                                                  :class="save_clicked && (empty(field.params.step) || field.params.step < field.params.min) ? 'is-invalid' : ''"
+                                                  class="form-control form-control-sm"
+                                                  v-model="field.params.step"/>
                     </div>
                     <div class="col-md-2" v-if="field.type === 'range'">
                         <small>начать с </small><input type="number" step="0.1"
-                                                 :class="save_clicked && (empty(field.params.default) || field.params.default < field.params.min) ? 'is-invalid' : ''"
-                                                 class="form-control form-control-sm"
-                                                 v-model="field.params.default"/>
+                                                       :class="save_clicked && (empty(field.params.default) || field.params.default < field.params.min) ? 'is-invalid' : ''"
+                                                       class="form-control form-control-sm"
+                                                       v-model="field.params.default"/>
                     </div>
                 </div>
             </div>
@@ -180,7 +187,7 @@
 
                 <div class="form-group row" v-for="(variant, j) in field.params.variants">
                     <div class="col-md-3">
-                        <small class="text-mutted">Код категории</small><br>
+                        <small class="text-muted">Код категории</small><br>
 
                         <select class="form-control form-control-sm"
                                 :class="save_clicked && !variant.category ? 'is-invalid' : ''"
@@ -195,19 +202,19 @@
                         </select>
                     </div>
                     <div class="col-md-2" v-if="variant.category != 'none'">
-                        <small class="text-mutted">Значение</small><br>
+                        <small class="text-muted">Значение</small><br>
                         <input type="text" class="form-control form-control-sm"
                                :class="save_clicked && empty(variant.category_value) ? 'is-invalid' : ''"
                                v-model="variant.category_value"/>
                     </div>
                     <div class="col-md-5">
-                        <small class="text-mutted">Текст варианта</small><br>
+                        <small class="text-muted">Текст варианта</small><br>
                         <input type="text"
                                :class="save_clicked && empty(variant.text) ? 'is-invalid' : ''"
                                class="form-control form-control-sm" v-model="variant.text"/>
                     </div>
                     <div class="col-md-2" v-if="form.has_integral_evaluation && !field.exclude_weight">
-                        <small class="text-mutted">Вес</small><br>
+                        <small class="text-muted">Вес</small><br>
                         <input type="number" step="0.1"
                                :class="save_clicked && empty(variant.weight) ? 'is-invalid' : ''"
                                class="form-control form-control-sm" v-model="variant.weight"/>
@@ -219,7 +226,7 @@
                     </div>
 
                     <div class="col-md-12" v-if="is_admin">
-                        <small class="text-mutted">Дополнительные параметры</small><br>
+                        <small class="text-muted">Дополнительные параметры</small><br>
                         <input type="text" class="form-control form-control-sm"
                                :class="save_clicked && !isJsonString(variant.custom_params) ? 'is-invalid' : ''"
                                v-model="variant.custom_params"/>
@@ -302,8 +309,46 @@
                 </form-group48>
 
                 <form-group48 title="Предпросмотр" description="Карта будет выглядеть так">
-                    <interactive-map :map="field.params.map" :uid="field.uid"/>
+                    <interactive-map :map="field.params.map" :uid="field.uid" :is_map_preview="true"/>
                 </form-group48>
+
+                <form-group48 title="Добавить группы зон?">
+                    <input type="checkbox" class="form-check" @change="$forceUpdate()"
+                           v-model="field.params.zone_groups_enabled">
+                </form-group48>
+
+                <div v-if="field.params.zone_groups_enabled">
+                    <strong>Группы зон</strong>
+                    <div class="form-group row" v-for="(group, j) in field.params.zone_groups">
+                        <div class="col-md-5">
+                            <small class="text-muted">Описание группы</small><br>
+                            <input type="text"
+                                   :class="save_clicked && empty(group.description) ? 'is-invalid' : ''"
+                                   class="form-control form-control-sm" v-model="group.description"/>
+                        </div>
+                        <div class="row" style="margin: 0">
+                            <div>
+                                <small class="text-muted">Цвет</small><br>
+                                <ColorPicker @input="change_zone_group_color(j)"
+                                    v-model="group.color"/>
+                            </div>
+                            <div class="col"><br>
+                                <input type="text" class="form-control form-control-sm"
+                                       @change="change_zone_group_color(j)"
+                                       v-model="group.color">
+                            </div>
+
+                        </div>
+                        <div><br>
+                            <a class="btn btn-primary btn-sm" @click="change_zone_group(j)">
+                                {{ field.params.current_group_index == j ? 'Текущая группа' : 'Выбрать зоны' }}
+                            </a>
+                        </div>
+                        <div><br>
+                            <a class="btn btn-default btn-sm" @click="remove_zone_group(j)">Удалить группу</a>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Список лекарств -->
@@ -311,6 +356,7 @@
             </div>
         </div>
 
+        <a v-if="field.type == 'map' && field.params.zone_groups_enabled" class="btn btn-default btn-sm" @click="add_zone_group()">Добавить группу</a>
         <a v-if="field.type == 'radio'" class="btn btn-default btn-sm" @click="add_variant()">Добавить вариант</a>
         <a class="btn btn-danger btn-sm" @click="remove()">Удалить {{
                 field.type != 'header' ? 'вопрос' : 'заголовок'
@@ -342,7 +388,9 @@ export default {
         return {
             mode: 'integer',
             field: {},
-            backup: {}
+            backup: {},
+            colors: ['#058dc7', '#50b432', '#c355ff', '#ffc800',
+                '#3673e8', '#f16400', "#853cff", '#24cbe5']
         }
     },
     computed: {
@@ -367,6 +415,11 @@ export default {
                     this.field.params.colors = ["#63bf3a", "#72c433", "#b0dc40", "#eed748", "#e9b942", "#e3a03c", "#e18738", "#d96932", "#d4482e", "#d3312c"]
                     this.field.params.tmp_colors = this.field.params.colors.toString()
                 }
+                if (this.field.type == 'map') {
+                    this.field.params.zone_groups_enabled = false
+                    this.field.params.zone_groups = []
+                    this.field.params.current_group_index = 0
+                }
             }
             this.$forceUpdate()
         },
@@ -379,6 +432,34 @@ export default {
         },
         remove_variant: function (j) {
             this.field.params.variants.splice(j, 1);
+            this.$forceUpdate()
+        },
+        change_zone_group_color: function () {
+            this.$forceUpdate()
+            Event.fire('map-zone-groups-changed', {uid: this.field.uid, groups: this.field.params.zone_groups})
+        },
+        add_zone_group: function () {
+            if (!this.field.params.zone_groups) {
+                this.field.params.zone_groups = []
+            }
+
+            this.field.params.current_group_index = this.field.params.zone_groups.length
+
+            let color = this.colors[this.field.params.zone_groups.length % 8].replace('#', '')
+            let group = {zones: [], description: '', color: color}
+
+            this.field.params.zone_groups.push(group);
+
+            Event.fire('map-zone-groups-changed', {uid: this.field.uid, groups: this.field.params.zone_groups})
+            this.$forceUpdate()
+        },
+        remove_zone_group: function (j) {
+            this.field.params.zone_groups.splice(j, 1);
+            Event.fire('map-zone-groups-changed', {uid: this.field.uid, groups: this.field.params.zone_groups})
+            this.$forceUpdate()
+        },
+        change_zone_group: function (j) {
+            this.field.params.current_group_index = j
             this.$forceUpdate()
         },
         remove: function () {
@@ -402,6 +483,33 @@ export default {
 
         if (this.field.type == 'scale')
             this.field.params.tmp_colors = this.field.params.colors.toString()
+        if (this.field.type == 'map') {
+            if (this.field.params.zone_groups_enabled) {
+                Event.fire('map-zone-groups-changed', {uid: this.field.uid, groups: this.field.params.zone_groups})
+                let zones = []
+                this.field.params.zone_groups.forEach((gr) => {
+                    zones = zones.concat(gr.zones)
+                })
+
+                setTimeout(() => {
+                    Event.fire('map-zone-groups-changed', {uid: this.field.uid, groups: this.field.params.zone_groups})
+                    Event.fire('set-map-zones', {uid: this.field.uid, parts: zones})
+                }, 100)
+            }
+        }
+
+        Event.listen('mouse-down', (data) => {
+            if (data.uid !== this.field.uid || this.field.type != 'map') return
+
+            if (this.field.params.zone_groups_enabled) {
+                if (data.group_index > -1)
+                    this.field.params.zone_groups[data.group_index].zones =
+                        this.field.params.zone_groups[data.group_index].zones.filter((z) => z != data.zone)
+                this.field.params.zone_groups[this.field.params.current_group_index].zones.push(data.zone)
+                Event.fire('map-zone-groups-changed', {uid: this.field.uid, groups: this.field.params.zone_groups})
+                this.$forceUpdate()
+            }
+        })
     }
 }
 </script>
