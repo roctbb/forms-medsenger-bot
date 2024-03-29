@@ -46,6 +46,10 @@
                 </select>
             </form-group48>
 
+            <form-group48 title="Подкатегория (для тепловой карты)" v-if="['symptom', 'side_effect'].includes(field.category)">
+                <input class="form-control form-control-sm" v-model="field.params.subcategory"/>
+            </form-group48>
+
             <form-group48 title="Обязательный вопрос?" v-if="!field.show_if">
                 <input type="checkbox" class="form-check" v-model="field.required">
             </form-group48>
