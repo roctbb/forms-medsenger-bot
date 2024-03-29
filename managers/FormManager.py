@@ -264,6 +264,9 @@ class FormManager(Manager):
                         "type": field['type']
                     }
 
+                    if field.get('params', {}).get('subcategory'):
+                        params["subcategory"] = field['params']['subcategory']
+
                     if field.get('params', {}).get('custom_params'):
                         try:
                             params.update(json.loads(field.get('params', {}).get('custom_params')))
