@@ -82,13 +82,11 @@ class FormManager(Manager):
                 except Exception as e:
                     log(e, False)
 
-
             if new_form.init_text:
                 self.medsenger_api.send_message(new_form.contract_id, form.init_text, only_patient=True)
 
             self.db.session.add(new_form)
             self.__commit__()
-
 
             if new_form.timetable.get('send_on_init'):
                 self.db.session.refresh(new_form)
@@ -230,6 +228,9 @@ class FormManager(Manager):
                         "type": field['type']
                     }
 
+                    if field.get('params', {}).get('subcategory'):
+                        params["subcategory"] = field['params']['subcategory']
+
                     if field['params']['variants'][answers[field['uid']]].get('custom_params'):
                         try:
                             params.update(
@@ -324,6 +325,9 @@ class FormManager(Manager):
                         "answer": answers[field['uid']],
                         "type": field['type']
                     }
+
+                    if field.get('params', {}).get('subcategory'):
+                        params["subcategory"] = field['params']['subcategory']
 
                     if field.get('params', {}).get('custom_params'):
                         try:
