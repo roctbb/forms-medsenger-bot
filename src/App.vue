@@ -149,7 +149,6 @@ export default {
             if (!examination.is_template) {
                 Event.fire('dashboard-to-main');
                 this.patient.examinations.push(examination)
-                console.log(this.patient.examinations)
             } else {
                 this.templates.examinations.push(examination)
             }
