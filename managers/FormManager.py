@@ -360,9 +360,6 @@ class FormManager(Manager):
         form.filled_timestamp = int(time.time())
 
         self.__commit__()
-        print()
-        print(answers)
-        print()
 
         packet, report = self._extract_packet_and_report_from_form(contract_id, form, answers)
 
