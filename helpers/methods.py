@@ -10,7 +10,7 @@ from helpers.descriptions import generate_contract_description
 DATACACHE = {}
 
 
-def get_ui(page, contract, categories='[]', object_id=None, is_preview=False, dashboard_parts=[], role='doctor'):
+def get_ui(page, contract, categories='[]', object_id=None, is_preview=False, dashboard_parts=[], role='doctor', params={}):
     token = 'undefined'
 
     if contract:
@@ -26,7 +26,8 @@ def get_ui(page, contract, categories='[]', object_id=None, is_preview=False, da
                            agent_id=AGENT_ID, categories=json.dumps(categories),
                            is_admin=str(bool(contract.is_admin)).lower() if contract else 'false',
                            lc=dir_last_updated('static'), clinic_id=contract.clinic_id if contract else 'undefined',
-                           is_preview=str(is_preview).lower(), dashboard_parts=json.dumps(dashboard_parts))
+                           is_preview=str(is_preview).lower(), dashboard_parts=json.dumps(dashboard_parts),
+                           params=json.dumps(params))
 
 
 def delayed(delay, f, args):

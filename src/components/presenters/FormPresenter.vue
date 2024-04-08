@@ -25,6 +25,7 @@
                                   :style="get_field_styles(field)">
                         <input type="number" :min="field.params.min" :max="field.params.max" step="1"
                                class="form-control monitoring-input" @input="fieldTransformer(field)"
+                               :disabled="is_form_answer_preview"
                                :class="save_clicked && field.required &&
                        (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
                                v-if="field.type == 'integer'" :required="field.required" v-model="answers[field.uid]"/>
@@ -32,29 +33,36 @@
 
                         <input type="number" :min="field.params.min" :max="field.params.max" step="0.01"
                                class="form-control monitoring-input" @input="fieldTransformer(field)"
+                               :disabled="is_form_answer_preview"
                                :class="save_clicked && field.required &&
                        (!answers[field.uid] && answers[field.uid] !== 0 || answers[field.uid] < field.params.min || answers[field.uid] > field.params.max) ? 'is-invalid' : ''"
                                v-if="field.type == 'float'" :required="field.required" v-model="answers[field.uid]"/>
 
                         <input type="text" class="form-control monitoring-input" v-if="field.type == 'text'"
                                :required="field.required"
+                               :disabled="is_form_answer_preview"
                                :class="save_clicked && field.required && !answers[field.uid] && answers[field.uid] !== 0 ? 'is-invalid' : ''"
                                v-model="answers[field.uid]"/>
 
                         <input type="file" class="monitoring-input" v-if="field.type == 'file'"
                                :required="field.required"
+                               :disabled="is_form_answer_preview"
                                v-bind:ref="'file_' + field.uid" v-on:change="submit_file(field)"/>
                         <textarea class="form-control monitoring-input" v-if="field.type == 'textarea'"
                                   :required="field.required"
+                                  :disabled="is_form_answer_preview"
                                   :class="save_clicked && field.required && !answers[field.uid] && answers[field.uid] !== 0 ? 'is-invalid' : ''"
                                   v-model="answers[field.uid]"></textarea>
                         <div v-if="field.type == 'checkbox'" style="width: 100%;">
-                            <input type="checkbox" v-model="answers[field.uid]"/>
+                            <input type="checkbox"
+                                   :disabled="is_form_answer_preview"
+                                   v-model="answers[field.uid]"/>
                         </div>
 
                         <div v-if="field.type == 'radio'">
                             <div class="form-check" v-for="(variant, j) in field.params.variants">
                                 <input class="form-check-input monitoring-input" type="radio"
+                                       :disabled="is_form_answer_preview"
                                        :id="'radio_' +  field.uid + '_' + j" :name="'radio_' +  field.uid + '_' + j"
                                        v-model="answers[field.uid]" :value="j" @change="$forceUpdate()">
                                 <label class="form-check-label" :for="'radio_' +  field.uid + '_' + j">{{
@@ -70,6 +78,7 @@
                                          v-for="(color, i) in field.params.colors">
                                         <input class="form-check-input monitoring-input" style="margin-left: 4px"
                                                type="radio"
+                                               :disabled="is_form_answer_preview"
                                                :id="'radio_' + field.uid + '_' + i" :name="'radio_' + field.uid"
                                                v-model="answers[field.uid]"
                                                :value="(field.params.reversed ? -1 : 1) * i + field.params.start_from">
@@ -79,27 +88,33 @@
                         </div>
 
                         <div v-if="field.type == 'map'">
-                            <interactive-map :map="field.params.map" :uid="field.uid"/>
+                            <interactive-map :map="field.params.map"
+                                             :disabled="is_form_answer_preview"
+                                             :uid="field.uid"/>
                         </div>
 
                         <div v-if="field.type == 'date'">
-                            <date-picker lang="ru" :required="field.required" v-model="answers[field.uid]"
-                                         value-type="YYYY-MM-DD"></date-picker>
+                            <date-picker lang="ru"
+                                         :disabled="is_form_answer_preview"
+                                         :required="field.required" v-model="answers[field.uid]"
+                                         value-type="YYYY-MM-DD"/>
                         </div>
 
                         <div v-if="field.type == 'time'">
-                            <date-picker lang="ru" :required="field.required" v-model="answers[field.uid]"
-                                         format="HH:mm"
-                                         value-type="HH:mm"
-                                         type="time"></date-picker>
+                            <date-picker lang="ru"
+                                         :disabled="is_form_answer_preview"
+                                         :required="field.required" v-model="answers[field.uid]"
+                                         format="HH:mm" value-type="HH:mm" type="time"/>
                         </div>
 
                         <input type="range" :min="field.params.min" :max="field.params.max" :step="field.params.step"
                                class="form-control monitoring-input"
+                               :disabled="is_form_answer_preview"
                                :class="save_clicked && field.required && (!answers[field.uid] && answers[field.uid] !== 0) ? 'is-invalid' : ''"
                                v-if="field.type == 'range'" v-model="answers[field.uid]"/>
 
-                        <span v-if="field.type == 'range'"><b>{{ answers[field.uid] }}</b><b v-if="save_clicked && field.required && (!answers[field.uid] && answers[field.uid] !== 0)" style="color:red;">Укажите значение!</b></span>
+                        <span v-if="field.type == 'range'"><b>{{ answers[field.uid] }}</b><b
+                            v-if="save_clicked && field.required && (!answers[field.uid] && answers[field.uid] !== 0)" style="color:red;">Укажите значение!</b></span>
 
                         <div v-if="field.type == 'medicine_list'">
                             <div v-for="(medicine, j) in answers[field.uid]">
@@ -107,6 +122,7 @@
                                     <div class="form-check col-5" v-if="medicine.id">
                                         <input class="form-check-input monitoring-input" type="checkbox"
                                                style="margin: 5px -15px;"
+                                               :disabled="is_form_answer_preview"
                                                :id="'radio_' +  field.uid + '_' + j"
                                                :name="'radio_' +  field.uid + '_' + j"
                                                v-model="medicine.checked" :value="j" @change="$forceUpdate()">
@@ -116,23 +132,30 @@
                                     </div>
                                     <div class="col-5" v-else>
                                         <small>Название</small>
-                                        <input type="text" class="form-control monitoring-input"
+                                        <input type="text"
+                                               :disabled="is_form_answer_preview"
+                                               class="form-control monitoring-input"
                                                v-model="medicine.title"/>
                                     </div>
                                     <div :class="`col${mobile ? '' : '-5'}`">
                                         <small>Дозировка</small>
                                         <input type="text" class="form-control monitoring-input"
+                                               :disabled="is_form_answer_preview"
                                                v-model="medicine.dose"/>
                                     </div>
                                     <div v-if="!medicine.id" class="col-md-2">
                                         <a class="btn btn-default btn-sm" :style="`margin-top: ${mobile ? 5 : 27}px;`"
+                                           v-if="!is_form_answer_preview"
                                            @click="remove_medicine(field, j)">Удалить</a>
                                     </div>
                                 </div>
 
                             </div>
                             <br>
-                            <button class="btn btn-sm btn-secondary" @click="add_medicine(field)">Добавить</button>
+                            <button class="btn btn-sm btn-secondary"
+                                    v-if="!is_form_answer_preview"
+                                    @click="add_medicine(field)">Добавить
+                            </button>
                         </div>
 
                     </form-group48>
@@ -153,12 +176,14 @@
                     <date-picker v-model="fill_time" lang="ru" :minute-step="15" type="datetime"
                                  format="DD.MM.YYYY HH:mm"
                                  time-title-format="DD.MM.YYYY"
-                                 :disabled-date="date_invalid"></date-picker>
+                                 :disabled="is_form_answer_preview"
+                                 :disabled-date="date_invalid"/>
                 </form-group48>
             </div>
         </div>
 
         <button style="margin-bottom: 20px;" @click="save()" class="btn btn-success btn-lg"
+                v-if="!is_form_answer_preview"
                 :disabled="submitted || is_preview">Отправить ответ
         </button>
 
@@ -206,6 +231,11 @@ export default {
                 }
             }
 
+        }
+    },
+    computed: {
+        is_form_answer_preview() {
+            return Boolean(this.is_preview && window.PARAMS.answers)
         }
     },
     methods: {
@@ -349,8 +379,8 @@ export default {
                 if (this.answers[field.show_if] // галочка
                     || this.answers[field.show_if.uid] &&
                     (field.show_if.ans != undefined && this.answers[field.show_if.uid] === field.show_if.ans // вариант ответа
-                    || field.show_if.group_index != undefined && show_if_field.params.zone_groups[field.show_if.group_index].zones // зоны
-                            .filter((z) => this.answers[field.show_if.uid].includes(z)).length)) {
+                        || field.show_if.group_index != undefined && show_if_field.params.zone_groups &&
+                        show_if_field.params.zone_groups[field.show_if.group_index].zones.filter((z) => this.answers[field.show_if.uid].includes(z)).length)) { // зоны
 
                     return this.show_field(show_if_field)
                 }
@@ -394,14 +424,14 @@ export default {
         get_field_styles: function (field) {
             let color = ""
 
+            const change = 10 * (this.get_level(field) - 1);
+
             if (field.params.color) {
                 color = "#" + field.params.color
-            }
-            else {
+            } else {
                 color = `rgb(${255 - change},${255 - change}, ${255})`
             }
 
-            const change = 10 * (this.get_level(field) - 1);
             return `margin-top: 15px; margin-bottom: 15px; background-color: ${color};`
         },
         load_form: function (form) {
@@ -441,6 +471,17 @@ export default {
         }
     },
     mounted() {
+        if (window.PARAMS.answers) {
+            this.answers = window.PARAMS.answers
+            this.fill_time = new Date(this.answers.timestamp * 1000)
+            this.form.fields.forEach((field) => {
+                if (field.type == 'map') {
+                    Event.fire('set-map-zones', {uid: field.uid, parts: this.answers[field.uid]})
+                }
+            })
+        }
+
+
         Event.listen('load-form-preview', form => {
             console.log("form preview", form)
             this.is_preview = true
