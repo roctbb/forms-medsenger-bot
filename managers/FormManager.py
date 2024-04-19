@@ -204,6 +204,8 @@ class FormManager(Manager):
             if field['uid'] in answers.keys():
                 if field['type'] == 'file':
                     category = field['category']
+                    if field['category'] == 'none':
+                        continue
                     comment = field.get('category_value', answers[field['uid']].get('name'))
 
                     packet.append({"category_name": category, "value": comment, "files": [answers[field['uid']]]})
@@ -305,6 +307,7 @@ class FormManager(Manager):
 
                     for medicine in medicines:
                         if not medicine.get('id'):
+                            medicine['edited_by_patient'] = True
                             medicine_manager.create_or_edit(medicine, contract)
                         params = {
                             "question_iud": field['uid'],
@@ -370,9 +373,35 @@ class FormManager(Manager):
         action_name += integral_description
 
         custom_params['record_time'] = time.time()
-        custom_params['form_answers'] = answers
+        custom_params['form_answers'] = {}
+        attachments = []
 
-        packet.append(('action', action_name, custom_params))
+        def get_field(uid):
+            field = [field for field in form.fields if field['uid'] == uid]
+            return field[0] if len(field) else None
+
+        for question in answers.keys():
+            if question == 'timestamp' or answers[question] is None:
+                continue
+
+            field = get_field(question)
+            if not field:
+                continue
+            elif isinstance(answers[question], dict) or isinstance(answers[question], list):
+                if field['type'] == 'medicine_list':
+                    medicines = [medicine for medicine in answers[question] if medicine['checked']]
+                    if not len(medicines):
+                        continue
+                    custom_params['form_answers'][question] = [medicine for medicine in answers[question] if medicine['checked']]
+                elif field['type'] == 'map':
+                    custom_params['form_answers'][question] = answers[question]
+                elif field['type'] == 'file':
+                    attachments.append(answers[question])
+                    custom_params['form_answers'][question] = answers[question].get('name')
+            else:
+                custom_params['form_answers'][question] = answers[question]
+
+        packet.append({'category_name': 'action', 'value': action_name, 'files': attachments, 'params': custom_params})
 
         params = {
             "form_id": form.id
