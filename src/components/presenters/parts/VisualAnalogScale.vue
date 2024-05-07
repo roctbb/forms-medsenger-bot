@@ -1,10 +1,10 @@
 <template>
 <div style="margin-bottom: 20px">
     <div class="row" v-if="params.left_label || params.right_label">
-        <div  :class="`col-6 d-flex text-nowrap justify-content-start`" v-if="params.left_label">
+        <div  :class="`col-5 d-flex justify-content-start`" v-if="params.left_label">
             <small>{{ params.left_label }}</small>
         </div>
-        <div  :class="`col-6 d-flex text-nowrap justify-content-end`" v-if="params.right_label">
+        <div  :class="`col-5 offset-2 d-flex justify-content-end`" v-if="params.right_label">
             <small>{{ params.right_label }}</small>
         </div>
     </div>
