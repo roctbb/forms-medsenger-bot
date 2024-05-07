@@ -4,7 +4,7 @@
         <div  :class="`col-5 d-flex justify-content-start`" v-if="params.left_label">
             <small>{{ params.left_label }}</small>
         </div>
-        <div  :class="`col-5 offset-2 d-flex justify-content-end`" v-if="params.right_label">
+        <div  :class="`col-5 offset-2 d-flex  text-right justify-content-end`" v-if="params.right_label">
             <small>{{ params.right_label }}</small>
         </div>
     </div>
