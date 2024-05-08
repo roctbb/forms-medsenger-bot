@@ -2,6 +2,7 @@ from infrastructure import db
 from . import Compliance
 from helpers import clear_categories
 
+
 class Form(db.Model, Compliance):
     id = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id', ondelete="CASCADE"), nullable=True)

@@ -25,7 +25,7 @@ import EmojiMap from "../../maps/emoji/EmojiMap.vue";
 export default {
     name: "InteractiveMap",
     components: {EmojiMap, YesNoMap, EmotionsMap, HumanMap, ChildMap},
-    props: ['map', 'uid', 'is_map_preview'],
+    props: ['map', 'uid', 'is_map_preview', 'disabled'],
     data() {
         return {
             parts: [],
@@ -34,7 +34,7 @@ export default {
     computed: {},
     created() {
         Event.listen('mouse-down', (data) => {
-            if (data.uid !== this.uid) return
+            if (this.disabled || data.uid !== this.uid) return
             let part = this.parts.filter(p => p == data.zone)
             if (part.length)
                 this.parts = this.parts.filter(p => p != data.zone)
@@ -67,8 +67,8 @@ export default {
 #info-box {
     display: none;
     position: absolute;
-    top: 0px;
-    left: 0px;
+    top: 0;
+    left: 0;
     z-index: 1;
     background-color: #ffffff;
     border: 2px solid #006c88;

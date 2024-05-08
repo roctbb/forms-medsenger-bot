@@ -146,6 +146,11 @@ def order(data):
     if data['order'] == 'get_params':
         return jsonify(algorithm_manager.search_params(contract))
 
+    if data['order'] == 'get_form':
+        form = form_manager.get(data['params'].get('form_id'))
+        if form:
+            return jsonify(form.as_dict())
+
     return "not found"
 
 

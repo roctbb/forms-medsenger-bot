@@ -20,6 +20,15 @@ def form_preview_page(args, form, contract, form_id):
     return get_ui('form', contract, medsenger_api.get_categories(), form_id, True, role='doctor')
 
 
+@actions_blueprint.route('/preview_form/<form_id>/<record_id>', methods=['GET'])
+@verify_request(contract_manager, 'patient')
+def form_preview_page_from_record(args, form, contract, form_id, record_id):
+    record = medsenger_api.get_record_by_id(contract.id, record_id)
+    answers = record['params'].get('form_answers', {}) if record['params'] else {}
+    return get_ui('form', contract, medsenger_api.get_categories(), form_id, True,
+                  params={'answers': answers}, role='patient')
+
+
 @actions_blueprint.route('/form/<form_id>', methods=['GET'])
 @verify_request(contract_manager, 'patient')
 def form_page(args, form, contract, form_id):
