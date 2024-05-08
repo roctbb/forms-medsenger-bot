@@ -354,7 +354,7 @@ class FormManager(Manager):
 
         return packet, report
 
-    def submit(self, answers, form, contract_id):
+    def submit(self, answers, form, contract_id, submit_from_patient=True):
         form.warning_timestamp = 0
         form.asked_timestamp = 0
         form.filled_timestamp = int(time.time())
@@ -371,7 +371,10 @@ class FormManager(Manager):
 
         custom_params['record_time'] = time.time()
 
-        packet.append(('action', action_name, custom_params))
+        if submit_from_patient:
+            packet.append(('action', action_name, custom_params))
+        else:
+            packet.append(('doctor_action', action_name, custom_params))
 
         params = {
             "form_id": form.id

@@ -275,6 +275,25 @@ def post_form(args, form, contract, form_id):
         "result": "ok",
     })
 
+@api_blueprint.route('/api/doctor_form/<form_id>', methods=['POST'])
+@verify_request(contract_manager, 'patient')
+def post_doctor_form(args, form, contract, form_id):
+    form = form_manager.get(form_id)
+    data = request.json
+    contract_id = int(args.get('contract_id'))
+
+    if form.contract_id != contract_id and not form.is_template:
+        abort(401)
+
+    submit_chain = tasks.submit_form.s(True, data, form_id, contract_id, False)
+    submit_chain |= tasks.examine_form.s(form_id, contract_id)
+    submit_chain |= tasks.examine_contract_tasks.s(form_id, contract_id)
+    submit_chain |= tasks.request_chained_cache_update.s(contract_id)
+    submit_chain.apply_async()
+
+    return jsonify({
+        "result": "ok",
+    })
 
 @api_blueprint.route('/api/outsource_form/<form_id>', methods=['POST'])
 def post_outsource_form(form_id):

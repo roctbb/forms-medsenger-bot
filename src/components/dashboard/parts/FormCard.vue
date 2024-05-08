@@ -19,9 +19,9 @@
         <!-- опросник пациента -->
         <div v-if="!form.is_template">
             <div v-if="form.contract_id == current_contract_id">
-                <a href="#" @click="edit_timetable()">Изменить расписание</a>
-                <a href="#" @click="edit_form()">Редактировать</a>
-                <a href="#" @click="delete_form()">Удалить</a>
+                <a href="#" @click="edit_timetable()">Изменить расписание</a> |
+                <a href="#" @click="edit_form()">Редактировать</a> |
+                <a href="#" @click="delete_form()">Удалить</a> |
                 <a target="_blank" v-if="!mobile" :href="preview_form_url">Просмотр</a>
                 <a href="#" v-else @click="preview_form()">Просмотр</a>
             </div>
@@ -29,6 +29,7 @@
                 <small>Добавлен в другом контракте.</small>
             </div>
             <div v-if="form.contract_id == current_contract_id || form.template_id">
+                <a href="#" @click="fill_form()">Заполнить за пациента</a> |
                 <a href="#" @click="send_now()">Отправить сейчас</a>
             </div>
             <br>
@@ -42,11 +43,13 @@
             <small v-else class="text-muted">Опросник подключен<br></small>
 
             <a href="#" v-if="is_admin || patient.info.doctor_id == form.doctor_id"
-               @click="edit_form()">Редактировать</a>
+               @click="edit_form()">Редактировать</a> |
             <a href="#" v-if="is_admin || patient.info.doctor_id == form.doctor_id"
-               @click="delete_form()">Удалить</a>
+               @click="delete_form()">Удалить</a> |
             <a target="_blank" v-if="!mobile" :href="preview_form_url">Просмотр</a>
-            <a href="#" v-else @click="preview_form()">Просмотр</a>
+            <a href="#" v-else @click="preview_form()">Просмотр</a><br>
+
+            <a href="#" @click="fill_form()">Заполнить за пациента</a> |
             <a href="#" @click="send_now()">Отправить сейчас</a>
             <br>
             <small class="text-muted">ID: {{ form.id }}</small>
@@ -71,6 +74,9 @@ export default {
     computed: {
         preview_form_url() {
             return this.direct_url('/preview_form/' + this.form.id)
+        },
+        fill_form_url() {
+            return this.direct_url('/form/' + this.form.id)
         },
         is_attached() {
             return this.patient.forms.filter(f => f.template_id == this.form.id).length != 0
@@ -100,6 +106,9 @@ export default {
         },
         preview_form: function () {
             Event.fire('preview-form', this.form)
+        },
+        fill_form: function () {
+            Event.fire('fill-form', this.form)
         },
         send_now: function () {
             let alert = () => {

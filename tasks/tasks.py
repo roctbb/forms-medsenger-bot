@@ -3,13 +3,13 @@ from config import DYNAMIC_CACHE
 
 
 @celery.task
-def submit_form(chain, answers, form_id, contract_id):
+def submit_form(chain, answers, form_id, contract_id, submit_from_patient=True):
     if not chain:
         return chain
 
     with app.app_context():
         form = form_manager.get(form_id)
-        return form_manager.submit(answers, form, contract_id)
+        return form_manager.submit(answers, form, contract_id, submit_from_patient)
 
 
 @celery.task

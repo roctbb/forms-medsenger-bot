@@ -161,6 +161,10 @@ export default {
             this.state = 'form-preview-presenter'
             Event.fire('load-form-preview', form);
         });
+        Event.listen('fill-form', (form) => {
+            this.state = 'form-presenter'
+            Event.fire('load-doctor-form', form);
+        });
         Event.listen('edit-medicine', (medicine) => {
             this.state = 'medicine-manager'
             Event.fire('navigate-to-edit-medicine-page', medicine);
