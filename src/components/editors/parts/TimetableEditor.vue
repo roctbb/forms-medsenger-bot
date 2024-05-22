@@ -58,7 +58,9 @@
 
         <div v-if="timetable.mode === 'ndays'">
             <div class="form-group row">
-                <div class="col-md-4 col-md-offset-4">
+                <div class="col-md-4">
+                </div>
+                <div class="col-md-4">
                     <small>Период</small>
                 </div>
                 <div class="col-md-4">
