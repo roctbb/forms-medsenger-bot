@@ -31,7 +31,7 @@ class TimetableManager(Manager):
             return False
 
         if timetable.get('mode') == 'ndays':
-            if not object.last_sent or (now - localize(object.last_sent)).days > timetable.get('period'):
+            if not object.last_sent or (now - localize(object.last_sent)).days > int(timetable.get('period')):
                 return True
             return False
 
