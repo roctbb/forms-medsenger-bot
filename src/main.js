@@ -190,6 +190,9 @@ Vue.mixin({
                 return 'Заполняется вручную или присылается алгоритмом.'
             } else if (timetable.mode == 'dates') {
                 return 'Отправляется в конкретные даты.'
+            }
+            else if (timetable.mode == 'ndays') {
+                return 'Раз в ' + timetable.period + ' дней.'
             } else if (timetable.mode == 'daily') {
                 return timetable.points.length + ' раз(а) в день.'
             } else if (timetable.mode == 'weekly') {
