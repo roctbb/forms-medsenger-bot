@@ -30,6 +30,11 @@ class TimetableManager(Manager):
         if timetable.get('mode') == 'manual':
             return False
 
+        if timetable.get('mode') == 'ndays':
+            if not object.last_sent or (now - localize(object.last_sent)).days > timetable.get('period'):
+                return True
+            return False
+
         if object.last_sent:
             last_sent = max(localize(object.last_sent), now - timedelta(minutes=5))
         else:

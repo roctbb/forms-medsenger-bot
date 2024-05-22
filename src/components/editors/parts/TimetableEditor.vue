@@ -8,10 +8,11 @@
                 <option value="daily">Ежедневно</option>
                 <option value="weekly">Еженедельно</option>
                 <option value="monthly">Ежемесячно</option>
+                <option value="ndays">Раз в N дней</option>
             </select>
         </form-group48>
 
-        <div v-if="!['manual', 'dates'].includes(timetable.mode)">
+        <div v-if="!['manual', 'dates', 'ndays'].includes(timetable.mode)">
             <hr>
             <div class="form-group row" v-for="(timepoint, index) in timetable.points">
                 <div class="col-md-4">
@@ -52,6 +53,19 @@
             <div class="text-center" style="margin-top: 15px;">
                 <a class="btn btn-default btn-sm" @click="add_time_point()">Добавить время</a>
                 <slot></slot>
+            </div>
+        </div>
+
+        <div v-if="timetable.mode === 'ndays'">
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <small>Период</small>
+                </div>
+                <div class="col-md-8">
+                     <input type="number" min="1" max="365"
+                           class="form-control form-control-sm"
+                           v-model="timetable.period"/>
+                </div>
             </div>
         </div>
 
@@ -175,7 +189,9 @@ export default {
     data() {
         return {
             mode: 'daily',
-            timetable: {},
+            timetable: {
+                period: 1
+            },
             backup: {}
         }
     },
