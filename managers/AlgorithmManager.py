@@ -329,9 +329,15 @@ class AlgorithmManager(Manager):
             result, has_message = self.run(algorithm)
             has_message_to_patient = has_message_to_patient or has_message
 
-        if not has_message_to_patient and form.thanks_text and not bypass_messages:
-            self.medsenger_api.send_message(contract.id, text=form.thanks_text, only_patient=True,
-                                            action_deadline=time.time() + 60 * 60)
+        if not has_message_to_patient and not bypass_messages:
+            deadline = time.time() + 1 * 60 * 60
+            if form.thanks_text:
+                self.medsenger_api.send_message(contract.id, text=form.thanks_text, only_patient=True,
+                                                action_deadline=deadline)
+            else:
+                self.medsenger_api.send_message(contract.id,
+                                                'Спасибо за заполнение опросника "{}". Ответы отправлены вашему лечащему врачу.'.format(
+                                                    form.title), only_patient=True, action_deadline=deadline)
 
         clear_cache(contract.id)
         return True

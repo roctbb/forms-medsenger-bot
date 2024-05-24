@@ -183,14 +183,9 @@ class FormManager(Manager):
         text += '<ul>{}</ul>'.format(
             ''.join(list(map(lambda line: '<li><strong>{}</strong>: {};</li>'.format(*line), report))))
 
-        deadline = time.time() + 1 * 60 * 60
+
 
         self.medsenger_api.send_message(contract_id, text, only_doctor=True)
-
-        if not form.thanks_text:
-            self.medsenger_api.send_message(contract_id,
-                                            'Спасибо за заполнение опросника "{}". Ответы отправлены вашему лечащему врачу.'.format(
-                                                form.title), only_patient=True, action_deadline=deadline)
 
     def _extract_packet_and_report_from_form(self, contract_id, form, answers):
         packet = []
