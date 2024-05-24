@@ -408,6 +408,35 @@ def delete_examination(args, form, contract):
         abort(404)
 
 
+@app.route('/api/examination-group/<examination_group_id>', methods=['GET'])
+@verify_request(contract_manager, 'patient')
+def get_examination_group(args, form, contract, examination_group_id):
+    examination_group = examination_manager.get_group(examination_group_id)
+
+    answer = examination_group.as_dict()
+    answer['examination_templates'] = []
+    for examination_id in answer['examinations']:
+        examination = examination_manager.get(examination_id)
+        if examination:
+            answer['examination_templates'].append(examination.as_dict())
+    return jsonify(answer)
+
+
+@app.route('/api/settings/examination-group', methods=['POST'])
+@verify_request(contract_manager, 'doctor')
+def create_examination_group(args, form, contract):
+    data = request.json
+    deadline = datetime.fromtimestamp(data['deadline'])
+
+    for template_id in data['examinations']:
+        try:
+            examination_manager.attach(template_id, contract, deadline)
+        except Exception as e:
+            log(e)
+
+    return 'ok'
+
+
 @app.route('/api/examination/<examination_id>', methods=['GET'])
 @verify_request(contract_manager, 'patient')
 def get_examination(args, form, contract, examination_id):

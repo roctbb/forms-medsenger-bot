@@ -125,3 +125,10 @@ def examination_page(args, form, contract, examination_id):
 def attach_examination_page(args, form, contract, template_id):
     return get_ui('attach-examination', contract, medsenger_api.get_categories(), template_id,
                   role='doctor', dashboard_parts=['examinations'])
+
+
+@actions_blueprint.route('/examination-group/<examination_group_id>', methods=['GET'])
+@verify_request(contract_manager, 'doctor')
+def attach_examination_group_page(args, form, contract, examination_group_id):
+    return get_ui('examination-group', contract, medsenger_api.get_categories(), examination_group_id,
+                  role='doctor', dashboard_parts=['examinations'])

@@ -27,6 +27,7 @@
                 <examinations-list :data="patient" v-if="state == 'examinations-list'"/>
                 <examination-editor v-show="state == 'examination-manager'"/>
                 <examination-presenter v-show="state == 'examination-loader'"/>
+                <examination-group-presenter :data="examination_group" v-show="state == 'examination-group'"/>
 
                 <algorithm-editor v-show="state == 'algorithm-manager'"/>
                 <action-done v-if="state == 'done'"/>
@@ -57,11 +58,13 @@ import ResultPresenter from "./components/presenters/ResultPresenter";
 import ExaminationEditor from "./components/editors/ExaminationEditor";
 import ExaminationsList from "./components/managers/ExaminationsList";
 import ExaminationPresenter from "./components/presenters/ExaminationPresenter";
+import ExaminationGroupPresenter from "./components/presenters/ExaminationGroupPresenter.vue";
 
 
 export default {
     name: 'app',
     components: {
+        ExaminationGroupPresenter,
         ExaminationPresenter,
         ExaminationsList, ExaminationEditor,
         FormPresenter, FormEditor, ResultPresenter,
@@ -79,6 +82,7 @@ export default {
             medicine: {},
             reminder: {},
             examination: {},
+            examination_group: {},
             mode: "",
             result: {},
             object_id: -1,
@@ -96,7 +100,8 @@ export default {
         Event.listen('navigate-to-create-medicine-page', () => this.state = 'medicine-manager');
         Event.listen('navigate-to-create-reminder-page', () => this.state = 'reminder-manager');
         Event.listen('navigate-to-create-examination-page', () => this.state = 'examination-manager');
-        Event.listen('navigate-to-load-examination-page', (e) => this.state = 'examination-loader');
+        Event.listen('navigate-to-load-examination-page', () => this.state = 'examination-loader');
+        Event.listen('navigate-to-load-examination-group-page', () => this.state = 'examination-group');
         Event.listen('navigate-to-create-algorithm-page', () => this.state = 'algorithm-manager');
         Event.listen('back-to-dashboard', () => this.state = this.mode == 'settings' ? 'dashboard' : 'medicine-chooser');
         Event.listen('back-to-medicine-list', () => this.state = 'medicines-list');
@@ -105,6 +110,7 @@ export default {
         Event.listen('form-done', () => this.state = 'done');
         Event.listen('confirm-medicine-done', () => this.state = 'done');
         Event.listen('confirm-reminder-done', () => this.state = 'done');
+        Event.listen('action-done', () => this.state = 'done');
         Event.listen('form-created', (form) => {
             this.state = 'dashboard'
             if (!form.is_template) {
@@ -249,6 +255,9 @@ export default {
             if (this.mode == 'examination') {
                 this.axios.get(this.direct_url('/api/examination/' + this.object_id)).then(this.process_load_answer);
             }
+            if (this.mode == 'examination-group') {
+                this.axios.get(this.direct_url('/api/examination-group/' + this.object_id)).then(this.process_load_answer);
+            }
             if (this.mode == 'medicines-list') {
                 this.axios.get(this.direct_url('/api/settings/get_patient_data')).then(this.process_load_answer);
             }
@@ -291,8 +300,13 @@ export default {
             }
 
             if (this.mode == 'examination') {
-                Event.fire('navigate-to-load-examination-page', response.data)
+                Event.fire('navigate-to-load-examination-page')
                 this.state = 'examination-loader'
+            }
+
+            if (this.mode == 'examination-group') {
+                this.examination_group = response.data
+                this.state = 'examination-group'
             }
 
             if (this.mode == 'verify-dose') {
