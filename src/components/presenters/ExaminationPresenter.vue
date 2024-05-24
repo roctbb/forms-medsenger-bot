@@ -152,6 +152,9 @@ export default {
                         this.examination.files = this.files
                         this.examination.upload_date = this.strftime('%Y-%m-%d', this.fill_time)
                         Event.fire('examination-loaded', this.examination)
+                        this.files = []
+                        this.file_states = []
+                        this.errors = []
                     })
             }
         },
@@ -159,7 +162,7 @@ export default {
             return date > new Date() || this.examination && date < this.examination.date
         }
     },
-    created() {
+    mounted() {
         Event.listen('navigate-to-load-examination-page', (examination) => {
             this.examination = examination
             if (examination.upload_date) {
