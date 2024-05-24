@@ -314,7 +314,7 @@ class AlgorithmManager(Manager):
 
         return [value for key, value in params.items()]
 
-    def examine(self, contract, form):
+    def examine(self, contract, form, bypass_messages=False):
         categories = form.categories.split('|')
         categories.append('action')
 
@@ -329,7 +329,7 @@ class AlgorithmManager(Manager):
             result, has_message = self.run(algorithm)
             has_message_to_patient = has_message_to_patient or has_message
 
-        if not has_message_to_patient and form.thanks_text:
+        if not has_message_to_patient and form.thanks_text and not bypass_messages:
             self.medsenger_api.send_message(contract.id, text=form.thanks_text, only_patient=True,
                                             action_deadline=time.time() + 60 * 60)
 

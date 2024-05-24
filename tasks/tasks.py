@@ -27,14 +27,14 @@ def request_chained_cache_update(chain, contract_id):
 
 
 @celery.task
-def examine_form(chain, form_id, contract_id):
+def examine_form(chain, form_id, contract_id, submit_from_patient=True):
     if not chain:
         return chain
 
     with app.app_context():
         contract = contract_manager.get(contract_id)
         form = form_manager.get(form_id)
-        return algorithm_manager.examine(contract, form)
+        return algorithm_manager.examine(contract, form, submit_from_patient)
 
 
 @celery.task
