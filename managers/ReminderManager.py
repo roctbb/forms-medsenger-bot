@@ -40,6 +40,25 @@ class ReminderManager(Manager):
             self.db.session.add(new_reminder)
             self.__commit__()
 
+            return reminder
+        else:
+            return False
+
+    def add_dates(self, id, dates):
+        reminder = self.get(id)
+
+        if reminder:
+            if reminder.timetable['mode'] != 'dates':
+                reminder.timetable = {
+                    "mode": "dates",
+                    "points": [{"date": d} for d in dates],
+                    "dates_enabled": True
+                }
+            else:
+                for d in dates:
+                    reminder.timetable['points'].append({"date": d})
+
+            self.__commit__()
 
             return reminder
         else:
