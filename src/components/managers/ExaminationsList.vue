@@ -3,6 +3,13 @@
         <div style="margin-top: 15px;" class="alert alert-info" role="alert">
             Напоминания о загрузке обследования приходят заблаговременно.
         </div>
+        <div class="row">
+            <input class="form-check" type="checkbox" v-model="flags.show_expired">
+            <div class="col" style="margin-top: 5px">
+                Показать обследования, срок загрузки которых истек
+            </div>
+        </div>
+
         <div v-if="examinations.length">
             <div v-if="!mobile">
                 <div class="row font-weight-bold" style="padding: 0 1.25rem;">
@@ -11,7 +18,7 @@
                     <span class="col-2">Загрузить до</span>
                 </div>
 
-                <div v-for="examination in examinations">
+                <div v-for="examination in filtered_examinations">
                     <card :class="!examination.expired ? '' : 'text-muted'"
                           :image="!examination.expired ? images.examination : images.expired_examination">
                         <div class="row">
@@ -37,9 +44,18 @@
                                         @click="load_examination(examination)">
                                     Загрузить
                                 </button>
-                                <span
-                                    v-else-if="examination.expired && !examination.upload_date">Срок загрузки истек<br></span>
-                                <span v-else-if="!examination.active">Загрузка сейчас недоступна<br></span>
+                                <div
+                                    v-else-if="examination.expired && !examination.upload_date">Срок загрузки истек<br>
+                                    <button class="btn btn-sm btn-secondary"
+                                            @click="load_examination(examination)">
+                                        Все равно загрузить
+                                    </button>
+                                    <br>
+                                </div>
+                                <span v-else-if="!examination.active">
+                                    Срок загрузки еще не наступил или уже прошел<br>
+                                    <button class="btn btn-sm btn-secondary" @click="load_examination(examination)">Все равно загрузить</button>
+                                </span>
                                 <div v-if="examination.upload_date">
                                     <small>
                                         <span v-if="examination.no_expiration">Действует бессрочно</span>
@@ -63,7 +79,7 @@
             </div>
 
             <div v-else>
-                <div v-for="examination in examinations">
+                <div v-for="examination in filtered_examinations">
                     <card :class="!examination.expired ? '' : 'text-muted'"
                           :image="!examination.expired ? images.examination : images.expired_examination">
                         <span :style="!examination.expired ? 'color: #006c88' : ''">{{ examination.title }}</span><br>
@@ -80,8 +96,15 @@
                                 @click="load_examination(examination)">
                             Загрузить
                         </button>
-                        <span
-                            v-else-if="examination.expired && !examination.upload_date"><br>Срок загрузки истек<br></span>
+                        <div
+                            v-else-if="examination.expired && !examination.upload_date">
+                            <br>Срок загрузки истек<br>
+                            <button class="btn btn-sm btn-secondary"
+                                    @click="load_examination(examination)">
+                                Все равно загрузить
+                            </button>
+
+                        </div>
                         <span v-else-if="!examination.active"><br>Загрузка сейчас недоступна<br></span>
                         <div v-if="examination.upload_date">
                             <span v-if="examination.no_expiration">Действует бессрочно</span>
@@ -118,11 +141,17 @@ export default {
     data() {
         return {
             flags: {
-                lock_btn: false
+                lock_btn: false,
+                show_expired: false
             },
             examinations: [],
             errors: []
         }
+    },
+    computed: {
+      filtered_examinations() {
+          return this.examinations.filter((e) => !e.expired || this.flags.show_expired)
+      }
     },
     methods: {
         format_date: function (date) {
