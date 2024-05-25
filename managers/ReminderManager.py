@@ -49,11 +49,9 @@ class ReminderManager(Manager):
 
         if reminder:
             if reminder.timetable['mode'] != 'dates':
-                reminder.timetable = {
-                    "mode": "dates",
-                    "points": [{"date": d} for d in dates],
-                    "dates_enabled": True
-                }
+                reminder.timetable["mode"] = "dates"
+                reminder.timetable["points"] = [{"date": d} for d in dates]
+                reminder.timetable["dates_enabled"] = True
             else:
                 for d in dates:
                     reminder.timetable['points'].append({"date": d})
@@ -79,6 +77,20 @@ class ReminderManager(Manager):
 
         self.__commit__()
         return id
+
+    def set_dates(self, id, dates):
+        reminder = self.get(id)
+
+        if reminder:
+            reminder.timetable["mode"] = "dates"
+            reminder.timetable["points"] = [{"date": d} for d in dates]
+            reminder.timetable["dates_enabled"] = True
+
+            self.__commit__()
+
+            return reminder
+        else:
+            return False
 
     def set_state(self, reminder, state):
         result = None
@@ -241,7 +253,8 @@ class ReminderManager(Manager):
         if reminder.has_order:
             params = reminder.order_params if reminder.order_params else None
             agent_id = reminder.order_agent_id if reminder.order_agent_id else None
-            result = self.medsenger_api.send_order(reminder.contract_id, reminder.order, receiver_id=reminder.order_agent_id, params=reminder.order_params)
+            result = self.medsenger_api.send_order(reminder.contract_id, reminder.order, receiver_id=reminder.order_agent_id,
+                                                   params=reminder.order_params)
 
         if result:
             reminder.last_sent = datetime.now()
