@@ -94,6 +94,10 @@ class Reminder(db.Model):
         new_reminder.order_params = self.order_params
         new_reminder.order_agent_id = self.order_agent_id
 
+        new_reminder.has_action = self.has_action
+        new_reminder.action = self.action
+        new_reminder.action_description = self.action_description
+
         new_reminder.has_record_params = self.has_record_params
         new_reminder.record_params = self.record_params
 
