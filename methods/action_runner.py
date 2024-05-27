@@ -8,7 +8,7 @@ from methods.hooks import *
 
 
 def run_action(action, contract, descriptions, algorithm, record_ids=[]):
-    from managers import ContractManager, FormManager, MedicineManager, AlgorithmManager, ReminderManager
+    from managers import ContractManager, FormManager, MedicineManager, AlgorithmManager, ReminderManager, ExaminationManager
 
     form_manager = FormManager()
     medicine_manager = MedicineManager()
@@ -242,6 +242,7 @@ def run_action(action, contract, descriptions, algorithm, record_ids=[]):
         contract_manager = ContractManager(medsenger_api, db)
         medicine_manager = MedicineManager(medsenger_api, db)
         reminder_manager = ReminderManager(medsenger_api, db)
+        examination_manager = ExaminationManager(medsenger_api, db)
         algorithm_params = algorithm.get_params()
 
         def get_param_value_by_code(code, default=None):
