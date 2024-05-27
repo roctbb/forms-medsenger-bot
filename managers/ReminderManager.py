@@ -49,9 +49,12 @@ class ReminderManager(Manager):
 
         if reminder:
             if reminder.timetable['mode'] != 'dates':
-                reminder.timetable["mode"] = "dates"
-                reminder.timetable["points"] = [{"date": d} for d in dates]
-                reminder.timetable["dates_enabled"] = True
+                reminder.timetable = {
+                    'mode': 'dates',
+                    'points': [{"date": d} for d in dates],
+                    'dates_enabled': True,
+                    'attach_date': reminder.timetable['attach_date']
+                }
             else:
                 for d in dates:
                     reminder.timetable['points'].append({"date": d})
@@ -82,12 +85,14 @@ class ReminderManager(Manager):
         reminder = self.get(id)
 
         if reminder:
-            reminder.timetable["mode"] = "dates"
-            reminder.timetable["points"] = [{"date": d} for d in dates]
-            reminder.timetable["dates_enabled"] = True
+            reminder.timetable = {
+                'mode': 'dates',
+                'points': [{"date": d} for d in dates],
+                'dates_enabled': True,
+                'attach_date': reminder.timetable['attach_date']
+            }
 
             self.__commit__()
-
             return reminder
         else:
             return False
