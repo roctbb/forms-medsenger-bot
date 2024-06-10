@@ -1,4 +1,5 @@
-from manage import app, celery, form_manager, algorithm_manager, examination_manager, contract_manager, medsenger_api
+from manage import app, celery, form_manager, algorithm_manager, examination_manager, contract_manager, medsenger_api, \
+    timetable_manager, medicine_manager, reminder_manager
 from config import DYNAMIC_CACHE
 
 
@@ -83,3 +84,13 @@ def run_examination(chain, examination_id):
 
     with app.app_context():
         return examination_manager.run(examination_manager.get(examination_id))
+
+
+@celery.task
+def iterate_contract(chain, contract_id):
+    with app.app_context():
+        contract = contract_manager.get(contract_id)
+
+        timetable_manager.run_if_should(contract.medicines, medicine_manager)
+        timetable_manager.run_if_should(contract.forms, form_manager)
+        timetable_manager.run_if_should(contract.reminders, reminder_manager)

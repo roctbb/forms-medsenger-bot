@@ -36,9 +36,9 @@ class TimetableManager(Manager):
             return False
 
         if object.last_sent:
-            last_sent = max(localize(object.last_sent), now - timedelta(minutes=5))
+            last_sent = max(localize(object.last_sent), now - timedelta(minutes=15))
         else:
-            last_sent = now - timedelta(minutes=5)
+            last_sent = now - timedelta(minutes=15)
 
         if isinstance(object, Reminder) and object.send_next:
             return now >= localize(object.send_next, zone) > last_sent
@@ -166,21 +166,14 @@ class TimetableManager(Manager):
                         tasks.run_examination(True, examination.id)
 
     def iterate(self, app):
+        from tasks import tasks
+
         with app.app_context():
             contracts = list(Contract.query.filter_by(is_active=True).all())
 
-            medicines_groups = list(map(lambda x: x.medicines, contracts))
-            forms_groups = list(map(lambda x: x.forms, contracts))
-            reminders_groups = list(map(lambda x: x.reminders, contracts))
+            for contract in contracts:
+                tasks.iterate_contract.s(True, contract.id).apply_async()
 
-            for medicines in medicines_groups:
-                self.run_if_should(medicines, self.medicine_manager)
-
-            for forms in forms_groups:
-                self.run_if_should(forms, self.form_manager)
-
-            for reminders in reminders_groups:
-                self.run_if_should(reminders, self.reminder_manager)
 
     def check_forgotten(self, app):
         with app.app_context():
