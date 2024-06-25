@@ -6,6 +6,7 @@ migrations
 node_modules/
 npm-debug.log
 yarn-error.log
+__pycache__
 
 # Editor directories and files
 .idea

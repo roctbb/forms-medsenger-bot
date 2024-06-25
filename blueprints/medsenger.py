@@ -22,6 +22,123 @@ def status(data):
     return jsonify(answer)
 
 
+@medsenger_blueprint.route("/scenarios", methods=["GET"])
+def scenarios():
+    form_id = {}
+    for form in form_manager.get_templates():
+        form_id[form.id] = form.title
+
+    medicine_id = {}
+    for medicine in medicine_manager.get_templates():
+        medicine_id[medicine.id] = medicine.title
+
+    algorithm_id = {}
+    for algorithm in algorithm_manager.get_templates():
+        algorithm_id[algorithm.id] = algorithm.title
+
+    examintaion_id = {}
+    for examination in examination_manager.get_templates():
+        examintaion_id[examination.id] = examination.title
+
+    examintaion_group_id = {}
+    for examintaion_group in examination_manager.get_groups():
+        examintaion_group_id[examintaion_group.id] = examintaion_group.title
+
+    responce = {
+        "codes": [
+            {
+                "name": "record_$(CATEGORY_CODE)",
+                "type": "any",
+            },
+            {
+                "name": "forms",
+                "type": "number_sequence",
+            },
+            {
+                "name": "form_timetable_$(FORM_ID)",
+                "type": "dict",
+            },
+            {
+                "name": "form_message_$(FORM_ID)",
+                "type": "text",
+            },
+            {
+                "name": "form_times_$(FORM_ID)",
+                "type": "number",
+            },
+            {
+                "name": "exclude_algorithms",
+                "type": "number_sequence",
+            },
+            {
+                "name": "reminders",
+                "type": "number_sequence",
+            },
+            {
+                "name": "algorithms",
+                "type": "number_sequence",
+            },
+            {
+                "name": "medicines",
+                "type": "number_sequence",
+            },
+            {
+                "name": "medicine_timetable_$(MEDICINE_ID)",
+                "type": "dict",
+            },
+            {
+                "name": "form_$(FORM_ID)",
+                "type": "bool",
+            },
+            {
+                "name": "select_forms_$(?)",
+                "type": "?",
+            },
+            {
+                "name": "medicine_$(MEDICINE_ID)",
+                "type": "bool",
+            },
+            {
+                "name": "medicine_timetable_$(MEDICINE_ID)",
+                "type": "dict",
+            },
+            {
+                "name": "algorithm_$(ALGORITHM_ID)",
+                "type": "bool",
+            },
+            {
+                "name": "examinations_deadline",
+                "type": "date",
+            },
+            {
+                "name": "examinations",
+                "type": "number_sequence",
+            },
+            {
+                "name": "examination_$(EXAMINATION_ID)",
+                "type": "bool",
+            },
+            {
+                "name": "examination_groups",
+                "type": "number_sequence",
+            },
+            {
+                "name": "examination_group_$(EXAMINATION_GROUP_ID)",
+                "type": "bool",
+            },
+        ],
+        "values": {
+            "FORM_ID": form_id,
+            "MEDICINE_ID": medicine_id,
+            "ALGORITHM_ID": algorithm_id,
+            "EXAMINATION_ID": examintaion_id,
+            "EXAMINATION_GROUP_ID": examintaion_group_id,
+        },
+    }
+
+    return jsonify(responce)
+
+
 @medsenger_blueprint.route('/order', methods=['POST'])
 @verify_request(contract_manager, 'backend')
 def order(data):

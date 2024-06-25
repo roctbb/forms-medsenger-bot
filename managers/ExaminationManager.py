@@ -24,6 +24,9 @@ class ExaminationManager(Manager):
 
         return examination
 
+    def get_groups(self):
+        return MedicalExaminationGroup.query.all()
+
     def get_group(self, examination_group_id):
         examination_group = MedicalExaminationGroup.query.filter_by(id=examination_group_id).first()
 
