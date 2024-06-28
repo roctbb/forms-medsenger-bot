@@ -1,11 +1,14 @@
 import json
 import threading
+from datetime import timedelta, datetime
+
 from flask import request, abort, jsonify, render_template
 from sentry_sdk import capture_exception
 import sys, os
 from config import *
 import os
 from helpers.descriptions import generate_contract_description
+from helpers.timing import timezone_now, localize
 
 DATACACHE = {}
 
@@ -80,6 +83,61 @@ def generate_timetable(start, end, times):
         })
 
     return timetable
+
+
+def get_next_timestamp(object):
+    timetable = object.timetable
+
+    if timetable.get('mode') == 'manual':
+        return None
+
+    zone = object.contract.get_actual_timezone()
+    now = timezone_now(zone)
+
+    next_run_timestamp = object.next_run_timestamp
+
+    if timetable.get('mode') == 'ndays':
+        if not next_run_timestamp:
+            if not object.last_sent:
+                return now.timestamp()
+            next_run_timestamp = object.last_sent.timestamp()
+
+        next_run_timestamp += (24 * 60 * 60) * int(timetable.get('period'))
+        return next_run_timestamp
+
+    points = []
+    days_delta = 0
+    if timetable.get('mode') == 'daily':
+        days_delta = 1
+        points = [localize(datetime(year=now.year, month=now.month, day=now.day, hour=point['hour'], minute=point['minute'], second=0), zone)
+                  for point in timetable['points']]
+
+    if timetable.get('mode') == 'weekly':
+        days_delta = 7
+        for point in timetable['points']:
+            day_diff = point['day'] - now.weekday()
+            tmp_day = now + timedelta(days=day_diff)
+            tmp_day.replace(hour=point['hour'], minute=point['minute'])
+
+    if timetable.get('mode') == 'monthly':
+        days_delta = 30
+        points = [localize(datetime(year=now.year, month=now.month, day=point['day'], hour=point['hour'], minute=point['minute'], second=0), zone)
+                  for point in timetable['points']]
+    if timetable.get('mode') == 'dates':
+        points = [localize(datetime.fromtimestamp(point['date'] / 1000), zone)
+                  for point in timetable['points']]
+
+
+    points.sort()
+    filtered_points = [point for point in points if point > now]
+    if len(filtered_points) > 0:
+        next_run_timestamp = filtered_points[0].timestamp()
+    else:
+        if timetable.get('mode') == 'dates':
+            return None
+        next_run_timestamp = (points[0] + timedelta(days=days_delta)).timestamp()
+
+    return next_run_timestamp
 
 
 def fullfill_message(text, contract, medsenger_api):

@@ -28,6 +28,8 @@ class MedicalExamination(db.Model):
     expiration_days = db.Column(db.Integer, default=0)
     record_id = db.Column(db.Integer, nullable=True)
 
+    next_run_timestamp = db.Column(db.Integer, nullable=True)
+
     def clone(self):
         new_examination = MedicalExamination()
 

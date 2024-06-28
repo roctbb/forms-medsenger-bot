@@ -35,6 +35,8 @@ class Reminder(db.Model):
     has_record_params = db.Column(db.Boolean, default=False)
     record_params = db.Column(db.JSON, nullable=True)
 
+    next_run_timestamp = db.Column(db.Integer, nullable=True)
+
     def timetable_description(self):
         if self.timetable['mode'] == 'dates':
             description = 'Отправляется в конкретные даты.'

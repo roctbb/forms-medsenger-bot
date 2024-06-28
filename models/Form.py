@@ -48,6 +48,8 @@ class Form(db.Model, Compliance):
 
     init_text = db.Column(db.Text, nullable=True)
 
+    next_run_timestamp = db.Column(db.Integer, nullable=True)
+
     def timetable_description(self):
         if self.timetable['mode'] == 'daily':
             return '{} раз(а) в день'.format(len(self.timetable['points']))

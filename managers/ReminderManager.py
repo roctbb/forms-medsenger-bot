@@ -1,7 +1,7 @@
 import time
 from datetime import datetime, timedelta
 from tasks import threader
-from helpers import log, timezone_now, gts
+from helpers import log, timezone_now, gts, get_next_timestamp
 from managers.Manager import Manager
 from models import Patient, Contract, Reminder
 
@@ -36,6 +36,7 @@ class ReminderManager(Manager):
                     "points": [{"date": d} for d in dates],
                     "dates_enabled": True
                 }
+            new_reminder.next_run_timestamp = get_next_timestamp(new_reminder)
 
             self.db.session.add(new_reminder)
             self.__commit__()
@@ -59,6 +60,8 @@ class ReminderManager(Manager):
                 for d in dates:
                     reminder.timetable['points'].append({"date": d})
 
+            reminder.next_run_timestamp = get_next_timestamp(reminder)
+
             self.__commit__()
 
             return reminder
@@ -77,6 +80,7 @@ class ReminderManager(Manager):
             return None
 
         reminder.canceled_at = datetime.now()
+        reminder.next_run_timestamp = None
 
         self.__commit__()
         return id
@@ -91,6 +95,8 @@ class ReminderManager(Manager):
                 'dates_enabled': True,
                 'attach_date': reminder.timetable['attach_date']
             }
+
+            reminder.next_run_timestamp = get_next_timestamp(reminder)
 
             self.__commit__()
             return reminder
@@ -128,6 +134,7 @@ class ReminderManager(Manager):
             return result
 
         reminder.canceled_at = datetime.now()
+        reminder.next_run_timestamp = get_next_timestamp(reminder)
         self.__commit__()
 
         if patient_text:
@@ -150,7 +157,7 @@ class ReminderManager(Manager):
         elif type == 'day':
             send_next = timezone_now(contract.get_actual_timezone()) + timedelta(days=count)
 
-        reminder.send_next = send_next
+        reminder.next_run_timestamp = send_next.timestamp()
         reminder.state = 'later'
 
         self.__commit__()
@@ -202,6 +209,7 @@ class ReminderManager(Manager):
             else:
                 reminder.patient_id = contract.patient_id
                 reminder.contract_id = contract.id
+                reminder.next_run_timestamp = get_next_timestamp(reminder)
 
             if not reminder.is_template and reminder.has_record_params and not reminder_id:
                 self.medsenger_api.add_record(contract.id, reminder.record_params['category'], reminder.record_params['date'])
@@ -221,9 +229,9 @@ class ReminderManager(Manager):
         if not description:
             description = ''
             if reminder.type == 'patient':
-                description += "Отправка напоминания пациенту: \"{}\". ".format(reminder.text)
+                description += "Отправка напоминания пациенту: \"{}\". ".format(reminder.title)
             if reminder.type == 'patient' or reminder.type == 'both':
-                description += "Отправка напоминания врачу: \"{}\".".format(reminder.text)
+                description += "Отправка напоминания врачу: \"{}\".".format(reminder.title)
 
         super().log_request("reminder_{}".format(reminder.id), contract_id, description)
 
@@ -263,6 +271,7 @@ class ReminderManager(Manager):
 
         if result:
             reminder.last_sent = datetime.now()
+            reminder.next_run_timestamp = get_next_timestamp(reminder)
             if commit:
                 self.__commit__()
                 return result

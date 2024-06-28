@@ -21,6 +21,10 @@ class TimetableManager(Manager):
 
         timetable = object.timetable
 
+        # Для запуска с next_run_timestamp
+        # if object.next_run_timestamp and object.next_run_timestamp < now.timestamp():
+        #     return True
+
         if (isinstance(object, Medicine) or isinstance(object, Reminder)) and object.canceled_at is not None:
             return False
 
@@ -173,7 +177,6 @@ class TimetableManager(Manager):
 
             for contract in contracts:
                 tasks.iterate_contract.s(True, contract.id).apply_async()
-
 
     def check_forgotten(self, app):
         with app.app_context():

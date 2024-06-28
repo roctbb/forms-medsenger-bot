@@ -44,6 +44,8 @@ class Medicine(db.Model, Compliance):
 
     medicine_database_id = db.Column(db.Integer, nullable=True)
 
+    next_run_timestamp = db.Column(db.Integer, nullable=True)
+
     def as_dict(self):
         if self.contract_id:
             sent, done = self.current_month_compliance()

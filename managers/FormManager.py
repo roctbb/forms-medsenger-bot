@@ -6,7 +6,7 @@ from datetime import datetime
 from methods import log_action
 from tasks import threader
 from config import DYNAMIC_CACHE
-from helpers import log, clear_categories, gts
+from helpers import log, clear_categories, gts, get_next_timestamp
 from managers.ContractsManager import ContractManager
 from managers.MedicineManager import MedicineManager
 from managers.Manager import Manager
@@ -31,7 +31,6 @@ class FormManager(Manager):
         return True
 
     def remove(self, id, contract):
-
         form = Form.query.filter_by(id=id).first_or_404()
 
         if form.contract_id != contract.id and not contract.is_admin:
@@ -56,7 +55,6 @@ class FormManager(Manager):
         self.__commit__()
 
     def attach(self, template_id, contract, custom_params=dict()):
-
         form = self.get(template_id)
 
         if form:
@@ -84,6 +82,8 @@ class FormManager(Manager):
 
             if new_form.init_text:
                 self.medsenger_api.send_message(new_form.contract_id, form.init_text, only_patient=True)
+
+            new_form.next_run_timestamp = get_next_timestamp(new_form)
 
             self.db.session.add(new_form)
             self.__commit__()
@@ -128,6 +128,7 @@ class FormManager(Manager):
 
         if result:
             form.last_sent = datetime.now()
+            form.next_run_timestamp = get_next_timestamp(form)
 
             if not form.asked_timestamp:
                 form.asked_timestamp = time.time()
@@ -558,6 +559,7 @@ class FormManager(Manager):
             else:
                 form.patient_id = contract.patient_id
                 form.contract_id = contract.id
+                form.next_run_timestamp = get_next_timestamp(form)
 
             if contract.is_admin:
                 if data.get('algorithm_id'):

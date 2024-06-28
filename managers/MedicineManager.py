@@ -4,7 +4,7 @@ from datetime import datetime
 from methods import log_action
 from tasks import threader
 from config import DYNAMIC_CACHE
-from helpers import log, gts
+from helpers import log, gts, get_next_timestamp
 from managers.Manager import Manager
 from models import Patient, Contract, Medicine
 import requests
@@ -31,6 +31,7 @@ class MedicineManager(Manager):
 
         for medicine in medicines:
             medicine.canceled_at = datetime.now()
+            medicine.next_run_timestamp = None
             log_action("medicine", "detach", contract, medicine)
 
         self.__commit__()
@@ -40,6 +41,7 @@ class MedicineManager(Manager):
 
         for medicine in medicines:
             medicine.canceled_at = datetime.now()
+            medicine.next_run_timestamp = None
 
         self.__commit__()
 
@@ -75,6 +77,7 @@ class MedicineManager(Manager):
                                             .format(new_medicine.get_description(True),
                                                     " Мы будем автоматически присылать напоминания о приемах." if
                                                     new_medicine.timetable['mode'] != "manual" else ''))
+            new_medicine.next_run_timestamp = get_next_timestamp(new_medicine)
             self.db.session.add(new_medicine)
             self.__commit__()
 
@@ -155,13 +158,13 @@ class MedicineManager(Manager):
             log_action("medicine", "resume", contract, medicine)
 
         medicine.canceled_at = None
+        medicine.next_run_timestamp = get_next_timestamp(medicine)
 
         self.__commit__()
 
         return id
 
     def remove(self, id, contract, by_patient=False, silent=False):
-
         medicine = Medicine.query.filter_by(id=id).first_or_404()
 
         if medicine.contract_id != contract.id and not contract.is_admin:
@@ -175,6 +178,7 @@ class MedicineManager(Manager):
             log_action("medicine", "remove", contract, medicine)
 
         medicine.canceled_at = datetime.now()
+        medicine.next_run_timestamp = None
 
         self.__commit__()
 
@@ -223,6 +227,7 @@ class MedicineManager(Manager):
                 else:
                     medicine.prescription_history = {'records': [record]}
                 medicine.canceled_at = datetime.now()
+                medicine.next_run_timestamp = None
             self.__commit__()
 
     def log_request(self, medicine, contract_id=None, description=None):
@@ -247,6 +252,8 @@ class MedicineManager(Manager):
 
             if not medicine.asked_timestamp:
                 medicine.asked_timestamp = time.time()
+
+            medicine.next_run_timestamp = get_next_timestamp(medicine)
 
             if commit:
                 self.__commit__()
@@ -309,6 +316,7 @@ class MedicineManager(Manager):
             else:
                 medicine.patient_id = contract.patient_id
                 medicine.contract_id = contract.id
+                medicine.next_run_timestamp = get_next_timestamp(medicine)
 
                 detach_date = medicine.timetable.get('detach_date')
                 medicine.detach_date = datetime.strptime(detach_date, "%Y-%m-%d") if detach_date else None
